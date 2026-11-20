@@ -5,6 +5,8 @@ import { openSession, register, login, logout, ApiError } from './api.js';
 
 const $ = id => document.getElementById(id);
 const GUEST_KEY = 'guest-mode-v1';
+// ДЕМО: пароль тестовых аккаунтов из scripts/seed-demo-users.py (только локальная база, не для настоящих людей)
+const DEMO_PASSWORD = 'demo-semya-nizhny-2026';
 let info = null;   // { csrf_token, authenticated, user, onboarding_completed }
 
 export const session = () => info;
@@ -12,6 +14,8 @@ export const isAuthenticated = () => !!info?.authenticated;
 export const userEmail = () => info?.user?.email || null;
 export function isGuest() { try { return localStorage.getItem(GUEST_KEY) === '1'; } catch { return false; } }
 function setGuest(on) { try { on ? localStorage.setItem(GUEST_KEY, '1') : localStorage.removeItem(GUEST_KEY); } catch { /* приватный режим */ } }
+
+export const enterGuest = () => setGuest(true);
 
 export async function startSession() {
   info = await openSession();
@@ -34,7 +38,6 @@ function setMode(m) {
   document.querySelectorAll('#onb-auth .seg button').forEach(b => b.setAttribute('aria-selected', b.dataset.mode === m));
   $('auth-submit').textContent = m === 'register' ? 'Создать аккаунт' : 'Войти';
   $('auth-password').autocomplete = m === 'register' ? 'new-password' : 'current-password';
-  $('auth-hint').hidden = m !== 'register';
   $('auth-error').hidden = true;
 }
 
@@ -94,6 +97,21 @@ export function initAuthScreen(options) {
     $('auth-eye').setAttribute('aria-label', show ? 'Скрыть пароль' : 'Показать пароль');
   };
   $('auth-guest').onclick = () => { setGuest(true); options.onGuest(); };
+  // ДЕМО: заполнить почту и пароль тестового аккаунта и сразу войти
+  document.querySelectorAll('[data-demo]').forEach(b => {
+    b.onclick = () => {
+      setMode('login');
+      $('auth-email').value = b.dataset.demo;
+      $('auth-password').value = DEMO_PASSWORD;
+      $('auth-form').requestSubmit();
+    };
+  });
+  // Подсказка «i»: открывается и закрывается нажатием (наведение не используем — на телефоне оно ломает нажатие)
+  const tip = $('guest-tip'), tipBtn = $('guest-tip-btn');
+  const setTip = open => { tip.hidden = !open; tipBtn.setAttribute('aria-expanded', open); };
+  tipBtn.onclick = e => { e.stopPropagation(); setTip(tip.hidden); };
+  document.addEventListener('click', e => { if (!tip.hidden && !tip.contains(e.target)) setTip(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') setTip(false); });
   setMode('register');
 }
 

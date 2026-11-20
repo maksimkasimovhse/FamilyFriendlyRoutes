@@ -9,8 +9,8 @@
 // ?newtrip=1 — сразу «Новая поездка» (для репетиции демо).
 
 import { onTripChange, loadSavedTrip, loadCachedTrip, listTrips, openTrip, forget, getTrip } from './api.js';
-import { startSession, isAuthenticated, isGuest, userEmail, signOut, initAuthScreen, openAuth } from './session.js';
-import { loadFamily, syncLocalProfile, openOnboarding, closeOnboarding, currentProfile, childName, genitive, familySummary } from './onboarding.js';
+import { startSession, isAuthenticated, isGuest, enterGuest, userEmail, signOut, initAuthScreen, openAuth } from './session.js';
+import { loadFamily, syncLocalProfile, seedDemoNames, openOnboarding, closeOnboarding, currentProfile, childName, genitive, familySummary } from './onboarding.js';
 import { openTripSetup, afterPick, backToWhen, backToWishes, backToPreview, closeTripSetup } from './trip-setup.js';
 import { loadPlaces } from './places.js';
 import { initMap, resizeMap, focusPlace, showPicked, refreshMap } from './map.js';
@@ -143,18 +143,30 @@ function openProfileFlow({ firstTime }) {
   });
 }
 
-// ---------- Вход ----------
+// ---------- Лендинг и вход ----------
+// Не вошедшему показываем лендинг; кнопки на нём ведут на экран входа / регистрации.
 let authCallback = null;
-function openAuthFlow(callback) {
+function showLanding() {
   loading('');
+  $('onb-auth').hidden = true;
+  $('landing').hidden = false;
+  $('landing').scrollTop = 0;
+}
+function openAuthFlow(callback, mode) {
+  loading('');
+  $('landing').hidden = true;
   app.classList.add('flow-mode');
   authCallback = callback;
-  openAuth(isGuest() ? 'login' : 'register');
+  openAuth(mode || (isGuest() ? 'login' : 'register'));
 }
+document.querySelectorAll('#landing [data-auth]').forEach(b => { b.onclick = () => openAuthFlow(afterAuth, b.dataset.auth); });
+$('ld-guest').onclick = () => { $('landing').hidden = true; guestEnter(); };
+$('auth-back').onclick = () => { $('onb-auth').hidden = true; if (mainStarted) { app.classList.remove('flow-mode'); } else showLanding(); };
 initAuthScreen({
   onDone: async () => { $('onb-auth').hidden = true; await authCallback?.(); },
-  onGuest: () => { $('onb-auth').hidden = true; afterAuth(); },
+  onGuest: () => { $('onb-auth').hidden = true; guestEnter(); },
 });
+function guestEnter() { enterGuest(); afterAuth(); }
 // После входа: анкету гостя — в аккаунт (если там пусто), дальше по обычной схеме
 async function afterAuth() {
   loading('Загружаем анкету…');
@@ -220,6 +232,7 @@ function showFatal(err) {
 
 async function continueBoot() {
   const profile = await loadFamily({ authenticated: isAuthenticated() });
+  seedDemoNames(userEmail());
   if (!profile) return openProfileFlow({ firstTime: true });
   if (q.has('newtrip')) { forget(); return startTripSetup(); }
   loading('Загружаем поездку…');
@@ -238,7 +251,7 @@ async function boot() {
     await loadCachedTrip();
     return startMain();
   }
-  if (!isAuthenticated() && !isGuest()) return openAuthFlow(afterAuth);
+  if (!isAuthenticated() && !isGuest()) return showLanding();
   try { await continueBoot(); } catch (err) { showFatal(err); }
 }
 boot();
