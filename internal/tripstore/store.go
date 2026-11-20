@@ -13,8 +13,15 @@ import (
 )
 
 type Session struct {
+	UserID    string    `json:"user_id,omitempty"`
 	CSRF      string    `json:"csrf"`
 	ExpiresAt time.Time `json:"expires_at"`
+}
+type Account struct {
+	UserID       string    `json:"user_id"`
+	Email        string    `json:"email"`
+	PasswordHash string    `json:"password_hash"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 type Trip struct {
 	Owner string     `json:"owner"`
@@ -33,10 +40,12 @@ type Receipt struct {
 	ExpiresAt time.Time       `json:"expires_at"`
 }
 type State struct {
-	Sessions map[string]Session `json:"sessions"`
-	Trips    map[string]Trip    `json:"trips"`
-	Previews map[string]Preview `json:"previews"`
-	Receipts map[string]Receipt `json:"receipts"`
+	Accounts       map[string]Account                `json:"accounts"`
+	FamilyProfiles map[string]c.FamilyOnboardingView `json:"family_profiles"`
+	Sessions       map[string]Session                `json:"sessions"`
+	Trips          map[string]Trip                   `json:"trips"`
+	Previews       map[string]Preview                `json:"previews"`
+	Receipts       map[string]Receipt                `json:"receipts"`
 }
 type Store struct {
 	mu       sync.Mutex
@@ -45,7 +54,7 @@ type Store struct {
 }
 
 func Open(filename string) (*Store, error) {
-	store := &Store{filename: filename, state: State{map[string]Session{}, map[string]Trip{}, map[string]Preview{}, map[string]Receipt{}}}
+	store := &Store{filename: filename, state: State{Accounts: map[string]Account{}, FamilyProfiles: map[string]c.FamilyOnboardingView{}, Sessions: map[string]Session{}, Trips: map[string]Trip{}, Previews: map[string]Preview{}, Receipts: map[string]Receipt{}}}
 	raw, err := os.ReadFile(filename)
 	if errors.Is(err, os.ErrNotExist) {
 		return store, nil
@@ -58,6 +67,13 @@ func Open(filename string) (*Store, error) {
 	}
 	if store.state.Sessions == nil || store.state.Trips == nil || store.state.Previews == nil || store.state.Receipts == nil {
 		return nil, errors.New("invalid development store")
+	}
+	// Older stores contain guest trips only. Preserve them when adding accounts.
+	if store.state.Accounts == nil {
+		store.state.Accounts = map[string]Account{}
+	}
+	if store.state.FamilyProfiles == nil {
+		store.state.FamilyProfiles = map[string]c.FamilyOnboardingView{}
 	}
 	return store, nil
 }

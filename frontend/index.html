@@ -9,6 +9,7 @@
 <link href="vendor/maplibre-gl-4.7.1/maplibre-gl.css" rel="stylesheet">
 <link href="css/app.css" rel="stylesheet">
 <link href="css/kid.css" rel="stylesheet">
+<link href="css/pick.css" rel="stylesheet">
 <script src="vendor/maplibre-gl-4.7.1/maplibre-gl.js"></script>
 <script type="module" src="js/app.js"></script>
 </head>
@@ -19,6 +20,7 @@
   <section class="screen" id="screen-map" data-tab="map">
     <header class="top">
       <h1>Карта</h1>
+      <button class="pick-open" id="open-pick">Подбор мест</button>
       <div class="days" role="tablist" aria-label="День поездки">
         <button class="on" role="tab" aria-selected="true">Сб</button>
         <button role="tab" aria-selected="false" disabled title="Второй день появится, когда бекенд научится планировать 2 дня">Вс</button>
@@ -47,6 +49,52 @@
         <button class="chip" data-layer="playground" aria-pressed="true"><i class="dot playground"></i>Площадки</button>
       </div>
       <div id="sheet-body" aria-live="polite"><p class="muted">Строим маршрут…</p></div>
+    </div>
+  </section>
+
+  <!-- ===== Экран «Подбор мест»: карточки как в Tinder ===== -->
+  <section class="screen pick" id="screen-pick" data-tab="pick" hidden>
+    <header class="pick-top">
+      <button class="pick-back" id="pick-back" aria-label="Назад к карте">‹</button>
+      <h1>Подбор мест</h1>
+      <span class="pick-count" id="pick-count" aria-live="polite"></span>
+    </header>
+
+    <div class="deck" id="deck">
+      <div class="deck-empty" id="deck-empty" hidden>
+        <p>Карточки закончились</p>
+        <button class="btn alt" id="pick-restart">Начать заново</button>
+      </div>
+    </div>
+
+    <div class="pick-actions">
+      <button class="act no" id="pick-no" aria-label="Не нравится">✕</button>
+      <button class="act info" id="pick-info" aria-label="Читать описание">i</button>
+      <button class="act yes" id="pick-yes" aria-label="Добавить в маршрут">♥</button>
+    </div>
+    <div class="pick-finish">
+      <button class="btn main" id="pick-finish" disabled>Завершить подбор мест</button>
+      <p class="pick-hint" id="pick-hint">Смахните карточку вправо — место попадёт в маршрут, влево — не нравится</p>
+    </div>
+
+    <!-- Описание целиком: открывается нажатием на карточку -->
+    <div class="pick-sheet" id="pick-sheet" hidden>
+      <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <button class="sheet-close" id="sheet-close" aria-label="Закрыть">✕</button>
+        <div class="sheet-scroll">
+          <img id="sheet-img" alt="">
+          <div class="sheet-text">
+            <span class="pcard-cat inline" id="sheet-cat"></span>
+            <h2 id="sheet-title"></h2>
+            <p class="pcard-addr" id="sheet-addr"></p>
+            <div id="sheet-text"></div>
+          </div>
+        </div>
+        <div class="row sheet-actions">
+          <button class="btn alt" id="sheet-no">✕ Не нравится</button>
+          <button class="btn main" id="sheet-yes">♥ В маршрут</button>
+        </div>
+      </div>
     </div>
   </section>
 

@@ -1,6 +1,6 @@
 # Family Friendly Routes
 
-Семейные маршруты по Нижнему Новгороду для детей 3–11 лет. ML возвращает до 50 рекомендованных мест на всю поездку. Backend распределяет их по дням, выбирает порядок и проверяет маршрут через OSM. Реализованы гостевая сессия, создание/чтение поездки, preview/apply, HTTP-адаптер ML и отдельный режим синтетического каталога. Реальный сервис ML и frontend ещё не подключены.
+Семейные маршруты по Нижнему Новгороду для детей 3–11 лет. ML возвращает до 50 рекомендованных мест на всю поездку. Backend распределяет их по дням, выбирает порядок и проверяет маршрут через OSM. Реализованы регистрация и вход, анкета семьи, гостевая сессия, создание/чтение поездки, preview/apply, HTTP-адаптер ML и отдельный режим синтетического каталога. Реальный сервис ML и frontend ещё не подключены.
 
 ## Backend маршрутов
 
@@ -22,7 +22,10 @@ go run ./cmd/backend -ml-url http://127.0.0.1:8090/internal/v1/recommendations -
 
 Поддержанные операции:
 
-- `GET /api/v1/session` — гостевая cookie и CSRF-токен.
+- `GET /api/v1/session` — cookie, CSRF-токен, статус аккаунта и заполнения анкеты.
+- `POST /api/v1/auth/register`, `/login`, `/logout`, `GET /api/v1/auth/me` — аккаунт по почте и паролю; гостевые поездки переносятся при входе.
+- `GET/PUT /api/v1/profile/family` — возраст и интересы детей, интересы взрослых, темп, ограничения и пожелания.
+- `POST /api/v1/trips/from-profile` — draft из снимка анкеты; `GET /api/v1/trips` — свои поездки.
 - `GET /api/v1/reference-data` — справочники и дополнительный demo_activities для интеграции.
 - `POST /api/v1/trips` и `GET /api/v1/trips/{trip_id}` — draft и чтение.
 - `POST /api/v1/trips/{trip_id}/previews` — generate_plan, start_day, remove_stop, replan_day.
@@ -30,7 +33,7 @@ go run ./cmd/backend -ml-url http://127.0.0.1:8090/internal/v1/recommendations -
 - `GET /api/v1/trips/{trip_id}/previews/{preview_id}` — чтение варианта.
 - `POST /api/v1/trips/{trip_id}/previews/{preview_id}/apply` — сохранение выбранного варианта с проверкой версии и предупреждений.
 
-Запросы POST требуют cookie, `X-CSRF-Token` и `Content-Type: application/json`. Создание поездки, progress и apply дополнительно требуют `Idempotency-Key`; для preview он необязателен. Frontend в разработке должен проксировать `/api` на backend, чтобы использовать один origin. Примеры входа — [один день](examples/trip-one-day.json), [два дня](examples/trip-two-days.json). [Сценарий продолжения прогулки](docs/active_day.md) описывает запросы старта, посещения, удаления и пересчёта.
+Мутации требуют cookie и `X-CSRF-Token`; для тела JSON нужен `Content-Type: application/json`. Создание поездки (включая from-profile), progress и apply дополнительно требуют `Idempotency-Key`; для preview он необязателен. Frontend в разработке должен проксировать `/api` на backend, чтобы использовать один origin. [Регистрация и анкета](docs/auth_onboarding.md), примеры поездок — [один день](examples/trip-one-day.json), [два дня](examples/trip-two-days.json). [Продолжение прогулки](docs/active_day.md) описывает запросы старта, посещения, удаления и пересчёта.
 
 Автоматическая проверка всей цепочки с реальными OSM-переходами, если установлен Node.js 22+:
 
@@ -99,7 +102,30 @@ export DATABASE_URL='postgres://familyroutes:<пароль>@127.0.0.1:5432/famil
 go run ./cmd/dbload
 ```
 
-Загрузчик идемпотентен: повторный запуск обновляет данные и не создаёт дублей. Файл `.env` не попадает в Git. Картинки в БД не хранятся: в таблице `item_images` лежат метаданные и хеш, сами файлы будут на диске.
+Загрузчик идемпотентен: повторный запуск обновляет данные и не создаёт дублей. Файл `.env` не попадает в Git. Картинки в БД не хранятся: в таблице `item_images` лежат метаданные и хеш, а сами файлы лежат в репозитории (см. ниже). `dbload` после загрузки наборов читает `db/seed/card_images.csv` и записывает обложки 174 карточек в `item_images`.
+
+### Картинки карточек
+
+Готовые WebP лежат в Git, в `assets/images/ab/cd/<sha256>_{thumb,card,full}.webp` (320, 800 и 1280 px по ширине, около 37 МБ). Имя файла — SHA-256 оригинала, поэтому содержимое по ссылке не меняется. `assets/images/manifest.json` сопоставляет `id` из `main.csv` ссылкам:
+
+```json
+"57": {"thumb": "/media/ac/86/ac86…_thumb.webp", "card": "/media/…_card.webp", "full": "/media/…_full.webp", "alt": "Памятник Петру 1", "width": 1200, "height": 800}
+```
+
+Backend раздаёт их по `/media/…` (флаг `-images-dir`, по умолчанию `assets/images`; отдаются только `.webp` и `manifest.json`, `*.webp` — с `Cache-Control: immutable`). Фронт при проксировании `/api` должен проксировать и `/media`:
+
+```html
+<img src="/media/…_card.webp" alt="Памятник Петру 1" loading="lazy">
+```
+
+### Экран «Подбор мест» (frontend)
+
+Кнопка «Подбор мест» в шапке карты открывает колоду из 174 карточек в стиле Tinder: фото, категория, адрес и описание. Свайп вправо (или ♥, или клавиша →) добавляет место в маршрут, влево (✕, ←) — не нравится; нажатие на карточку открывает описание целиком. «Завершить подбор мест» возвращает на карту: выбранные места нумеруются в порядке «ближайший сосед» от точки старта и соединяются линией. Пока линии прямые, маршрут по улицам backend для них не строит. «Подобрать ещё» возвращает к колоде, «Сбросить» возвращает исходный маршрут дня.
+
+Данные карточек — `frontend/data/cards.json`, собирается из `db/seed/main.csv` и `assets/images/manifest.json`: `python3 scripts/build-frontend-cards.py`. Картинки nginx отдаёт из `assets/images` по ссылкам `/media/…` (том смонтирован в `compose.yaml`, сервис `web`), backend для просмотра карточек не нужен. После обновления конфигурации перезапустите: `docker compose up -d web`.
+
+Оригиналы (`data/card_images/`, не в Git) нужны только для пересборки: `pip install pillow && python scripts/build-card-images.py`. Источник каждой картинки записан в `db/seed/card_images.csv` (`source_url`).
+
 
 ## Запуск маршрутизатора
 

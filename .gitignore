@@ -5,3 +5,4 @@
 *.test
 coverage.out
 /infra/docker/certs/
+/compose.override.yaml

@@ -74,6 +74,8 @@ services:
     command: ["-ml-url", "http://127.0.0.1:8090/internal/v1/recommendations", "-catalog-version", "mock-ml-v1"]
     volumes:
       - ./data:/app/data
+      # Картинки карточек: backend отдаёт их под /media/ и без папки не стартует (-images-dir)
+      - ./assets/images:/app/assets/images:ro
     depends_on:
       valhalla:
         condition: service_healthy
@@ -94,6 +96,7 @@ services:
     network_mode: host
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
+      - ./assets/images:/usr/share/nginx/card-images:ro
       - ./infra/docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     restart: unless-stopped
 

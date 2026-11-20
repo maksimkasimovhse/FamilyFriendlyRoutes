@@ -72,3 +72,28 @@ func TestVisitDefaultsFor(t *testing.T) {
 		}
 	}
 }
+
+func TestParseImages(t *testing.T) {
+	sha := strings.Repeat("ab", 32)
+	head := `item_id,title,category,sha256,width,height,source_url` + "\n"
+	images, err := ParseImages(strings.NewReader(head + "57,Памятник Петру 1,Памятники," + sha + ",1200,800,https://example.org/a.jpg\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(images) != 1 || images[0].ItemID != "57" || len(images[0].SHA256) != 32 || images[0].Width != 1200 || images[0].Height != 800 {
+		t.Fatalf("неожиданный результат: %+v", images)
+	}
+	for name, bad := range map[string]string{
+		"короткий sha": "1,a,b,abcd,10,10,u\n",
+		"ширина":       "1,a,b," + sha + ",0,10,u\n",
+		"повтор":       "1,a,b," + sha + ",10,10,u\n1,a,b," + sha + ",10,10,u\n",
+		"пусто":        "",
+	} {
+		if _, err := ParseImages(strings.NewReader(head + bad)); err == nil {
+			t.Errorf("%s: ожидалась ошибка", name)
+		}
+	}
+	if _, err := ParseImages(strings.NewReader("item_id,title\n")); err == nil {
+		t.Error("без обязательных колонок ожидалась ошибка")
+	}
+}

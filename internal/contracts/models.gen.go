@@ -495,7 +495,10 @@ type ApiError struct {
 }
 
 type SessionResponse struct {
-	CSRFToken string `json:"csrf_token"`
+	CSRFToken           string    `json:"csrf_token"`
+	Authenticated       bool      `json:"authenticated"`
+	User                *AuthUser `json:"user"`
+	OnboardingCompleted bool      `json:"onboarding_completed"`
 }
 
 type RoutingRequest struct {
@@ -540,4 +543,52 @@ type DayExecution struct {
 	ConsumedRestDurationSec  float64 `json:"consumed_rest_duration_sec"`
 	ConsumedWaitDurationSec  float64 `json:"consumed_wait_duration_sec"`
 	ElapsedDurationSec       float64 `json:"elapsed_duration_sec"`
+}
+
+type AuthUser struct {
+	UserID    ID      `json:"user_id"`
+	Email     string  `json:"email"`
+	CreatedAt Instant `json:"created_at"`
+}
+
+type AuthCredentials struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type FamilyOnboardingInput struct {
+	ExpectedVersion int           `json:"expected_version"`
+	Family          FamilyProfile `json:"family"`
+	LoadLimits      LoadLimits    `json:"load_limits"`
+	Wishes          *string       `json:"wishes"`
+}
+
+type FamilyOnboardingView struct {
+	Version    int           `json:"version"`
+	UpdatedAt  Instant       `json:"updated_at"`
+	Family     FamilyProfile `json:"family"`
+	LoadLimits LoadLimits    `json:"load_limits"`
+	Wishes     *string       `json:"wishes"`
+}
+
+type TripFromProfileRequest struct {
+	ExpectedProfileVersion int         `json:"expected_profile_version"`
+	CityID                 string      `json:"city_id"`
+	Timezone               TimeZone    `json:"timezone"`
+	PlanningContext        string      `json:"planning_context"`
+	Days                   []DayInput  `json:"days"`
+	Selections             []Selection `json:"selections"`
+	RequestText            *string     `json:"request_text"`
+}
+
+type TripSummary struct {
+	TripID    ID      `json:"trip_id"`
+	Version   int     `json:"version"`
+	UpdatedAt Instant `json:"updated_at"`
+	Status    string  `json:"status"`
+	CityID    string  `json:"city_id"`
+}
+
+type TripList struct {
+	Items []TripSummary `json:"items"`
 }

@@ -39,6 +39,7 @@ func newID() string {
 }
 
 type tripAPI struct {
+	auth    *authGuard
 	store   *tripstore.Store
 	planner planner.Planner
 	now     func() time.Time
@@ -58,10 +59,18 @@ func TripHandler(store *tripstore.Store, p planner.Planner) http.Handler {
 	return tripHandler(store, p, func() time.Time { return time.Now().UTC() })
 }
 func tripHandler(store *tripstore.Store, p planner.Planner, now func() time.Time) http.Handler {
-	api := &tripAPI{store, p, now}
+	api := &tripAPI{store: store, planner: p, now: now, auth: newAuthGuard()}
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, map[string]string{"status": "alive"}) })
 	mux.HandleFunc("GET /api/v1/session", api.session)
+	mux.HandleFunc("POST /api/v1/auth/register", api.credentials)
+	mux.HandleFunc("POST /api/v1/auth/login", api.credentials)
+	mux.HandleFunc("POST /api/v1/auth/logout", api.logout)
+	mux.HandleFunc("GET /api/v1/auth/me", api.me)
+	mux.HandleFunc("GET /api/v1/profile/family", api.familyProfile)
+	mux.HandleFunc("PUT /api/v1/profile/family", api.familyProfile)
+	mux.HandleFunc("GET /api/v1/trips", api.listTrips)
+	mux.HandleFunc("POST /api/v1/trips/from-profile", api.post)
 	mux.HandleFunc("GET /api/v1/reference-data", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 200, map[string]any{"interest_options": []map[string]string{{"id": "history", "label": "История"}, {"id": "science", "label": "Наука"}, {"id": "play", "label": "Игры"}}, "categories": []map[string]string{{"id": "landmark", "label": "Тестовые остановки"}}, "supported_city_ids": []string{"nizhny_novgorod"}, "supported_child_age": map[string]int{"min": 3, "max": 11}, "capabilities": map[string]bool{"taxi_suggestions": false, "weather_automation": false, "free_text": p.Source != nil}, "default_family_policy": planner.NewDraft("", c.TripInput{}, api.now()).Policy, "demo_activities": p.Activities, "implementation_stage": "multi_day_pool"})
 	})
@@ -113,21 +122,24 @@ func (a *tripAPI) session(w http.ResponseWriter, r *http.Request) {
 		id = cookie.Value
 	}
 	var session tripstore.Session
+	var result c.SessionResponse
 	err := a.store.Update(func(s *tripstore.State) error {
 		session = s.Sessions[id]
-		if session.CSRF == "" || !session.ExpiresAt.After(a.now()) {
+		_, userExists := s.Accounts[session.UserID]
+		if session.CSRF == "" || !session.ExpiresAt.After(a.now()) || session.UserID != "" && !userExists {
 			id = newID()
 			session = tripstore.Session{CSRF: newID(), ExpiresAt: a.now().Add(24 * time.Hour)}
 			s.Sessions[id] = session
 		}
+		result = sessionView(*s, session)
 		return nil
 	})
 	if err != nil {
 		a.respondError(w, r, err)
 		return
 	}
-	http.SetCookie(w, &http.Cookie{Name: "family_session", Value: id, Path: "/", HttpOnly: true, SameSite: http.SameSiteLaxMode, Secure: r.TLS != nil, Expires: session.ExpiresAt})
-	writeJSON(w, 200, c.SessionResponse{CSRFToken: session.CSRF})
+	setSessionCookie(w, r, id, session)
+	writeJSON(w, 200, result)
 }
 func (a *tripAPI) owner(r *http.Request, mutating bool) (string, error) {
 	cookie, err := r.Cookie("family_session")
@@ -135,7 +147,15 @@ func (a *tripAPI) owner(r *http.Request, mutating bool) (string, error) {
 		return "", failure(401, "SESSION_REQUIRED", "Получите гостевую сессию.")
 	}
 	var session tripstore.Session
-	if err := a.store.Read(func(s tripstore.State) error { session = s.Sessions[cookie.Value]; return nil }); err != nil {
+	if err := a.store.Read(func(s tripstore.State) error {
+		session = s.Sessions[cookie.Value]
+		if session.UserID != "" {
+			if _, ok := s.Accounts[session.UserID]; !ok {
+				return failure(401, "AUTH_REQUIRED", "Войдите в аккаунт.")
+			}
+		}
+		return nil
+	}); err != nil {
 		return "", err
 	}
 	if session.CSRF == "" || !session.ExpiresAt.After(a.now()) {
@@ -156,7 +176,7 @@ func (a *tripAPI) owner(r *http.Request, mutating bool) (string, error) {
 			}
 		}
 	}
-	return cookie.Value, nil
+	return principal(cookie.Value, session), nil
 }
 func (a *tripAPI) getTrip(w http.ResponseWriter, r *http.Request) {
 	owner, err := a.owner(r, false)
@@ -265,10 +285,13 @@ func (a *tripAPI) post(w http.ResponseWriter, r *http.Request) {
 	}
 	var prepared *c.PlanPreview
 	var create c.TripInput
+	profileVersion := 0
 	var apply c.ApplyRequest
 	var progress c.ProgressRequest
 	if r.PathValue("trip_id") == "" {
-		if err = strict(raw, &create); err == nil {
+		if r.URL.Path == "/api/v1/trips/from-profile" {
+			create, profileVersion, err = a.inputFromProfile(r, raw)
+		} else if err = strict(raw, &create); err == nil {
 			err = planner.Validate(create)
 		}
 	} else if isProgress {
@@ -284,8 +307,8 @@ func (a *tripAPI) post(w http.ResponseWriter, r *http.Request) {
 	}
 	var reply tripReply
 	err = a.store.Update(func(s *tripstore.State) error {
-		if session, ok := s.Sessions[owner]; !ok || !session.ExpiresAt.After(a.now()) {
-			return failure(401, "SESSION_REQUIRED", "Сессия истекла.")
+		if _, err := a.liveSession(s, r, owner); err != nil {
+			return err
 		}
 		if key != "" {
 			if saved, ok := s.Receipts[receiptKey]; ok && saved.ExpiresAt.After(a.now()) {
@@ -299,6 +322,9 @@ func (a *tripAPI) post(w http.ResponseWriter, r *http.Request) {
 		var err error
 		switch {
 		case r.PathValue("trip_id") == "":
+			if profileVersion > 0 && s.FamilyProfiles[accountID(owner)].Version != profileVersion {
+				return conflict(s.FamilyProfiles[accountID(owner)].Version)
+			}
 			id := newID()
 			view := a.planner.Draft(c.ID(id), create, a.now())
 			s.Trips[id] = tripstore.Trip{Owner: owner, View: view}

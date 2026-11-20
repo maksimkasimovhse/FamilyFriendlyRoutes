@@ -2,7 +2,8 @@
 
 import { loadTrip, resetTrip, onTripChange } from './api.js';
 import { loadPlaces } from './places.js';
-import { initMap, resizeMap, focusPlace } from './map.js';
+import { initMap, resizeMap, focusPlace, showPicked } from './map.js';
+import { initPick, openPick } from './pick.js';
 import { initToday, refreshToday } from './today.js';
 import { initAssistant, openAssistant } from './assistant.js';
 import { initKid, openKid, syncKidOrder, kidStopInfo } from './kid.js';
@@ -78,6 +79,16 @@ initToday({
   onNeedNow: () => openTab('helper'),
 });
 initAssistant({ onShowOnMap: place => { openTab('map'); focusPlace(place); } });
+
+// ---------- Подбор мест (карточки как в Tinder, экран Максима) ----------
+initPick({
+  onFinish: places => { openTab('map'); showPicked(places); },   // выбранные места → карта и маршрут
+  onClose: () => openTab('map'),
+});
+const startPick = () => { openTab('pick'); openPick(); };
+document.getElementById('open-pick').addEventListener('click', startPick);
+document.addEventListener('pick:open', startPick);                 // «Подобрать ещё» на карте
+document.addEventListener('pick:reset', () => showPicked(null));   // вернуть исходный маршрут дня
 
 // Тропа ребёнка — в порядке маршрута с бекенда; «Сегодня» — когда подгрузились места рядом
 onTripChange(trip => kidReady.then(() => syncKidOrder(trip.days[0].stops.map(s => s.activity_id))));
