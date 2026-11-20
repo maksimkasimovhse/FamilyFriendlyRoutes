@@ -11,6 +11,11 @@ let day = null;
 let source = null;
 let pins = [];          // маркеры остановок, по порядку
 let selected = null;    // что открыто в карточке: null — сводка дня
+let startPin = null;    // метка «Старт»
+let mapReady = false;
+let picked = null;      // выбранные на экране подбора места (в порядке обхода) или null
+let pendingPicked;      // выбор, пришедший до загрузки карты
+let pickedPins = [];
 
 // ---------- Форматирование ----------
 const fmtDistance = m => m < 1000 ? Math.round(m / 10) * 10 + ' м' : (m / 1000).toFixed(1).replace('.', ',') + ' км';
@@ -140,7 +145,7 @@ function addPins() {
   const start = document.createElement('div');
   start.className = 'start-pin';
   start.textContent = 'Старт';
-  new maplibregl.Marker({ element: start, anchor: 'bottom-left' }).setLngLat(day.start_point.coordinates).addTo(map);
+  startPin = new maplibregl.Marker({ element: start, anchor: 'bottom-left' }).setLngLat(day.start_point.coordinates).addTo(map);
 
   pins = day.stops.map((stop, i) => {
     const el = document.createElement('button');
@@ -267,12 +272,147 @@ function sourceNote() {
     : `<p class="source warn">Сервер недоступен — показан сохранённый маршрут. ${credits}</p>`;
 }
 
+// ---------- Маршрут из выбранных мест (экран «Подбор мест») ----------
+// Порядок обхода — «ближайший сосед» от точки старта. Линии пока прямые: маршрут по улицам
+// строит backend, сюда он ещё не подключён.
+function orderByNearest(places, from) {
+  const left = [...places];
+  const ordered = [];
+  let cur = from;
+  while (left.length) {
+    let best = 0;
+    left.forEach((p, i) => { if (distanceM(cur, p.location) < distanceM(cur, left[best].location)) best = i; });
+    const [next] = left.splice(best, 1);
+    ordered.push(next);
+    cur = next.location;
+  }
+  return ordered;
+}
+
+const PICKED_LAYERS = ['route-glow', 'route-line', 'route-active'];
+
+// places — массив выбранных карточек; null — вернуть исходный маршрут дня.
+export function showPicked(places) {
+  pendingPicked = places;
+  if (mapReady) applyPicked(places);
+}
+
+function applyPicked(places) {
+  pendingPicked = undefined;
+  pickedPins.forEach(m => m.remove());
+  pickedPins = [];
+  const hasPicks = !!(places && places.length);
+  document.querySelector('.sheet').classList.toggle('picked', hasPicks);
+  PICKED_LAYERS.forEach(id => map.setLayoutProperty(id, 'visibility', hasPicks ? 'none' : 'visible'));
+  pins.forEach(p => { p.getElement().style.display = hasPicks ? 'none' : ''; });
+  if (map.getLayer('picked-line')) {
+    map.removeLayer('picked-glow'); map.removeLayer('picked-line'); map.removeSource('picked');
+  }
+  if (!hasPicks) {
+    picked = null;
+    applyChips();
+    showSummary();
+    return;
+  }
+  const from = day.start_point.coordinates;
+  picked = orderByNearest(places, from);
+  const path = [from, ...picked.map(p => p.location)];
+  map.addSource('picked', { type: 'geojson', data: { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: path } } });
+  map.addLayer({ id: 'picked-glow', type: 'line', source: 'picked', layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': '#FFFFFF', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 10, 17, 18], 'line-opacity': 0.8, 'line-blur': 3 } });
+  map.addLayer({ id: 'picked-line', type: 'line', source: 'picked', layout: { 'line-join': 'round', 'line-cap': 'round' },
+    paint: { 'line-color': '#2463D6', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 4, 17, 7], 'line-dasharray': [1.2, 1.6] } });
+  pickedPins = picked.map((place, i) => {
+    const pin = document.createElement('button');
+    pin.className = 'stop-pin';
+    pin.textContent = i + 1;
+    pin.setAttribute('aria-label', `Место ${i + 1}: ${place.title}`);
+    pin.addEventListener('click', e => { e.stopPropagation(); showPickedPlace(i); });
+    return new maplibregl.Marker({ element: pin }).setLngLat(place.location).addTo(map);
+  });
+  applyChips();
+  showPickedSummary();
+}
+
+// Расстояния по прямой: от старта к первому месту, дальше от места к месту
+function pickedLegs() {
+  let cur = day.start_point.coordinates;
+  return picked.map(p => { const d = distanceM(cur, p.location); cur = p.location; return d; });
+}
+
+function pickedButtons() {
+  return `<div class="row">
+      <button class="btn main" data-act="more">Подобрать ещё</button>
+      <button class="btn alt" data-act="reset">Сбросить</button>
+    </div>`;
+}
+function bindPickedButtons() {
+  sheetBody.querySelector('[data-act="more"]').onclick = () => document.dispatchEvent(new Event('pick:open'));
+  sheetBody.querySelector('[data-act="reset"]').onclick = () => document.dispatchEvent(new Event('pick:reset'));
+}
+
+function showPickedSummary() {
+  selected = null;
+  pickedPins.forEach(m => m.getElement().classList.remove('sel'));
+  const legs = pickedLegs();
+  const total = legs.reduce((a, b) => a + b, 0);
+  sheetBody.innerHTML = `
+    <div class="card now">
+      <span class="kicker">Ваш маршрут</span>
+      <h2>${plural(picked.length, 'место', 'места', 'мест')} · ≈ ${fmtDistance(total)}</h2>
+      <p class="small">Расстояние по прямой. Маршрут по улицам пока не построен.</p>
+    </div>
+    <ol class="picked-list">${picked.map((p, i) => `
+      <li><button data-i="${i}">
+        <span class="num">${i + 1}</span>
+        <img src="${escapeHtml(p.image.thumb)}" alt="" loading="lazy">
+        <span class="t">${escapeHtml(p.title)}<br><span class="d">${fmtDistance(legs[i])} ${i === 0 ? 'от старта' : 'от предыдущего'}</span></span>
+      </button></li>`).join('')}
+    </ol>
+    ${pickedButtons()}
+    <p class="source">Карта © OpenFreeMap, OpenMapTiles, участники OpenStreetMap</p>`;
+  sheetBody.querySelectorAll('.picked-list button').forEach(b => { b.onclick = () => showPickedPlace(Number(b.dataset.i)); });
+  bindPickedButtons();
+  showArea([day.start_point.coordinates, ...picked.map(p => p.location)]);
+}
+
+function showPickedPlace(i) {
+  selected = 'picked';
+  pickedPins.forEach((m, k) => m.getElement().classList.toggle('sel', k === i));
+  const p = picked[i];
+  const d = pickedLegs()[i];
+  sheetBody.innerHTML = `
+    <img class="picked-photo" src="${escapeHtml(p.image.card)}" alt="${escapeHtml(p.image.alt || p.title)}">
+    <div class="card now">
+      <div class="kicker">Место ${i + 1} из ${picked.length}</div>
+      <h2>${escapeHtml(p.title)}</h2>
+      <p>${escapeHtml(p.address)} · ${fmtDistance(d)} по прямой</p>
+    </div>
+    <div class="row">
+      <button class="btn icon alt" data-act="prev" aria-label="Предыдущее место" ${i === 0 ? 'disabled' : ''}>‹</button>
+      <button class="btn main" data-act="all">Весь маршрут</button>
+      <button class="btn icon alt" data-act="next" aria-label="Следующее место" ${i === picked.length - 1 ? 'disabled' : ''}>›</button>
+    </div>`;
+  sheetBody.querySelector('[data-act="prev"]').onclick = () => showPickedPlace(i - 1);
+  sheetBody.querySelector('[data-act="next"]').onclick = () => showPickedPlace(i + 1);
+  sheetBody.querySelector('[data-act="all"]').onclick = showPickedSummary;
+  map.resize();
+  map.flyTo({ center: p.location, zoom: Math.max(map.getZoom(), 15.5), duration: 600 });
+}
+
 // ---------- Кнопки ----------
+function applyChips() {
+  document.querySelectorAll('.chip').forEach(c => {
+    if (c.dataset.layer === 'all') return;
+    // Пока показан маршрут из выбранных мест, удобства вдоль старого маршрута не нужны
+    const on = !picked && c.getAttribute('aria-pressed') === 'true';
+    map.setLayoutProperty('amenity-' + c.dataset.layer, 'visibility', on ? 'visible' : 'none');
+  });
+}
+
 function bindChips() {
   const chips = [...document.querySelectorAll('.chip')];
-  const apply = () => chips.forEach(c => {
-    if (c.dataset.layer !== 'all') map.setLayoutProperty('amenity-' + c.dataset.layer, 'visibility', c.getAttribute('aria-pressed') === 'true' ? 'visible' : 'none');
-  });
+  const apply = applyChips;
   chips.forEach(chip => chip.addEventListener('click', () => {
     if (chip.dataset.layer === 'all') {
       // «Всё семейное» включает всё; повторное нажатие — выключает
@@ -328,11 +468,13 @@ export async function initMap(tripInput) {
     await addAmenities();
     // Нажатие на пустое место карты — назад к сводке. Регистрируем после слоёв удобств,
     // чтобы нажатие на значок (он вызывает preventDefault) сюда не доходило.
-    map.on('click', e => { if (selected !== null && !e.defaultPrevented) showSummary(); });
+    map.on('click', e => { if (selected !== null && !e.defaultPrevented) (picked ? showPickedSummary() : showSummary()); });
     addPins();
     bindChips();
     bindMapButtons();
     showSummary();
+    mapReady = true;
+    if (pendingPicked !== undefined) applyPicked(pendingPicked);
   });
 }
 

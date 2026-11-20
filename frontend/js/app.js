@@ -1,6 +1,7 @@
 // Точка входа: нижнее меню и запуск экрана карты.
 
-import { initMap, resizeMap } from './map.js';
+import { initMap, resizeMap, showPicked } from './map.js';
+import { initPick, openPick } from './pick.js';
 import { initKid, openKid } from './kid.js';
 
 // Параметры поездки для демо. Формат — TripInput из docs/contracts/openapi.json.
@@ -42,6 +43,16 @@ function openTab(name) {
   if (name === 'map') resizeMap();
 }
 tabs.forEach(t => t.addEventListener('click', () => openTab(t.dataset.tab)));
+
+// ---------- Подбор мест (карточки как в Tinder) ----------
+initPick({
+  onFinish: places => { openTab('map'); showPicked(places); },   // выбранные места → карта и маршрут
+  onClose: () => openTab('map'),
+});
+const startPick = () => { openTab('pick'); openPick(); };
+document.getElementById('open-pick').addEventListener('click', startPick);
+document.addEventListener('pick:open', startPick);                 // «Подобрать ещё» на карте
+document.addEventListener('pick:reset', () => showPicked(null));   // вернуть исходный маршрут дня
 
 // Ребёнок в детском режиме — берём из данных семьи (пока анкеты нет — из TRIP_INPUT)
 const kidReady = initKid({
