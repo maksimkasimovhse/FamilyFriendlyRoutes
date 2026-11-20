@@ -72,3 +72,20 @@ curl http://127.0.0.1:8082/health
 - authentication между сервисами, rate limits, OpenTelemetry;
 - retries/circuit breaker для GigaChat, dead-letter queue;
 - обученная локальная модель интереса и возрастные метки вместо части baseline-компонентов.
+
+## Автодеплой origin/main на VM
+
+`ops/deploy-main.sh` сравнивает последний успешно развёрнутый commit с `origin/main`. При изменении он переключает deployment checkout на новый commit, проверяет Compose, пересобирает контейнеры и записывает состояние только после успешных health-check обоих сервисов. Если updater установлен до merge и в `main` ещё нет `compose.yaml`, работающие контейнеры не останавливаются.
+
+Systemd timer `family-routes-deploy.timer` запускает проверку раз в минуту и после загрузки VM. Это polling deployment для MVP; GitHub webhook/Actions можно добавить позже для мгновенного запуска и обязательных CI gates.
+
+```bash
+sudo install -m 0755 ops/deploy-main.sh /usr/local/bin/family-routes-deploy-main
+sudo install -m 0644 ops/systemd/family-routes-deploy.service /etc/systemd/system/
+sudo install -m 0644 ops/systemd/family-routes-deploy.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now family-routes-deploy.timer
+
+systemctl list-timers family-routes-deploy.timer
+journalctl -u family-routes-deploy.service -n 100 --no-pager
+```
