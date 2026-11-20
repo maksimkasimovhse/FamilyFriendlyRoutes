@@ -58,8 +58,8 @@ const tripPath = () => `/api/v1/trips/${trip.trip_id}`;
 const nowIso = () => new Date().toISOString();
 
 // Посмотреть вариант (preview) и сохранить его (apply)
-async function preview(command, t = trip) {
-  return call('POST', `/api/v1/trips/${t.trip_id}/previews`, { expected_version: t.version, command, current_position: null, observed_at: null });
+async function preview(command, t = trip, position = null) {
+  return call('POST', `/api/v1/trips/${t.trip_id}/previews`, { expected_version: t.version, command, current_position: position ? {coordinates:position,label:null} : null, observed_at: position ? nowIso() : null });
 }
 export async function applyPreview(p, acknowledged = p.required_acknowledgement_codes) {
   const saved = await call('POST', `/api/v1/trips/${p.trip_id}/previews/${p.preview_id}/apply`,
@@ -169,7 +169,11 @@ export function previewCommand(command) {
 export const tripId = () => trip && trip.trip_id;
 export const tripVersion = () => trip && trip.version;
 export const csrf = () => csrfToken;
+export const planningOptions = (t, previewId = null) => call('POST', `/api/v1/trips/${t.trip_id}/planning-options`, { expected_version:t.version, ...(previewId ? {preview_id:previewId} : {}) });
+export const previewManualChoices = (t, date, choices, basePreviewId = null) => call('POST', `/api/v1/trips/${t.trip_id}/previews`, {
+  expected_version:t.version, command:{kind:'append_manual_choices',date,choices,...(basePreviewId ? {base_preview_id:basePreviewId} : {})}, current_position:null, observed_at:null,
+});
 
-export function previewRemove(stopId) {
-  return preview({ kind: 'remove_stop', date: today().date, stop_id: stopId });
+export function previewRemove(stopId, position = null) {
+  return preview({ kind: 'remove_stop', date: today().date, stop_id: stopId }, trip, position);
 }

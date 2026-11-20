@@ -24,5 +24,10 @@
     "table_service": 4500,
     "meal_with_play": 6300
   },
-  "restaurant_walk_reserve_m_per_day": 0
+  "restaurant_walk_reserve_m_per_day": 0,
+  "completion_policy": {
+    "manual_limit_per_day": 2,
+    "short_day_ratio": 0.7,
+    "supplement_radius_m": 2000
+  }
 }

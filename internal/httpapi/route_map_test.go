@@ -40,7 +40,7 @@ func TestRoutePlacesOwnershipVersionAndGeometry(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &result); err != nil {
 		t.Fatal(err)
 	}
-	if result.RouteVersion == nil || *result.RouteVersion != view.Version || result.RouteDate == nil || *result.RouteDate != view.Days[0].Date || repo.query.RadiusM != 250 || len(repo.query.RouteLines) != len(view.Days[0].Legs) {
+	if result.RouteVersion == nil || *result.RouteVersion != view.Version || result.RouteDate == nil || *result.RouteDate != view.Days[0].Date || repo.query.RadiusM != 125 || len(repo.query.RouteLines) != len(view.Days[0].Legs) {
 		t.Fatal("route metadata/geometry lost")
 	}
 	for i, line := range repo.query.RouteLines {

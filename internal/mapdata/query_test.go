@@ -35,11 +35,32 @@ func TestQueryValidationAndCursor(t *testing.T) {
 		t.Fatal("cursor accepted different search")
 	}
 }
+func TestNearestSearchWithoutDistanceCutoff(t *testing.T) {
+	v, _ := url.ParseQuery("lon=44&lat=56&nearest=true&limit=3&categories=toilet")
+	q, err := Parse(v)
+	if err != nil || !q.Nearest || q.RadiusM != 0 || q.Limit != 3 {
+		t.Fatal(q, err)
+	}
+	v.Set("cursor", q.Next(3))
+	if next, err := Parse(v); err != nil || next.Offset != 3 {
+		t.Fatal(next, err)
+	}
+	v.Set("lon", "45")
+	if _, err := Parse(v); err == nil {
+		t.Fatal("nearest cursor accepted another origin")
+	}
+	for _, raw := range []string{"lon=44&lat=56&nearest=true&radius_km=1", "bbox=44,56,44.1,56.1&nearest=true", "lon=44&lat=56&nearest=false", "lon=181&lat=56&nearest=true", "nearest=true"} {
+		v, _ := url.ParseQuery(raw)
+		if _, err := Parse(v); err == nil {
+			t.Fatalf("accepted %s", raw)
+		}
+	}
+}
 func TestRouteCorridorQueryAndCursor(t *testing.T) {
 	lines := [][]routing.Position{{{44, 56}, {44.1, 56}}}
 	v, _ := url.ParseQuery("date=2030-06-15&expected_version=2&limit=1")
 	q, err := ParseRoute(v, lines)
-	if err != nil || q.RadiusM != 250 || q.RouteVersion != 2 {
+	if err != nil || q.RadiusM != 125 || q.RouteVersion != 2 {
 		t.Fatal(q, err)
 	}
 	v.Set("cursor", q.Next(1))

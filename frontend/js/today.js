@@ -1,3 +1,4 @@
+import { placeEmojiHtml } from './place-display.js';
 // Экран «Сегодня» — главный экран родителя (макет «Сегодня и Карта: что сейчас и что рядом»).
 // Карточка «Сейчас» + лента со временем. Под каждой точкой — одна «семейная» строка:
 // что там у ребёнка (окно в прошлое / задание / штамп) и что рядом (туалет, кафе для детей).
@@ -88,7 +89,7 @@ function render() {
             <div class="kicker">${started ? 'Сейчас идём' : 'Первая точка'}</div>
             ${started ? '<button class="more" data-act="skip" aria-label="Пропустить эту точку">⋯</button>' : ''}
           </div>
-          <h2>${esc(next.title)}</h2>
+          <h2>${placeEmojiHtml(next.category)} ${esc(next.title)}</h2>
           <div class="now-meta">
             ${time ? `<span class="big-time">${time}</span>` : ''}
             <span>${leg ? `${fmtDuration(leg.travel_duration_sec)} пешком · ${fmtDistance(leg.distance_m)}<br>` : ''}на месте ~${fmtDuration(next.duration.duration_sec)}</span>
@@ -122,7 +123,7 @@ function render() {
     return `<li class="${state}">
       <span class="node">${iconFor(s, kid)}</span>
       <span class="t">${time || ''}</span>
-      <span class="what"><b>${esc(s.title)}</b><small>${esc(line)}</small></span>
+      <span class="what"><b>${placeEmojiHtml(s.category)} ${esc(s.title)}</b><small>${esc(line)}</small></span>
       ${kid?.photo ? `<img class="thumb" src="${kid.photo}" alt="">` : ''}
     </li>`;
   });

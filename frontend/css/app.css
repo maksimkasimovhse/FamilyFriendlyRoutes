@@ -306,3 +306,21 @@ details.notes ul { margin: 4px 0 0; padding-left: 18px; }
 
 /* Карта — на весь экран, без белой шапки; кнопки ниже «чёлки» телефона */
 .map-buttons { top: calc(12px + env(safe-area-inset-top)); }
+
+.stop-pin[data-order] { position: relative; font-size: 20px; }
+.stop-pin:not(.done)[data-order]::after { content: attr(data-order); position: absolute; bottom: -6px; right: -6px; min-width: 16px; height: 16px; padding: 0 2px; border-radius: 9px; background: #fff; color: #2463D6; font-size: 10px; line-height: 16px; box-shadow: 0 1px 3px #0003; }
+
+/* Colored round badges with white symbols, matching the map category palette. */
+.place-emoji { object-fit: contain; display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; font-size: 20px; line-height: 1; vertical-align: middle; flex: none; }
+h2 .place-emoji { width: 26px; height: 26px; margin-right: 4px; }
+.stop-pin.emoji-marker { width: 46px; height: 46px; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.stop-pin.emoji-marker .place-emoji { width: 32px; height: 32px; font-size: 28px; filter: drop-shadow(0 2px 2px #26344a40); }
+.stop-pin.emoji-marker.sel { background: transparent; }
+.stop-pin.emoji-marker.done { background: transparent; box-shadow: none; }
+.stop-pin.emoji-marker.done .place-emoji { opacity: .6; }
+.stop-pin.emoji-marker.done::after { content:'✓'; position:absolute; right:0; bottom:0; color:#fff; background:#29844d; border-radius:50%; width:16px; height:16px; font-size:12px; line-height:16px; }
+.maplibregl-marker > .place-emoji { width:34px; height:34px; font-size: 28px; filter:drop-shadow(0 2px 2px #26344a40); }
+.pcard-cat .place-emoji { width:20px; height:20px; margin-right:5px; }
+
+.chip .place-emoji { width: 18px; height: 18px; margin: -2px 0; }
+.chat-suggest button .place-emoji { width: 20px; height: 20px; margin: -2px 4px -2px 0; }

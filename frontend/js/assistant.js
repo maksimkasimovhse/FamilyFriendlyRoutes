@@ -6,6 +6,9 @@
 import { today, tripId, tripVersion, csrf, applyPreview, onTripChange } from './api.js';
 import { walkMinutes, distanceM, cafeBadges, isDemo } from './places.js';
 import { mockAssistant, DEFAULT_SUGGESTIONS } from './assistant-mock.js';
+import { placeEmojiHtml } from './place-display.js';
+import { kindOf } from './places.js';
+import { urgentKind, runUrgentAction, walkingDirections } from './urgent-actions.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -18,9 +21,12 @@ let useMock = false;
 let onShowOnMap = () => {};
 let lastQuestion = '';
 let greeted = false;
+let sending = false;
 
 // ---------- Запрос: настоящий сервис или мок ----------
 async function ask(message) {
+  const kind = urgentKind(message);
+  if (kind) return runUrgentAction(kind);
   if (!useMock) {
     try {
       const res = await fetch(`/api/v1/trips/${tripId()}/assistant/messages`, {
@@ -50,7 +56,7 @@ function add(html, who) {
 }
 
 function suggest(list) {
-  $('chat-suggest').innerHTML = (list || []).map(s => `<button type="button">${esc(s)}</button>`).join('');
+  $('chat-suggest').innerHTML = (list || []).map(s => `<button type="button">${urgentKind(s) ? placeEmojiHtml({rest:'bench',toilet:'toilet',food:'restaurant',rain:'landmark',skip:'landmark'}[urgentKind(s)]) : ''}${esc(s)}</button>`).join('');
   $('chat-suggest').querySelectorAll('button').forEach(b => { b.onclick = () => send(b.textContent); });
 }
 
@@ -68,13 +74,19 @@ function previewCard(preview) {
     <div class="plan-card">
       <div class="kicker">Новый план на сегодня</div>
       <ul>${(lines.length ? lines : ['Маршрут пересчитан от текущего момента']).map(l => `<li>${esc(l)}</li>`).join('')}</ul>
+      ${(preview.warnings || []).map(w=>`<p class="small">${esc(w.message || w.code)}</p>`).join('')}
+      ${(preview.required_acknowledgement_codes || []).map(code=>`<label class="small"><input type="checkbox" data-ack="${esc(code)}"> Понятно: ${esc(code)}</label>`).join('')}
       <div class="row"><button class="btn alt slim" data-no>Не надо</button><button class="btn main slim" data-yes>Применить</button></div>
     </div>`, 'bot card');
   el.querySelector('[data-no]').onclick = () => { el.querySelector('.row').innerHTML = '<span class="muted">Оставили как было</span>'; };
-  el.querySelector('[data-yes]').onclick = async () => {
+  const applyButton = el.querySelector('[data-yes]');
+  const acknowledgements = [...el.querySelectorAll('[data-ack]')];
+  const updateApply = () => { applyButton.disabled = !preview.can_apply || acknowledgements.some(input=>!input.checked); };
+  acknowledgements.forEach(input=>input.onchange=updateApply); updateApply();
+  applyButton.onclick = async () => {
     el.querySelector('.row').innerHTML = '<span class="muted">Применяю…</span>';
     try {
-      await applyPreview(preview);
+      await applyPreview(preview,acknowledgements.filter(input=>input.checked).map(input=>input.dataset.ack));
       el.querySelector('.row').innerHTML = '<span class="ok-text">✓ Маршрут обновлён — смотрите «Сегодня» и карту</span>';
     } catch (err) {
       if (err.code === 'PREVIEW_EXPIRED' || err.code === 'PREVIEW_STALE' || err.code === 'VERSION_CONFLICT') {
@@ -94,7 +106,9 @@ function placesCard(places) {
     const badges = cafeBadges(p).filter(b => b.state !== 'unknown')
       .map(b => `<span class="badge ${b.state}">${b.state === 'yes' ? '✓' : '✕'} ${b.text}</span>`);
     if (isDemo(p)) badges.push('<span class="badge demo">демо</span>');
-    return `<div class="place-row"><div><b>${esc(p.name)}</b><small>~${walkMinutes(distanceM(from, p.location.coordinates))} мин пешком</small>
+    return `<div class="place-row"><div><b>${placeEmojiHtml(kindOf(p))} ${esc(p.name)}</b><small>~${walkMinutes(p.urgent_distance_m ?? distanceM(from, p.location.coordinates))} мин пешком${p.urgent_origin ? ' от геопозиции · оценка' : ''}</small>
+      ${p.urgent_note ? `<small>${esc(p.urgent_note)}</small>` : ''}
+      ${p.urgent_origin ? `<a class="btn link slim" target="_blank" rel="noopener noreferrer" href="${esc(walkingDirections(p.urgent_origin,p.location.coordinates))}">Пешком в Яндекс Картах ↗</a>` : ''}
       ${badges.length ? `<div class="badges">${badges.join('')}</div>` : ''}</div><button class="btn alt slim" data-i="${i}">На карте</button></div>`;
   }).join(''), 'bot card');
   el.querySelectorAll('[data-i]').forEach(b => { b.onclick = () => onShowOnMap(places[+b.dataset.i]); });
@@ -102,7 +116,8 @@ function placesCard(places) {
 
 async function send(text, { silent = false } = {}) {
   text = text.trim();
-  if (!text || !today()) return;
+  if (!text || !today() || sending) return;
+  sending = true;
   lastQuestion = text;
   if (!silent) add(esc(text), 'me');
   suggest([]);
@@ -117,6 +132,8 @@ async function send(text, { silent = false } = {}) {
   } catch (err) {
     typing.innerHTML = 'Не получилось: ' + esc(err.message);
     suggest(DEFAULT_SUGGESTIONS);
+  } finally {
+    sending = false;
   }
 }
 
