@@ -1,12 +1,116 @@
 {
-  "about": "МОК каталога для ML-контракта /internal/v1/recommendations. Места для демо-маршрута: окна в прошлое (точки съёмки из PastVu) и остановки с детскими заданиями (координаты из датасета кейса). ID совпадают с frontend/data/kid-route.json. Часы доступности — «весь день»: это открытые городские места (улицы, площади, лестница), а не учреждения. Заменить ответом настоящего ML-сервиса.",
+  "about": "МОК каталога для ML-контракта /internal/v1/recommendations. Места для демо-маршрута: окна в прошлое (точки съёмки из PastVu), остановки с детскими заданиями и достопримечательности (координаты из датасета кейса, id case_<номер>). ID совпадают с frontend/data/kid-route.json. Часы доступности — «весь день»: это открытые городские места (улицы, площади, лестница), а не учреждения. Заменить ответом настоящего ML-сервиса.",
   "catalog_version": "mock-ml-v1",
   "items": [
-    { "id": "win_pokrovka",          "name": "Большая Покровская улица",      "point": [43.99909, 56.320844],  "category": "landmark", "duration_sec": 1200 },
-    { "id": "win_minin",             "name": "Площадь Минина и Пожарского",   "point": [44.005942, 56.32705],  "category": "landmark", "duration_sec": 1200 },
-    { "id": "task_dmitrievskaya",    "name": "Дмитриевская башня",            "point": [44.005695, 56.32711],  "category": "landmark", "duration_sec": 900 },
-    { "id": "win_kremlin",           "name": "Кремль: смотровая площадка",    "point": [44.001268, 56.329068], "category": "landmark", "duration_sec": 1200 },
-    { "id": "task_chkalov_monument", "name": "Памятник Валерию Чкалову",      "point": [44.009444, 56.329995], "category": "landmark", "duration_sec": 900 },
-    { "id": "win_chkalov",           "name": "Чкаловская лестница",           "point": [44.009457, 56.330379], "category": "landmark", "duration_sec": 1200 }
+    {
+      "id": "win_pokrovka",
+      "name": "Большая Покровская улица",
+      "point": [
+        43.99909,
+        56.320844
+      ],
+      "category": "landmark",
+      "duration_sec": 1200
+    },
+    {
+      "id": "win_minin",
+      "name": "Площадь Минина и Пожарского",
+      "point": [
+        44.005942,
+        56.32705
+      ],
+      "category": "landmark",
+      "duration_sec": 1200
+    },
+    {
+      "id": "task_dmitrievskaya",
+      "name": "Дмитриевская башня",
+      "point": [
+        44.005695,
+        56.32711
+      ],
+      "category": "landmark",
+      "duration_sec": 900
+    },
+    {
+      "id": "win_kremlin",
+      "name": "Кремль: смотровая площадка",
+      "point": [
+        44.001268,
+        56.329068
+      ],
+      "category": "landmark",
+      "duration_sec": 1200
+    },
+    {
+      "id": "task_chkalov_monument",
+      "name": "Памятник Валерию Чкалову",
+      "point": [
+        44.009444,
+        56.329995
+      ],
+      "category": "landmark",
+      "duration_sec": 900
+    },
+    {
+      "id": "win_chkalov",
+      "name": "Чкаловская лестница",
+      "point": [
+        44.009457,
+        56.330379
+      ],
+      "category": "landmark",
+      "duration_sec": 1200
+    },
+    {
+      "id": "case_57_peter",
+      "name": "Памятник Петру I",
+      "point": [
+        44.003277,
+        56.331576
+      ],
+      "category": "landmark",
+      "duration_sec": 900
+    },
+    {
+      "id": "case_101_ivanovskaya",
+      "name": "Ивановская башня",
+      "point": [
+        43.999495,
+        56.32995
+      ],
+      "category": "landmark",
+      "duration_sec": 900
+    },
+    {
+      "id": "case_15_embankment",
+      "name": "Нижне-Волжская набережная",
+      "point": [
+        43.991344,
+        56.330481
+      ],
+      "category": "landmark",
+      "duration_sec": 1500
+    },
+    {
+      "id": "case_19_rozhdestvenskaya",
+      "name": "Улица Рождественская",
+      "point": [
+        43.988951,
+        56.328575
+      ],
+      "category": "landmark",
+      "duration_sec": 1200
+    },
+    {
+      "id": "case_58_church",
+      "name": "Рождественская (Строгановская) церковь",
+      "point": [
+        43.985146,
+        56.327401
+      ],
+      "category": "landmark",
+      "duration_sec": 900
+    }
   ]
 }

@@ -11,7 +11,10 @@ export function loadPlaces() {
   if (!loading) loading = fetchPlaces();
   return loading;
 }
+let types = {};   // place_id → «кофейня», «пиццерия»… (data/place-types.json, из OSM)
+
 async function fetchPlaces() {
+  try { types = await (await fetch('data/place-types.json')).json(); } catch { types = {}; }
   try {
     const res = await fetch('/api/v1/map/places?bbox=43.95,56.30,44.06,56.345&limit=1000');
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -75,3 +78,6 @@ export function sourceOf(p) {
   const e = ids.map(id => evidence.get(id)).find(Boolean);
   return e ? e.source_kind : null;
 }
+
+// Тип заведения, как подпись в Яндекс Картах: «кофейня», «грузинская кухня»…
+export const placeType = p => types[p.place_id] || null;

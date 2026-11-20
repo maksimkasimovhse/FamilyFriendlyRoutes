@@ -18,14 +18,6 @@
 
   <!-- ===== Экран «Карта» ===== -->
   <section class="screen" id="screen-map" data-tab="map">
-    <header class="top">
-      <h1>Карта</h1>
-      <button class="pick-open" id="open-pick">Подбор мест</button>
-      <div class="days" role="tablist" aria-label="День поездки">
-        <button class="on" role="tab" aria-selected="true">Сб</button>
-        <button role="tab" aria-selected="false" disabled title="Второй день появится, когда бекенд научится планировать 2 дня">Вс</button>
-      </div>
-    </header>
 
     <div class="map-wrap">
       <div id="map" aria-label="Карта маршрута"></div>
@@ -36,6 +28,10 @@
           <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3" stroke="currentColor" stroke-width="2"/></svg>
         </button>
       </div>
+
+      <!-- Источники карты (обязательны по лицензиям) и оговорки — спрятаны под «i», как в Яндекс/Google -->
+      <button id="btn-info" class="map-info" aria-label="О карте и маршруте" aria-expanded="false">i</button>
+      <div class="map-info-pop" id="map-info-pop" hidden></div>
 
     </div>
 

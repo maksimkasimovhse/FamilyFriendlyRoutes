@@ -2,7 +2,7 @@
 
 import { loadTrip, resetTrip, onTripChange } from './api.js';
 import { loadPlaces } from './places.js';
-import { initMap, resizeMap, focusPlace, showPicked } from './map.js';
+import { initMap, resizeMap, focusPlace, showPicked, refreshMap } from './map.js';
 import { initPick, openPick } from './pick.js';
 import { initToday, refreshToday } from './today.js';
 import { initAssistant, openAssistant } from './assistant.js';
@@ -12,9 +12,16 @@ import { initKid, openKid, syncKidOrder, kidStopInfo } from './kid.js';
 // Формат — TripInput из docs/contracts/openapi.json. Пока анкеты нет, семья задана здесь.
 // День — сегодняшний (по Москве): бекенд разрешает «начать день» только в его дату и окно времени.
 // Режим in_city и окно «с текущей минуты» — чтобы время прибытия было видно сразу, ещё до старта.
+// Вечером (после 19:00) планируем завтрашнюю прогулку с 10:00 — сегодня уже мало что успеть.
 const FAMILY = { childName: 'Маша', childNameGenitive: 'Маши', childAge: 7 };
 const todayMsk = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' });   // 2026-11-20
 const nowMsk = new Date().toLocaleTimeString('ru-RU', { timeZone: 'Europe/Moscow', hour: '2-digit', minute: '2-digit' });
+const EVENING_HOUR = 19;
+const planTomorrow = Number(nowMsk.slice(0, 2)) >= EVENING_HOUR;
+const tripDate = planTomorrow
+  ? new Date(Date.now() + 24 * 3600 * 1000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' })
+  : todayMsk;
+const windowStart = planTomorrow ? '10:00' : nowMsk;
 const START = { coordinates: [44.0066, 56.3273], label: 'Площадь Минина и Пожарского' };
 
 const TRIP_INPUT = {
@@ -28,11 +35,11 @@ const TRIP_INPUT = {
   },
   load_limits: { pace: 'relaxed', max_walk_distance_m_per_day: 10000, max_continuous_walk_duration_sec: 3600, restaurant_walk_reserve_m_per_day: 0 },
   days: [{
-    date: todayMsk,
+    date: tripDate,
     start_point: START,
     end_point: START,
-    available_window: { start_at: `${todayMsk}T${nowMsk}:00+03:00`, end_at: todayMsk + 'T23:30:00+03:00' },
-    duration_budget_sec: 6 * 3600,
+    available_window: { start_at: `${tripDate}T${windowStart}:00+03:00`, end_at: tripDate + 'T23:30:00+03:00' },
+    duration_budget_sec: 7 * 3600,
     meal_window: null,
     rest_budget_sec: 0,
   }],
@@ -66,7 +73,7 @@ const kidReady = initKid({
 }).catch(err => console.error('Детский режим не загрузился', err));
 if (location.hash === '#kid') kidReady.then(() => openKid());
 
-initMap().catch(err => {
+initMap({ stopInfo: activityId => kidStopInfo(activityId) }).catch(err => {
   console.error(err);
   document.getElementById('sheet-body').innerHTML = `<p class="source warn">Не удалось загрузить карту: ${err.message}</p>`;
 });
@@ -86,13 +93,13 @@ initPick({
   onClose: () => openTab('map'),
 });
 const startPick = () => { openTab('pick'); openPick(); };
-document.getElementById('open-pick').addEventListener('click', startPick);
+// Кнопки «Подбор мест» пока нет: экран откроем после регистрации/анкеты (событие pick:open)
 document.addEventListener('pick:open', startPick);                 // «Подобрать ещё» на карте
 document.addEventListener('pick:reset', () => showPicked(null));   // вернуть исходный маршрут дня
 
 // Тропа ребёнка — в порядке маршрута с бекенда; «Сегодня» — когда подгрузились места рядом
 onTripChange(trip => kidReady.then(() => syncKidOrder(trip.days[0].stops.map(s => s.activity_id))));
-Promise.all([loadPlaces(), kidReady]).then(refreshToday);
+Promise.all([loadPlaces(), kidReady]).then(() => { refreshToday(); refreshMap(); });
 
 // ?newtrip=1 — начать поездку заново (для репетиции демо)
 const q = new URLSearchParams(location.search);

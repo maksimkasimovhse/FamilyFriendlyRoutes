@@ -286,3 +286,20 @@ details.notes ul { margin: 4px 0 0; padding-left: 18px; }
 .chat-input input:focus { outline: none; border-color: var(--now); }
 .chat-input .send { width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--now); color: #fff; display: grid; place-items: center; }
 .demo-flag { top: auto; bottom: 18px; }
+
+/* ===== Карта: метки без дрожания ===== */
+/* Карта двигает .pin-wrap через transform — у него не должно быть своих transition/transform,
+   иначе метка «догоняет» карту и дрожит. Анимации — только на кнопке внутри. */
+.pin-wrap { width: 0; height: 0; display: grid; place-items: center; }
+.place-card p { margin: 2px 0 0; }
+
+/* «i» — источники и оговорки */
+.map-info { position: absolute; left: 12px; bottom: 30px; width: 28px; height: 28px; border-radius: 50%; border: 0; background: rgba(255,255,255,.92); color: var(--ink-2); font: italic 800 14px Georgia, serif; box-shadow: 0 1px 4px rgba(15,22,40,.2); z-index: 2; }
+.map-info-pop { position: absolute; left: 12px; right: 12px; bottom: 64px; z-index: 3; background: #fff; border-radius: 16px; padding: 12px 14px; font-size: 12px; color: var(--ink-2); box-shadow: 0 6px 20px rgba(15,22,40,.2); max-height: 45%; overflow-y: auto; }
+.map-info-pop b { color: var(--ink); font-size: 13px; }
+.map-info-pop p { margin: 2px 0 8px; }
+.map-info-pop ul { margin: 2px 0 0; padding-left: 16px; }
+.map-info-pop a { color: inherit; }
+
+/* Карта — на весь экран, без белой шапки; кнопки ниже «чёлки» телефона */
+.map-buttons { top: calc(12px + env(safe-area-inset-top)); }

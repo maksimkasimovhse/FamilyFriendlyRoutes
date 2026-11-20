@@ -96,6 +96,8 @@ function render() {
           <div class="chips-s">${chips.map(chipHtml).join('')}</div>
           ${started
             ? `<button class="btn main slim" data-act="visited" ${live ? '' : 'disabled'}>Мы на месте ✓</button>`
+            : day.date > new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' })
+            ? '<button class="btn main slim" disabled>Начнём завтра</button>'   // вечером план на завтра — стартовать можно только в его день
             : `<button class="btn main slim" data-act="start" ${live ? '' : 'disabled'}>Начинаем прогулку</button>`}
         </div>
       </article>`;
