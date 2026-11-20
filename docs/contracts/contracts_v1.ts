@@ -109,6 +109,7 @@ export interface Place {
   indoor: Fact<boolean>; toilet: Fact<boolean>; shelter: Fact<boolean>;
   seating: Fact<boolean>;
   distance_m?: number; // geodesic metres from centre; radius search only
+  distance_to_route_m?: number; // geodesic metres to complete saved route, corridor search only
   address?: string | null;
   opening_hours_raw?: string | null;
   access_raw?: string | null;
@@ -320,6 +321,8 @@ export interface NeedResponse {
   evidence: Evidence[]; warnings: Warning[];
 }
 export interface MapResponse {
+  route_version?: number;
+  route_date?: ISODate;
   catalog_version: string; items: Place[]; evidence: Evidence[];
   next_cursor: string | null;
 }

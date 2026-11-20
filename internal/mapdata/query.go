@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/routing"
 	"math"
 	"net/url"
 	"slices"
@@ -23,6 +24,9 @@ type Query struct {
 	BBox              *[4]float64
 	Categories        []string
 	Limit, Offset     int
+	RouteLines        [][]routing.Position
+	RouteVersion      int
+	RouteDate         string
 }
 
 func bad(message string) error { return fmt.Errorf("%w: %s", ErrQuery, message) }
@@ -34,14 +38,62 @@ func number(s string) (float64, error) {
 	return n, nil
 }
 func Parse(v url.Values) (Query, error) {
+	return parse(v, nil)
+}
+
+// ParseRoute searches a corridor around each real leg independently. Disconnected
+// legs remain disconnected: no artificial straight connector is ever constructed.
+func ParseRoute(v url.Values, lines [][]routing.Position) (Query, error) {
+	if len(lines) == 0 {
+		return Query{}, bad("геометрия маршрута отсутствует")
+	}
+	points := 0
+	for _, line := range lines {
+		if len(line) < 2 {
+			return Query{}, bad("сегмент маршрута должен содержать минимум две координаты")
+		}
+		for _, p := range line {
+			if math.IsNaN(p[0]) || math.IsNaN(p[1]) || math.IsInf(p[0], 0) || math.IsInf(p[1], 0) || p[0] < -180 || p[0] > 180 || p[1] < -90 || p[1] > 90 {
+				return Query{}, bad("неверная координата маршрута")
+			}
+		}
+		points += len(line)
+	}
+	if points > 200000 {
+		return Query{}, bad("слишком большая геометрия маршрута")
+	}
+	return parse(v, lines)
+}
+func parse(v url.Values, lines [][]routing.Position) (Query, error) {
 	q := Query{Limit: 100, Categories: append([]string{}, Categories...)}
 	allowed := []string{"lon", "lat", "radius_km", "bbox", "categories", "limit", "cursor", "date", "include_other"}
+	if lines != nil {
+		allowed = []string{"categories", "limit", "cursor", "date", "expected_version", "buffer_m"}
+	}
 	for k, values := range v {
 		if !slices.Contains(allowed, k) || len(values) != 1 && k != "categories" {
 			return q, bad("неизвестный или повторный параметр " + k)
 		}
 	}
-	if v.Has("bbox") {
+	if lines != nil {
+		q.RouteLines = lines
+		q.RouteDate = v.Get("date")
+		if _, err := time.Parse("2006-01-02", q.RouteDate); err != nil {
+			return q, bad("date обязателен: YYYY-MM-DD")
+		}
+		version, err := strconv.Atoi(v.Get("expected_version"))
+		if err != nil || version < 1 {
+			return q, bad("expected_version обязателен и больше нуля")
+		}
+		q.RouteVersion = version
+		q.RadiusM = 250
+		if v.Has("buffer_m") {
+			q.RadiusM, err = number(v.Get("buffer_m"))
+			if err != nil || q.RadiusM <= 0 || q.RadiusM > 1000 {
+				return q, bad("buffer_m: больше 0 и не больше 1000 метров; по умолчанию 250")
+			}
+		}
+	} else if v.Has("bbox") {
 		if v.Has("lon") || v.Has("lat") || v.Has("radius_km") {
 			return q, bad("передайте bbox ИЛИ lon, lat, radius_km")
 		}

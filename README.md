@@ -28,6 +28,7 @@ go run ./cmd/backend -ml-url http://127.0.0.1:8090/internal/v1/recommendations -
 - `POST /api/v1/trips/from-profile` — draft из снимка анкеты; `GET /api/v1/trips` — свои поездки.
 - `GET /api/v1/reference-data` — справочники и дополнительный demo_activities для интеграции.
 - `GET /api/v1/map/places?lon=44.0066&lat=56.3273&radius_km=2` — площадки, парки, скамейки, туалеты, аптеки и кафе из PostgreSQL. Поддержаны bbox, категории и страницы. [Импорт и параметры](docs/map_infrastructure.md).
+- `GET /api/v1/trips/{trip_id}/map/places?date=YYYY-MM-DD&expected_version=2` — инфраструктура в коридоре **250 м вдоль реального OSM-маршрута дня**. Эта ручка используется основной картой, обновляется после изменения маршрута.
 - `POST /api/v1/trips` и `GET /api/v1/trips/{trip_id}` — draft и чтение.
 - `POST /api/v1/trips/{trip_id}/previews` — generate_plan, start_day, remove_stop, replan_day.
 - `POST /api/v1/trips/{trip_id}/progress` — посещение или пропуск следующей остановки активного дня.

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"flag"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 	"net"
 	"net/http"
@@ -12,6 +11,8 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/httpapi"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/mapdata"
@@ -22,6 +23,8 @@ import (
 
 func main() {
 	listen := flag.String("listen", "127.0.0.1:8080", "Development backend address")
+	allowNetwork := flag.Bool("allow-network-listen", false, "Allow binding container network interfaces; publish ports on loopback")
+	routingURL := flag.String("routing-url", "http://127.0.0.1:8002", "Valhalla base URL")
 	database := flag.String("store", "data/backend/state.json", "Single-process development store")
 	demo := flag.Bool("demo-catalog", false, "Explicitly enable synthetic integration activities, NOT real venue data")
 	imagesDir := flag.String("images-dir", "assets/images", "Directory with card images served under /media/")
@@ -33,14 +36,14 @@ func main() {
 	}
 	host, _, err := net.SplitHostPort(*listen)
 	ip := net.ParseIP(host)
-	if err != nil || ip == nil || !ip.IsLoopback() {
-		log.Fatal("This development backend may only listen on loopback")
+	if err != nil || ip == nil || !ip.IsLoopback() && !*allowNetwork {
+		log.Fatal("Non-loopback binding requires -allow-network-listen")
 	}
 	manifest, err := routing.LoadManifest("data/routing/source-manifest.json")
 	if err != nil {
 		log.Fatal(err)
 	}
-	router, err := routing.NewClient("http://127.0.0.1:8002", manifest.RoutingDataVersion, nil)
+	router, err := routing.NewClient(*routingURL, manifest.RoutingDataVersion, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -80,6 +83,7 @@ func main() {
 		mapRepository = mapdata.Postgres{Pool: pool}
 	}
 	root.Handle("/api/v1/map/places", httpapi.MapHandler(mapRepository))
+	root.Handle("GET /api/v1/trips/{trip_id}/map/places", httpapi.RouteMapHandler(store, mapRepository))
 	root.Handle("/media/", httpapi.MediaHandler(*imagesDir))
 	root.Handle("/", httpapi.TripHandler(store, p))
 	server := &http.Server{Addr: *listen, Handler: root, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 40 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}

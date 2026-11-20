@@ -3,6 +3,7 @@ package mapdata
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -35,10 +36,22 @@ func (db Postgres) Search(ctx context.Context, q Query) (c.MapResponse, error) {
 	filter := `ST_DWithin(l.location,ST_SetSRID(ST_MakePoint($1,$2),4326)::geography,$3)`
 	distance := `ST_Distance(l.location,ST_SetSRID(ST_MakePoint($1,$2),4326)::geography)`
 	args := []any{q.Lon, q.Lat, q.RadiusM, q.Categories, q.Limit + 1, q.Offset}
+	categoryParam, limitParam, offsetParam := 4, 5, 6
 	if q.BBox != nil {
 		filter = `l.location && ST_MakeEnvelope($1,$2,$3,$7,4326)::geography AND ST_X(l.location::geometry) BETWEEN $1 AND $3 AND ST_Y(l.location::geometry) BETWEEN $2 AND $7`
 		distance = `NULL::double precision`
 		args = []any{q.BBox[0], q.BBox[1], q.BBox[2], q.Categories, q.Limit + 1, q.Offset, q.BBox[3]}
+	}
+	if len(q.RouteLines) > 0 {
+		raw, err := json.Marshal(map[string]any{"type": "MultiLineString", "coordinates": q.RouteLines})
+		if err != nil {
+			return result, err
+		}
+		geometry := `ST_SetSRID(ST_GeomFromGeoJSON($1::text),4326)::geography`
+		filter = `ST_DWithin(l.location,` + geometry + `,$2)`
+		distance = `ST_Distance(l.location,` + geometry + `)`
+		args = []any{string(raw), q.RadiusM, q.Categories, q.Limit + 1, q.Offset}
+		categoryParam, limitParam, offsetParam = 3, 4, 5
 	}
 	rows, err := tx.Query(ctx, `WITH mapped AS (
  SELECT i.*, CASE c.slug WHEN 'playgrounds' THEN 'playground' WHEN 'parks' THEN 'park'
@@ -52,8 +65,8 @@ func (db Postgres) Search(ctx context.Context, q Query) (c.MapResponse, error) {
    AND f.source=src.source_kind AND f.updated_at=src.checked_at AND f.fact_key IN ('indoor','toilet','shelter','seating','children_menu','small_portions','play_area')), '{}'::jsonb),
  `+distance+` AS distance_m
  FROM mapped i JOIN item_location l USING(item_id) LEFT JOIN item_map_sources src USING(item_id)
- WHERE i.api_category=ANY($4::text[]) AND `+filter+`
- ORDER BY distance_m ASC NULLS LAST,i.item_id ASC LIMIT $5 OFFSET $6`, args...)
+ WHERE i.api_category=ANY(`+fmt.Sprintf("$%d", categoryParam)+`::text[]) AND `+filter+`
+ ORDER BY distance_m ASC NULLS LAST,i.item_id ASC LIMIT `+fmt.Sprintf("$%d OFFSET $%d", limitParam, offsetParam), args...)
 	if err != nil {
 		return result, err
 	}
@@ -75,6 +88,10 @@ func (db Postgres) Search(ctx context.Context, q Query) (c.MapResponse, error) {
 			break
 		}
 		p := c.Place{PlaceID: c.ID(strconv.Itoa(id)), Name: title, Location: c.Point{Coordinates: c.Position{lon, lat}}, Categories: []c.Category{c.Category(kind)}, DisplayClass: "neutral", DistanceM: distanceM, Address: &address, OpeningHoursRaw: hours, AccessRaw: access, FeeRaw: fee}
+		if len(q.RouteLines) > 0 {
+			p.DistanceM = nil
+			p.DistanceToRouteM = distanceM
+		}
 		if entranceLon != nil && entranceLat != nil {
 			p.Entrance = &c.Point{Coordinates: c.Position{*entranceLon, *entranceLat}}
 		}

@@ -2,7 +2,7 @@
 
 import { loadMapStyle } from './map-style.js';
 import { onTripChange, today, getSource } from './api.js';
-import { loadPlaces, allPlaces, kindOf, cafeBadges, isFamilyCafe, isDemo, walkMinutes, placeType } from './places.js';
+import { allPlaces, onPlacesChange, kindOf, cafeBadges, isFamilyCafe, isDemo, walkMinutes, placeType } from './places.js';
 
 const CENTER = [44.0066, 56.3273];   // площадь Минина и Пожарского, [долгота, широта]
 const NEAR_ROUTE_M = 250;            // удобства показываем только в этой полосе вдоль маршрута
@@ -161,18 +161,16 @@ const pinBtn = marker => marker.getElement().firstChild;
 
 // ---------- Удобства вдоль маршрута ----------
 function amenitiesNearRoute() {
-  const route = allRouteCoords().filter((_, i) => i % 3 === 0);   // каждой 3-й точки достаточно
-  if (!route.length) return { type: 'FeatureCollection', features: [] };
+  // PostGIS измеряет расстояние до всей исходной линии, а не до выбранных вершин.
   const near = allPlaces()
-    .map(p => ({ p, near_m: Math.round(Math.min(...route.map(r => distanceM(r, p.location.coordinates)))) }))
-    .filter(x => x.near_m <= NEAR_ROUTE_M && kindOf(x.p) !== 'other')
+    .map(p => ({ p, near_m: p.distance_to_route_m }))
+    .filter(x => Number.isFinite(x.near_m) && x.near_m <= NEAR_ROUTE_M && kindOf(x.p) !== 'other')
     .map(({ p, near_m }) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: p.location.coordinates },
       properties: { place_id: p.place_id, kind: kindOf(p), name: p.name, sub: placeType(p) || '', near_m, family: isFamilyCafe(p) } }));
   return { type: 'FeatureCollection', features: near };
 }
 
 async function addAmenities() {
-  await loadPlaces();
   map.addSource('amenities', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   for (const [kind, a] of Object.entries(AMENITIES)) {
     map.addImage('icon-' + kind, makeIcon(a.color, a.shape), { pixelRatio: 2 });
@@ -517,6 +515,7 @@ export async function initMap(options = {}) {
     if (pendingPicked !== undefined) applyPicked(pendingPicked);
   });
   onTripChange(() => render({ fit: false }));
+  onPlacesChange(() => render({ fit: false }));
 }
 
 // Когда возвращаемся на вкладку «Карта», карте нужно пересчитать размер

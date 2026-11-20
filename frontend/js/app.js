@@ -8,11 +8,11 @@
 //
 // ?newtrip=1 — сразу «Новая поездка» (для репетиции демо).
 
-import { onTripChange, loadSavedTrip, loadCachedTrip, listTrips, openTrip, forget, getTrip } from './api.js';
+import { onTripChange, loadSavedTrip, loadCachedTrip, listTrips, openTrip, forget, getTrip, getSource, today } from './api.js';
 import { startSession, isAuthenticated, isGuest, userEmail, signOut, initAuthScreen, openAuth } from './session.js';
 import { loadFamily, syncLocalProfile, openOnboarding, closeOnboarding, currentProfile, childName, genitive, familySummary } from './onboarding.js';
 import { openTripSetup, afterPick, backToWhen, backToWishes, backToPreview, closeTripSetup } from './trip-setup.js';
-import { loadPlaces } from './places.js';
+import { loadRoutePlaces, clearRoutePlaces, onPlacesChange, loadPlaceTypes } from './places.js';
 import { initMap, resizeMap, focusPlace, showPicked, refreshMap } from './map.js';
 import { initPick, openPick } from './pick.js';
 import { initToday, refreshToday } from './today.js';
@@ -73,10 +73,18 @@ function startMain() {
   initAssistant({ onShowOnMap: place => { openTab('map'); focusPlace(place); } });
 
   // Тропа ребёнка — в порядке маршрута; «Сегодня» — когда подгрузились места рядом
-  const syncKid = trip => kidReady.then(() => syncKidOrder(trip.days[0].stops.map(s => s.activity_id)));
+  const syncKid = () => kidReady.then(() => { const day = today(); if (day) syncKidOrder(day.stops.map(s => s.activity_id)); });
   onTripChange(syncKid);
   if (getTrip()) syncKid(getTrip());
-  Promise.all([loadPlaces(), kidReady]).then(() => { refreshToday(); refreshMap(); });
+  const syncInfrastructure = trip => {
+    const day = today();
+    if (getSource() === 'backend' && day) loadRoutePlaces(trip, day).catch(err => console.warn(err.message));
+    else clearRoutePlaces();
+  };
+  onTripChange(syncInfrastructure);
+  onPlacesChange(() => { refreshToday(); refreshMap(); });
+  if (getTrip()) syncInfrastructure(getTrip());
+  Promise.all([loadPlaceTypes(), kidReady]).then(() => { refreshToday(); refreshMap(); });
   openTab(location.hash === '#map' ? 'map' : 'today');
 }
 

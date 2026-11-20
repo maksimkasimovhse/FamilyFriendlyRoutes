@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,6 +17,7 @@ import (
 	c "github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/contracts"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/httpapi"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/mapdata"
+	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/routing"
 )
 
 func TestPostGISRadiusBBoxImportAndHTTP(t *testing.T) {
@@ -141,5 +143,51 @@ func TestPostGISRadiusBBoxImportAndHTTP(t *testing.T) {
 	httpapi.MapHandler(nil).ServeHTTP(w, httptest.NewRequest("GET", "/?lon=44&lat=56&radius_km=1", nil))
 	if w.Code != 503 {
 		t.Fatal("missing database must not silently return fake data")
+	}
+	// A long meridian leg: an object in its middle must be found even when
+	// several kilometres from both vertices; 249 m is inside and 251 m outside.
+	for name, offset := range map[string]float64{"Middle": 0, "Inside249": 249, "Outside251": 251} {
+		var id int
+		err := pool.QueryRow(ctx, `INSERT INTO items(item_type,category_id,show_in_cards,title,source_dataset,source_id,catalog_version)
+ VALUES('map_object',32,false,$1,'route_test',$1,'test-map-v1') RETURNING item_id`, name).Scan(&id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := pool.Exec(ctx, `INSERT INTO item_location(item_id,location,address) VALUES($1,ST_Project(ST_SetSRID(ST_MakePoint(44,56.05),4326)::geography,$2::double precision,pi()/2),'')`, id, offset); err != nil {
+			t.Fatal(err)
+		}
+	}
+	values, _ := url.ParseQuery("date=2030-06-15&expected_version=2&categories=toilet")
+	q, err := mapdata.ParseRoute(values, [][]routing.Position{{{44, 56}, {44, 56.1}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	response, err := (mapdata.Postgres{Pool: pool}).Search(ctx, q)
+	if err != nil {
+		t.Fatal(err)
+	}
+	names := map[string]bool{}
+	for _, p := range response.Items {
+		names[p.Name] = true
+		if p.DistanceM != nil || p.DistanceToRouteM == nil || *p.DistanceToRouteM > 250 {
+			t.Fatal("route distance missing or outside corridor")
+		}
+	}
+	if !names["Middle"] || !names["Inside249"] || names["Outside251"] {
+		t.Fatalf("incorrect corridor: %+v", names)
+	}
+	// Independent legs must not introduce a fictitious connector through Middle.
+	q, err = mapdata.ParseRoute(values, [][]routing.Position{{{44, 56}, {44, 56.01}}, {{44, 56.09}, {44, 56.1}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	response, err = (mapdata.Postgres{Pool: pool}).Search(ctx, q)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range response.Items {
+		if p.Name == "Middle" || p.Name == "Inside249" {
+			t.Fatal("disconnected legs created a false straight connector")
+		}
 	}
 }
