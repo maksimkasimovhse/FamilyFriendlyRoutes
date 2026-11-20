@@ -30,6 +30,7 @@
 .pcard[data-pos="2"] { z-index: 1; transform: scale(.90) translateY(28px); }
 .pcard[data-pos="1"] > *, .pcard[data-pos="2"] > * { pointer-events: none; }
 .pcard.drag { transition: none; cursor: grabbing; }
+.pcard.gone { z-index: 4; pointer-events: none; }
 .pcard.fly { transition: transform .28s ease-in, opacity .28s ease-in; opacity: 0; }
 
 .pcard-photo { position: relative; flex: 0 0 56%; min-height: 0; background: #DDE3EC; }
