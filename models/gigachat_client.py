@@ -33,7 +33,7 @@ class GigaChatStructuredClient:
         model: str | None = None,
         base_url: str | None = None,
         ca_bundle: str | None = None,
-        timeout_seconds: float = 60,
+        timeout_seconds: float = 180,
     ) -> None:
         self.credentials = credentials or os.environ.get("GIGACHAT_CREDENTIALS")
         self.access_token = access_token or os.environ.get("GIGACHAT_ACCESS_TOKEN")
@@ -42,10 +42,14 @@ class GigaChatStructuredClient:
         self.scope = scope or os.environ.get("GIGACHAT_SCOPE", "GIGACHAT_API_PERS")
         if self.scope not in ("GIGACHAT_API_PERS", "GIGACHAT_API_B2B", "GIGACHAT_API_CORP"):
             raise ValueError("invalid GIGACHAT_SCOPE")
-        self.model = model or os.environ.get("GIGACHAT_MODEL", "GigaChat-2-Pro")
+        self.model = model or os.environ.get("GIGACHAT_MODEL", "GigaChat-3-Pro")
         self.base_url = (base_url or os.environ.get("GIGACHAT_BASE_URL", DEFAULT_BASE_URL)).rstrip("/")
         bundle = ca_bundle or os.environ.get("GIGACHAT_CA_BUNDLE")
-        self.ssl_context = ssl.create_default_context(cafile=bundle) if bundle else ssl.create_default_context()
+        # Keep the platform trust store and add the Ministry certificate when
+        # configured. Replacing the store would break unrelated HTTPS chains.
+        self.ssl_context = ssl.create_default_context()
+        if bundle:
+            self.ssl_context.load_verify_locations(cafile=bundle)
         self.timeout_seconds = timeout_seconds
         self._token_valid_until = time.monotonic() + 25 * 60 if self.access_token else 0.0
 
