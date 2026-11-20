@@ -1,0 +1,282 @@
+﻿priority,place_id,title,category,address,official_url,candidate_url,review_status
+medium,place:main:5,Чкаловская лестница,landmark,"Нижний Новгород, историческая территория Старый Нижний Новгород",,,needs_source_discovery
+medium,place:main:8,Стадион Нижний Новгород,landmark,"Нижний Новгород, улица Бетанкура, 1А",,,needs_source_discovery
+medium,place:main:9,Нижегородское отделение Государственного банка,landmark,"Нижний Новгород, Большая Покровская улица, 26",,,needs_source_discovery
+medium,place:main:10,Волжская набережная,landmark,"Нижний Новгород, Волжская набережная",,,needs_source_discovery
+medium,place:main:11,Окская набережная — Общественное пространство «Стрелка»,landmark,"Нижний Новгород, мыс Стрелка",,,needs_source_discovery
+medium,place:main:12,Набережная Гребного канала,landmark,"Нижний Новгород, историческая территория Старый Нижний Новгород",,,needs_source_discovery
+medium,place:main:13,Верхне-Волжская набережная,landmark,"Нижний Новгород, Верхне-Волжская набережная",,,needs_source_discovery
+medium,place:main:14,Набережная Федоровского,landmark,"Нижний Новгород, набережная Федоровского",,,needs_source_discovery
+medium,place:main:15,Нижне-Волжская набережная,landmark,"Нижний Новгород, Нижне-Волжская набережная",,,needs_source_discovery
+medium,place:main:16,Казанская набережная,landmark,"Нижний Новгород, Казанская набережная",,,needs_source_discovery
+medium,place:main:17,Нижегородская ярмарка,landmark,"Нижний Новгород, Канавинский район, микрорайон Ярмарка",,,needs_source_discovery
+medium,place:main:18,Улица Большая Покровская,landmark,"Нижний Новгород, Большая Покровская улица",,,needs_source_discovery
+medium,place:main:19,Улица Рождественская,landmark,"Нижний Новгород, Рождественская улица",,,needs_source_discovery
+medium,place:main:20,Торговый дом С.М. Рукавишникова (фабрика «Маяк»),landmark,"Нижний Новгород, Нижне-Волжская набережная, 11",,,needs_source_discovery
+medium,place:main:21,Макет старого Нижнего Новгорода,landmark,"Нижний Новгород, Кремль",,,needs_source_discovery
+medium,place:main:22,Ромодановский вокзал,landmark,"Нижний Новгород, Казанская площадь, 1",,,needs_source_discovery
+medium,place:main:23,Дом А.Л. Барышевой,landmark,"Нижний Новгород, Черниговская улица, 4",,,needs_source_discovery
+medium,place:main:24,Усадьба В.Е. Кожевникова,landmark,"Нижний Новгород, Черниговская улица, 14",,,needs_source_discovery
+medium,place:main:25,Усадьба Вяхиревых,landmark,"Нижний Новгород, Черниговская улица, 12Б",,,needs_source_discovery
+medium,place:main:26,Нижегородский острог,landmark,"Нижний Новгород, площадь Свободы, 2А",,,needs_source_discovery
+medium,place:main:27,Палаты Афанасия Олисова,landmark,"Нижний Новгород, Нижегородский район, Крутой переулок, 7",,,needs_source_discovery
+medium,place:main:28,Палаты Чатыгина (Домик Петра I),landmark,"Нижний Новгород, Почаинская улица, 27",,,needs_source_discovery
+high,place:main:29,Александровский сад,park,"Нижний Новгород, Александровский сад",,,needs_source_discovery
+medium,place:main:30,Сцена Ракушка,landmark,"Нижний Новгород, Александровский сад",,,needs_source_discovery
+medium,place:main:31,Жилой дом завода «Красное Сормово»,landmark,"Нижний Новгород, Большая Покровская улица, 29",,,needs_source_discovery
+medium,place:main:32,Завод «ГАЗ»,landmark,"Нижний Новгород, Автозаводский район",,,needs_source_discovery
+high,place:main:33,Музей «ГАЗ»,museum,"Нижний Новгород, проспект Ленина, 95",,,needs_source_discovery
+medium,place:main:34,Завод «Красное Сормово»,landmark,"Нижний Новгород, улица Баррикад, 1",,,needs_source_discovery
+high,place:main:35,Музей истории завода «Красное Сормово»,museum,"Нижний Новгород, улица Свободы, 1",,,needs_source_discovery
+medium,place:main:36,Зачатьевская башня,landmark,"Нижний Новгород, Кремль, 2Г",,,needs_source_discovery
+medium,place:main:37,Красные казармы,landmark,"Нижний Новгород, Нижне-Волжская набережная, 1/1",,,needs_source_discovery
+medium,place:main:38,Канатная дорога,landmark,"Нижний Новгород, Казанская набережная, 8А",,,needs_source_discovery
+medium,place:main:39,Соборная мечеть,landmark,"Нижний Новгород, Казанская набережная, 6",,,needs_source_discovery
+medium,place:main:40,Вознесенский Печерский мужской монастырь,landmark,"Нижний Новгород, Приволжская слобода, 108Б",,,needs_source_discovery
+medium,place:main:41,Катер Герой,landmark,"Нижний Новгород, историческая территория Старый Нижний Новгород",,,needs_source_discovery
+medium,place:main:42,Нижегородский кремль,landmark,"Нижний Новгород, Кремль",,,needs_source_discovery
+medium,place:main:43,Дмитриевская башня,landmark,"Нижний Новгород, Кремль, 6А",,,needs_source_discovery
+medium,place:main:44,Спасская колокольня,landmark,"Нижний Новгород, Кремль",,,needs_source_discovery
+medium,place:main:45,Площадь Минина и Пожарского,landmark,"Нижний Новгород, площадь Минина и Пожарского",,,needs_source_discovery
+medium,place:main:46,Гимназия №1,landmark,"Нижний Новгород, площадь Минина и Пожарского, 5",,,needs_source_discovery
+medium,place:main:47,Стены кремля,landmark,"Нижний Новгород, Кремль, 6",,,needs_source_discovery
+medium,place:main:48,Кремль Смотровая площадь,landmark,"Нижний Новгород, Кремль",,,needs_source_discovery
+medium,place:main:49,Северная башня,landmark,"Нижний Новгород, Кремль, 1В",,,needs_source_discovery
+medium,place:main:50,Казанская церковь,landmark,"Нижний Новгород, Зеленский съезд, 3",,,needs_source_discovery
+medium,place:main:51,Памятник Максиму Горькому,landmark,"Нижний Новгород, Суетинская улица",,,needs_source_discovery
+medium,place:main:52,Пешеходный мост,landmark,"Нижний Новгород, улица Заломова",,,needs_source_discovery
+medium,place:main:53,Олень,landmark,"Нижний Новгород, историческая территория Старый Нижний Новгород",,,needs_source_discovery
+medium,place:main:54,Пакгаузы,landmark,"Нижний Новгород, улица Стрелка, 21Ж",,,needs_source_discovery
+medium,place:main:55,Имитация Шуховских башен,landmark,"Нижний Новгород, Окская набережная",,,needs_source_discovery
+high,place:main:56,Парк Победы,park,"Нижний Новгород, парк Победы",,,needs_source_discovery
+medium,place:main:57,Памятник Петру 1,landmark,"Нижний Новгород, Нижне-Волжская набережная",,,needs_source_discovery
+medium,place:main:58,Собор Пресвятой Богородицы (Рождественская церковь),landmark,"Нижний Новгород, Рождественская улица, 34А",,,needs_source_discovery
+medium,place:main:59,"Дом на Суетинской, 29",landmark,"Нижний Новгород, Суетинская улица, 29",,,needs_source_discovery
+medium,place:main:60,Трамплин,landmark,"Нижний Новгород, кресельный подъёмник",,,needs_source_discovery
+medium,place:main:61,Колесо Обозрения,landmark,"Нижний Новгород, историческая территория Старый Нижний Новгород",,,needs_source_discovery
+medium,place:main:62,Спасский Староярмарочный собор,landmark,"Нижний Новгород, Ярмарочный проезд, 10к1",,,needs_source_discovery
+medium,place:main:63,Художественные промыслы,landmark,"Нижний Новгород, Большая Покровская улица, 43",,,needs_source_discovery
+medium,place:main:64,Театр кукол,event,"Нижний Новгород, Большая Покровская улица, 39Б",,,needs_source_discovery
+medium,place:main:65,"Торговый флигель (Большая Покровская, 38)",landmark,"Нижний Новгород, Большая Покровская улица, 38",,,needs_source_discovery
+medium,place:main:66,"Дом Белавиных (ул. Большая Покровская, 40)",landmark,"Нижний Новгород, Большая Покровская улица, 40",,,needs_source_discovery
+high,place:main:67,Парк Швейцария,park,"Нижний Новгород, парк Швейцария",,,needs_source_discovery
+medium,place:main:68,Собор во имя святого благоверного великого князя Александра Невского,landmark,"Нижний Новгород, улица Стрелка, 3А",,,needs_source_discovery
+high,place:main:69,Сормовский парк,park,"Нижний Новгород, Сормовский парк культуры и отдыха",,,needs_source_discovery
+high,place:main:70,Парк Дубки,park,"Нижний Новгород, парк Дубки",,,needs_source_discovery
+high,place:main:71,Автозаводский парк,park,"Нижний Новгород, Центральный парк культуры и отдыха Автозаводского района",,,needs_source_discovery
+high,place:main:72,Щелоковский хутор,park,"Нижний Новгород, памятник природы регионального областного значения Щёлоковский хутор",,,needs_source_discovery
+medium,place:main:73,Театр «Комедiя»,event,"Нижний Новгород, Грузинская улица, 23",,,needs_source_discovery
+medium,place:main:74,Театр «Вера»,event,"Нижний Новгород, Канавинский район, жилой район Мещерское Озеро, Мещерский бульвар, 10",,,needs_source_discovery
+medium,place:main:75,Театр драмы им. М. Горького,event,"Нижний Новгород, Большая Покровская улица, 13",,,needs_source_discovery
+medium,place:main:76,Театр оперы и балета им. А.С. Пушкина.,event,"Нижний Новгород, улица Белинского, 59/2",,,needs_source_discovery
+medium,place:main:77,Независимый театр «На счастливой»,event,"Нижний Новгород, улица Дьяконова, 1Е",,,needs_source_discovery
+medium,place:main:78,Филармония имени М. Ростроповича,event,"Нижний Новгород, Кремль, 2",,,needs_source_discovery
+medium,place:main:79,Театр юного зрителя,event,"Нижний Новгород, улица Максима Горького, 145",,,needs_source_discovery
+high,place:main:80,Парк 1 мая,park,"Нижний Новгород, улица Октябрьской Революции, 31к7",,,needs_source_discovery
+high,place:main:81,Парк Пушкина,park,"Нижний Новгород, Городской ландшафтный парк культуры и отдыха имени А.С. Пушкина",,,needs_source_discovery
+high,place:main:82,Парк Кулибина,park,"Нижний Новгород, улица Максима Горького, 143",,,needs_source_discovery
+high,place:main:83,Сквер Горького,park,"Нижний Новгород, площадь Максима Горького",,,needs_source_discovery
+high,place:main:84,Сквер Свердлова,park,"Нижний Новгород, сквер имени Свердлова",,,needs_source_discovery
+high,place:main:85,Парк 800-летия,park,"Нижний Новгород, Петушковская гора",,,needs_source_discovery
+high,place:main:86,Мещерское озеро,park,"Нижний Новгород, озеро Мещерское",,,needs_source_discovery
+high,place:main:87,Бурнаковское озеро,park,"Нижний Новгород, озеро Бурнаковской низины",,,needs_source_discovery
+high,place:main:88,Ботанический сад ННГУ,park,"Нижний Новгород, памятник природы регионального значения Ботанический сад ННГУ имени Н.И. Лобачевского",,,needs_source_discovery
+high,place:main:89,Площадь Маркина,park,"Нижний Новгород, площадь Маркина",,,needs_source_discovery
+medium,place:main:90,Детская железная дорога,landmark,"Нижний Новгород, улица Октябрьской Революции, 23А",,,needs_source_discovery
+medium,place:main:91,Железнодорожный вокзал,landmark,"Нижний Новгород, площадь Революции, 2А",,,needs_source_discovery
+medium,place:main:92,Палаты Пушникова,landmark,"Нижний Новгород, улица Гоголя, 52",,,needs_source_discovery
+medium,place:main:93,Квартал трех Святителей,landmark,"Нижний Новгород, улица Короленко",,,needs_source_discovery
+high,place:main:94,Фонтан на пл. Минина,park,"Нижний Новгород, площадь Минина и Пожарского",,,needs_source_discovery
+medium,place:main:95,Старобусыгинские дома,landmark,"Нижний Новгород, Автозаводский район, жилой район Соцгород, микрорайон Соцгород-1, проспект Октября, 21",,,needs_source_discovery
+medium,place:main:96,Бывший речной вокзал,landmark,"Нижний Новгород, площадь Маркина, 15А",,,needs_source_discovery
+medium,place:main:97,Фуникулер,landmark,"Нижний Новгород, Кремль",,,needs_source_discovery
+medium,place:main:98,Никольская башня,landmark,"Нижний Новгород, Кремль, 11А",,,needs_source_discovery
+medium,place:main:99,Георгиевская башня,landmark,"Нижний Новгород, Кремль, 4Б",,,needs_source_discovery
+medium,place:main:100,Часовая башня,landmark,"Нижний Новгород, Кремль, 1Г",,,needs_source_discovery
+medium,place:main:101,Ивановская башня,landmark,"Нижний Новгород, Кремль, 2Б",,,needs_source_discovery
+medium,place:main:102,Театральная лестница,landmark,"Нижний Новгород, историческая территория Старый Нижний Новгород",,,needs_source_discovery
+medium,place:main:103,Ночлежный дом Бугрова,landmark,"Нижний Новгород, Рождественская улица, 2",,,needs_source_discovery
+medium,place:main:104,Армянская апостольская церковь «Сурб Аменапркич»,landmark,"Нижний Новгород, улица Шевченко, 2",,,needs_source_discovery
+medium,place:main:105,Церковь Христиан Адвентистов Седьмого Дня,landmark,"Нижний Новгород, Комсомольское шоссе, 7",,,needs_source_discovery
+medium,place:main:106,Судейская вышка,landmark,"Нижегородская область, Нижегородская канатная дорога",,,needs_source_discovery
+medium,place:main:107,Дом Сироткина,landmark,"Нижний Новгород, Верхне-Волжская набережная, 3",,,needs_source_discovery
+high,place:main:109,Арсенал,museum,"Нижний Новгород, Кремль, 6",,,needs_source_discovery
+high,place:main:110,ЦЕХ,museum,"Нижний Новгород, Варварская улица, 32",,,needs_source_discovery
+high,place:main:111,Домик Каширина,museum,"Нижний Новгород, Почтовый съезд, 21",,,needs_source_discovery
+high,place:main:112,Нижегородский государственный художественный музей,museum,"Нижний Новгород, Кремль, 3",,,needs_source_discovery
+high,place:main:113,Музей Паровозы России,museum,"Нижний Новгород, Канавинский район",,,needs_source_discovery
+high,place:main:114,Центр Рекорд,museum,"Нижний Новгород, Алексеевская улица, 7",,,needs_source_discovery
+high,place:main:115,Центр Река-река,museum,"Нижний Новгород, площадь Маркина, 15А",,,needs_source_discovery
+high,place:main:116,Дом Архитектора,museum,"Нижний Новгород, Верхне-Волжская набережная, 2Б",,,needs_source_discovery
+high,place:main:117,Студия 1221,museum,"Нижний Новгород, Почаинская улица, 17И",,,needs_source_discovery
+high,place:main:118,Галерея 9Б,museum,"Нижний Новгород, Октябрьская улица, 9Б",,,needs_source_discovery
+high,place:main:119,Терминал А,museum,"Нижний Новгород, улица Красная Слобода, 9",,,needs_source_discovery
+high,place:main:120,Музей Н. А. Добролюбова,museum,"Нижний Новгород, набережная Лыковая Дамба, 2А",,,needs_source_discovery
+high,place:main:121,Музей Горького,museum,"Нижний Новгород, улица Семашко, 19",,,needs_source_discovery
+medium,place:main:122,Памятник Максиму Горькому,landmark,"Нижний Новгород, площадь Максима Горького",,,needs_source_discovery
+medium,place:main:123,Памятник Козе-Дерезе,landmark,"Нижний Новгород, Большая Покровская улица",,,needs_source_discovery
+medium,place:main:124,Памятник Почтальону,landmark,"Нижний Новгород, Большая Покровская улица",,,needs_source_discovery
+medium,place:main:125,Памятник Евгению Евстигнееву,landmark,"Нижний Новгород, Большая Покровская улица",,,needs_source_discovery
+medium,place:main:126,Памятник Козьме Минину,landmark,"Нижний Новгород, площадь Минина и Пожарского",,,needs_source_discovery
+medium,place:main:127,Памятник Минину и Пожарскому,landmark,"Нижний Новгород, Рождественская улица",,,needs_source_discovery
+medium,place:main:128,Памятник Владимиру Ленину,landmark,"Нижний Новгород, площадь Ленина",,,needs_source_discovery
+medium,place:main:129,Памятник бронепоезду «Козьма Минин»,landmark,"Нижний Новгород, Канавинский район",,,needs_source_discovery
+medium,place:main:130,Памятник Александру Невскому,landmark,"Нижний Новгород, улица Стрелка",,,needs_source_discovery
+medium,place:main:131,Памятник Валерию Чкалову,landmark,"Нижний Новгород, Георгиевский съезд",,,needs_source_discovery
+high,place:main:217,Музей А.Д. Сахарова,museum,"Нижний Новгород, пр. Гагарина, 214 (домофон 3)",,,needs_source_discovery
+high,place:main:218,Архитектурно-этнографический музей-заповедник «Щелоковский хутор»,museum,"Нижний Новгород, Горбатовская ул., 41",,,needs_source_discovery
+medium,place:main:219,Дворец Культуры им. С. Орджоникидзе,other,"Нижний Новгород, улица Чаадаева, 17",,,needs_source_discovery
+high,place:main:220,Музейно-выставочный центр «Микула»,museum,"Нижний Новгород, улица 50-летия Победы, 25, помещение 1А",,,needs_source_discovery
+medium,place:main:221,Театр музыкально-пластической драмы «Преображение»,event,"Нижний Новгород, ул. Октябрьской Революции, 96/21",,,needs_source_discovery
+medium,place:main:222,Кинотеатр «Буревестник»,other,"Нижний Новгород, ул. Коминтерна, 244",,,needs_source_discovery
+medium,place:main:223,Кинотеатр «Зарница»,other,"Нижний Новгород, просп. Гагарина, 114",,,needs_source_discovery
+medium,place:main:224,Кинотеатр «Орленок»,other,"Нижний Новгород, Большая Покровская ул., 39А",,,needs_source_discovery
+high,place:main:226,Парк Светлоярский,park,"Нижний Новгород, парк Светлоярский",,,needs_source_discovery
+high,place:main:227,Парк Станкозавода,park,"Нижний Новгород, парк Станкозавода",,,needs_source_discovery
+high,place:main:228,Детский парк им. Я.М. Свердлова,park,"Нижний Новгород, ул. Пискунова, 40, корп. 1",,,needs_source_discovery
+high,place:main:229,Парк им. 777-летия г. Н.Новгорода,park,"Нижний Новгород, Автозаводский район, микрорайон Северный",,,needs_source_discovery
+medium,place:main:230,Нижегородский планетарий им. Г.М. Гречко,other,"Нижний Новгород, Революционная ул., 20",,,needs_source_discovery
+medium,place:main:231,Камерный музыкальный театр им. В.Т. Степанова,event,"Нижний Новгород, Юбилейный бул., 32",,,needs_source_discovery
+medium,place:main:232,Общественно-досуговый центр «Смена»,other,"Нижний Новгород, Гордеевская ул., 80А",,,needs_source_discovery
+medium,place:main:233,Общественно-досуговый центр «Надежда»,other,"Нижний Новгород, ул. Котова, 2",,,needs_source_discovery
+medium,place:main:234,Центр культуры и досуга «Молодёжный»,other,"Нижний Новгород, ул. Дьяконова, 25А",,,needs_source_discovery
+medium,place:main:235,Центральная районная детская библиотека им. Н. А. Зайцева,other,"Зайцева улица, 7",,,needs_source_discovery
+medium,place:main:236,Библиотека им. П.И. Мельникова-Печерского,other,"Культуры улица, 111",,,needs_source_discovery
+medium,place:main:237,Библиотека им. Ю. А. Адрианова,other,"ул. Дьяконова, 25",,,needs_source_discovery
+medium,place:main:238,Библиотека им. А. С. Макаренко,other,"ул. Мончегорская, 11а, корпус 3",,,needs_source_discovery
+medium,place:main:240,Детская библиотека им. В. В. Бианки,other,"ул. Прыгунова, 9",,,needs_source_discovery
+medium,place:main:241,Детская библиотека — филиал №6 им. Е.А. Никонова,other,"Куйбышева улица, 13",,,needs_source_discovery
+medium,place:main:242,Центральная районная библиотека им. В.Г. Короленко,other,"Родионова, 199, к.2",,,needs_source_discovery
+medium,place:main:243,Детская библиотека — филиал №5 им. Н.Ф. Гастелло,other,"проспект Героев, 2",,,needs_source_discovery
+medium,place:main:244,Центральная районная детская библиотека им. В.Г. Белинского,other,"Буревестника улица, 9",,,needs_source_discovery
+medium,place:main:245,Детская библиотека им. К. М. Станюковича,other,"ул. Космическая, 49",,,needs_source_discovery
+medium,place:main:246,Библиотека им. А. Н. Радищева,other,"пос. Мостоотряд, 30",,,needs_source_discovery
+medium,place:main:247,Библиотека им. В. В. Маяковского,other,"ул.Комсомольская,2",,,needs_source_discovery
+medium,place:main:248,Библиотека им. Д. Н. Мамина-Сибиряка,other,"Южное шоссе, 32а",,,needs_source_discovery
+medium,place:main:249,Библиотека им. М. Ю. Лермонтова,other,"пр. Бусыгина, 45А",,,needs_source_discovery
+medium,place:main:250,"Центральная районная библиотека Автозаводского района ""Библиотечно-досуговый центр""",other,"проспект Молодежный, 44б",,,needs_source_discovery
+medium,place:main:253,Библиотека — филиал № 8 им. А.И. Люкина,other,"Чаадаева улица, 15",,,needs_source_discovery
+medium,place:main:255,Библиотека — филиал №4 им. А. Н. Толстого,other,"Березовская улица, 10",,,needs_source_discovery
+medium,place:main:256,Библиотека — филиал №3 им. Н.К. Крупской,other,"Героя Давыдова улица, 15",,,needs_source_discovery
+medium,place:main:257,Библиотека — филиал №2 им. П. А. Заломова,other,"Мечникова улица, 73А",,,needs_source_discovery
+medium,place:main:260,Библиотека — филиал № 1 им. А.И. Герцена,other,"Куйбышева улица, 11",,,needs_source_discovery
+medium,place:main:261,Библиотека им. Б. Корнилова,other,"улица Адмирала Васюнина, дом 1, корпус 1",,,needs_source_discovery
+medium,place:main:262,Центральная районная библиотека им. А. С. Пушкина,other,"Березовская улица, 96А",,,needs_source_discovery
+medium,place:main:263,Центральная районная библиотека им. Бориса Панина,other,"Академика Б.А. Королёва бульвар, 10",,,needs_source_discovery
+medium,place:main:265,Центральная районная библиотека им. Д.А. Фурманова,other,"г. Нижний Новгород, пр. Ленина, 14",,,needs_source_discovery
+medium,place:osm:node:10017965217,Владимир Иванович Даль,landmark,,,,needs_source_discovery
+high,place:osm:node:10189305899,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:10576703468,Назад в СССР,museum,,,https://ссср-музей.com,needs_domain_review
+high,place:osm:node:10759966961,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:11016554438,КидБург,playground,,,https://kidburg.ru/,needs_domain_review
+high,place:osm:node:11185593837,Оружие Победы,museum,,,https://ссср-музей.com,needs_domain_review
+medium,place:osm:node:11428120571,Якорь,landmark,,,,needs_source_discovery
+medium,place:osm:node:11799363626,Кинофактура,event,,,,needs_source_discovery
+high,place:osm:node:11809455622,Догель,museum,,,,needs_source_discovery
+high,place:osm:node:11904093381,"Музей дизайна, моды и портновского искусства имени Н.П. Ламановой",museum,,,https://lamanovamuseumnn.ru/,needs_domain_review
+high,place:osm:node:11930489855,Нижегородский Музей СВО,museum,,,https://музейсвонн.рф,needs_domain_review
+high,place:osm:node:11968916787,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:12022609237,Smile Park,park,,,,needs_source_discovery
+medium,place:osm:node:12022630128,DKRT,event,,,,needs_source_discovery
+high,place:osm:node:12109261728,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:12145672417,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:12438209201,"Галерея кукол ""Хрупкие мечты""",museum,2Б,,https://lobachevagallery.ru/,needs_domain_review
+medium,place:osm:node:1253194943,Синема-парк,event,,,http://www.cinemapark.ru/,needs_domain_review
+high,place:osm:node:12881368401,Нижний в шоколаде,museum,"Большая Покровская улица, 50В",,https://muzey-shokolada.ru/,needs_domain_review
+medium,place:osm:node:1290609526,И. П. Кулибину,landmark,,,,needs_source_discovery
+medium,place:osm:node:12925547247,А,landmark,,,,needs_source_discovery
+medium,place:osm:node:13026925312,JamCity,event,,,https://jamcitycamp.com,needs_domain_review
+high,place:osm:node:13468095300,Галерея Имён,museum,,,,needs_source_discovery
+medium,place:osm:node:13572984282,Палитра,event,,,,needs_source_discovery
+medium,place:osm:node:1370908397,Детская библиотека им. Саши Чекалина,other,,,,needs_source_discovery
+medium,place:osm:node:13957448005,Love Cinema,event,"603024, Нижний Новгород, улица Белинского, 124",,https://love-kino.ru,needs_domain_review
+medium,place:osm:node:1449034817,Н.Н. Боголюбов,landmark,,,,needs_source_discovery
+high,place:osm:node:1797429742,Детская площадка,playground,,,,needs_source_discovery
+medium,place:osm:node:1808422812,Zooпарк,event,,,https://teatrzoopark.narod.ru/,needs_domain_review
+medium,place:osm:node:1808422813,Нетеатр «Лифт»,event,,,http://neteatr.com/,needs_domain_review
+medium,place:osm:node:1808422815,Пиано,event,,,https://www.tepi.org/,needs_domain_review
+medium,place:osm:node:1808422818,Театр перемен,event,,,,needs_source_discovery
+high,place:osm:node:1808680311,Геологический музей,museum,,,http://www.volgageo.nn.ru/,needs_domain_review
+high,place:osm:node:1808680312,Зоологический музей,museum,,,,needs_source_discovery
+high,place:osm:node:1808680314,Музей деревянной скульптуры А.И. Новикова,museum,,,,needs_source_discovery
+high,place:osm:node:1808680319,Музей истории Приокского района,museum,,,,needs_source_discovery
+high,place:osm:node:1808680321,Музей истории железнодорожного узла Горький-Сортировочная,museum,,,,needs_source_discovery
+high,place:osm:node:1808680324,"Музей истории, МП Нижегородэлектротранс",museum,улица Генерала Ивлиева,,,needs_source_discovery
+high,place:osm:node:1808680327,"Музей истории, ОАО Нител",museum,"проспект Гагарина, 37",,,needs_source_discovery
+high,place:osm:node:1808680328,Музей науки «Нижегородская радиолаборатория»,museum,,,https://radiolaboratorija.ru/,needs_domain_review
+high,place:osm:node:1808680330,Музей речного флота,museum,,,http://vgavt-nn.ru/museum/,needs_domain_review
+medium,place:osm:node:1814750890,Синема парк,event,,,http://www.cinemapark.ru/main,needs_domain_review
+medium,place:osm:node:1814750892,М.А.Балакирев,landmark,,,,needs_source_discovery
+medium,place:osm:node:1954713874,Листопад,event,,,http://www.teatr-listopad.ru/,needs_domain_review
+high,place:osm:node:1993500120,Музей В.Г. Короленко,museum,,,,needs_source_discovery
+medium,place:osm:node:2083028779,Библиотека им. М.А.Светлова.,other,,,,needs_source_discovery
+medium,place:osm:node:2295063200,«Катюша» БМ-13,landmark,,,,needs_source_discovery
+medium,place:osm:node:2295063213,ГАЗ-АА «Полуторка»,landmark,,,,needs_source_discovery
+high,place:osm:node:2360254552,Детская площадка,playground,,,,needs_source_discovery
+medium,place:osm:node:2527584549,Спутник,event,,,http://vk.com/sputnikinfo,needs_domain_review
+medium,place:osm:node:2894873428,Пекарь,landmark,,,,needs_source_discovery
+medium,place:osm:node:2917705806,Детская библиотека-филиал имени В.А.Жуковского,other,,,,needs_source_discovery
+high,place:osm:node:3043748213,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:3073907048,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:3075334725,Детская площадка,playground,,,,needs_source_discovery
+medium,place:osm:node:3249937430,Империя грез,event,,,империягрез.рф,needs_domain_review
+high,place:osm:node:3302933087,Нижегородский государственный выставочный комплекс,museum,,,http://ngvk.ru/,needs_domain_review
+high,place:osm:node:3312102332,Музей общества «Динамо»,museum,,,,needs_source_discovery
+high,place:osm:node:3312103220,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:3312103260,Детская площадка,playground,,,,needs_source_discovery
+medium,place:osm:node:3396748672,Профессор и студент,landmark,,,,needs_source_discovery
+medium,place:osm:node:3460337794,Библиотека им. Твардовского,other,,,,needs_source_discovery
+high,place:osm:node:3472666393,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:3532499597,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:3842176142,Детская площадка,playground,,,,needs_source_discovery
+medium,place:osm:node:3884779472,Евфимию Суздальскому и Макарию Желтоводскому,landmark,,,,needs_source_discovery
+medium,place:osm:node:3891854956,Сергию Радонежскому,landmark,,,,needs_source_discovery
+medium,place:osm:node:4159863919,М.А.Бонч-Бруевич,landmark,,,,needs_source_discovery
+high,place:osm:node:4231351846,Детская площадка,playground,,,,needs_source_discovery
+medium,place:osm:node:4234435144,Сормовский (Империя Грёз),event,,,,needs_source_discovery
+high,place:osm:node:4246067501,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:4247040278,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:4247041929,Музей пожарной части,museum,,,,needs_source_discovery
+high,place:osm:node:4247041948,Детская площадка,playground,,,,needs_source_discovery
+medium,place:osm:node:4423349298,Арлекино,event,,,https://arlekino52.ru/,needs_domain_review
+high,place:osm:node:4450152234,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:4450152235,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:4456584740,Детская площадка,playground,,,,needs_source_discovery
+medium,place:osm:node:4462100932,Futuro,event,,,,needs_source_discovery
+medium,place:osm:node:4731184869,Экраноплан,landmark,,,,needs_source_discovery
+medium,place:osm:node:5141054171,Центр эстетического воспитания детей,event,"603005, Алексеевская улица, 3",,http://deti-nn.ru/,needs_domain_review
+medium,place:osm:node:5141071786,Дворец вице-губернатора,landmark,9,,,needs_source_discovery
+high,place:osm:node:5167643468,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:5176645580,Детская площадка,playground,,,,needs_source_discovery
+medium,place:osm:node:5193254175,В.Д. Максименко,landmark,,,,needs_source_discovery
+high,place:osm:node:5214308537,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:5215908503,Детская площадка,playground,,,,needs_source_discovery
+medium,place:osm:node:5287329872,Г. Г. Масляков,landmark,,,,needs_source_discovery
+medium,place:osm:node:5324560321,Митрополиту Николаю,landmark,,,,needs_source_discovery
+high,place:osm:node:5633171117,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:5633181511,Детская площадка,playground,,,,needs_source_discovery
+medium,place:osm:node:5658006421,Из рук в руки 20 лет,landmark,,,,needs_source_discovery
+medium,place:osm:node:597408727,Павшим студентам и преподавателям ГИСИ,landmark,,,,needs_source_discovery
+medium,place:osm:node:611577989,Нестеров П.Н.,landmark,,,,needs_source_discovery
+high,place:osm:node:6153074165,Детская площадка,playground,,,,needs_source_discovery
+medium,place:osm:node:6357052648,Библиотека семейного чтения им. И. В. Зуева,other,,,https://vk.com/zueva_lib,needs_domain_review
+medium,place:osm:node:6434652546,Филиал № 3 библиотеки имени И. В. Мичурина,other,,,,needs_source_discovery
+high,place:osm:node:6468078922,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:6514103494,Музей связи,museum,,,,needs_source_discovery
+high,place:osm:node:6517871241,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:6517871243,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:6766047589,Детская площадка,playground,,,,needs_source_discovery
+medium,place:osm:node:7126626685,Плита Бабушка Горького,landmark,,,,needs_source_discovery
+medium,place:osm:node:9051745332,Труженикам тыла,landmark,,,,needs_source_discovery
+high,place:osm:node:9084292818,Усадьба Каменских,museum,,,,needs_source_discovery
+high,place:osm:node:9084312519,Романовы,museum,,,,needs_source_discovery
+medium,place:osm:node:9093165318,Нижегородская Биржа,landmark,,,,needs_source_discovery
+high,place:osm:node:9127573435,Детская площадка,playground,,,,needs_source_discovery
+high,place:osm:node:9128493459,Живой музей ремёсел,museum,,,https://jivoeremeslo.ru,needs_domain_review
+medium,place:osm:node:925666794,Я. М. Свердлову,landmark,,,,needs_source_discovery
+high,place:osm:node:9332430217,Планетарий 1,museum,,,https://instagram.com/planetarium.1.nn,needs_domain_review
+medium,place:osm:node:979462188,Николай I,landmark,,,,needs_source_discovery
+medium,place:osm:node:9893484619,Территория эмоций,other,,,https://biblionn.ru,needs_domain_review
+medium,place:osm:node:994449607,Рубка подводной лодки С-13,landmark,,,,needs_source_discovery
+medium,place:osm:node:994449615,Основателям города,landmark,,,,needs_source_discovery
+high,place:osm:node:9966335766,Электрические витамины,museum,,,,needs_source_discovery

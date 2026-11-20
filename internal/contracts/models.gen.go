@@ -95,6 +95,7 @@ type DayInput struct {
 	MealCount         *int      `json:"meal_count,omitempty"`
 	MealFormat        *string   `json:"meal_format,omitempty"`
 	MealDurationSec   *float64  `json:"meal_duration_sec,omitempty"`
+	MaxWalkDistanceM  *float64  `json:"max_walk_distance_m,omitempty"`
 }
 
 type Selection struct {
@@ -241,7 +242,8 @@ type RecommendationRequest struct {
 		} `json:"route"`
 		CorridorWidthM *float64 `json:"corridor_width_m"`
 	} `json:"spatial_scope"`
-	Limit int `json:"limit"`
+	Limit         int            `json:"limit"`
+	ParsedRequest *ParsedRequest `json:"parsed_request,omitempty"`
 }
 
 type RecommendationResponse struct {
@@ -446,9 +448,11 @@ type ReferenceData struct {
 		Max float64 `json:"max"`
 	} `json:"supported_child_age"`
 	Capabilities struct {
-		TaxiSuggestions   bool `json:"taxi_suggestions"`
-		WeatherAutomation bool `json:"weather_automation"`
-		FreeText          bool `json:"free_text"`
+		TaxiSuggestions   bool  `json:"taxi_suggestions"`
+		WeatherAutomation bool  `json:"weather_automation"`
+		FreeText          bool  `json:"free_text"`
+		Assistant         *bool `json:"assistant,omitempty"`
+		LlmUnderstanding  *bool `json:"llm_understanding,omitempty"`
 	} `json:"capabilities"`
 	DefaultFamilyPolicy FamilyPolicy `json:"default_family_policy"`
 }
@@ -603,4 +607,64 @@ type TripSummary struct {
 
 type TripList struct {
 	Items []TripSummary `json:"items"`
+}
+
+type RequestCategoryClaim struct {
+	Polarity string `json:"polarity"`
+	Evidence string `json:"evidence"`
+	Kind     string `json:"kind"`
+	Value    string `json:"value"`
+}
+
+type RequestFormatClaim struct {
+	Polarity string `json:"polarity"`
+	Evidence string `json:"evidence"`
+	Kind     string `json:"kind"`
+	Value    string `json:"value"`
+}
+
+type RequestInterestClaim struct {
+	Polarity string `json:"polarity"`
+	Evidence string `json:"evidence"`
+	Kind     string `json:"kind"`
+	Value    string `json:"value"`
+}
+
+type ParsedRequest struct {
+	TaxonomyVersion       string            `json:"taxonomy_version"`
+	Claims                []json.RawMessage `json:"claims"`
+	NeedsClarification    bool              `json:"needs_clarification"`
+	ClarificationQuestion *string           `json:"clarification_question"`
+	UnsupportedRequests   []string          `json:"unsupported_requests"`
+}
+
+type AssistantMessageRequest struct {
+	ExpectedVersion int      `json:"expected_version"`
+	Message         string   `json:"message"`
+	Date            *ISODate `json:"date,omitempty"`
+	CurrentPosition *Point   `json:"current_position"`
+	ObservedAt      *Instant `json:"observed_at"`
+}
+
+type AssistantNeed struct {
+	Kind     string `json:"kind"`
+	ChildID  *ID    `json:"child_id"`
+	Urgency  string `json:"urgency"`
+	Evidence string `json:"evidence"`
+}
+
+type AssistantPlaceOption struct {
+	PlaceID           ID      `json:"place_id"`
+	WalkDurationSec   float64 `json:"walk_duration_sec"`
+	DetourDurationSec float64 `json:"detour_duration_sec"`
+}
+
+type AssistantMessageResponse struct {
+	Reply       string                 `json:"reply"`
+	Preview     *PlanPreview           `json:"preview"`
+	Places      []Place                `json:"places"`
+	Options     []AssistantPlaceOption `json:"options"`
+	Suggestions []string               `json:"suggestions"`
+	Needs       []AssistantNeed        `json:"needs"`
+	Mode        string                 `json:"mode"`
 }

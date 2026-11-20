@@ -1,0 +1,218 @@
+{
+  "schema_version": "reviewed-source-claims-v1",
+  "claims": [
+    {
+      "source_id": "granat",
+      "url": "https://granatnn.ru/restoran",
+      "entity_key": "source:granat",
+      "field": "children_menu",
+      "value": true,
+      "quote": "Детское меню",
+      "scope": "restaurant",
+      "notes": ""
+    },
+    {
+      "source_id": "granat",
+      "url": "https://granatnn.ru/restoran",
+      "entity_key": "source:granat",
+      "field": "play_room",
+      "value": true,
+      "quote": "Игровая комната для маленьких гостей",
+      "scope": "restaurant",
+      "notes": ""
+    },
+    {
+      "source_id": "granat",
+      "url": "https://granatnn.ru/restoran",
+      "entity_key": "source:granat",
+      "field": "cuisines",
+      "value": [
+        "georgian",
+        "european"
+      ],
+      "quote": "блюда грузинской и европейской кухни",
+      "scope": "restaurant",
+      "notes": ""
+    },
+    {
+      "source_id": "granat",
+      "url": "https://granatnn.ru/restoran",
+      "entity_key": "source:granat",
+      "field": "address",
+      "value": "Нижний Новгород, Казанское шоссе, 29",
+      "quote": "Нижний Новгород, Казанское шоссе, 29",
+      "scope": "restaurant",
+      "notes": ""
+    },
+    {
+      "source_id": "granat",
+      "url": "https://granatnn.ru/restoran",
+      "entity_key": "source:granat",
+      "field": "opening_hours_text",
+      "value": "воскресенье - четверг с 12:00 до 24:00; пятница - суббота с 12:00 до 02:00",
+      "quote": "воскресенье - четверг с 12:00 до 24:00\nпятница - суббота с 12:00 до 02:00",
+      "scope": "restaurant",
+      "notes": "Часы ресторана; закрытие после полуночи относится к следующему дню. Часы кухни и комнаты неизвестны."
+    },
+    {
+      "source_id": "granat",
+      "url": "https://granatnn.ru/detyam/",
+      "entity_key": "source:granat",
+      "field": "published_age_range",
+      "value": {
+        "min_years": 2,
+        "max_years": 12
+      },
+      "quote": "Детская комната предусмотрена для детей от 2 до 12 лет (дети до 2 лет только в сопровождении взрослых).",
+      "scope": "play_room",
+      "notes": "Заявленная аудитория комнаты; не ограничение возраста всего ресторана."
+    },
+    {
+      "source_id": "granat",
+      "url": "https://granatnn.ru/detyam/",
+      "entity_key": "source:granat",
+      "field": "under_2_requires_adult",
+      "value": true,
+      "quote": "дети до 2 лет только в сопровождении взрослых",
+      "scope": "play_room",
+      "notes": ""
+    },
+    {
+      "source_id": "granat",
+      "url": "https://granatnn.ru/detyam/",
+      "entity_key": "source:granat",
+      "field": "babysitter_mentioned",
+      "value": true,
+      "quote": "с горками, батутом, сухим бассейном и бебиситтер.",
+      "scope": "play_room",
+      "notes": "График и постоянный присмотр не подтверждены."
+    },
+    {
+      "source_id": "granat",
+      "url": "https://granatnn.ru/detyam/",
+      "entity_key": "source:granat",
+      "field": "equipment",
+      "value": [
+        "slides",
+        "trampoline",
+        "ball_pool"
+      ],
+      "quote": "с горками, батутом, сухим бассейном и бебиситтер.",
+      "scope": "play_room",
+      "notes": ""
+    },
+    {
+      "source_id": "granat",
+      "url": "https://granatnn.ru/detyam/",
+      "entity_key": "source:granat",
+      "field": "colouring_books",
+      "value": true,
+      "quote": "игрушки, мозаики, интересные развивающие игры, раскраски, книжки.",
+      "scope": "play_room",
+      "notes": ""
+    },
+    {
+      "source_id": "solbirza",
+      "url": "https://solbirza.ru/",
+      "entity_key": "source:solbirza",
+      "field": "children_menu",
+      "value": true,
+      "quote": "Детское меню",
+      "scope": "restaurant",
+      "notes": ""
+    },
+    {
+      "source_id": "solbirza",
+      "url": "https://solbirza.ru/",
+      "entity_key": "source:solbirza",
+      "field": "play_room",
+      "value": true,
+      "quote": "Современная игровая комната",
+      "scope": "restaurant",
+      "notes": ""
+    },
+    {
+      "source_id": "solbirza",
+      "url": "https://solbirza.ru/",
+      "entity_key": "source:solbirza",
+      "field": "cuisines",
+      "value": [
+        "russian",
+        "european"
+      ],
+      "quote": "Русская и европейская кухня",
+      "scope": "restaurant",
+      "notes": ""
+    },
+    {
+      "source_id": "solbirza",
+      "url": "https://solbirza.ru/",
+      "entity_key": "source:solbirza",
+      "field": "address",
+      "value": "Нижний Новгород, улица Сибирская, 3",
+      "quote": "Нижний Новгород, улица Сибирская, 3",
+      "scope": "restaurant",
+      "notes": ""
+    },
+    {
+      "source_id": "solbirza",
+      "url": "https://solbirza.ru/",
+      "entity_key": "source:solbirza",
+      "field": "opening_hours_text",
+      "value": "Ежедневно с 12.00 до 00.00",
+      "quote": "Ежедневно с 12.00 до 00.00",
+      "scope": "restaurant",
+      "notes": "Часы ресторана; часы кухни и игровой комнаты неизвестны."
+    },
+    {
+      "source_id": "solbirza",
+      "url": "https://solbirza.ru/",
+      "entity_key": "source:solbirza",
+      "field": "animator_schedule_text",
+      "value": "игры с аниматорами каждое воскресенье",
+      "quote": "игры с аниматорами каждое воскресенье",
+      "scope": "play_room",
+      "notes": "Не конкретный сеанс: время начала и длительность не опубликованы в этой цитате."
+    },
+    {
+      "source_id": "solbirza",
+      "url": "https://solbirza.ru/",
+      "entity_key": "source:solbirza",
+      "field": "board_games",
+      "value": true,
+      "quote": "настольные игры",
+      "scope": "play_room",
+      "notes": ""
+    },
+    {
+      "source_id": "solbirza",
+      "url": "https://solbirza.ru/",
+      "entity_key": "source:solbirza",
+      "field": "drawing_boards",
+      "value": true,
+      "quote": "доски для рисования",
+      "scope": "play_room",
+      "notes": ""
+    },
+    {
+      "source_id": "solbirza",
+      "url": "https://solbirza.ru/",
+      "entity_key": "source:solbirza",
+      "field": "soft_toys",
+      "value": true,
+      "quote": "мягкие игрушки",
+      "scope": "play_room",
+      "notes": ""
+    },
+    {
+      "source_id": "solbirza",
+      "url": "https://solbirza.ru/",
+      "entity_key": "source:solbirza",
+      "field": "play_tent",
+      "value": true,
+      "quote": "палатка-вигвам",
+      "scope": "play_room",
+      "notes": ""
+    }
+  ]
+}

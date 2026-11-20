@@ -26,6 +26,12 @@ def candidate(
 
 
 class PlaceRankerTests(unittest.TestCase):
+    def test_mmr_prefix_is_stable_when_input_order_or_limit_changes(self):
+        pool = [candidate(str(i), query=(i % 11) / 10, tags=(f"theme-{i % 5}",)) for i in range(80)]
+        first = rank_places(pool, limit=12)
+        full = rank_places(list(reversed(pool)), limit=80)
+        self.assertEqual(first, full[:12])
+
     def test_known_ineligible_is_removed_even_with_high_scores(self):
         blocked = candidate("blocked", eligibility="ineligible", interest=100, query=1, popularity=1)
         allowed = candidate("allowed", interest=0, query=0, popularity=0)

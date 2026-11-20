@@ -1,0 +1,98 @@
+{
+  "schema_version": "city-catalog-coverage-v2",
+  "record_count": 281,
+  "category_counts": {
+    "Библиотеки": 7,
+    "Детские площадки": 35,
+    "Достопримечательности": 89,
+    "Культурно-развлекательные организации": 32,
+    "Культурные площадки": 18,
+    "Музеи и выставочные центры": 18,
+    "Музеи и галереи": 27,
+    "Набережные": 7,
+    "Памятники": 15,
+    "Парки и места отдыха": 22,
+    "Парки и развлечения": 1,
+    "Театры": 10
+  },
+  "topic_counts": {
+    "animals": 1,
+    "architecture": 63,
+    "art": 52,
+    "cooking": 1,
+    "crafts": 11,
+    "history": 113,
+    "literature": 42,
+    "music": 13,
+    "nature": 58,
+    "plants": 7,
+    "science": 5,
+    "space": 2,
+    "sport": 19,
+    "technology": 12,
+    "theatre": 41,
+    "transport": 14
+  },
+  "field_coverage": {
+    "coordinates": {
+      "known": 281,
+      "total": 281,
+      "percent": 100.0
+    },
+    "description": {
+      "known": 281,
+      "total": 281,
+      "percent": 100.0
+    },
+    "topics": {
+      "known": 230,
+      "total": 281,
+      "percent": 81.9
+    },
+    "formats": {
+      "known": 281,
+      "total": 281,
+      "percent": 100.0
+    },
+    "official_url": {
+      "known": 0,
+      "total": 281,
+      "percent": 0.0
+    },
+    "duration": {
+      "known": 0,
+      "total": 281,
+      "percent": 0.0
+    },
+    "opening_hours": {
+      "known": 0,
+      "total": 281,
+      "percent": 0.0
+    },
+    "age_fit": {
+      "known": 0,
+      "total": 281,
+      "percent": 0.0
+    }
+  },
+  "next_enrichment_order": [
+    "official_url",
+    "opening_hours",
+    "duration",
+    "age_fit"
+  ],
+  "catalog_version": "city-osm-v2",
+  "source_counts": {
+    "main": 165,
+    "osm": 116
+  },
+  "category_id_counts": {
+    "landmark": 111,
+    "park": 23,
+    "museum": 45,
+    "event": 28,
+    "other": 39,
+    "playground": 35
+  },
+  "raw_osm_hours_records": 20
+}

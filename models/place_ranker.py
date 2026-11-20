@@ -133,15 +133,13 @@ def rank_places(
 
     selected: list[RankedCandidate] = []
     remaining = set(scored)
+    similarities = {activity_id: 0.0 for activity_id in remaining}
     while remaining and len(selected) < limit:
         best_id = ""
         best_key = (-math.inf, -math.inf, "")
         best_penalty = 0.0
         for activity_id in remaining:
-            similarity = max(
-                (_jaccard(by_id[activity_id].tags, by_id[item.activity_id].tags) for item in selected),
-                default=0.0,
-            )
+            similarity = similarities[activity_id]
             mmr = policy.mmr_lambda * scored[activity_id].final_relevance - (1 - policy.mmr_lambda) * similarity
             key = (mmr, scored[activity_id].final_relevance, activity_id)
             if key > best_key:
@@ -157,4 +155,7 @@ def rank_places(
             warnings=item.warnings,
         ))
         remaining.remove(best_id)
+        # Each selected item contributes once. Avoid rescanning the entire prefix.
+        for activity_id in remaining:
+            similarities[activity_id] = max(similarities[activity_id], _jaccard(by_id[activity_id].tags, by_id[best_id].tags))
     return selected

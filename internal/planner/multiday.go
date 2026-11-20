@@ -119,6 +119,14 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 			return c.TripView{}, stateError("ACTIVE_TRIP", "Для начатой поездки используйте пересчёт дня, сохраняя историю.")
 		}
 	}
+	var languageWarnings []c.Warning
+	if p.Interpreter != nil && view.Input.RequestText != nil && strings.TrimSpace(*view.Input.RequestText) != "" {
+		var err error
+		view, p, languageWarnings, err = p.understandInitial(ctx, view, now)
+		if err != nil {
+			return c.TripView{}, err
+		}
+	}
 	if err := Validate(view.Input); err != nil {
 		return c.TripView{}, err
 	}
@@ -126,7 +134,7 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 	if p.Router == nil {
 		return c.TripView{}, routing.ErrUnavailable
 	}
-	warnings := []c.Warning{}
+	warnings := append([]c.Warning{}, languageWarnings...)
 	if p.Source != nil {
 		if view.CatalogVersion != p.Source.CatalogVersion() {
 			return c.TripView{}, ErrMLContract

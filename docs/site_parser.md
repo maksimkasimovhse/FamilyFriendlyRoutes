@@ -130,3 +130,16 @@ export GIGACHAT_CA_BUNDLE='/path/to/russian_trusted_root_ca.pem'
 python scripts/extract_site.py 'https://official.example/program' \
   --source-id official-example --output data/processed/catalog/program.json
 ```
+
+## Ограниченная партия и возобновление
+
+`scripts/collect_sites.py` получает конкретные URL из задания, сохраняет нормализованные
+страницы, продолжает после ошибок и использует успешные снимки при повторном запуске.
+По умолчанию работает без LLM; `--extract` включает существующий GigaChat extractor.
+Результаты первой партии, реестр рассмотренных доменов и команды продолжения:
+[data/site_collection/README.md](../data/site_collection/README.md).
+
+Редакционно выделенные семейные свойства ресторанов экспортируются отдельно через
+`scripts/export_reviewed_site_facts.py`. Экспортер принимает только цитаты, присутствующие
+в сохранённых страницах, и сохраняет область действия свойства. Эти наблюдения ещё
+не опубликованы в HTTP API и не назначают канонические ID.

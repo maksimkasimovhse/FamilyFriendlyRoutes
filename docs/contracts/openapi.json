@@ -591,7 +591,7 @@
             }
           }
         },
-        "description": "Implemented commands: generate_plan, start_day, remove_stop, replan_day. Active previews expire 30 seconds after observed_at and preserve confirmed history. Other command variants are target API and may return COMMAND_NOT_IMPLEMENTED."
+        "description": "Implemented: generate_plan, update_trip_input (before start), start_day, remove_stop, replan_day, shorten_day, return_to_hotel, add_activity, replace_stop, reorder_stops, move_stop. Active previews preserve confirmed history and expire 30 seconds after observed_at."
       }
     },
     "/api/v1/trips/{trip_id}/previews/{preview_id}": {
@@ -2298,6 +2298,110 @@
         },
         "description": "Checks trip ownership and expected_version. Searches PostGIS using the complete original OSM leg geometries as a MultiLineString, without simplification or straight connectors between legs. Default buffer is 250 m to either side and around the ends. distance_to_route_m is the shortest geodesic distance to the line, not a walking detour. All saved legs of the selected day are included. Cursor is bound to route geometry, version, date and filters; version changes return 409. No GPS centre is used."
       }
+    },
+    "/api/v1/trips/{trip_id}/assistant/messages": {
+      "post": {
+        "operationId": "sendAssistantMessage",
+        "summary": "Понять потребность и подготовить предложение изменения маршрута",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            },
+            "description": ""
+          },
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Токен сессии; backend также проверяет Origin."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "502": {
+            "$ref": "#/components/responses/Error502"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          },
+          "200": {
+            "description": "Grounded reply and optional preview",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantMessageResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistantMessageRequest"
+              }
+            }
+          }
+        },
+        "description": "Does not mutate Trip. Stores bounded trip-specific conversation and optional PlanPreview. Apply uses the existing endpoint and explicit warning acknowledgement. Errors never fall back to a mock."
+      }
     }
   },
   "components": {
@@ -2786,6 +2890,19 @@
             "minimum": 0,
             "maximum": 86400,
             "description": "Total daily meal time, seconds. When omitted, meal_count times the configured duration for meal_format. Explicit zero disables the meal time reserve."
+          },
+          "max_walk_distance_m": {
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional cap for this day, additionally bounded by family load_limits."
           }
         },
         "required": [
@@ -4403,6 +4520,16 @@
             "minimum": 1,
             "maximum": 50,
             "description": "Initial planning requests 50 ranked distinct places for the entire trip. ML does not assign days or compute routes."
+          },
+          "parsed_request": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ParsedRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -5262,13 +5389,29 @@
               },
               "target_remaining_duration_sec": {
                 "type": "number",
-                "minimum": 0
+                "minimum": 60
+              },
+              "target_remaining_walk_distance_m": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100000
               }
             },
             "required": [
               "kind",
-              "date",
-              "target_remaining_duration_sec"
+              "date"
+            ],
+            "anyOf": [
+              {
+                "required": [
+                  "target_remaining_duration_sec"
+                ]
+              },
+              {
+                "required": [
+                  "target_remaining_walk_distance_m"
+                ]
+              }
             ]
           },
           {
@@ -5283,6 +5426,16 @@
               },
               "hotel_point": {
                 "$ref": "#/components/schemas/Point"
+              },
+              "target_remaining_duration_sec": {
+                "type": "number",
+                "minimum": 60,
+                "maximum": 86400
+              },
+              "target_remaining_walk_distance_m": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100000
               }
             },
             "required": [
@@ -5330,6 +5483,33 @@
               "kind",
               "date"
             ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "date",
+              "stop_id",
+              "target_date"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "move_stop"
+                ]
+              },
+              "date": {
+                "$ref": "#/components/schemas/ISODate"
+              },
+              "stop_id": {
+                "$ref": "#/components/schemas/ID"
+              },
+              "target_date": {
+                "$ref": "#/components/schemas/ISODate"
+              }
+            }
           }
         ]
       },
@@ -5822,6 +6002,12 @@
                 "type": "boolean"
               },
               "free_text": {
+                "type": "boolean"
+              },
+              "assistant": {
+                "type": "boolean"
+              },
+              "llm_understanding": {
                 "type": "boolean"
               }
             },
@@ -6547,6 +6733,385 @@
         "required": [
           "items"
         ]
+      },
+      "RequestCategoryClaim": {
+        "additionalProperties": false,
+        "properties": {
+          "polarity": {
+            "enum": [
+              "prefer",
+              "avoid"
+            ],
+            "title": "Polarity",
+            "type": "string"
+          },
+          "evidence": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Evidence",
+            "type": "string"
+          },
+          "kind": {
+            "const": "category",
+            "title": "Kind",
+            "type": "string"
+          },
+          "value": {
+            "enum": [
+              "museum",
+              "event",
+              "park",
+              "playground",
+              "restaurant",
+              "toilet",
+              "bench",
+              "shelter",
+              "landmark",
+              "other"
+            ],
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "polarity",
+          "evidence",
+          "kind",
+          "value"
+        ],
+        "title": "CategoryClaim",
+        "type": "object"
+      },
+      "RequestFormatClaim": {
+        "additionalProperties": false,
+        "properties": {
+          "polarity": {
+            "enum": [
+              "prefer",
+              "avoid"
+            ],
+            "title": "Polarity",
+            "type": "string"
+          },
+          "evidence": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Evidence",
+            "type": "string"
+          },
+          "kind": {
+            "const": "format",
+            "title": "Kind",
+            "type": "string"
+          },
+          "value": {
+            "enum": [
+              "educational",
+              "playful",
+              "creative",
+              "calm",
+              "active",
+              "spectacular"
+            ],
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "polarity",
+          "evidence",
+          "kind",
+          "value"
+        ],
+        "title": "FormatClaim",
+        "type": "object"
+      },
+      "RequestInterestClaim": {
+        "additionalProperties": false,
+        "properties": {
+          "polarity": {
+            "enum": [
+              "prefer",
+              "avoid"
+            ],
+            "title": "Polarity",
+            "type": "string"
+          },
+          "evidence": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Evidence",
+            "type": "string"
+          },
+          "kind": {
+            "const": "interest",
+            "title": "Kind",
+            "type": "string"
+          },
+          "value": {
+            "enum": [
+              "animals",
+              "plants",
+              "nature",
+              "space",
+              "science",
+              "technology",
+              "transport",
+              "history",
+              "architecture",
+              "art",
+              "music",
+              "theatre",
+              "literature",
+              "crafts",
+              "cooking",
+              "sport"
+            ],
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "polarity",
+          "evidence",
+          "kind",
+          "value"
+        ],
+        "title": "InterestClaim",
+        "type": "object"
+      },
+      "ParsedRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "taxonomy_version": {
+            "const": "1.0",
+            "title": "Taxonomy Version",
+            "type": "string"
+          },
+          "claims": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/RequestInterestClaim"
+                },
+                {
+                  "$ref": "#/components/schemas/RequestCategoryClaim"
+                },
+                {
+                  "$ref": "#/components/schemas/RequestFormatClaim"
+                }
+              ]
+            },
+            "maxItems": 20,
+            "title": "Claims",
+            "type": "array"
+          },
+          "needs_clarification": {
+            "title": "Needs Clarification",
+            "type": "boolean"
+          },
+          "clarification_question": {
+            "title": "Clarification Question",
+            "oneOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "unsupported_requests": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Unsupported Requests",
+            "type": "array"
+          }
+        },
+        "required": [
+          "taxonomy_version",
+          "claims",
+          "needs_clarification",
+          "clarification_question",
+          "unsupported_requests"
+        ],
+        "title": "ParsedRequest",
+        "type": "object"
+      },
+      "AssistantMessageRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expected_version",
+          "message",
+          "current_position",
+          "observed_at"
+        ],
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "date": {
+            "$ref": "#/components/schemas/ISODate"
+          },
+          "current_position": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Point"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observed_at": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Instant"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "AssistantNeed": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "child_id",
+          "urgency",
+          "evidence"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "rest",
+              "food",
+              "toilet",
+              "shelter",
+              "play",
+              "less_walking",
+              "return"
+            ]
+          },
+          "child_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "urgency": {
+            "type": "string",
+            "enum": [
+              "now",
+              "soon",
+              "unspecified"
+            ]
+          },
+          "evidence": {
+            "type": "string"
+          }
+        }
+      },
+      "AssistantPlaceOption": {
+        "type": "object",
+        "required": [
+          "place_id",
+          "walk_duration_sec",
+          "detour_duration_sec"
+        ],
+        "properties": {
+          "place_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "walk_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "detour_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      },
+      "AssistantMessageResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reply",
+          "preview",
+          "places",
+          "options",
+          "suggestions",
+          "needs",
+          "mode"
+        ],
+        "properties": {
+          "reply": {
+            "type": "string"
+          },
+          "preview": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PlanPreview"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "places": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "$ref": "#/components/schemas/Place"
+            }
+          },
+          "options": {
+            "type": "array",
+            "maxItems": 3,
+            "items": {
+              "$ref": "#/components/schemas/AssistantPlaceOption"
+            }
+          },
+          "suggestions": {
+            "type": "array",
+            "maxItems": 5,
+            "items": {
+              "type": "string"
+            }
+          },
+          "needs": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/AssistantNeed"
+            }
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "gigachat"
+            ]
+          }
+        }
       }
     },
     "securitySchemes": {

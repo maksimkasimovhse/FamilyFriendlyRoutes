@@ -1,0 +1,1796 @@
+{
+  "schema_version": "case-seed-audit-v1",
+  "catalog_version": "city-osm-v2",
+  "sources": {
+    "main": {
+      "file": "db/seed/main.csv",
+      "sha256": "45771f7bd1d022f54cc9a32c63254214421530e0052e30388250e40724760a68",
+      "bytes": 304840,
+      "rows": 174,
+      "columns": [
+        "id",
+        "address",
+        "coordinate",
+        "description",
+        "title",
+        "category"
+      ],
+      "missing_values": {
+        "id": 0,
+        "address": 0,
+        "coordinate": 0,
+        "description": 0,
+        "title": 0,
+        "category": 0
+      },
+      "categories": {
+        "Достопримечательности": 62,
+        "Культурно-развлекательные организации": 39,
+        "Музеи и выставочные центры": 18,
+        "Набережные": 7,
+        "Памятники": 15,
+        "Парки и места отдыха": 23,
+        "Театры": 10
+      },
+      "invalid_rows": [],
+      "outside_core_sampling_bbox": [
+        {
+          "source_id": "108",
+          "title": "Шуховская башня на Оке",
+          "address": "Нижегородская область, Дзержинск",
+          "point": [
+            43.543545,
+            56.193396
+          ]
+        }
+      ],
+      "normalized_name_groups": [
+        [
+          "51",
+          "122"
+        ],
+        [
+          "67",
+          "225"
+        ]
+      ],
+      "shared_coordinate_groups": [],
+      "exact_record_duplicates": [],
+      "description_length": {
+        "min": 259,
+        "max": 2978
+      },
+      "semantic_fields_absent": [
+        "official_url",
+        "opening_hours",
+        "visit_duration",
+        "age_fit",
+        "admission",
+        "event_sessions",
+        "price",
+        "entrance_coordinates"
+      ],
+      "published_at": null,
+      "content_verified_at": null
+    },
+    "addition": {
+      "file": "db/seed/addition.csv",
+      "sha256": "8c6fa53400087da5359d844db1dc772c4caa5f21329a5e3cd365f1432648c757",
+      "bytes": 47495,
+      "rows": 85,
+      "columns": [
+        "id",
+        "address",
+        "coordinate",
+        "description",
+        "title",
+        "category"
+      ],
+      "missing_values": {
+        "id": 0,
+        "address": 0,
+        "coordinate": 0,
+        "description": 0,
+        "title": 0,
+        "category": 0
+      },
+      "categories": {
+        "Города-побратимы": 1,
+        "Мозаика": 72,
+        "Тактильный объект": 12
+      },
+      "invalid_rows": [],
+      "outside_core_sampling_bbox": [],
+      "normalized_name_groups": [],
+      "shared_coordinate_groups": [
+        [
+          "153",
+          "154"
+        ],
+        [
+          "145",
+          "146"
+        ],
+        [
+          "149",
+          "148"
+        ],
+        [
+          "173",
+          "174"
+        ],
+        [
+          "210",
+          "209",
+          "211"
+        ],
+        [
+          "184",
+          "183"
+        ],
+        [
+          "151",
+          "155"
+        ],
+        [
+          "194",
+          "195"
+        ],
+        [
+          "165",
+          "166"
+        ],
+        [
+          "169",
+          "170",
+          "168"
+        ],
+        [
+          "156",
+          "147"
+        ],
+        [
+          "179",
+          "178",
+          "180",
+          "177"
+        ],
+        [
+          "176",
+          "175"
+        ],
+        [
+          "198",
+          "197"
+        ],
+        [
+          "182",
+          "181"
+        ],
+        [
+          "158",
+          "157"
+        ],
+        [
+          "215",
+          "216"
+        ]
+      ],
+      "exact_record_duplicates": [],
+      "description_length": {
+        "min": 151,
+        "max": 395
+      },
+      "semantic_fields_absent": [
+        "official_url",
+        "opening_hours",
+        "visit_duration",
+        "age_fit",
+        "admission",
+        "event_sessions",
+        "price",
+        "entrance_coordinates"
+      ],
+      "published_at": null,
+      "content_verified_at": null
+    }
+  },
+  "source_records": 259,
+  "cross_dataset_id_overlap": [],
+  "recommendable_records": 281,
+  "status_counts": {
+    "included": 165,
+    "alias": 1,
+    "held": 8,
+    "map_only": 85
+  },
+  "review_decisions": {
+    "review_version": "seed-review-v1",
+    "catalog_version": "seed-city-v1",
+    "source_sha256": {
+      "main": "45771f7bd1d022f54cc9a32c63254214421530e0052e30388250e40724760a68",
+      "addition": "8c6fa53400087da5359d844db1dc772c4caa5f21329a5e3cd365f1432648c757"
+    },
+    "merges": [
+      {
+        "source_id": "225",
+        "canonical_source_id": "67",
+        "reason": "Один парк «Швейцария»: совпадают нормализованное название, категория и адрес; координаты представляют разные точки большого парка.",
+        "verification_url": "https://swissparknn.ru/"
+      }
+    ],
+    "holds": [
+      {
+        "source_id": "239",
+        "code": "PROGRAM_REQUIRED",
+        "reason": "Музыкальная школа; для туристической рекомендации нужна конкретная открытая программа."
+      },
+      {
+        "source_id": "251",
+        "code": "PROGRAM_REQUIRED",
+        "reason": "Художественная школа; обычное обучение не приравнивается к разовому посещению."
+      },
+      {
+        "source_id": "252",
+        "code": "PROGRAM_REQUIRED",
+        "reason": "Школа искусств; для туристической рекомендации нужна конкретная открытая программа."
+      },
+      {
+        "source_id": "254",
+        "code": "PROGRAM_REQUIRED",
+        "reason": "Художественная школа; обычное обучение не приравнивается к разовому посещению."
+      },
+      {
+        "source_id": "258",
+        "code": "PROGRAM_REQUIRED",
+        "reason": "Школа искусств; для туристической рекомендации нужна конкретная открытая программа."
+      },
+      {
+        "source_id": "259",
+        "code": "PROGRAM_REQUIRED",
+        "reason": "Школа искусств; для туристической рекомендации нужна конкретная открытая программа."
+      },
+      {
+        "source_id": "264",
+        "code": "ORGANIZATION_NOT_VISIT",
+        "reason": "Дирекция управляет парками и организует события; офис организации не считается посещением парка."
+      },
+      {
+        "source_id": "108",
+        "code": "OUTSIDE_CITY_SCOPE",
+        "reason": "Шуховская башня на Оке: адрес в исходном CSV — Дзержинск. Сохранена для отдельного загородного сценария, вне текущего городского среза."
+      }
+    ],
+    "title_overrides": [
+      {
+        "source_id": "242",
+        "title": "Центральная районная библиотека им. В.Г. Короленко",
+        "source_quote": "Центральная районная библиотека им. В.Г. Короленко",
+        "reason": "Заголовок источника называет библиотечную систему, описание указывает конкретную библиотеку."
+      }
+    ],
+    "retained_same_name": [
+      {
+        "source_ids": [
+          "51",
+          "122"
+        ],
+        "reason": "Разные памятники Горькому: разные адреса, координаты, скульпторы и описания."
+      }
+    ],
+    "description_conflicts": [
+      {
+        "source_ids": [
+          "67",
+          "225"
+        ],
+        "code": "SOURCE_DESCRIPTION_CONFLICT",
+        "reason": "В описаниях одного парка указаны площади 380 и 52 га. Возможны разные границы территории; площадь не публикуется как нормализованный факт."
+      }
+    ]
+  },
+  "osm_mapping_audit": {
+    "available": true,
+    "rows": 259,
+    "matched": 116,
+    "matched_with_different_normalized_title": 110,
+    "incompatible_type_candidates": [
+      {
+        "source_id": "123",
+        "source_title": "Памятник Козе-Дерезе",
+        "matched_place_id": "place:osm:node:5720245323",
+        "matched_title": "Шоколадница",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "125",
+        "source_title": "Памятник Евгению Евстигнееву",
+        "matched_place_id": "place:osm:node:3212469572",
+        "matched_title": "bench OSM 3212469572",
+        "matched_categories": [
+          "bench"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "29",
+        "source_title": "Александровский сад",
+        "matched_place_id": "place:osm:node:12925496900",
+        "matched_title": "Ротонда",
+        "matched_categories": [
+          "shelter"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "67",
+        "source_title": "Парк Швейцария",
+        "matched_place_id": "place:osm:node:9139675811",
+        "matched_title": "toilet OSM 9139675811",
+        "matched_categories": [
+          "toilet"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "80",
+        "source_title": "Парк 1 мая",
+        "matched_place_id": "place:osm:node:2334415571",
+        "matched_title": "playground OSM 2334415571",
+        "matched_categories": [
+          "playground"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "14",
+        "source_title": "Набережная Федоровского",
+        "matched_place_id": "place:osm:node:4368367001",
+        "matched_title": "Bubble Cafe",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "15",
+        "source_title": "Нижне-Волжская набережная",
+        "matched_place_id": "place:osm:node:11304388881",
+        "matched_title": "Кофехюгге",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "13",
+        "source_title": "Верхне-Волжская набережная",
+        "matched_place_id": "place:osm:node:10926401816",
+        "matched_title": "Виа",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "21",
+        "source_title": "Макет старого Нижнего Новгорода",
+        "matched_place_id": "place:osm:node:9051110790",
+        "matched_title": "bench OSM 9051110790",
+        "matched_categories": [
+          "bench"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "38",
+        "source_title": "Канатная дорога",
+        "matched_place_id": "place:osm:node:8960934846",
+        "matched_title": "toilet OSM 8960934846",
+        "matched_categories": [
+          "toilet"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "39",
+        "source_title": "Соборная мечеть",
+        "matched_place_id": "place:osm:node:8960934846",
+        "matched_title": "toilet OSM 8960934846",
+        "matched_categories": [
+          "toilet"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "97",
+        "source_title": "Фуникулер",
+        "matched_place_id": "place:osm:node:12176605865",
+        "matched_title": "toilet OSM 12176605865",
+        "matched_categories": [
+          "toilet"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "99",
+        "source_title": "Георгиевская башня",
+        "matched_place_id": "place:osm:node:9244406469",
+        "matched_title": "Губернское кафе",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "18",
+        "source_title": "Улица Большая Покровская",
+        "matched_place_id": "place:osm:node:2649773452",
+        "matched_title": "Звоно пицца",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "44",
+        "source_title": "Спасская колокольня",
+        "matched_place_id": "place:osm:node:2297015606",
+        "matched_title": "bench OSM 2297015606",
+        "matched_categories": [
+          "bench"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "46",
+        "source_title": "Гимназия №1",
+        "matched_place_id": "place:osm:node:14282551116",
+        "matched_title": "Coffee Like",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "48",
+        "source_title": "Кремль Смотровая площадь",
+        "matched_place_id": "place:osm:node:2289419728",
+        "matched_title": "bench OSM 2289419728",
+        "matched_categories": [
+          "bench"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "98",
+        "source_title": "Никольская башня",
+        "matched_place_id": "place:osm:node:2296264471",
+        "matched_title": "bench OSM 2296264471",
+        "matched_categories": [
+          "bench"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "111",
+        "source_title": "Домик Каширина",
+        "matched_place_id": "place:osm:node:12124974701",
+        "matched_title": "Caprese",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "112",
+        "source_title": "Нижегородский государственный художественный музей",
+        "matched_place_id": "place:osm:node:2297015941",
+        "matched_title": "bench OSM 2297015941",
+        "matched_categories": [
+          "bench"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "42",
+        "source_title": "Нижегородский кремль",
+        "matched_place_id": "place:osm:node:2289057590",
+        "matched_title": "bench OSM 2289057590",
+        "matched_categories": [
+          "bench"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "75",
+        "source_title": "Театр драмы им. М. Горького",
+        "matched_place_id": "place:osm:node:3212469997",
+        "matched_title": "bench OSM 3212469997",
+        "matched_categories": [
+          "bench"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "45",
+        "source_title": "Площадь Минина и Пожарского",
+        "matched_place_id": "place:osm:node:11649646058",
+        "matched_title": "Мороженое",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "58",
+        "source_title": "Собор Пресвятой Богородицы (Рождественская церковь)",
+        "matched_place_id": "place:osm:node:2626186934",
+        "matched_title": "Пекарня Мадлен",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "52",
+        "source_title": "Пешеходный мост",
+        "matched_place_id": "place:osm:node:10003885906",
+        "matched_title": "Строгов",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "91",
+        "source_title": "Железнодорожный вокзал",
+        "matched_place_id": "place:osm:node:12157333316",
+        "matched_title": "playground OSM 12157333316",
+        "matched_categories": [
+          "playground"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "93",
+        "source_title": "Квартал трех Святителей",
+        "matched_place_id": "place:osm:node:13034186761",
+        "matched_title": "Mola Mola Капри",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "94",
+        "source_title": "Фонтан на пл. Минина",
+        "matched_place_id": "place:osm:node:4349521225",
+        "matched_title": "bench OSM 4349521225",
+        "matched_categories": [
+          "bench"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "116",
+        "source_title": "Дом Архитектора",
+        "matched_place_id": "place:osm:node:12860119086",
+        "matched_title": "Met Tea",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "59",
+        "source_title": "Дом на Суетинской, 29",
+        "matched_place_id": "place:osm:node:12084658022",
+        "matched_title": "Навигация",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "28",
+        "source_title": "Палаты Чатыгина (Домик Петра I)",
+        "matched_place_id": "place:osm:node:4371665093",
+        "matched_title": "Дель Пара",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "121",
+        "source_title": "Музей Горького",
+        "matched_place_id": "place:osm:node:11972358187",
+        "matched_title": "toilet OSM 11972358187",
+        "matched_categories": [
+          "toilet"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "118",
+        "source_title": "Галерея 9Б",
+        "matched_place_id": "place:osm:node:5600178022",
+        "matched_title": "Юла Пицца",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "228",
+        "source_title": "Детский парк им. Я.М. Свердлова",
+        "matched_place_id": "place:osm:node:11775167797",
+        "matched_title": "shelter OSM 11775167797",
+        "matched_categories": [
+          "shelter"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "252",
+        "source_title": "МБУ ДО \"Детская школа искусств № 9 им. А.Д.Улыбышева\"",
+        "matched_place_id": "place:osm:node:2709159572",
+        "matched_title": "Виталич",
+        "matched_categories": [
+          "restaurant"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "224",
+        "source_title": "Кинотеатр «Орленок»",
+        "matched_place_id": "place:osm:node:11298582400",
+        "matched_title": "toilet OSM 11298582400",
+        "matched_categories": [
+          "toilet"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "262",
+        "source_title": "Центральная районная библиотека им. А. С. Пушкина",
+        "matched_place_id": "place:osm:node:5155839621",
+        "matched_title": "playground OSM 5155839621",
+        "matched_categories": [
+          "playground"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "243",
+        "source_title": "Детская библиотека — филиал №5 им. Н.Ф. Гастелло",
+        "matched_place_id": "place:osm:node:2360254552",
+        "matched_title": "playground OSM 2360254552",
+        "matched_categories": [
+          "playground"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "244",
+        "source_title": "Центральная районная детская библиотека им. В.Г. Белинского",
+        "matched_place_id": "place:osm:node:3844910283",
+        "matched_title": "playground OSM 3844910283",
+        "matched_categories": [
+          "playground"
+        ],
+        "match_method": "name_or_80m"
+      },
+      {
+        "source_id": "254",
+        "source_title": "МБУ ДО \"Детская художественная школа №1\"",
+        "matched_place_id": "place:osm:node:2283255272",
+        "matched_title": "playground OSM 2283255272",
+        "matched_categories": [
+          "playground"
+        ],
+        "match_method": "name_or_80m"
+      }
+    ],
+    "conclusion": "name_or_80m is a candidate linkage, not verified identity; no OSM facts are copied to seed places"
+  },
+  "interpretation": "Structurally valid place directory, not training labels or verified family visit conditions. Shared positions in addition may represent separate artworks in one metro station.",
+  "supplemental_imports": [
+    {
+      "file": "_select_cs_id_cs_address_cs_coordinate_cs_description_cs_title_c.csv",
+      "sha256": "60d4b50215dc72e037772e2404b831b2be928e65e9f427e1cf8a5ef1a837c55c",
+      "rows": 259,
+      "invalid_rows": [],
+      "identical_existing_records": 259,
+      "matches": [
+        {
+          "source_id": "57",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "51",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "55",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "122",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "123",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "153",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "124",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "125",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "127",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "129",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "145",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "130",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "53",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "126",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "29",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "67",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "149",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "72",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "16",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "81",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "84",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "86",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "172",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "87",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "88",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "89",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "70",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "71",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "80",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "82",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "85",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "225",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "140",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "143",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "173",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "12",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "227",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "226",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "14",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "15",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "11",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "138",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "150",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "13",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "131",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "19",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "189",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "20",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "21",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "22",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "32",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "38",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "139",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "39",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "210",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "25",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "26",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "43",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "47",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "184",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "49",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "50",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "151",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "61",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "62",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "194",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "66",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "68",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "97",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "107",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "99",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "101",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "104",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "106",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "18",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "44",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "46",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "30",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "37",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "40",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "48",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "54",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "165",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "60",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "65",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "92",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "98",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "100",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "105",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "169",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "111",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "170",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "232",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "112",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "155",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "113",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "119",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "218",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "171",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "73",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "156",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "179",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "77",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "78",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "176",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "167",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "178",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "187",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "174",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "154",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "163",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "164",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "198",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "180",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "182",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "183",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "161",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "158",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "181",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "159",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "188",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "190",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "191",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "192",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "193",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "200",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "201",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "205",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "214",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "199",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "209",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "211",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "212",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "213",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "215",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "216",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "206",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "208",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "207",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "152",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "157",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "8",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "9",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "17",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "31",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "132",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "34",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "186",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "177",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "168",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "195",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "185",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "160",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "142",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "42",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "75",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "45",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "58",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "56",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "52",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "137",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "63",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "74",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "83",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "141",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "117",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "79",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "91",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "93",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "94",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "96",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "103",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "109",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "115",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "116",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "5",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "59",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "28",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "114",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "36",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "33",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "110",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "64",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "144",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "76",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "135",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "90",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "102",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "120",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "134",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "121",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "95",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "133",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "136",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "219",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "24",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "217",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "147",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "230",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "221",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "231",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "148",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "166",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "202",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "203",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "196",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "233",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "108",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "128",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "241",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "118",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "69",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "23",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "27",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "10",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "229",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "228",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "35",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "41",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "222",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "223",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "252",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "224",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "175",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "162",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "204",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "197",
+          "matches_dataset": "addition"
+        },
+        {
+          "source_id": "220",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "234",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "235",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "236",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "237",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "238",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "239",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "240",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "262",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "242",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "243",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "244",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "245",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "246",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "247",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "248",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "249",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "250",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "251",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "253",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "254",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "255",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "256",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "257",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "258",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "259",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "260",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "261",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "263",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "264",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "265",
+          "matches_dataset": "main"
+        },
+        {
+          "source_id": "146",
+          "matches_dataset": "addition"
+        }
+      ],
+      "id_conflicts": [],
+      "new_record_candidates": [],
+      "result": "already_present",
+      "snapshot": "data/raw/user_imports/60d4b50215dc72e037772e2404b831b2be928e65e9f427e1cf8a5ef1a837c55c.csv"
+    }
+  ],
+  "conservative_osm_candidates": {
+    "count": 5,
+    "manual_review_required": true
+  },
+  "seed_recommendable_records": 165,
+  "osm_source_records": 1000,
+  "total_source_records": 1259,
+  "osm_expansion": {
+    "catalog_version": "city-osm-v2",
+    "review_version": "osm-expansion-v1",
+    "source_snapshot_sha256": "11dcde12037743e8272481a2ed0c60eacd5bf9d059a53b06aec6540309327de0",
+    "source_records": 1000,
+    "added_records": 116,
+    "added_by_category": {
+      "landmark": 28,
+      "playground": 35,
+      "museum": 27,
+      "event": 18,
+      "park": 1,
+      "other": 7
+    },
+    "decisions": {
+      "SUPPORT_OBJECT": 512,
+      "OVERLAP_REVIEW": 82,
+      "included": 116,
+      "MANUAL_REVIEW": 8,
+      "RESTRICTED_ACCESS": 3,
+      "PROGRAM_REVIEW": 33,
+      "MAP_OR_EXHIBIT_ONLY": 114,
+      "OTHER_CITY": 4,
+      "ACCESS_REVIEW": 128
+    },
+    "verification_urls": {
+      "node/12881368401": "https://www.muzey-shokolada.ru/",
+      "node/6412596831": "https://museumgorkogo.ru/"
+    }
+  },
+  "combined_status_counts": {
+    "included": 281,
+    "alias": 1,
+    "held": 892,
+    "map_only": 85
+  }
+}

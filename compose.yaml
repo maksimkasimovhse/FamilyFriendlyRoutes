@@ -7,6 +7,7 @@ services:
       dockerfile: services/parser_service/Dockerfile
     environment:
       SOURCE_REGISTRY_PATH: /app/config/source_registry.json
+      ML_API_TOKEN: ${ML_API_TOKEN:-}
       GIGACHAT_CREDENTIALS: ${GIGACHAT_CREDENTIALS:-}
       GIGACHAT_ACCESS_TOKEN: ${GIGACHAT_ACCESS_TOKEN:-}
       GIGACHAT_SCOPE: ${GIGACHAT_SCOPE:-GIGACHAT_API_B2B}
@@ -29,6 +30,10 @@ services:
     build:
       context: .
       dockerfile: services/model_service/Dockerfile
+    environment:
+      MODEL_CATALOG_VERSION: ${MODEL_CATALOG_VERSION:-city-osm-v2}
+      ML_API_TOKEN: ${ML_API_TOKEN:-}
+      REQUEST_PARSER_URL: http://parser-service:8080/internal/v1/request-parses
     ports:
       - "127.0.0.1:8082:8080"
     read_only: true
@@ -108,9 +113,10 @@ services:
       dockerfile: infra/docker/backend.Dockerfile
     environment:
       DATABASE_URL: ${DOCKER_DATABASE_URL:-postgres://familyroutes:${POSTGRES_PASSWORD:-}@postgres:5432/familyroutes?sslmode=disable}
-    # Места для маршрута берёт у ML по контракту /internal/v1/recommendations.
-    # Пока у Вильдана нет сервиса — у мока (mock-api). Вернуть синтетику: command: ["-demo-catalog"]
-    command: ["-listen", "0.0.0.0:8080", "-allow-network-listen", "-routing-url", "http://valhalla:8002", "-ml-url", "http://mock-api:8090/internal/v1/recommendations", "-catalog-version", "mock-ml-v1"]
+      ML_API_TOKEN: ${ML_API_TOKEN:-}
+      ASSISTANT_URL: http://parser-service:8080/internal/v1/assistant-intents
+    # Реальный небольшой seed-каталог и content baseline, без онлайн-загрузки сайтов.
+    command: ["-listen", "0.0.0.0:8080", "-allow-network-listen", "-routing-url", "http://valhalla:8002", "-ml-url", "http://model-service:8080/internal/v1/recommendations", "-catalog-version", "${MODEL_CATALOG_VERSION:-city-osm-v2}"]
     volumes:
       - ./data:/app/data
       # Картинки карточек: backend отдаёт их под /media/ и без папки не стартует (-images-dir)
@@ -118,8 +124,8 @@ services:
     depends_on:
       valhalla:
         condition: service_healthy
-      mock-api:
-        condition: service_started
+      model-service:
+        condition: service_healthy
       postgres:
         condition: service_healthy
     restart: unless-stopped
@@ -140,6 +146,7 @@ services:
 
   # МОК рекомендаций ML. Инфраструктура карты читается Go-бэкендом из PostgreSQL.
   mock-api:
+    profiles: ["mock"]
     build: ./infra/mock-api
     environment:
       MOCK_API_LISTEN: 0.0.0.0:8090

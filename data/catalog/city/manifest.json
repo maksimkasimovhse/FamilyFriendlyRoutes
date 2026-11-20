@@ -1,0 +1,15 @@
+{
+  "catalog_version": "city-osm-v2",
+  "record_count": 281,
+  "content_sha256": "f80508fe1c3133303ddb4a2e58cd93bfe23afd84d46fba56c0cc3fdd10b105cc",
+  "source_dataset": "challenge_seed_csv_and_osm",
+  "seed_records": 165,
+  "osm_records": 116,
+  "source_files": {
+    "main": "45771f7bd1d022f54cc9a32c63254214421530e0052e30388250e40724760a68",
+    "addition": "8c6fa53400087da5359d844db1dc772c4caa5f21329a5e3cd365f1432648c757",
+    "osm_snapshot": "11dcde12037743e8272481a2ed0c60eacd5bf9d059a53b06aec6540309327de0"
+  },
+  "review_version": "seed-review-v1",
+  "osm_review_version": "osm-expansion-v1"
+}

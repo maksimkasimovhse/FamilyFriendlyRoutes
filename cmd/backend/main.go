@@ -14,6 +14,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/assistant"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/httpapi"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/mapdata"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/planner"
@@ -30,6 +31,7 @@ func main() {
 	imagesDir := flag.String("images-dir", "assets/images", "Directory with card images served under /media/")
 	mlURL := flag.String("ml-url", "", "Full internal ML recommendations endpoint")
 	catalogVersion := flag.String("catalog-version", "", "Catalog version agreed with ML")
+	assistantURL := flag.String("assistant-url", os.Getenv("ASSISTANT_URL"), "Internal contextual LLM intent endpoint")
 	flag.Parse()
 	if *demo == (*mlURL != "") || (!*demo && *catalogVersion == "") {
 		log.Fatal("Choose -demo-catalog OR -ml-url <endpoint> -catalog-version <version>.")
@@ -85,8 +87,12 @@ func main() {
 	root.Handle("/api/v1/map/places", httpapi.MapHandler(mapRepository))
 	root.Handle("GET /api/v1/trips/{trip_id}/map/places", httpapi.RouteMapHandler(store, mapRepository))
 	root.Handle("/media/", httpapi.MediaHandler(*imagesDir))
-	root.Handle("/", httpapi.TripHandler(store, p))
-	server := &http.Server{Addr: *listen, Handler: root, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 40 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
+	var interpreter assistant.Interpreter
+	if *assistantURL != "" {
+		interpreter = assistant.HTTPInterpreter{Endpoint: *assistantURL, Token: os.Getenv("ML_API_TOKEN")}
+	}
+	root.Handle("/", httpapi.TripHandlerWithAssistant(store, p, interpreter, mapRepository))
+	server := &http.Server{Addr: *listen, Handler: root, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 70 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	go func() {

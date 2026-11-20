@@ -16,7 +16,14 @@ catalog/profile/features ──────────────────�
 
 `parser-service` — единственный из двух сервисов, который загружает сайты и обращается к GigaChat. Он не назначает канонические ID и не ранжирует места.
 
-`model-service` не имеет credentials GigaChat и не загружает URL. Он принимает только канонические `activity_id`, признаки семьи/активности и проверенный `ParsedRequest`; применяет eligibility, query matching, score и MMR.
+`model-service` не имеет credentials GigaChat и не загружает URL. Endpoint `/rankings` принимает канонические `activity_id`, признаки семьи/активности и проверенный `ParsedRequest`; применяет eligibility, query matching, score и MMR.
+
+Для первого MVP дополнительно реализован полный `/internal/v1/recommendations`:
+он читает локальный seed-каталог и профиль семьи, строит content scores и возвращает
+ответ backend по OpenAPI. Compose использует этот endpoint вместо mock. GigaChat вызывается через parser-service: backend передаёт проверенные предпочтения
+в `parsed_request`, а при прямом обращении model-service использует `REQUEST_PARSER_URL`.
+Локальный словарь остаётся только для явно настроенного запуска без parser.
+[Потребности, чат и изменения маршрутов](llm_assistant.md). [Описание, ограничения и тест](recommendation_mvp.md).
 
 Backend остаётся оркестратором: хранит каталог и версии, вызывает parser для свободного текста, собирает признаки кандидатов и вызывает model-service. Parser и model-service не пишут напрямую в общую БД.
 
@@ -26,11 +33,13 @@ Backend остаётся оркестратором: хранит каталог
 | --- | --- | --- | --- |
 | parser | GET | `/health` | readiness процесса |
 | parser | POST | `/internal/v1/request-parses` | текст → закрытые claims |
+| parser | POST | `/internal/v1/assistant-intents` | сообщение + контекст → потребности и намерение изменения |
 | parser | POST | `/internal/v1/catalog-extractions` | разрешённый URL → кандидаты каталога с evidence |
 | model | GET | `/health` | readiness процесса |
 | model | POST | `/internal/v1/rankings` | признаки кандидатов + claims → ранжированный список |
+| model | POST | `/internal/v1/recommendations` | анкета и поездка → кандидаты по полному контракту backend |
 
-Все запросы несут `contract_version="1.0"` и `request_id`. В production к ним нужно добавить service authentication/mTLS, tracing и retry policy; Compose публикует порты только на localhost. Контейнеры работают non-root, с read-only root filesystem и политикой перезапуска `unless-stopped`.
+Все запросы несут `contract_version="1.0"` и `request_id`. Модель поддерживает Bearer auth через `ML_API_TOKEN`, тот же токен передаёт backend. Parser-service также проверяет `ML_API_TOKEN`. Для production остаются tracing и политика лимитов запросов; Compose публикует порты только на localhost. Контейнеры работают non-root, с read-only root filesystem и политикой перезапуска `unless-stopped`.
 
 ## Запуск
 
