@@ -1,7 +1,8 @@
 // Экран «Карта» для родителя: маршрут дня по улицам, остановки, удобства рядом.
 
 import { loadMapStyle } from './map-style.js';
-import { loadDay } from './api.js';
+import { onTripChange, today, getSource } from './api.js';
+import { loadPlaces, allPlaces, kindOf, cafeBadges, isFamilyCafe, isDemo, walkMinutes } from './places.js';
 
 const CENTER = [44.0066, 56.3273];   // площадь Минина и Пожарского, [долгота, широта]
 const NEAR_ROUTE_M = 250;            // удобства показываем только в этой полосе вдоль маршрута
@@ -10,6 +11,8 @@ let map = null;
 let day = null;
 let source = null;
 let pins = [];          // маркеры остановок, по порядку
+let startPin = null;
+let mapReady = false;
 let selected = null;    // что открыто в карточке: null — сводка дня
 
 // ---------- Форматирование ----------
@@ -65,7 +68,8 @@ function legsGeoJSON(legs) {
     })),
   };
 }
-const legToStop = stop => day.legs.find(l => l.to.stop_id === stop.stop_id);
+// После пересчёта у остановки может появиться новый переход — берём последний
+const legToStop = stop => [...day.legs].reverse().find(l => l.to.stop_id === stop.stop_id);
 const allRouteCoords = () => day.legs.flatMap(l => l.geometry ? l.geometry.coordinates : []);
 
 function boundsOf(coords) {
@@ -121,7 +125,7 @@ function addKremlin() {
 }
 
 function addRouteLayers() {
-  map.addSource('route', { type: 'geojson', data: legsGeoJSON(day.legs) });
+  map.addSource('route', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   // Мягкая светлая «дорожка» под маршрутом
   map.addLayer({ id: 'route-glow', type: 'line', source: 'route',
     layout: { 'line-join': 'round', 'line-cap': 'round' },
@@ -137,36 +141,54 @@ function addRouteLayers() {
 }
 
 function addPins() {
+  // Перерисовываем с нуля: после отметок и пропусков список остановок меняется
+  pins.forEach(p => p.remove());
+  if (startPin) startPin.remove();
   const start = document.createElement('div');
   start.className = 'start-pin';
   start.textContent = 'Старт';
-  new maplibregl.Marker({ element: start, anchor: 'bottom-left' }).setLngLat(day.start_point.coordinates).addTo(map);
+  startPin = new maplibregl.Marker({ element: start, anchor: 'bottom-left' }).setLngLat(day.start_point.coordinates).addTo(map);
 
   pins = day.stops.map((stop, i) => {
     const el = document.createElement('button');
-    el.className = 'stop-pin';
-    el.textContent = i + 1;
+    const visited = stop.progress === 'visited';
+    el.className = 'stop-pin' + (visited ? ' done' : '');
+    el.textContent = visited ? '✓' : i + 1;
     el.setAttribute('aria-label', `Остановка ${i + 1}: ${stop.title}`);
     el.addEventListener('click', e => { e.stopPropagation(); showStop(i); });
     return new maplibregl.Marker({ element: el }).setLngLat(stop.location.coordinates).addTo(map);
   });
 }
 
-// Удобства: берём из data/amenities.geojson только то, что рядом с маршрутом
-async function addAmenities() {
-  const all = await (await fetch('data/amenities.geojson')).json();
+// Удобства: места из /api/v1/map/places — только то, что рядом с маршрутом
+function amenitiesNearRoute() {
   const route = allRouteCoords().filter((_, i) => i % 3 === 0);   // каждой 3-й точки достаточно
-  const near = all.features
-    .map(f => ({ ...f, properties: { ...f.properties, near_m: Math.round(Math.min(...route.map(p => distanceM(p, f.geometry.coordinates)))) } }))
-    .filter(f => f.properties.near_m <= NEAR_ROUTE_M);
+  if (!route.length) return { type: 'FeatureCollection', features: [] };
+  // Места из /api/v1/map/places → точки для карты; у кафе с детскими фактами — флаг family (подпись на карте)
+  const near = allPlaces()
+    .map(p => ({ p, near_m: Math.round(Math.min(...route.map(r => distanceM(r, p.location.coordinates)))) }))
+    .filter(x => x.near_m <= NEAR_ROUTE_M && kindOf(x.p) !== 'other')
+    .map(({ p, near_m }) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: p.location.coordinates },
+      properties: { place_id: p.place_id, kind: kindOf(p), name: p.name, near_m, family: isFamilyCafe(p) } }));
+  return { type: 'FeatureCollection', features: near };
+}
 
-  map.addSource('amenities', { type: 'geojson', data: { type: 'FeatureCollection', features: near } });
+async function addAmenities() {
+  await loadPlaces();
+  map.addSource('amenities', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   for (const [kind, a] of Object.entries(AMENITIES)) {
     map.addImage('icon-' + kind, makeIcon(a.color, a.shape), { pixelRatio: 2 });
     const id = 'amenity-' + kind;
     // minzoom: на общем виде маршрута значки не показываем — иначе каша; появляются при приближении
     map.addLayer({ id, type: 'symbol', source: 'amenities', filter: ['==', ['get', 'kind'], kind], minzoom: 14.5,
-      layout: { 'icon-image': 'icon-' + kind, 'icon-allow-overlap': true, 'icon-size': ['interpolate', ['linear'], ['zoom'], 13, 0.8, 17, 1.2] } });
+      layout: {
+        'icon-image': 'icon-' + kind, 'icon-allow-overlap': true,
+        'icon-size': ['interpolate', ['linear'], ['zoom'], 13, 0.8, 17, 1.2],
+        // Кафе для детей — с названием прямо на карте, чтобы не протыкивать все точки
+        'text-field': ['case', ['get', 'family'], ['get', 'name'], ''],
+        'text-font': ['Noto Sans Bold'], 'text-size': 12, 'text-offset': [0, 1.3], 'text-anchor': 'top', 'text-optional': true,
+      },
+      paint: { 'text-color': '#7A5200', 'text-halo-color': '#FFFFFF', 'text-halo-width': 2 } });
     map.on('click', id, e => { e.preventDefault(); showAmenity(e.features[0]); });
     map.on('mouseenter', id, () => { map.getCanvas().style.cursor = 'pointer'; });
     map.on('mouseleave', id, () => { map.getCanvas().style.cursor = ''; });
@@ -179,7 +201,7 @@ function resetSelection() {
   map.setFilter('route-active', ['==', ['get', 'leg_id'], '']);
 }
 
-function showSummary() {
+function showSummary({ fit = true } = {}) {
   selected = null;
   resetSelection();
   const t = day.totals;
@@ -198,11 +220,12 @@ function showSummary() {
       <ul>${notes.map(n => `<li>${escapeHtml(n)}</li>`).join('')}</ul>
     </details>
     ${sourceNote()}`;
-  sheetBody.querySelector('[data-act="first"]').onclick = () => showStop(0);
-  showArea(allRouteCoords());
+  // К следующей непройденной остановке
+  sheetBody.querySelector('[data-act="first"]').onclick = () => showStop(Math.max(0, day.stops.findIndex(st => st.progress === 'planned')));
+  if (fit) showArea(allRouteCoords());
 }
 
-function showStop(i) {
+function showStop(i, { fly = true } = {}) {
   selected = i;
   resetSelection();
   const stop = day.stops[i];
@@ -223,33 +246,46 @@ function showStop(i) {
   sheetBody.querySelector('[data-act="go"]').onclick = () => showLeg(leg);
   sheetBody.querySelector('[data-act="prev"]').onclick = () => showStop(i - 1);
   sheetBody.querySelector('[data-act="next"]').onclick = () => showStop(i + 1);
-  sheetBody.querySelector('[data-act="all"]').onclick = showSummary;
+  sheetBody.querySelector('[data-act="all"]').onclick = () => showSummary();
   map.resize();
-  map.flyTo({ center: stop.location.coordinates, zoom: Math.max(map.getZoom(), 15.5), duration: 600 });
+  if (fly) map.flyTo({ center: stop.location.coordinates, zoom: Math.max(map.getZoom(), 15.5), duration: 600 });
 }
 
 // Карточка удобства — как «Туалет · 3 мин» на макете
 function showAmenity(f) {
+  const place = allPlaces().find(p => p.place_id === f.properties.place_id);
+  if (place) showPlace(place, f.properties.near_m);
+}
+
+// Карточка места: как «Туалет · 3 мин» на макете + детские факты у кафе
+function showPlace(place, nearM) {
   selected = 'amenity';
   resetSelection();
-  const p = f.properties;
-  const a = AMENITIES[p.kind];
-  const walkMin = Math.max(1, Math.round(p.near_m / 50));   // ~3 км/ч с детьми
-  const details = [
-    p.opening_hours && 'Часы: ' + p.opening_hours,
-    p.fee === 'no' && 'Бесплатно', p.fee === 'yes' && 'Платно',
-    p.changing_table === 'yes' && 'Есть пеленальный стол',
-  ].filter(Boolean);
+  const kind = kindOf(place);
+  const badges = cafeBadges(place).map(b =>
+    `<span class="badge ${b.state}">${b.state === 'yes' ? '✓ ' : b.state === 'no' ? '✕ ' : ''}${b.text}${b.state === 'unknown' ? ': нет данных' : ''}</span>`);
+  if (isDemo(place)) badges.push('<span class="badge demo">демо-данные</span>');
+  const label = { toilets: 'Туалет', playground: 'Детская площадка', cafe: 'Кафе' }[kind];
   sheetBody.innerHTML = `
     <div class="card plain">
-      <h2><i class="dot ${p.kind}"></i>${escapeHtml(p.name || a.label)} · ~${walkMin} мин от маршрута</h2>
-      ${details.length ? `<p>${details.map(escapeHtml).join(' · ')}</p>` : ''}
-      <p class="small">По данным OpenStreetMap, на месте не проверено</p>
+      <h2><i class="dot ${kind}"></i>${escapeHtml(place.name)}${nearM !== undefined ? ` · ~${walkMinutes(nearM)} мин от маршрута` : ''}</h2>
+      ${place.name !== label ? `<p>${label}</p>` : ''}
+      ${badges.length ? `<div class="badges">${badges.join('')}</div>` : ''}
+      <p class="small">${isDemo(place) ? 'Детские факты — демо-заполнение, не проверены' : 'По данным OpenStreetMap, на месте не проверено'}</p>
     </div>
     <button class="btn link" data-act="all">Назад к маршруту</button>`;
-  sheetBody.querySelector('[data-act="all"]').onclick = showSummary;
+  sheetBody.querySelector('[data-act="all"]').onclick = () => showSummary();
   map.resize();
-  map.flyTo({ center: f.geometry.coordinates, zoom: Math.max(map.getZoom(), 16), duration: 500 });
+  map.flyTo({ center: place.location.coordinates, zoom: Math.max(map.getZoom(), 16), duration: 500 });
+}
+
+// Открыть место из «Помощника»: включить его слой и показать карточку
+export function focusPlace(place) {
+  if (!mapReady) return;
+  const kind = kindOf(place);
+  const chip = document.querySelector(`.chip[data-layer="${kind}"]`);
+  if (chip && chip.getAttribute('aria-pressed') !== 'true') chip.click();
+  showPlace(place);
 }
 
 // «Как дойти»: выделяем путь к остановке и показываем его целиком
@@ -312,12 +348,26 @@ function bindMapButtons() {
   });
 }
 
-// ---------- Запуск ----------
-export async function initMap(tripInput) {
-  const [style, loaded] = await Promise.all([loadMapStyle(), loadDay(tripInput)]);
-  day = loaded.day;
-  source = loaded.source;
+// ---------- Перерисовка при изменении поездки ----------
+function render({ fit }) {
+  day = today();
+  source = getSource();
+  if (!day) return;
+  // Кнопка дня — по дате поездки (Пт, Сб…), а не зашитая «Сб»
+  const dayBtn = document.querySelector('.days button');
+  dayBtn.textContent = new Date(day.date + 'T12:00:00').toLocaleDateString('ru-RU', { weekday: 'short' }).replace(/^./, c => c.toUpperCase());
+  if (!mapReady) return;
+  map.getSource('route').setData(legsGeoJSON(day.legs));
+  map.getSource('amenities').setData(amenitiesNearRoute());
+  addPins();
+  // Первый показ — подгоняем карту под маршрут; при отметках камеру не дёргаем
+  if (fit || selected === null) showSummary({ fit });
+  else if (typeof selected === 'number' && day.stops[selected]) showStop(selected, { fly: false });
+}
 
+// ---------- Запуск ----------
+export async function initMap() {
+  const style = await loadMapStyle();
   map = new maplibregl.Map({
     container: 'map', style, center: CENTER, zoom: 14, pitch: 35,
     attributionControl: false,   // источники подписаны текстом в карточке
@@ -328,12 +378,13 @@ export async function initMap(tripInput) {
     await addAmenities();
     // Нажатие на пустое место карты — назад к сводке. Регистрируем после слоёв удобств,
     // чтобы нажатие на значок (он вызывает preventDefault) сюда не доходило.
-    map.on('click', e => { if (selected !== null && !e.defaultPrevented) showSummary(); });
-    addPins();
+    map.on('click', e => { if (selected !== null && !e.defaultPrevented) showSummary({ fit: true }); });
     bindChips();
     bindMapButtons();
-    showSummary();
+    mapReady = true;
+    render({ fit: true });
   });
+  onTripChange(() => render({ fit: false }));
 }
 
 // Когда возвращаемся на вкладку «Карта», карте нужно пересчитать размер

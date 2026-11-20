@@ -11,4 +11,6 @@ FROM gcr.io/distroless/static-debian12
 # относительно рабочей папки, поэтому ./data монтируется в /app/data.
 WORKDIR /app
 COPY --from=build /out/backend /usr/local/bin/backend
-ENTRYPOINT ["backend", "-demo-catalog"]
+ENTRYPOINT ["backend"]
+# Режим по умолчанию — синтетический каталог; compose.yaml переключает на ML (мок или настоящий)
+CMD ["-demo-catalog"]

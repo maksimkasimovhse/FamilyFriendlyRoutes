@@ -51,7 +51,35 @@
   </section>
 
   <!-- ===== Остальные вкладки — пока заглушки ===== -->
-  <section class="screen placeholder" data-tab="today" hidden><h1>Сегодня</h1><p>Скоро здесь будет план на сегодня.</p></section>
+  <!-- ===== Экран «Сегодня»: что сейчас, что дальше, что пройдено ===== -->
+  <section class="screen today" data-tab="today" hidden>
+    <header class="today-top">
+      <p class="today-sub" id="today-sub"></p>
+      <h1>Сегодня</h1>
+      <div class="beads" id="today-stats"></div>
+    </header>
+    <div class="today-scroll">
+      <div id="today-now"></div>
+      <ol class="timeline" id="today-list"></ol>
+      <p class="source" id="today-source"></p>
+    </div>
+    <div class="today-bottom">
+      <button class="btn need" id="need-now">＋ Нужно сейчас</button>
+    </div>
+
+    <!-- Подтверждение «Пропустить»: что изменится в маршруте -->
+    <div class="confirm" id="skip-confirm" hidden>
+      <div class="confirm-card">
+        <h2 id="skip-title"></h2>
+        <ul id="skip-diff"></ul>
+        <div class="row">
+          <button class="btn alt" id="skip-cancel">Оставить</button>
+          <button class="btn main" id="skip-ok">Пропустить</button>
+        </div>
+      </div>
+    </div>
+    <p class="toast" id="today-toast" hidden></p>
+  </section>
   <!-- ===== Детский режим: «Тропа Маши» — поверх приложения, без нижнего меню ===== -->
   <section class="kid-mode" id="kid-mode" hidden>
     <header class="kid-bar">
@@ -183,15 +211,30 @@
       </div>
     </div>
   </section>
-  <section class="screen placeholder" data-tab="helper" hidden><h1>Помощник</h1><p>Скоро.</p></section>
+  <!-- ===== Помощник: ИИ-чат, перестраивает маршрут под семью ===== -->
+  <section class="screen helper" data-tab="helper" hidden>
+    <header class="today-top chat-top">
+      <p class="today-sub">Перестрою маршрут под вас</p>
+      <h1>Помощник</h1>
+      <span class="demo-flag" id="chat-mode" hidden>демо: ответы по правилам</span>
+    </header>
+    <div class="chat" id="chat" aria-live="polite"></div>
+    <div class="chat-suggest" id="chat-suggest"></div>
+    <form class="chat-input" id="chat-form">
+      <input id="chat-text" type="text" autocomplete="off" placeholder="Например: ребёнок устал" aria-label="Сообщение помощнику">
+      <button class="send" aria-label="Отправить">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 12l16-8-6 16-2-6z" fill="currentColor"/></svg>
+      </button>
+    </form>
+  </section>
   <section class="screen placeholder" data-tab="album" hidden><h1>Альбом</h1><p>Скоро.</p></section>
 
   <!-- ===== Нижнее меню ===== -->
   <nav class="tabbar" aria-label="Разделы">
     <button data-tab="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c3-1 4-5 7-7s5-1 7-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="5" cy="19" r="2" fill="currentColor"/><circle cx="19" cy="6" r="2" fill="currentColor"/></svg>Сегодня</button>
+    <button data-tab="helper"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 7.5l1 2.2 2.2 1-2.2 1-1 2.2-1-2.2-2.2-1 2.2-1z" fill="currentColor"/></svg>Помощник</button>
     <button data-tab="map" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Карта</button>
     <button data-tab="kid" class="kid"><span class="kid-badge">М</span>Маша</button>
-    <button data-tab="helper"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Помощник</button>
     <button data-tab="album"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 16l5-5 4 4 3-3 4 4" fill="none" stroke="currentColor" stroke-width="2"/></svg>Альбом</button>
   </nav>
 </div>

@@ -317,3 +317,26 @@ export async function initKid(options) {
   $('res-save').onclick = () => saveStory().catch(err => alert('Не получилось сохранить: ' + err.message));
   addEventListener('resize', () => { if (!$('kid-mode').hidden) renderTrail(); });
 }
+
+// Сводка для экрана родителя «Сегодня»: сколько точек и окон осталось на тропе ребёнка
+export function kidSummary() {
+  if (!route) return null;
+  const left = route.stops.filter(s => !isDone(s));
+  return { left: left.length, windowsLeft: left.filter(s => s.type === 'window').length };
+}
+
+// Тропа ребёнка идёт в том же порядке, что маршрут родителя с бекенда.
+// activityIds — activity_id остановок дня (совпадают с id в kid-route.json).
+export function syncKidOrder(activityIds) {
+  if (!route) return;
+  const pos = id => { const i = activityIds.indexOf(id); return i === -1 ? 999 : i; };
+  route.stops.sort((a, b) => pos(a.id) - pos(b.id));
+  if (!$('kid-mode').hidden) renderTrail();
+}
+
+// Что у ребёнка на этой остановке — для строки в ленте «Сегодня»
+export function kidStopInfo(activityId) {
+  const s = route && route.stops.find(x => x.id === activityId);
+  if (!s) return null;
+  return { type: s.type, years: s.years || null, done: isDone(s), photo: s.photo ? s.photo.url : null };
+}

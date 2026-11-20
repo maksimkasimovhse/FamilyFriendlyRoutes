@@ -69,11 +69,22 @@ services:
       context: .
       dockerfile: infra/docker/backend.Dockerfile
     network_mode: host
+    # Места для маршрута берёт у ML по контракту /internal/v1/recommendations.
+    # Пока у Вильдана нет сервиса — у мока (mock-api). Вернуть синтетику: command: ["-demo-catalog"]
+    command: ["-ml-url", "http://127.0.0.1:8090/internal/v1/recommendations", "-catalog-version", "mock-ml-v1"]
     volumes:
       - ./data:/app/data
     depends_on:
       valhalla:
         condition: service_healthy
+      mock-api:
+        condition: service_started
+    restart: unless-stopped
+
+  # МОК по контрактам для демо: рекомендации ML + /api/v1/map/places. Только 127.0.0.1:8090.
+  mock-api:
+    build: ./infra/mock-api
+    network_mode: host
     restart: unless-stopped
 
   # Фронтенд (обычные HTML/CSS/JS из ./frontend) + прокси /api на бекенд.

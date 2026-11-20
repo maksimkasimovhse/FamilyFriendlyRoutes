@@ -1,0 +1,12 @@
+{
+  "about": "МОК каталога для ML-контракта /internal/v1/recommendations. Места для демо-маршрута: окна в прошлое (точки съёмки из PastVu) и остановки с детскими заданиями (координаты из датасета кейса). ID совпадают с frontend/data/kid-route.json. Часы доступности — «весь день»: это открытые городские места (улицы, площади, лестница), а не учреждения. Заменить ответом настоящего ML-сервиса.",
+  "catalog_version": "mock-ml-v1",
+  "items": [
+    { "id": "win_pokrovka",          "name": "Большая Покровская улица",      "point": [43.99909, 56.320844],  "category": "landmark", "duration_sec": 1200 },
+    { "id": "win_minin",             "name": "Площадь Минина и Пожарского",   "point": [44.005942, 56.32705],  "category": "landmark", "duration_sec": 1200 },
+    { "id": "task_dmitrievskaya",    "name": "Дмитриевская башня",            "point": [44.005695, 56.32711],  "category": "landmark", "duration_sec": 900 },
+    { "id": "win_kremlin",           "name": "Кремль: смотровая площадка",    "point": [44.001268, 56.329068], "category": "landmark", "duration_sec": 1200 },
+    { "id": "task_chkalov_monument", "name": "Памятник Валерию Чкалову",      "point": [44.009444, 56.329995], "category": "landmark", "duration_sec": 900 },
+    { "id": "win_chkalov",           "name": "Чкаловская лестница",           "point": [44.009457, 56.330379], "category": "landmark", "duration_sec": 1200 }
+  ]
+}
