@@ -1,0 +1,41 @@
+priority,place_id,title,category,address,official_url,missing_fields
+medium,place:main:43,Дмитриевская башня,Достопримечательности,"Нижний Новгород, Кремль, 6А",,official_url|opening_hours|duration|age_fit
+medium,place:main:47,Стены кремля,Достопримечательности,"Нижний Новгород, Кремль, 6",,official_url|opening_hours|duration|age_fit
+medium,place:main:94,Фонтан на пл. Минина,Парки и места отдыха,"Нижний Новгород, площадь Минина и Пожарского",,official_url|opening_hours|duration|age_fit
+medium,place:main:45,Площадь Минина и Пожарского,Достопримечательности,"Нижний Новгород, площадь Минина и Пожарского",,official_url|opening_hours|duration|age_fit
+medium,place:main:126,Памятник Козьме Минину,Памятники,"Нижний Новгород, площадь Минина и Пожарского",,official_url|opening_hours|duration|age_fit
+high,place:main:109,Арсенал,Музеи и выставочные центры,"Нижний Новгород, Кремль, 6",,official_url|opening_hours|duration|age_fit
+medium,place:main:46,Гимназия №1,Достопримечательности,"Нижний Новгород, площадь Минина и Пожарского, 5",,official_url|opening_hours|duration|age_fit
+medium,place:main:44,Спасская колокольня,Достопримечательности,"Нижний Новгород, Кремль",,official_url|opening_hours|duration|age_fit
+medium,place:main:21,Макет старого Нижнего Новгорода,Достопримечательности,"Нижний Новгород, Кремль",,official_url|opening_hours|duration|age_fit
+medium,place:main:42,Нижегородский кремль,Достопримечательности,"Нижний Новгород, Кремль",,official_url|opening_hours|duration|age_fit
+medium,place:main:98,Никольская башня,Достопримечательности,"Нижний Новгород, Кремль, 11А",,official_url|opening_hours|duration|age_fit
+high,place:main:112,Нижегородский государственный художественный музей,Музеи и выставочные центры,"Нижний Новгород, Кремль, 3",,official_url|opening_hours|duration|age_fit
+high,place:main:114,Центр Рекорд,Музеи и выставочные центры,"Нижний Новгород, Алексеевская улица, 7",,official_url|opening_hours|duration|age_fit
+high,place:main:78,Филармония имени М. Ростроповича,Театры,"Нижний Новгород, Кремль, 2",,official_url|opening_hours|duration|age_fit
+medium,place:main:123,Памятник Козе-Дерезе,Памятники,"Нижний Новгород, Большая Покровская улица",,official_url|opening_hours|duration|age_fit
+high,place:main:75,Театр драмы им. М. Горького,Театры,"Нижний Новгород, Большая Покровская улица, 13",,official_url|opening_hours|duration|age_fit
+medium,place:main:125,Памятник Евгению Евстигнееву,Памятники,"Нижний Новгород, Большая Покровская улица",,official_url|opening_hours|duration|age_fit
+medium,place:main:131,Памятник Валерию Чкалову,Памятники,"Нижний Новгород, Георгиевский съезд",,official_url|opening_hours|duration|age_fit
+high,place:main:116,Дом Архитектора,Музеи и выставочные центры,"Нижний Новгород, Верхне-Волжская набережная, 2Б",,official_url|opening_hours|duration|age_fit
+medium,place:main:228,Детский парк им. Я.М. Свердлова,Парки и места отдыха,"Нижний Новгород, ул. Пискунова, 40, корп. 1",,official_url|opening_hours|duration|age_fit
+medium,place:main:29,Александровский сад,Парки и места отдыха,"Нижний Новгород, Александровский сад",,official_url|opening_hours|duration|age_fit
+medium,place:main:57,Памятник Петру 1,Памятники,"Нижний Новгород, Нижне-Волжская набережная",,official_url|opening_hours|duration|age_fit
+high,place:main:118,Галерея 9Б,Музеи и выставочные центры,"Нижний Новгород, Октябрьская улица, 9Б",,official_url|opening_hours|duration|age_fit
+high,place:main:120,Музей Н. А. Добролюбова,Музеи и выставочные центры,"Нижний Новгород, набережная Лыковая Дамба, 2А",,official_url|opening_hours|duration|age_fit
+medium,place:main:84,Сквер Свердлова,Парки и места отдыха,"Нижний Новгород, сквер имени Свердлова",,official_url|opening_hours|duration|age_fit
+high,place:main:117,Студия 1221,Музеи и выставочные центры,"Нижний Новгород, Почаинская улица, 17И",,official_url|opening_hours|duration|age_fit
+high,place:main:110,ЦЕХ,Музеи и выставочные центры,"Нижний Новгород, Варварская улица, 32",,official_url|opening_hours|duration|age_fit
+high,place:main:73,Театр «Комедiя»,Театры,"Нижний Новгород, Грузинская улица, 23",,official_url|opening_hours|duration|age_fit
+medium,place:main:13,Верхне-Волжская набережная,Набережные,"Нижний Новгород, Верхне-Волжская набережная",,official_url|opening_hours|duration|age_fit
+medium,place:main:252,"МБУ ДО ""Детская школа искусств № 9 им. А.Д.Улыбышева""",Культурно-развлекательные организации,"Большая Покровская, 33",,official_url|opening_hours|duration|age_fit
+medium,place:main:15,Нижне-Волжская набережная,Набережные,"Нижний Новгород, Нижне-Волжская набережная",,official_url|opening_hours|duration|age_fit
+medium,place:main:254,"МБУ ДО ""Детская художественная школа №1""",Культурно-развлекательные организации,"Нижневолжская набережная, 14",,official_url|opening_hours|duration|age_fit
+medium,place:main:89,Площадь Маркина,Парки и места отдыха,"Нижний Новгород, площадь Маркина",,official_url|opening_hours|duration|age_fit
+medium,place:main:224,Кинотеатр «Орленок»,Культурно-развлекательные организации,"Нижний Новгород, Большая Покровская ул., 39А",,official_url|opening_hours|duration|age_fit
+high,place:main:64,Театр кукол,Театры,"Нижний Новгород, Большая Покровская улица, 39Б",,official_url|opening_hours|duration|age_fit
+medium,place:main:14,Набережная Федоровского,Набережные,"Нижний Новгород, набережная Федоровского",,official_url|opening_hours|duration|age_fit
+medium,place:main:82,Парк Кулибина,Парки и места отдыха,"Нижний Новгород, улица Максима Горького, 143",,official_url|opening_hours|duration|age_fit
+medium,place:main:259,"МБУ ДО ""Детская школа искусств им. Д.Д. Шостаковича""",Культурно-развлекательные организации,"ул. Заломова, д.20",,official_url|opening_hours|duration|age_fit
+medium,place:main:11,Окская набережная — Общественное пространство «Стрелка»,Набережные,"Нижний Новгород, мыс Стрелка",,official_url|opening_hours|duration|age_fit
+medium,place:main:230,Нижегородский планетарий им. Г.М. Гречко,Культурно-развлекательные организации,"Нижний Новгород, Революционная ул., 20",,official_url|opening_hours|duration|age_fit

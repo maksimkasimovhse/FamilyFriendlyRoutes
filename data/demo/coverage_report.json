@@ -1,0 +1,77 @@
+{
+  "category_counts": {
+    "Достопримечательности": 8,
+    "Культурно-развлекательные организации": 5,
+    "Музеи и выставочные центры": 8,
+    "Набережные": 4,
+    "Памятники": 5,
+    "Парки и места отдыха": 6,
+    "Театры": 4
+  },
+  "field_coverage": {
+    "age_fit": {
+      "known": 0,
+      "percent": 0.0,
+      "total": 40
+    },
+    "coordinates": {
+      "known": 40,
+      "percent": 100.0,
+      "total": 40
+    },
+    "description": {
+      "known": 40,
+      "percent": 100.0,
+      "total": 40
+    },
+    "duration": {
+      "known": 0,
+      "percent": 0.0,
+      "total": 40
+    },
+    "formats": {
+      "known": 40,
+      "percent": 100.0,
+      "total": 40
+    },
+    "official_url": {
+      "known": 0,
+      "percent": 0.0,
+      "total": 40
+    },
+    "opening_hours": {
+      "known": 0,
+      "percent": 0.0,
+      "total": 40
+    },
+    "topics": {
+      "known": 40,
+      "percent": 100.0,
+      "total": 40
+    }
+  },
+  "next_enrichment_order": [
+    "official_url",
+    "opening_hours",
+    "duration",
+    "age_fit"
+  ],
+  "record_count": 40,
+  "schema_version": "demo-coverage-v1",
+  "topic_counts": {
+    "architecture": 19,
+    "art": 16,
+    "crafts": 1,
+    "history": 25,
+    "literature": 2,
+    "music": 6,
+    "nature": 17,
+    "plants": 1,
+    "science": 1,
+    "space": 1,
+    "sport": 3,
+    "technology": 3,
+    "theatre": 10,
+    "transport": 2
+  }
+}
