@@ -1,6 +1,7 @@
 data/raw/
 data/processed/
 data/routing/
+# Файловое хранилище backend: сессии, CSRF-токены, аккаунты — НЕ публиковать
 data/backend/
 __pycache__/
 *.pyc
