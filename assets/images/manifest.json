@@ -1,0 +1,1394 @@
+{
+ "10": {
+  "alt": "Волжская набережная",
+  "card": "/media/81/e9/81e9a79ed5638d52f04942e2ff23cb63f39d2428eebd4e3ad44bbbc68b78cd0c_card.webp",
+  "full": "/media/81/e9/81e9a79ed5638d52f04942e2ff23cb63f39d2428eebd4e3ad44bbbc68b78cd0c_full.webp",
+  "height": 632,
+  "thumb": "/media/81/e9/81e9a79ed5638d52f04942e2ff23cb63f39d2428eebd4e3ad44bbbc68b78cd0c_thumb.webp",
+  "width": 1200
+ },
+ "100": {
+  "alt": "Часовая башня",
+  "card": "/media/47/ab/47abb8bd253b4cd00936fb5810f4e4a36c629a20fac63c192a390e4aad504e9b_card.webp",
+  "full": "/media/47/ab/47abb8bd253b4cd00936fb5810f4e4a36c629a20fac63c192a390e4aad504e9b_full.webp",
+  "height": 800,
+  "thumb": "/media/47/ab/47abb8bd253b4cd00936fb5810f4e4a36c629a20fac63c192a390e4aad504e9b_thumb.webp",
+  "width": 1200
+ },
+ "101": {
+  "alt": "Ивановская башня",
+  "card": "/media/77/65/776535ef3ca49411d68086bf95b54a57926e2a3fc4c7d07bbce1f4c1b899cc9e_card.webp",
+  "full": "/media/77/65/776535ef3ca49411d68086bf95b54a57926e2a3fc4c7d07bbce1f4c1b899cc9e_full.webp",
+  "height": 700,
+  "thumb": "/media/77/65/776535ef3ca49411d68086bf95b54a57926e2a3fc4c7d07bbce1f4c1b899cc9e_thumb.webp",
+  "width": 980
+ },
+ "102": {
+  "alt": "Театральная лестница",
+  "card": "/media/25/58/2558ea9da3a80f0bb32c1ec812c6ed0fc4d8ade2939993a02bee0dd84ca78aab_card.webp",
+  "full": "/media/25/58/2558ea9da3a80f0bb32c1ec812c6ed0fc4d8ade2939993a02bee0dd84ca78aab_full.webp",
+  "height": 800,
+  "thumb": "/media/25/58/2558ea9da3a80f0bb32c1ec812c6ed0fc4d8ade2939993a02bee0dd84ca78aab_thumb.webp",
+  "width": 1400
+ },
+ "103": {
+  "alt": "Ночлежный дом Бугрова",
+  "card": "/media/0e/5a/0e5a9c73ff50d3fa41bd2b0463484ae17def25c82c17e190b10aa17bf52b9bea_card.webp",
+  "full": "/media/0e/5a/0e5a9c73ff50d3fa41bd2b0463484ae17def25c82c17e190b10aa17bf52b9bea_full.webp",
+  "height": 1200,
+  "thumb": "/media/0e/5a/0e5a9c73ff50d3fa41bd2b0463484ae17def25c82c17e190b10aa17bf52b9bea_thumb.webp",
+  "width": 1600
+ },
+ "104": {
+  "alt": "Армянская апостольская церковь «Сурб Аменапркич»",
+  "card": "/media/42/76/427644fbc3d322bdf36cca81aef1961bda7e1687b0d483d34df884cdcd05a906_card.webp",
+  "full": "/media/42/76/427644fbc3d322bdf36cca81aef1961bda7e1687b0d483d34df884cdcd05a906_full.webp",
+  "height": 719,
+  "thumb": "/media/42/76/427644fbc3d322bdf36cca81aef1961bda7e1687b0d483d34df884cdcd05a906_thumb.webp",
+  "width": 1280
+ },
+ "105": {
+  "alt": "Церковь Христиан Адвентистов Седьмого Дня",
+  "card": "/media/d3/e0/d3e03091cd12484660325a6973838356c702d40cf7af71a26a72f94d7d123d5c_card.webp",
+  "full": "/media/d3/e0/d3e03091cd12484660325a6973838356c702d40cf7af71a26a72f94d7d123d5c_full.webp",
+  "height": 720,
+  "thumb": "/media/d3/e0/d3e03091cd12484660325a6973838356c702d40cf7af71a26a72f94d7d123d5c_thumb.webp",
+  "width": 960
+ },
+ "106": {
+  "alt": "Судейская вышка",
+  "card": "/media/ee/a0/eea0b00d1a57700d19d0e2bff64d7ebe8b33f2e3e1e39d508bd8628cfd506483_card.webp",
+  "full": "/media/ee/a0/eea0b00d1a57700d19d0e2bff64d7ebe8b33f2e3e1e39d508bd8628cfd506483_full.webp",
+  "height": 1068,
+  "thumb": "/media/ee/a0/eea0b00d1a57700d19d0e2bff64d7ebe8b33f2e3e1e39d508bd8628cfd506483_thumb.webp",
+  "width": 1600
+ },
+ "107": {
+  "alt": "Дом Сироткина",
+  "card": "/media/07/a9/07a97c208aa88ac5ea3cc45636c8a9e31c743839566f6389382aaaf275d3720c_card.webp",
+  "full": "/media/07/a9/07a97c208aa88ac5ea3cc45636c8a9e31c743839566f6389382aaaf275d3720c_full.webp",
+  "height": 2848,
+  "thumb": "/media/07/a9/07a97c208aa88ac5ea3cc45636c8a9e31c743839566f6389382aaaf275d3720c_thumb.webp",
+  "width": 4272
+ },
+ "108": {
+  "alt": "Шуховская башня на Оке",
+  "card": "/media/0c/f2/0cf2d59fb1c30640d0782260c6b403df45c0ece81b1d62300a3331753418818e_card.webp",
+  "full": "/media/0c/f2/0cf2d59fb1c30640d0782260c6b403df45c0ece81b1d62300a3331753418818e_full.webp",
+  "height": 720,
+  "thumb": "/media/0c/f2/0cf2d59fb1c30640d0782260c6b403df45c0ece81b1d62300a3331753418818e_thumb.webp",
+  "width": 960
+ },
+ "109": {
+  "alt": "Арсенал",
+  "card": "/media/73/b9/73b92909cd87c547a84fde5042b937d406045debecc53a54fd08f4aa19e88ca6_card.webp",
+  "full": "/media/73/b9/73b92909cd87c547a84fde5042b937d406045debecc53a54fd08f4aa19e88ca6_full.webp",
+  "height": 800,
+  "thumb": "/media/73/b9/73b92909cd87c547a84fde5042b937d406045debecc53a54fd08f4aa19e88ca6_thumb.webp",
+  "width": 1200
+ },
+ "11": {
+  "alt": "Окская набережная — Общественное пространство «Стрелка»",
+  "card": "/media/ab/fd/abfd18fe5852441405a97088efced28ffcd68ca92990b164f7ae56158a81a826_card.webp",
+  "full": "/media/ab/fd/abfd18fe5852441405a97088efced28ffcd68ca92990b164f7ae56158a81a826_full.webp",
+  "height": 959,
+  "thumb": "/media/ab/fd/abfd18fe5852441405a97088efced28ffcd68ca92990b164f7ae56158a81a826_thumb.webp",
+  "width": 1280
+ },
+ "110": {
+  "alt": "ЦЕХ",
+  "card": "/media/81/44/8144a43835a1b95bca1787d32496f305bfd2e3d8e20f04c28f4d2d29d7d9704c_card.webp",
+  "full": "/media/81/44/8144a43835a1b95bca1787d32496f305bfd2e3d8e20f04c28f4d2d29d7d9704c_full.webp",
+  "height": 3000,
+  "thumb": "/media/81/44/8144a43835a1b95bca1787d32496f305bfd2e3d8e20f04c28f4d2d29d7d9704c_thumb.webp",
+  "width": 4500
+ },
+ "111": {
+  "alt": "Домик Каширина",
+  "card": "/media/ff/08/ff087548738532cd17de9212ba7333377be51aa56bc47d0d2b155460ec1c74f2_card.webp",
+  "full": "/media/ff/08/ff087548738532cd17de9212ba7333377be51aa56bc47d0d2b155460ec1c74f2_full.webp",
+  "height": 800,
+  "thumb": "/media/ff/08/ff087548738532cd17de9212ba7333377be51aa56bc47d0d2b155460ec1c74f2_thumb.webp",
+  "width": 1200
+ },
+ "112": {
+  "alt": "Нижегородский государственный художественный музей",
+  "card": "/media/9d/73/9d73c5fd3b7d423f85d43306f81f6a199651c441b0c60811441543c0599152f8_card.webp",
+  "full": "/media/9d/73/9d73c5fd3b7d423f85d43306f81f6a199651c441b0c60811441543c0599152f8_full.webp",
+  "height": 720,
+  "thumb": "/media/9d/73/9d73c5fd3b7d423f85d43306f81f6a199651c441b0c60811441543c0599152f8_thumb.webp",
+  "width": 1280
+ },
+ "113": {
+  "alt": "Музей Паровозы России",
+  "card": "/media/b0/09/b009a578b685e75bafa5b950cb81b414d6e21397fdda9d89ef3e5a27f781305a_card.webp",
+  "full": "/media/b0/09/b009a578b685e75bafa5b950cb81b414d6e21397fdda9d89ef3e5a27f781305a_full.webp",
+  "height": 730,
+  "thumb": "/media/b0/09/b009a578b685e75bafa5b950cb81b414d6e21397fdda9d89ef3e5a27f781305a_thumb.webp",
+  "width": 1200
+ },
+ "114": {
+  "alt": "Центр Рекорд",
+  "card": "/media/f7/9b/f79b99487464791db54bbc73d13bf185e6f71cc7dc64a8ed25b0ac18f4bc5128_card.webp",
+  "full": "/media/f7/9b/f79b99487464791db54bbc73d13bf185e6f71cc7dc64a8ed25b0ac18f4bc5128_full.webp",
+  "height": 1440,
+  "thumb": "/media/f7/9b/f79b99487464791db54bbc73d13bf185e6f71cc7dc64a8ed25b0ac18f4bc5128_thumb.webp",
+  "width": 2560
+ },
+ "115": {
+  "alt": "Центр Река-река",
+  "card": "/media/d7/79/d7795899ae28baa7387464282e2c4dc20e3ef71c5793b093d2309b934e949ed4_card.webp",
+  "full": "/media/d7/79/d7795899ae28baa7387464282e2c4dc20e3ef71c5793b093d2309b934e949ed4_full.webp",
+  "height": 720,
+  "thumb": "/media/d7/79/d7795899ae28baa7387464282e2c4dc20e3ef71c5793b093d2309b934e949ed4_thumb.webp",
+  "width": 960
+ },
+ "116": {
+  "alt": "Дом Архитектора",
+  "card": "/media/da/38/da3821377d272a5170627121c7606536ea807748a0e1d8e7fa91036c61c60309_card.webp",
+  "full": "/media/da/38/da3821377d272a5170627121c7606536ea807748a0e1d8e7fa91036c61c60309_full.webp",
+  "height": 624,
+  "thumb": "/media/da/38/da3821377d272a5170627121c7606536ea807748a0e1d8e7fa91036c61c60309_thumb.webp",
+  "width": 900
+ },
+ "117": {
+  "alt": "Студия 1221",
+  "card": "/media/c2/a6/c2a6f8769f31cd307abe7424963c373bd67a2ae44a888c491b93f74042a86937_card.webp",
+  "full": "/media/c2/a6/c2a6f8769f31cd307abe7424963c373bd67a2ae44a888c491b93f74042a86937_full.webp",
+  "height": 853,
+  "thumb": "/media/c2/a6/c2a6f8769f31cd307abe7424963c373bd67a2ae44a888c491b93f74042a86937_thumb.webp",
+  "width": 1280
+ },
+ "118": {
+  "alt": "Галерея 9Б",
+  "card": "/media/d6/fb/d6fb7740fb0a7b331373fdb362703b44df29c247c55b3f6c9cc8930654180959_card.webp",
+  "full": "/media/d6/fb/d6fb7740fb0a7b331373fdb362703b44df29c247c55b3f6c9cc8930654180959_full.webp",
+  "height": 576,
+  "thumb": "/media/d6/fb/d6fb7740fb0a7b331373fdb362703b44df29c247c55b3f6c9cc8930654180959_thumb.webp",
+  "width": 1024
+ },
+ "119": {
+  "alt": "Терминал А",
+  "card": "/media/41/09/41097962128f5c4b26ccb6bda35586c4654b9b7e7b36d7bf34ce9eaef8cef3a4_card.webp",
+  "full": "/media/41/09/41097962128f5c4b26ccb6bda35586c4654b9b7e7b36d7bf34ce9eaef8cef3a4_full.webp",
+  "height": 853,
+  "thumb": "/media/41/09/41097962128f5c4b26ccb6bda35586c4654b9b7e7b36d7bf34ce9eaef8cef3a4_thumb.webp",
+  "width": 1280
+ },
+ "12": {
+  "alt": "Набережная Гребного канала",
+  "card": "/media/63/62/6362400a1811d916c30e353f7d2ef14b841cc52492bd476ef4ed0b0fde7e4d60_card.webp",
+  "full": "/media/63/62/6362400a1811d916c30e353f7d2ef14b841cc52492bd476ef4ed0b0fde7e4d60_full.webp",
+  "height": 683,
+  "thumb": "/media/63/62/6362400a1811d916c30e353f7d2ef14b841cc52492bd476ef4ed0b0fde7e4d60_thumb.webp",
+  "width": 1280
+ },
+ "120": {
+  "alt": "Музей Н. А. Добролюбова",
+  "card": "/media/67/0c/670c01ac5e28ab35fec6ad62aa521c45d5c88e85ad0c0770ccab7d7c38bbf133_card.webp",
+  "full": "/media/67/0c/670c01ac5e28ab35fec6ad62aa521c45d5c88e85ad0c0770ccab7d7c38bbf133_full.webp",
+  "height": 600,
+  "thumb": "/media/67/0c/670c01ac5e28ab35fec6ad62aa521c45d5c88e85ad0c0770ccab7d7c38bbf133_thumb.webp",
+  "width": 994
+ },
+ "121": {
+  "alt": "Музей Горького",
+  "card": "/media/cb/f0/cbf040b060af881f294dc923f73d23416b603d3ade946ee2d11830d02ce312d5_card.webp",
+  "full": "/media/cb/f0/cbf040b060af881f294dc923f73d23416b603d3ade946ee2d11830d02ce312d5_full.webp",
+  "height": 1365,
+  "thumb": "/media/cb/f0/cbf040b060af881f294dc923f73d23416b603d3ade946ee2d11830d02ce312d5_thumb.webp",
+  "width": 2048
+ },
+ "122": {
+  "alt": "Памятник Максиму Горькому",
+  "card": "/media/db/66/db66d228ac261e4004e320520f16d3d55bb0d5843bf7dc16c48f791513ef77ad_card.webp",
+  "full": "/media/db/66/db66d228ac261e4004e320520f16d3d55bb0d5843bf7dc16c48f791513ef77ad_full.webp",
+  "height": 1200,
+  "thumb": "/media/db/66/db66d228ac261e4004e320520f16d3d55bb0d5843bf7dc16c48f791513ef77ad_thumb.webp",
+  "width": 1765
+ },
+ "123": {
+  "alt": "Памятник Козе-Дерезе",
+  "card": "/media/31/63/31634f6be5421f12596601a44b557f324f24fbe6ec7c69b88e973fe3eade7725_card.webp",
+  "full": "/media/31/63/31634f6be5421f12596601a44b557f324f24fbe6ec7c69b88e973fe3eade7725_full.webp",
+  "height": 683,
+  "thumb": "/media/31/63/31634f6be5421f12596601a44b557f324f24fbe6ec7c69b88e973fe3eade7725_thumb.webp",
+  "width": 1024
+ },
+ "124": {
+  "alt": "Памятник Почтальону",
+  "card": "/media/84/31/8431c576dbe19301f8ac764373ee67e580e40a22d6fc8cd8408462817709f052_card.webp",
+  "full": "/media/84/31/8431c576dbe19301f8ac764373ee67e580e40a22d6fc8cd8408462817709f052_full.webp",
+  "height": 3472,
+  "thumb": "/media/84/31/8431c576dbe19301f8ac764373ee67e580e40a22d6fc8cd8408462817709f052_thumb.webp",
+  "width": 4640
+ },
+ "125": {
+  "alt": "Памятник Евгению Евстигнееву",
+  "card": "/media/2a/fe/2afed02fc65a8a2358d8319b9500f448d086a8ada16f8cfa646542e751537093_card.webp",
+  "full": "/media/2a/fe/2afed02fc65a8a2358d8319b9500f448d086a8ada16f8cfa646542e751537093_full.webp",
+  "height": 839,
+  "thumb": "/media/2a/fe/2afed02fc65a8a2358d8319b9500f448d086a8ada16f8cfa646542e751537093_thumb.webp",
+  "width": 1280
+ },
+ "126": {
+  "alt": "Памятник Козьме Минину",
+  "card": "/media/f1/2b/f12b690489b78c4ac51394f8a7a257a0c1b20fbb77b00f6286587fc39548f9cd_card.webp",
+  "full": "/media/f1/2b/f12b690489b78c4ac51394f8a7a257a0c1b20fbb77b00f6286587fc39548f9cd_full.webp",
+  "height": 800,
+  "thumb": "/media/f1/2b/f12b690489b78c4ac51394f8a7a257a0c1b20fbb77b00f6286587fc39548f9cd_thumb.webp",
+  "width": 1200
+ },
+ "127": {
+  "alt": "Памятник Минину и Пожарскому",
+  "card": "/media/8a/86/8a86f3112949c159dad95fc60f6729f6c1c1036b00460db12f16d4891c2687a9_card.webp",
+  "full": "/media/8a/86/8a86f3112949c159dad95fc60f6729f6c1c1036b00460db12f16d4891c2687a9_full.webp",
+  "height": 853,
+  "thumb": "/media/8a/86/8a86f3112949c159dad95fc60f6729f6c1c1036b00460db12f16d4891c2687a9_thumb.webp",
+  "width": 1280
+ },
+ "128": {
+  "alt": "Памятник Владимиру Ленину",
+  "card": "/media/46/12/4612fa3d37dbf2c0fa291a8753daa86e2eba1482458e56d23ccf5f5fed71135e_card.webp",
+  "full": "/media/46/12/4612fa3d37dbf2c0fa291a8753daa86e2eba1482458e56d23ccf5f5fed71135e_full.webp",
+  "height": 2600,
+  "thumb": "/media/46/12/4612fa3d37dbf2c0fa291a8753daa86e2eba1482458e56d23ccf5f5fed71135e_thumb.webp",
+  "width": 3800
+ },
+ "129": {
+  "alt": "Памятник бронепоезду «Козьма Минин»",
+  "card": "/media/cc/ed/ccedc92a4647659e5d0de435050ae5a63820025de59edf88bc871eda31814736_card.webp",
+  "full": "/media/cc/ed/ccedc92a4647659e5d0de435050ae5a63820025de59edf88bc871eda31814736_full.webp",
+  "height": 902,
+  "thumb": "/media/cc/ed/ccedc92a4647659e5d0de435050ae5a63820025de59edf88bc871eda31814736_thumb.webp",
+  "width": 1200
+ },
+ "13": {
+  "alt": "Верхне-Волжская набережная",
+  "card": "/media/89/20/892057e1376e2ee3b76066a9621ca310ce3a5f6c185e94bf8a26f3843800dc14_card.webp",
+  "full": "/media/89/20/892057e1376e2ee3b76066a9621ca310ce3a5f6c185e94bf8a26f3843800dc14_full.webp",
+  "height": 640,
+  "thumb": "/media/89/20/892057e1376e2ee3b76066a9621ca310ce3a5f6c185e94bf8a26f3843800dc14_thumb.webp",
+  "width": 960
+ },
+ "130": {
+  "alt": "Памятник Александру Невскому",
+  "card": "/media/f2/a3/f2a3659aeda4b04195e788a804eba6442eba41dc4db1a21b513c54019aea418c_card.webp",
+  "full": "/media/f2/a3/f2a3659aeda4b04195e788a804eba6442eba41dc4db1a21b513c54019aea418c_full.webp",
+  "height": 900,
+  "thumb": "/media/f2/a3/f2a3659aeda4b04195e788a804eba6442eba41dc4db1a21b513c54019aea418c_thumb.webp",
+  "width": 1200
+ },
+ "131": {
+  "alt": "Памятник Валерию Чкалову",
+  "card": "/media/da/9b/da9b3cc496cefbdb6ea8aaa9547b074f43ac80238736f5717e3edd4baf848276_card.webp",
+  "full": "/media/da/9b/da9b3cc496cefbdb6ea8aaa9547b074f43ac80238736f5717e3edd4baf848276_full.webp",
+  "height": 900,
+  "thumb": "/media/da/9b/da9b3cc496cefbdb6ea8aaa9547b074f43ac80238736f5717e3edd4baf848276_thumb.webp",
+  "width": 1200
+ },
+ "14": {
+  "alt": "Набережная Федоровского",
+  "card": "/media/b0/dc/b0dcd7f24c6a9b630b639772b049b7d7634c8dccdb323ef39d953a8f2e87fec2_card.webp",
+  "full": "/media/b0/dc/b0dcd7f24c6a9b630b639772b049b7d7634c8dccdb323ef39d953a8f2e87fec2_full.webp",
+  "height": 3072,
+  "thumb": "/media/b0/dc/b0dcd7f24c6a9b630b639772b049b7d7634c8dccdb323ef39d953a8f2e87fec2_thumb.webp",
+  "width": 4096
+ },
+ "15": {
+  "alt": "Нижне-Волжская набережная",
+  "card": "/media/d9/3e/d93eed3791be52854df079b157aa160c263a928b655934c95c22be4a774d7e8f_card.webp",
+  "full": "/media/d9/3e/d93eed3791be52854df079b157aa160c263a928b655934c95c22be4a774d7e8f_full.webp",
+  "height": 1000,
+  "thumb": "/media/d9/3e/d93eed3791be52854df079b157aa160c263a928b655934c95c22be4a774d7e8f_thumb.webp",
+  "width": 1335
+ },
+ "16": {
+  "alt": "Казанская набережная",
+  "card": "/media/42/da/42da7cbff232e80a02e5b2f6bd5a84e766a8cf43628ce2c71aec35b8d7d00d74_card.webp",
+  "full": "/media/42/da/42da7cbff232e80a02e5b2f6bd5a84e766a8cf43628ce2c71aec35b8d7d00d74_full.webp",
+  "height": 692,
+  "thumb": "/media/42/da/42da7cbff232e80a02e5b2f6bd5a84e766a8cf43628ce2c71aec35b8d7d00d74_thumb.webp",
+  "width": 1024
+ },
+ "17": {
+  "alt": "Нижегородская ярмарка",
+  "card": "/media/ad/9a/ad9a8dfeb7c49aae523cc5fb7b90d1ca72e5a10eaf52ad10dd3cb64732e016e0_card.webp",
+  "full": "/media/ad/9a/ad9a8dfeb7c49aae523cc5fb7b90d1ca72e5a10eaf52ad10dd3cb64732e016e0_full.webp",
+  "height": 960,
+  "thumb": "/media/ad/9a/ad9a8dfeb7c49aae523cc5fb7b90d1ca72e5a10eaf52ad10dd3cb64732e016e0_thumb.webp",
+  "width": 1280
+ },
+ "18": {
+  "alt": "Улица Большая Покровская",
+  "card": "/media/e2/f6/e2f6024b8215d87b1e673b6d7ee9e9a68cfaf06d93462d55271838fb123c11ef_card.webp",
+  "full": "/media/e2/f6/e2f6024b8215d87b1e673b6d7ee9e9a68cfaf06d93462d55271838fb123c11ef_full.webp",
+  "height": 597,
+  "thumb": "/media/e2/f6/e2f6024b8215d87b1e673b6d7ee9e9a68cfaf06d93462d55271838fb123c11ef_thumb.webp",
+  "width": 1280
+ },
+ "19": {
+  "alt": "Улица Рождественская",
+  "card": "/media/9b/e9/9be988ea0bb631b498404c042100468639883954039798cd80a3341e5247d186_card.webp",
+  "full": "/media/9b/e9/9be988ea0bb631b498404c042100468639883954039798cd80a3341e5247d186_full.webp",
+  "height": 1000,
+  "thumb": "/media/9b/e9/9be988ea0bb631b498404c042100468639883954039798cd80a3341e5247d186_thumb.webp",
+  "width": 1500
+ },
+ "20": {
+  "alt": "Торговый дом С.М. Рукавишникова (фабрика «Маяк»)",
+  "card": "/media/41/9b/419b8ba405d9a0d66ba714a909f7395751ecb5a581e1a8afbd6f6f2f843f4581_card.webp",
+  "full": "/media/41/9b/419b8ba405d9a0d66ba714a909f7395751ecb5a581e1a8afbd6f6f2f843f4581_full.webp",
+  "height": 1152,
+  "thumb": "/media/41/9b/419b8ba405d9a0d66ba714a909f7395751ecb5a581e1a8afbd6f6f2f843f4581_thumb.webp",
+  "width": 2048
+ },
+ "21": {
+  "alt": "Макет старого Нижнего Новгорода",
+  "card": "/media/2c/7d/2c7d06d49cb792afb1d9b80794b2e76b3d9a1d31ed1a5a556ef3c79a2d419046_card.webp",
+  "full": "/media/2c/7d/2c7d06d49cb792afb1d9b80794b2e76b3d9a1d31ed1a5a556ef3c79a2d419046_full.webp",
+  "height": 667,
+  "thumb": "/media/2c/7d/2c7d06d49cb792afb1d9b80794b2e76b3d9a1d31ed1a5a556ef3c79a2d419046_thumb.webp",
+  "width": 1000
+ },
+ "217": {
+  "alt": "Музей А.Д. Сахарова",
+  "card": "/media/5f/93/5f93f9fbeee3b66906ae8bfceedc7ab2022383226d837d53838261f19f8a0915_card.webp",
+  "full": "/media/5f/93/5f93f9fbeee3b66906ae8bfceedc7ab2022383226d837d53838261f19f8a0915_full.webp",
+  "height": 2599,
+  "thumb": "/media/5f/93/5f93f9fbeee3b66906ae8bfceedc7ab2022383226d837d53838261f19f8a0915_thumb.webp",
+  "width": 3465
+ },
+ "218": {
+  "alt": "Архитектурно-этнографический музей-заповедник «Щелоковский хутор»",
+  "card": "/media/53/49/534959f25c4c112f3c7224dbbb16cc91a12a52c0f35e1433a820ee2a818c0a37_card.webp",
+  "full": "/media/53/49/534959f25c4c112f3c7224dbbb16cc91a12a52c0f35e1433a820ee2a818c0a37_full.webp",
+  "height": 1365,
+  "thumb": "/media/53/49/534959f25c4c112f3c7224dbbb16cc91a12a52c0f35e1433a820ee2a818c0a37_thumb.webp",
+  "width": 2048
+ },
+ "219": {
+  "alt": "Дворец Культуры им. С. Орджоникидзе",
+  "card": "/media/d9/ef/d9ef3e466e5c3d9a2917277dbe3ef711b8f473d9f10f6e5e93e476c0e0af3d16_card.webp",
+  "full": "/media/d9/ef/d9ef3e466e5c3d9a2917277dbe3ef711b8f473d9f10f6e5e93e476c0e0af3d16_full.webp",
+  "height": 506,
+  "thumb": "/media/d9/ef/d9ef3e466e5c3d9a2917277dbe3ef711b8f473d9f10f6e5e93e476c0e0af3d16_thumb.webp",
+  "width": 900
+ },
+ "22": {
+  "alt": "Ромодановский вокзал",
+  "card": "/media/a3/50/a350ce5a8a77f8311285f7d9263bb6c9afc159270130078508ffe290b966f3d3_card.webp",
+  "full": "/media/a3/50/a350ce5a8a77f8311285f7d9263bb6c9afc159270130078508ffe290b966f3d3_full.webp",
+  "height": 768,
+  "thumb": "/media/a3/50/a350ce5a8a77f8311285f7d9263bb6c9afc159270130078508ffe290b966f3d3_thumb.webp",
+  "width": 1024
+ },
+ "220": {
+  "alt": "Музейно-выставочный центр «Микула»",
+  "card": "/media/d4/a1/d4a119e0f084fcba43b9d11589a48fb7613d150004205e01bd00bc6fb620b542_card.webp",
+  "full": "/media/d4/a1/d4a119e0f084fcba43b9d11589a48fb7613d150004205e01bd00bc6fb620b542_full.webp",
+  "height": 870,
+  "thumb": "/media/d4/a1/d4a119e0f084fcba43b9d11589a48fb7613d150004205e01bd00bc6fb620b542_thumb.webp",
+  "width": 1435
+ },
+ "221": {
+  "alt": "Театр музыкально-пластической драмы «Преображение»",
+  "card": "/media/7d/5e/7d5e26bfb85974d8be17e82de32aff876daec85edf4e21a076834dd172c144b0_card.webp",
+  "full": "/media/7d/5e/7d5e26bfb85974d8be17e82de32aff876daec85edf4e21a076834dd172c144b0_full.webp",
+  "height": 800,
+  "thumb": "/media/7d/5e/7d5e26bfb85974d8be17e82de32aff876daec85edf4e21a076834dd172c144b0_thumb.webp",
+  "width": 1400
+ },
+ "222": {
+  "alt": "Кинотеатр «Буревестник»",
+  "card": "/media/af/80/af800487d3a3f8d93d38131c9106a2fc85422491b79b05bc2faeffd1d295e52b_card.webp",
+  "full": "/media/af/80/af800487d3a3f8d93d38131c9106a2fc85422491b79b05bc2faeffd1d295e52b_full.webp",
+  "height": 768,
+  "thumb": "/media/af/80/af800487d3a3f8d93d38131c9106a2fc85422491b79b05bc2faeffd1d295e52b_thumb.webp",
+  "width": 1024
+ },
+ "223": {
+  "alt": "Кинотеатр «Зарница»",
+  "card": "/media/17/c4/17c4a8d0e699fdc8ee0a8a82918cfcc852d89d7ebfce92f1ff67ceb326dbc241_card.webp",
+  "full": "/media/17/c4/17c4a8d0e699fdc8ee0a8a82918cfcc852d89d7ebfce92f1ff67ceb326dbc241_full.webp",
+  "height": 683,
+  "thumb": "/media/17/c4/17c4a8d0e699fdc8ee0a8a82918cfcc852d89d7ebfce92f1ff67ceb326dbc241_thumb.webp",
+  "width": 951
+ },
+ "224": {
+  "alt": "Кинотеатр «Орленок»",
+  "card": "/media/40/39/4039d45d6397877ccfe381b376e2885214fa1fcb004ed774c01f6de0fb997192_card.webp",
+  "full": "/media/40/39/4039d45d6397877ccfe381b376e2885214fa1fcb004ed774c01f6de0fb997192_full.webp",
+  "height": 677,
+  "thumb": "/media/40/39/4039d45d6397877ccfe381b376e2885214fa1fcb004ed774c01f6de0fb997192_thumb.webp",
+  "width": 1016
+ },
+ "225": {
+  "alt": "Парк «Швейцария»",
+  "card": "/media/e9/e7/e9e7433cfec9ea86008fc4b17e65c8826d8cbe40f422f47460e033e560997071_card.webp",
+  "full": "/media/e9/e7/e9e7433cfec9ea86008fc4b17e65c8826d8cbe40f422f47460e033e560997071_full.webp",
+  "height": 1067,
+  "thumb": "/media/e9/e7/e9e7433cfec9ea86008fc4b17e65c8826d8cbe40f422f47460e033e560997071_thumb.webp",
+  "width": 1600
+ },
+ "226": {
+  "alt": "Парк Светлоярский",
+  "card": "/media/bd/ac/bdacd1041a9f91db9cdeafdf9a49a87204cbdb6763015b6967ed68caca468df1_card.webp",
+  "full": "/media/bd/ac/bdacd1041a9f91db9cdeafdf9a49a87204cbdb6763015b6967ed68caca468df1_full.webp",
+  "height": 709,
+  "thumb": "/media/bd/ac/bdacd1041a9f91db9cdeafdf9a49a87204cbdb6763015b6967ed68caca468df1_thumb.webp",
+  "width": 1200
+ },
+ "227": {
+  "alt": "Парк Станкозавода",
+  "card": "/media/c4/77/c477be50a03e2bfc83d1c89d5657c9286b8561f379c05d3a5917848b2f07f7bd_card.webp",
+  "full": "/media/c4/77/c477be50a03e2bfc83d1c89d5657c9286b8561f379c05d3a5917848b2f07f7bd_full.webp",
+  "height": 2976,
+  "thumb": "/media/c4/77/c477be50a03e2bfc83d1c89d5657c9286b8561f379c05d3a5917848b2f07f7bd_thumb.webp",
+  "width": 3968
+ },
+ "228": {
+  "alt": "Детский парк им. Я.М. Свердлова",
+  "card": "/media/9c/f5/9cf5e83ab10406a6bb82c2baa237ace9652d84019d5fbe396eb941d86cf2badd_card.webp",
+  "full": "/media/9c/f5/9cf5e83ab10406a6bb82c2baa237ace9652d84019d5fbe396eb941d86cf2badd_full.webp",
+  "height": 853,
+  "thumb": "/media/9c/f5/9cf5e83ab10406a6bb82c2baa237ace9652d84019d5fbe396eb941d86cf2badd_thumb.webp",
+  "width": 1280
+ },
+ "229": {
+  "alt": "Парк им. 777-летия г. Н.Новгорода",
+  "card": "/media/d3/19/d3191b90e0bb7c250d588ab3cadfa4ab343391aaed79e97b976f6eee1d6e88f6_card.webp",
+  "full": "/media/d3/19/d3191b90e0bb7c250d588ab3cadfa4ab343391aaed79e97b976f6eee1d6e88f6_full.webp",
+  "height": 759,
+  "thumb": "/media/d3/19/d3191b90e0bb7c250d588ab3cadfa4ab343391aaed79e97b976f6eee1d6e88f6_thumb.webp",
+  "width": 1200
+ },
+ "23": {
+  "alt": "Дом А.Л. Барышевой",
+  "card": "/media/38/ee/38ee65d9bb1040a4f75b54d90dfcf3abcd37b369a8f525a81dce64838a6e7497_card.webp",
+  "full": "/media/38/ee/38ee65d9bb1040a4f75b54d90dfcf3abcd37b369a8f525a81dce64838a6e7497_full.webp",
+  "height": 1846,
+  "thumb": "/media/38/ee/38ee65d9bb1040a4f75b54d90dfcf3abcd37b369a8f525a81dce64838a6e7497_thumb.webp",
+  "width": 4000
+ },
+ "230": {
+  "alt": "Нижегородский планетарий им. Г.М. Гречко",
+  "card": "/media/3d/55/3d55f559d37aa387bdef5de5cec839fd5dfa9df27e358ebb640eb6733f6eaf5f_card.webp",
+  "full": "/media/3d/55/3d55f559d37aa387bdef5de5cec839fd5dfa9df27e358ebb640eb6733f6eaf5f_full.webp",
+  "height": 1500,
+  "thumb": "/media/3d/55/3d55f559d37aa387bdef5de5cec839fd5dfa9df27e358ebb640eb6733f6eaf5f_thumb.webp",
+  "width": 2400
+ },
+ "231": {
+  "alt": "Камерный музыкальный театр им. В.Т. Степанова",
+  "card": "/media/a7/22/a722d5d9fc08375dd6a2a1a78fa96e6fa34dd2427a9689f7f39ea051c7417222_card.webp",
+  "full": "/media/a7/22/a722d5d9fc08375dd6a2a1a78fa96e6fa34dd2427a9689f7f39ea051c7417222_full.webp",
+  "height": 729,
+  "thumb": "/media/a7/22/a722d5d9fc08375dd6a2a1a78fa96e6fa34dd2427a9689f7f39ea051c7417222_thumb.webp",
+  "width": 968
+ },
+ "232": {
+  "alt": "Общественно-досуговый центр «Смена»",
+  "card": "/media/40/0d/400d6eeb84c03ce0bfb1e98a682401ad745b476e2115e6fc27c22353f87fd51d_card.webp",
+  "full": "/media/40/0d/400d6eeb84c03ce0bfb1e98a682401ad745b476e2115e6fc27c22353f87fd51d_full.webp",
+  "height": 1000,
+  "thumb": "/media/40/0d/400d6eeb84c03ce0bfb1e98a682401ad745b476e2115e6fc27c22353f87fd51d_thumb.webp",
+  "width": 1334
+ },
+ "233": {
+  "alt": "Общественно-досуговый центр «Надежда»",
+  "card": "/media/0c/4a/0c4a78a2ef0c89cdd2e5650a842047c1cbbace8769a4bae1d082696f11daf752_card.webp",
+  "full": "/media/0c/4a/0c4a78a2ef0c89cdd2e5650a842047c1cbbace8769a4bae1d082696f11daf752_full.webp",
+  "height": 720,
+  "thumb": "/media/0c/4a/0c4a78a2ef0c89cdd2e5650a842047c1cbbace8769a4bae1d082696f11daf752_thumb.webp",
+  "width": 960
+ },
+ "234": {
+  "alt": "Центр культуры и досуга «Молодёжный»",
+  "card": "/media/08/aa/08aa3f009e2f2a385307b850f030e0dd28686e5d05ed4496958b525c4548cc0c_card.webp",
+  "full": "/media/08/aa/08aa3f009e2f2a385307b850f030e0dd28686e5d05ed4496958b525c4548cc0c_full.webp",
+  "height": 768,
+  "thumb": "/media/08/aa/08aa3f009e2f2a385307b850f030e0dd28686e5d05ed4496958b525c4548cc0c_thumb.webp",
+  "width": 1024
+ },
+ "235": {
+  "alt": "Центральная районная детская библиотека им. Н. А. Зайцева",
+  "card": "/media/3d/f8/3df8a6edbb5d96fdfb0d6ad7aaa965725c55d4acc3c6547301ea95474d726341_card.webp",
+  "full": "/media/3d/f8/3df8a6edbb5d96fdfb0d6ad7aaa965725c55d4acc3c6547301ea95474d726341_full.webp",
+  "height": 1535,
+  "thumb": "/media/3d/f8/3df8a6edbb5d96fdfb0d6ad7aaa965725c55d4acc3c6547301ea95474d726341_thumb.webp",
+  "width": 2048
+ },
+ "236": {
+  "alt": "Библиотека им. П.И. Мельникова-Печерского",
+  "card": "/media/c9/c1/c9c1be4012aad2b0e8a9556ec04ac494e928aaeb4a4d2458fa569e13c04a603a_card.webp",
+  "full": "/media/c9/c1/c9c1be4012aad2b0e8a9556ec04ac494e928aaeb4a4d2458fa569e13c04a603a_full.webp",
+  "height": 576,
+  "thumb": "/media/c9/c1/c9c1be4012aad2b0e8a9556ec04ac494e928aaeb4a4d2458fa569e13c04a603a_thumb.webp",
+  "width": 1024
+ },
+ "237": {
+  "alt": "Библиотека им. Ю. А. Адрианова",
+  "card": "/media/1b/eb/1beb14d7e2252c4513f5a467f96b5bd35ff13f4b423a1e925fd181ebddeeaee2_card.webp",
+  "full": "/media/1b/eb/1beb14d7e2252c4513f5a467f96b5bd35ff13f4b423a1e925fd181ebddeeaee2_full.webp",
+  "height": 768,
+  "thumb": "/media/1b/eb/1beb14d7e2252c4513f5a467f96b5bd35ff13f4b423a1e925fd181ebddeeaee2_thumb.webp",
+  "width": 1024
+ },
+ "238": {
+  "alt": "Библиотека им. А. С. Макаренко",
+  "card": "/media/95/61/9561a41c492a1307395c223512b3dc207093e37548067bc0ecdb2a87c89dcc9d_card.webp",
+  "full": "/media/95/61/9561a41c492a1307395c223512b3dc207093e37548067bc0ecdb2a87c89dcc9d_full.webp",
+  "height": 576,
+  "thumb": "/media/95/61/9561a41c492a1307395c223512b3dc207093e37548067bc0ecdb2a87c89dcc9d_thumb.webp",
+  "width": 1024
+ },
+ "239": {
+  "alt": "МБУ ДО \"ДМШ № 13\"",
+  "card": "/media/58/d6/58d6116759732f4125cafe3db813375c6d94fbc25d0a8a018aaeca9f562b3ffe_card.webp",
+  "full": "/media/58/d6/58d6116759732f4125cafe3db813375c6d94fbc25d0a8a018aaeca9f562b3ffe_full.webp",
+  "height": 768,
+  "thumb": "/media/58/d6/58d6116759732f4125cafe3db813375c6d94fbc25d0a8a018aaeca9f562b3ffe_thumb.webp",
+  "width": 1024
+ },
+ "24": {
+  "alt": "Усадьба В.Е. Кожевникова",
+  "card": "/media/9d/e2/9de2cc6e1e318295c3c9aa9490cbe5d3116bdb24ff3b48ea922086ca2637d5e7_card.webp",
+  "full": "/media/9d/e2/9de2cc6e1e318295c3c9aa9490cbe5d3116bdb24ff3b48ea922086ca2637d5e7_full.webp",
+  "height": 977,
+  "thumb": "/media/9d/e2/9de2cc6e1e318295c3c9aa9490cbe5d3116bdb24ff3b48ea922086ca2637d5e7_thumb.webp",
+  "width": 1181
+ },
+ "240": {
+  "alt": "Детская библиотека им. В. В. Бианки",
+  "card": "/media/11/ec/11ec891a4a67c2dcfa47fa2e0aa58ce72916601d539fbd8580455e726eb544ec_card.webp",
+  "full": "/media/11/ec/11ec891a4a67c2dcfa47fa2e0aa58ce72916601d539fbd8580455e726eb544ec_full.webp",
+  "height": 700,
+  "thumb": "/media/11/ec/11ec891a4a67c2dcfa47fa2e0aa58ce72916601d539fbd8580455e726eb544ec_thumb.webp",
+  "width": 1004
+ },
+ "241": {
+  "alt": "Детская библиотека — филиал №6 им. Е.А. Никонова",
+  "card": "/media/3a/e5/3ae5e0488baddfbc9368ac8e4cfe11fc0c660773d3d7e9b4751032aef12c703b_card.webp",
+  "full": "/media/3a/e5/3ae5e0488baddfbc9368ac8e4cfe11fc0c660773d3d7e9b4751032aef12c703b_full.webp",
+  "height": 720,
+  "thumb": "/media/3a/e5/3ae5e0488baddfbc9368ac8e4cfe11fc0c660773d3d7e9b4751032aef12c703b_thumb.webp",
+  "width": 960
+ },
+ "242": {
+  "alt": "МКУК \"Централизованная библиотечная система\" Нижегородского района г. Н. Новгорода",
+  "card": "/media/13/06/13061191fd6068eabbf3b299861d597b92b370fdeddc7d965d7f20f50daf38ac_card.webp",
+  "full": "/media/13/06/13061191fd6068eabbf3b299861d597b92b370fdeddc7d965d7f20f50daf38ac_full.webp",
+  "height": 750,
+  "thumb": "/media/13/06/13061191fd6068eabbf3b299861d597b92b370fdeddc7d965d7f20f50daf38ac_thumb.webp",
+  "width": 1280
+ },
+ "243": {
+  "alt": "Детская библиотека — филиал №5 им. Н.Ф. Гастелло",
+  "card": "/media/ee/21/ee2124720288eba27475d1ad1e38557fece60a7870b55f556a986238c60f8e05_card.webp",
+  "full": "/media/ee/21/ee2124720288eba27475d1ad1e38557fece60a7870b55f556a986238c60f8e05_full.webp",
+  "height": 768,
+  "thumb": "/media/ee/21/ee2124720288eba27475d1ad1e38557fece60a7870b55f556a986238c60f8e05_thumb.webp",
+  "width": 1024
+ },
+ "244": {
+  "alt": "Центральная районная детская библиотека им. В.Г. Белинского",
+  "card": "/media/8f/4d/8f4de70911d9e5a40eae9b35861a0ab057d1687cef9b8056413d4f602967be24_card.webp",
+  "full": "/media/8f/4d/8f4de70911d9e5a40eae9b35861a0ab057d1687cef9b8056413d4f602967be24_full.webp",
+  "height": 768,
+  "thumb": "/media/8f/4d/8f4de70911d9e5a40eae9b35861a0ab057d1687cef9b8056413d4f602967be24_thumb.webp",
+  "width": 1024
+ },
+ "245": {
+  "alt": "Детская библиотека им. К. М. Станюковича",
+  "card": "/media/24/37/2437490073c3b93c1bd83a419156651fec15ed5bd25508b1ba00b936fbd3c865_card.webp",
+  "full": "/media/24/37/2437490073c3b93c1bd83a419156651fec15ed5bd25508b1ba00b936fbd3c865_full.webp",
+  "height": 768,
+  "thumb": "/media/24/37/2437490073c3b93c1bd83a419156651fec15ed5bd25508b1ba00b936fbd3c865_thumb.webp",
+  "width": 1024
+ },
+ "246": {
+  "alt": "Библиотека им. А. Н. Радищева",
+  "card": "/media/ff/fe/fffec35c534ad8ae152da9947c9b1a7710d0c8d730f2e44394a3d34916402528_card.webp",
+  "full": "/media/ff/fe/fffec35c534ad8ae152da9947c9b1a7710d0c8d730f2e44394a3d34916402528_full.webp",
+  "height": 700,
+  "thumb": "/media/ff/fe/fffec35c534ad8ae152da9947c9b1a7710d0c8d730f2e44394a3d34916402528_thumb.webp",
+  "width": 933
+ },
+ "247": {
+  "alt": "Библиотека им. В. В. Маяковского",
+  "card": "/media/eb/62/eb6206f88ffae31852bdd0bf3866cdc89de8bad89d87de64426f85eab72c3dad_card.webp",
+  "full": "/media/eb/62/eb6206f88ffae31852bdd0bf3866cdc89de8bad89d87de64426f85eab72c3dad_full.webp",
+  "height": 1365,
+  "thumb": "/media/eb/62/eb6206f88ffae31852bdd0bf3866cdc89de8bad89d87de64426f85eab72c3dad_thumb.webp",
+  "width": 2048
+ },
+ "248": {
+  "alt": "Библиотека им. Д. Н. Мамина-Сибиряка",
+  "card": "/media/22/17/221786523b30a4ca058e422b4064f1e5d2dbdf9ddad451a683a7d29abe504f31_card.webp",
+  "full": "/media/22/17/221786523b30a4ca058e422b4064f1e5d2dbdf9ddad451a683a7d29abe504f31_full.webp",
+  "height": 768,
+  "thumb": "/media/22/17/221786523b30a4ca058e422b4064f1e5d2dbdf9ddad451a683a7d29abe504f31_thumb.webp",
+  "width": 1024
+ },
+ "249": {
+  "alt": "Библиотека им. М. Ю. Лермонтова",
+  "card": "/media/1e/77/1e77947fdc71fb7ea2f5f9a37a1ee09dc232e93afb3f0e29686848e5e6564726_card.webp",
+  "full": "/media/1e/77/1e77947fdc71fb7ea2f5f9a37a1ee09dc232e93afb3f0e29686848e5e6564726_full.webp",
+  "height": 768,
+  "thumb": "/media/1e/77/1e77947fdc71fb7ea2f5f9a37a1ee09dc232e93afb3f0e29686848e5e6564726_thumb.webp",
+  "width": 1024
+ },
+ "25": {
+  "alt": "Усадьба Вяхиревых",
+  "card": "/media/75/aa/75aa0764187a11cf74bcf1521a7f8062093081fdfe33f41e9f6a63c61f8a4ce5_card.webp",
+  "full": "/media/75/aa/75aa0764187a11cf74bcf1521a7f8062093081fdfe33f41e9f6a63c61f8a4ce5_full.webp",
+  "height": 3024,
+  "thumb": "/media/75/aa/75aa0764187a11cf74bcf1521a7f8062093081fdfe33f41e9f6a63c61f8a4ce5_thumb.webp",
+  "width": 4032
+ },
+ "250": {
+  "alt": "Центральная районная библиотека Автозаводского района \"Библиотечно-досуговый центр\"",
+  "card": "/media/cc/60/cc60aa2ba8d67587f041e9d58e29a8689f1980b645616dcc15e14d53bddae745_card.webp",
+  "full": "/media/cc/60/cc60aa2ba8d67587f041e9d58e29a8689f1980b645616dcc15e14d53bddae745_full.webp",
+  "height": 1415,
+  "thumb": "/media/cc/60/cc60aa2ba8d67587f041e9d58e29a8689f1980b645616dcc15e14d53bddae745_thumb.webp",
+  "width": 2048
+ },
+ "251": {
+  "alt": "МБУ ДО \"ДХШ №2\"",
+  "card": "/media/50/1e/501e5d8b199dbeef9e603e932abdbbf9179db965462f34147e1f3fd80a9ee788_card.webp",
+  "full": "/media/50/1e/501e5d8b199dbeef9e603e932abdbbf9179db965462f34147e1f3fd80a9ee788_full.webp",
+  "height": 1021,
+  "thumb": "/media/50/1e/501e5d8b199dbeef9e603e932abdbbf9179db965462f34147e1f3fd80a9ee788_thumb.webp",
+  "width": 2048
+ },
+ "252": {
+  "alt": "МБУ ДО \"Детская школа искусств № 9 им. А.Д.Улыбышева\"",
+  "card": "/media/90/4f/904f3b7c6fcc0860725dfa5de1789198be5ef696e12a0fad7743504a4789bf64_card.webp",
+  "full": "/media/90/4f/904f3b7c6fcc0860725dfa5de1789198be5ef696e12a0fad7743504a4789bf64_full.webp",
+  "height": 853,
+  "thumb": "/media/90/4f/904f3b7c6fcc0860725dfa5de1789198be5ef696e12a0fad7743504a4789bf64_thumb.webp",
+  "width": 1280
+ },
+ "253": {
+  "alt": "Библиотека — филиал № 8 им. А.И. Люкина",
+  "card": "/media/0e/6f/0e6f22bd773a4bc11000bf67de5eaed7cc4a42972f26890d02abacf44ad52a23_card.webp",
+  "full": "/media/0e/6f/0e6f22bd773a4bc11000bf67de5eaed7cc4a42972f26890d02abacf44ad52a23_full.webp",
+  "height": 1000,
+  "thumb": "/media/0e/6f/0e6f22bd773a4bc11000bf67de5eaed7cc4a42972f26890d02abacf44ad52a23_thumb.webp",
+  "width": 1333
+ },
+ "254": {
+  "alt": "МБУ ДО \"Детская художественная школа №1\"",
+  "card": "/media/b5/ed/b5ed3fa99437f20f5ee713bf48c014e45865eaf0df90cccac996366c087752a2_card.webp",
+  "full": "/media/b5/ed/b5ed3fa99437f20f5ee713bf48c014e45865eaf0df90cccac996366c087752a2_full.webp",
+  "height": 682,
+  "thumb": "/media/b5/ed/b5ed3fa99437f20f5ee713bf48c014e45865eaf0df90cccac996366c087752a2_thumb.webp",
+  "width": 1024
+ },
+ "255": {
+  "alt": "Библиотека — филиал №4 им. А. Н. Толстого",
+  "card": "/media/34/35/34356d90e510ad5303199fba645d944ae000754c7b2b54e2da1d625a0b790c82_card.webp",
+  "full": "/media/34/35/34356d90e510ad5303199fba645d944ae000754c7b2b54e2da1d625a0b790c82_full.webp",
+  "height": 1922,
+  "thumb": "/media/34/35/34356d90e510ad5303199fba645d944ae000754c7b2b54e2da1d625a0b790c82_thumb.webp",
+  "width": 2560
+ },
+ "256": {
+  "alt": "Библиотека — филиал №3 им. Н.К. Крупской",
+  "card": "/media/46/ee/46ee29e7c63ab1c127874f4938212694ddb464fa25748ba385296408e36b890e_card.webp",
+  "full": "/media/46/ee/46ee29e7c63ab1c127874f4938212694ddb464fa25748ba385296408e36b890e_full.webp",
+  "height": 768,
+  "thumb": "/media/46/ee/46ee29e7c63ab1c127874f4938212694ddb464fa25748ba385296408e36b890e_thumb.webp",
+  "width": 1024
+ },
+ "257": {
+  "alt": "Библиотека — филиал №2 им. П. А. Заломова",
+  "card": "/media/12/5e/125e96899c181eab23b2f4a5934dc26ab357e9043e1063d7be605ae1ee2f3941_card.webp",
+  "full": "/media/12/5e/125e96899c181eab23b2f4a5934dc26ab357e9043e1063d7be605ae1ee2f3941_full.webp",
+  "height": 1536,
+  "thumb": "/media/12/5e/125e96899c181eab23b2f4a5934dc26ab357e9043e1063d7be605ae1ee2f3941_thumb.webp",
+  "width": 2048
+ },
+ "258": {
+  "alt": "МБУ ДО \"ДШИ № 4\"",
+  "card": "/media/b2/4f/b24f7a915b5ca30f118e7192300b785662e345e6fa482a1482cbc03300ef2d8f_card.webp",
+  "full": "/media/b2/4f/b24f7a915b5ca30f118e7192300b785662e345e6fa482a1482cbc03300ef2d8f_full.webp",
+  "height": 3024,
+  "thumb": "/media/b2/4f/b24f7a915b5ca30f118e7192300b785662e345e6fa482a1482cbc03300ef2d8f_thumb.webp",
+  "width": 4032
+ },
+ "259": {
+  "alt": "МБУ ДО \"Детская школа искусств им. Д.Д. Шостаковича\"",
+  "card": "/media/df/ab/dfab731efaa7c24d407606988dcdbe0c2031afb42936e4a16ba85384881489e3_card.webp",
+  "full": "/media/df/ab/dfab731efaa7c24d407606988dcdbe0c2031afb42936e4a16ba85384881489e3_full.webp",
+  "height": 766,
+  "thumb": "/media/df/ab/dfab731efaa7c24d407606988dcdbe0c2031afb42936e4a16ba85384881489e3_thumb.webp",
+  "width": 1024
+ },
+ "26": {
+  "alt": "Нижегородский острог",
+  "card": "/media/7e/c9/7ec91b636a016a1c04bf5c5e4cc0aaf2c07669da940615e69c9723e10fded9d6_card.webp",
+  "full": "/media/7e/c9/7ec91b636a016a1c04bf5c5e4cc0aaf2c07669da940615e69c9723e10fded9d6_full.webp",
+  "height": 578,
+  "thumb": "/media/7e/c9/7ec91b636a016a1c04bf5c5e4cc0aaf2c07669da940615e69c9723e10fded9d6_thumb.webp",
+  "width": 960
+ },
+ "260": {
+  "alt": "Библиотека — филиал № 1 им. А.И. Герцена",
+  "card": "/media/b6/71/b67144422e6eaac9f7b69ce932bf3cf5ca630cbccd02ce0263baeeff2f31d14c_card.webp",
+  "full": "/media/b6/71/b67144422e6eaac9f7b69ce932bf3cf5ca630cbccd02ce0263baeeff2f31d14c_full.webp",
+  "height": 576,
+  "thumb": "/media/b6/71/b67144422e6eaac9f7b69ce932bf3cf5ca630cbccd02ce0263baeeff2f31d14c_thumb.webp",
+  "width": 1024
+ },
+ "261": {
+  "alt": "Библиотека им. Б. Корнилова",
+  "card": "/media/f0/e0/f0e01d94c84d1e8753eba0405cc6bb4ed67baa4016a60b882ac209a3b7c2a812_card.webp",
+  "full": "/media/f0/e0/f0e01d94c84d1e8753eba0405cc6bb4ed67baa4016a60b882ac209a3b7c2a812_full.webp",
+  "height": 1152,
+  "thumb": "/media/f0/e0/f0e01d94c84d1e8753eba0405cc6bb4ed67baa4016a60b882ac209a3b7c2a812_thumb.webp",
+  "width": 2560
+ },
+ "262": {
+  "alt": "Центральная районная библиотека им. А. С. Пушкина",
+  "card": "/media/7d/78/7d781b4692d97c776aca1e4eb5a4728a62f65393b6c9cec409d612d6a4486e87_card.webp",
+  "full": "/media/7d/78/7d781b4692d97c776aca1e4eb5a4728a62f65393b6c9cec409d612d6a4486e87_full.webp",
+  "height": 1536,
+  "thumb": "/media/7d/78/7d781b4692d97c776aca1e4eb5a4728a62f65393b6c9cec409d612d6a4486e87_thumb.webp",
+  "width": 2048
+ },
+ "263": {
+  "alt": "Центральная районная библиотека им. Бориса Панина",
+  "card": "/media/0f/bf/0fbf000836eb07b10faf3673d5833d3182b1482711e7039a4b96c791b2918151_card.webp",
+  "full": "/media/0f/bf/0fbf000836eb07b10faf3673d5833d3182b1482711e7039a4b96c791b2918151_full.webp",
+  "height": 1922,
+  "thumb": "/media/0f/bf/0fbf000836eb07b10faf3673d5833d3182b1482711e7039a4b96c791b2918151_thumb.webp",
+  "width": 2560
+ },
+ "264": {
+  "alt": "МАУК \"Дирекция парков и скверов г. Нижнего Новгорода\"",
+  "card": "/media/c2/bb/c2bbb50260bd2d25713ec4be047742669d265b3663a2720214b9559106610176_card.webp",
+  "full": "/media/c2/bb/c2bbb50260bd2d25713ec4be047742669d265b3663a2720214b9559106610176_full.webp",
+  "height": 4000,
+  "thumb": "/media/c2/bb/c2bbb50260bd2d25713ec4be047742669d265b3663a2720214b9559106610176_thumb.webp",
+  "width": 6000
+ },
+ "265": {
+  "alt": "Центральная районная библиотека им. Д.А. Фурманова",
+  "card": "/media/70/2a/702ae6ffa0c4c6ca5547e9d1f23b822d48c35bf487e072297119b1f4871befac_card.webp",
+  "full": "/media/70/2a/702ae6ffa0c4c6ca5547e9d1f23b822d48c35bf487e072297119b1f4871befac_full.webp",
+  "height": 700,
+  "thumb": "/media/70/2a/702ae6ffa0c4c6ca5547e9d1f23b822d48c35bf487e072297119b1f4871befac_thumb.webp",
+  "width": 1244
+ },
+ "27": {
+  "alt": "Палаты Афанасия Олисова",
+  "card": "/media/2b/93/2b93a79418b46af24aa0e71c4ff43f77e06dd3e112535cba8389d556b7e304af_card.webp",
+  "full": "/media/2b/93/2b93a79418b46af24aa0e71c4ff43f77e06dd3e112535cba8389d556b7e304af_full.webp",
+  "height": 960,
+  "thumb": "/media/2b/93/2b93a79418b46af24aa0e71c4ff43f77e06dd3e112535cba8389d556b7e304af_thumb.webp",
+  "width": 1280
+ },
+ "28": {
+  "alt": "Палаты Чатыгина (Домик Петра I)",
+  "card": "/media/ca/93/ca937551991daf6b92de4fe0ec7543a08ad9e8e209149f13680bce9416301d0f_card.webp",
+  "full": "/media/ca/93/ca937551991daf6b92de4fe0ec7543a08ad9e8e209149f13680bce9416301d0f_full.webp",
+  "height": 652,
+  "thumb": "/media/ca/93/ca937551991daf6b92de4fe0ec7543a08ad9e8e209149f13680bce9416301d0f_thumb.webp",
+  "width": 1024
+ },
+ "29": {
+  "alt": "Александровский сад",
+  "card": "/media/4f/6c/4f6c10e0d93860e6f15a0dfafcfb70739cdec9be383e31c6ea69a35922b6ee86_card.webp",
+  "full": "/media/4f/6c/4f6c10e0d93860e6f15a0dfafcfb70739cdec9be383e31c6ea69a35922b6ee86_full.webp",
+  "height": 683,
+  "thumb": "/media/4f/6c/4f6c10e0d93860e6f15a0dfafcfb70739cdec9be383e31c6ea69a35922b6ee86_thumb.webp",
+  "width": 1024
+ },
+ "30": {
+  "alt": "Сцена Ракушка",
+  "card": "/media/e7/67/e767f48b71646284d8cddb1c0aa6a020d0c4c04b6789750082660bea6c184155_card.webp",
+  "full": "/media/e7/67/e767f48b71646284d8cddb1c0aa6a020d0c4c04b6789750082660bea6c184155_full.webp",
+  "height": 2112,
+  "thumb": "/media/e7/67/e767f48b71646284d8cddb1c0aa6a020d0c4c04b6789750082660bea6c184155_thumb.webp",
+  "width": 2816
+ },
+ "31": {
+  "alt": "Жилой дом завода «Красное Сормово»",
+  "card": "/media/16/b3/16b353c4d0c3408a67d10a730b4e0845447bc9221024c70c498a95662d2743c9_card.webp",
+  "full": "/media/16/b3/16b353c4d0c3408a67d10a730b4e0845447bc9221024c70c498a95662d2743c9_full.webp",
+  "height": 668,
+  "thumb": "/media/16/b3/16b353c4d0c3408a67d10a730b4e0845447bc9221024c70c498a95662d2743c9_thumb.webp",
+  "width": 960
+ },
+ "32": {
+  "alt": "Завод «ГАЗ»",
+  "card": "/media/fd/fb/fdfb5f10dab49b9e626622befe780fb615e041cea70af4df7f7d6e00fe8f3542_card.webp",
+  "full": "/media/fd/fb/fdfb5f10dab49b9e626622befe780fb615e041cea70af4df7f7d6e00fe8f3542_full.webp",
+  "height": 2760,
+  "thumb": "/media/fd/fb/fdfb5f10dab49b9e626622befe780fb615e041cea70af4df7f7d6e00fe8f3542_thumb.webp",
+  "width": 4912
+ },
+ "33": {
+  "alt": "Музей «ГАЗ»",
+  "card": "/media/56/1e/561ecaa2d2a97aa44957eb8022e9c67ee5a23f2d8975029ecb0e0252379e6dee_card.webp",
+  "full": "/media/56/1e/561ecaa2d2a97aa44957eb8022e9c67ee5a23f2d8975029ecb0e0252379e6dee_full.webp",
+  "height": 720,
+  "thumb": "/media/56/1e/561ecaa2d2a97aa44957eb8022e9c67ee5a23f2d8975029ecb0e0252379e6dee_thumb.webp",
+  "width": 1080
+ },
+ "34": {
+  "alt": "Завод «Красное Сормово»",
+  "card": "/media/0d/64/0d64d6f774f5faec62434043663e34410786eb7a90ee2def533f8b0b87619a1b_card.webp",
+  "full": "/media/0d/64/0d64d6f774f5faec62434043663e34410786eb7a90ee2def533f8b0b87619a1b_full.webp",
+  "height": 802,
+  "thumb": "/media/0d/64/0d64d6f774f5faec62434043663e34410786eb7a90ee2def533f8b0b87619a1b_thumb.webp",
+  "width": 1202
+ },
+ "35": {
+  "alt": "Музей истории завода «Красное Сормово»",
+  "card": "/media/35/52/3552ca751f1f29eb4cf92fcb69db2d90b4573e4f2f7760c945b35b054c2455aa_card.webp",
+  "full": "/media/35/52/3552ca751f1f29eb4cf92fcb69db2d90b4573e4f2f7760c945b35b054c2455aa_full.webp",
+  "height": 853,
+  "thumb": "/media/35/52/3552ca751f1f29eb4cf92fcb69db2d90b4573e4f2f7760c945b35b054c2455aa_thumb.webp",
+  "width": 1280
+ },
+ "36": {
+  "alt": "Зачатьевская башня",
+  "card": "/media/55/75/55756f0fe8c4f818386073f47986dbe5dc3fd5a9252297e04a388e96f3f93703_card.webp",
+  "full": "/media/55/75/55756f0fe8c4f818386073f47986dbe5dc3fd5a9252297e04a388e96f3f93703_full.webp",
+  "height": 853,
+  "thumb": "/media/55/75/55756f0fe8c4f818386073f47986dbe5dc3fd5a9252297e04a388e96f3f93703_thumb.webp",
+  "width": 1280
+ },
+ "37": {
+  "alt": "Красные казармы",
+  "card": "/media/59/25/59258ed6f9862ec1fe98d2c9c422033df70fc98a8d2f01950bac019584d6f1a0_card.webp",
+  "full": "/media/59/25/59258ed6f9862ec1fe98d2c9c422033df70fc98a8d2f01950bac019584d6f1a0_full.webp",
+  "height": 2600,
+  "thumb": "/media/59/25/59258ed6f9862ec1fe98d2c9c422033df70fc98a8d2f01950bac019584d6f1a0_thumb.webp",
+  "width": 4624
+ },
+ "38": {
+  "alt": "Канатная дорога",
+  "card": "/media/7a/25/7a2597090dffb7f449d527767ed93f82f9b7bf1a9c3ced377f7d12ab52cdecb2_card.webp",
+  "full": "/media/7a/25/7a2597090dffb7f449d527767ed93f82f9b7bf1a9c3ced377f7d12ab52cdecb2_full.webp",
+  "height": 800,
+  "thumb": "/media/7a/25/7a2597090dffb7f449d527767ed93f82f9b7bf1a9c3ced377f7d12ab52cdecb2_thumb.webp",
+  "width": 1200
+ },
+ "39": {
+  "alt": "Соборная мечеть",
+  "card": "/media/c1/48/c148dc91d5a4ecbbba2439d5865c7bda165922136e3e121f1b6faa46557295c3_card.webp",
+  "full": "/media/c1/48/c148dc91d5a4ecbbba2439d5865c7bda165922136e3e121f1b6faa46557295c3_full.webp",
+  "height": 800,
+  "thumb": "/media/c1/48/c148dc91d5a4ecbbba2439d5865c7bda165922136e3e121f1b6faa46557295c3_thumb.webp",
+  "width": 1400
+ },
+ "40": {
+  "alt": "Вознесенский Печерский мужской монастырь",
+  "card": "/media/6c/31/6c312db1b3767195522843171f4918a899f9e351e95ea001a2592bfeba7e1d2c_card.webp",
+  "full": "/media/6c/31/6c312db1b3767195522843171f4918a899f9e351e95ea001a2592bfeba7e1d2c_full.webp",
+  "height": 511,
+  "thumb": "/media/6c/31/6c312db1b3767195522843171f4918a899f9e351e95ea001a2592bfeba7e1d2c_thumb.webp",
+  "width": 1000
+ },
+ "41": {
+  "alt": "Катер Герой",
+  "card": "/media/e9/5b/e95b221a3545b268dc185c177adcb5b98de3f1e01ee6ead83cda8c3eb43d3853_card.webp",
+  "full": "/media/e9/5b/e95b221a3545b268dc185c177adcb5b98de3f1e01ee6ead83cda8c3eb43d3853_full.webp",
+  "height": 800,
+  "thumb": "/media/e9/5b/e95b221a3545b268dc185c177adcb5b98de3f1e01ee6ead83cda8c3eb43d3853_thumb.webp",
+  "width": 1200
+ },
+ "42": {
+  "alt": "Нижегородский кремль",
+  "card": "/media/d5/09/d5092991a05cc0b501dbfdcfa343a484f77eb3b90c719089a350c52d9fea7767_card.webp",
+  "full": "/media/d5/09/d5092991a05cc0b501dbfdcfa343a484f77eb3b90c719089a350c52d9fea7767_full.webp",
+  "height": 1066,
+  "thumb": "/media/d5/09/d5092991a05cc0b501dbfdcfa343a484f77eb3b90c719089a350c52d9fea7767_thumb.webp",
+  "width": 1600
+ },
+ "43": {
+  "alt": "Дмитриевская башня",
+  "card": "/media/16/bd/16bdc19599a94cef6dc45f0002bce375e9770b8db6756605bf3b8e1d39bf866b_card.webp",
+  "full": "/media/16/bd/16bdc19599a94cef6dc45f0002bce375e9770b8db6756605bf3b8e1d39bf866b_full.webp",
+  "height": 810,
+  "thumb": "/media/16/bd/16bdc19599a94cef6dc45f0002bce375e9770b8db6756605bf3b8e1d39bf866b_thumb.webp",
+  "width": 1080
+ },
+ "44": {
+  "alt": "Спасская колокольня",
+  "card": "/media/41/36/41365dad62b9396f89e1e3953478722de28de66415d524a1d09ccf5b0ea9f176_card.webp",
+  "full": "/media/41/36/41365dad62b9396f89e1e3953478722de28de66415d524a1d09ccf5b0ea9f176_full.webp",
+  "height": 626,
+  "thumb": "/media/41/36/41365dad62b9396f89e1e3953478722de28de66415d524a1d09ccf5b0ea9f176_thumb.webp",
+  "width": 1170
+ },
+ "45": {
+  "alt": "Площадь Минина и Пожарского",
+  "card": "/media/f3/25/f325d6bd198dcd9f0497fe61cd117fc4094cc66fb36807667824924925e73462_card.webp",
+  "full": "/media/f3/25/f325d6bd198dcd9f0497fe61cd117fc4094cc66fb36807667824924925e73462_full.webp",
+  "height": 667,
+  "thumb": "/media/f3/25/f325d6bd198dcd9f0497fe61cd117fc4094cc66fb36807667824924925e73462_thumb.webp",
+  "width": 1000
+ },
+ "46": {
+  "alt": "Гимназия №1",
+  "card": "/media/a3/91/a391ef1c126a9bf9fdab313ca87fc5e81359b31e308df2e6e1db772a0fade99a_card.webp",
+  "full": "/media/a3/91/a391ef1c126a9bf9fdab313ca87fc5e81359b31e308df2e6e1db772a0fade99a_full.webp",
+  "height": 700,
+  "thumb": "/media/a3/91/a391ef1c126a9bf9fdab313ca87fc5e81359b31e308df2e6e1db772a0fade99a_thumb.webp",
+  "width": 1200
+ },
+ "47": {
+  "alt": "Стены кремля",
+  "card": "/media/5a/f7/5af70bd9e1813fcafeafc6353f23ea743a923cfe25f5faddb2c5e3459d6355ae_card.webp",
+  "full": "/media/5a/f7/5af70bd9e1813fcafeafc6353f23ea743a923cfe25f5faddb2c5e3459d6355ae_full.webp",
+  "height": 900,
+  "thumb": "/media/5a/f7/5af70bd9e1813fcafeafc6353f23ea743a923cfe25f5faddb2c5e3459d6355ae_thumb.webp",
+  "width": 1350
+ },
+ "48": {
+  "alt": "Кремль Смотровая площадь",
+  "card": "/media/13/e9/13e93c1f6256bbab5e493c9bc6f28a949f575f2c61ee49e402035c70e8330122_card.webp",
+  "full": "/media/13/e9/13e93c1f6256bbab5e493c9bc6f28a949f575f2c61ee49e402035c70e8330122_full.webp",
+  "height": 737,
+  "thumb": "/media/13/e9/13e93c1f6256bbab5e493c9bc6f28a949f575f2c61ee49e402035c70e8330122_thumb.webp",
+  "width": 1021
+ },
+ "49": {
+  "alt": "Северная башня",
+  "card": "/media/d7/6f/d76f4cdbf8523be3d31d31fdc02f20b287893c83c05fec0b648302d66706ebb9_card.webp",
+  "full": "/media/d7/6f/d76f4cdbf8523be3d31d31fdc02f20b287893c83c05fec0b648302d66706ebb9_full.webp",
+  "height": 767,
+  "thumb": "/media/d7/6f/d76f4cdbf8523be3d31d31fdc02f20b287893c83c05fec0b648302d66706ebb9_thumb.webp",
+  "width": 1024
+ },
+ "5": {
+  "alt": "Чкаловская лестница",
+  "card": "/media/17/ea/17eaccc58b09a1e0e32aff55d2cef58fe05d790f5c9630149c3b8c0e60b498ee_card.webp",
+  "full": "/media/17/ea/17eaccc58b09a1e0e32aff55d2cef58fe05d790f5c9630149c3b8c0e60b498ee_full.webp",
+  "height": 640,
+  "thumb": "/media/17/ea/17eaccc58b09a1e0e32aff55d2cef58fe05d790f5c9630149c3b8c0e60b498ee_thumb.webp",
+  "width": 960
+ },
+ "50": {
+  "alt": "Казанская церковь",
+  "card": "/media/b7/6a/b76af9f709f33054b7f8575fba939b3c424a19079cc416e155a938cfa2b89608_card.webp",
+  "full": "/media/b7/6a/b76af9f709f33054b7f8575fba939b3c424a19079cc416e155a938cfa2b89608_full.webp",
+  "height": 1080,
+  "thumb": "/media/b7/6a/b76af9f709f33054b7f8575fba939b3c424a19079cc416e155a938cfa2b89608_thumb.webp",
+  "width": 1620
+ },
+ "51": {
+  "alt": "Памятник Максиму Горькому",
+  "card": "/media/15/7e/157e4d3abe7e5ca76700fdb42d595babe8dd39ec47f53d3be4af1119a6939d91_card.webp",
+  "full": "/media/15/7e/157e4d3abe7e5ca76700fdb42d595babe8dd39ec47f53d3be4af1119a6939d91_full.webp",
+  "height": 1020,
+  "thumb": "/media/15/7e/157e4d3abe7e5ca76700fdb42d595babe8dd39ec47f53d3be4af1119a6939d91_thumb.webp",
+  "width": 1813
+ },
+ "52": {
+  "alt": "Пешеходный мост",
+  "card": "/media/e4/56/e4562340cf015a121adaf88182b39062ac08ccacaf2ea9d18cff6353e2f0e4cb_card.webp",
+  "full": "/media/e4/56/e4562340cf015a121adaf88182b39062ac08ccacaf2ea9d18cff6353e2f0e4cb_full.webp",
+  "height": 800,
+  "thumb": "/media/e4/56/e4562340cf015a121adaf88182b39062ac08ccacaf2ea9d18cff6353e2f0e4cb_thumb.webp",
+  "width": 1200
+ },
+ "53": {
+  "alt": "Олень",
+  "card": "/media/54/74/54748cdd33875a116eeda66df8d4d24aa6112138fea60064258e65411f80c8ea_card.webp",
+  "full": "/media/54/74/54748cdd33875a116eeda66df8d4d24aa6112138fea60064258e65411f80c8ea_full.webp",
+  "height": 800,
+  "thumb": "/media/54/74/54748cdd33875a116eeda66df8d4d24aa6112138fea60064258e65411f80c8ea_thumb.webp",
+  "width": 1200
+ },
+ "54": {
+  "alt": "Пакгаузы",
+  "card": "/media/7a/37/7a37c9e98e8aadd6b0d82df6a6cb92082c2c6a61894f87f041304faa9d66f4a2_card.webp",
+  "full": "/media/7a/37/7a37c9e98e8aadd6b0d82df6a6cb92082c2c6a61894f87f041304faa9d66f4a2_full.webp",
+  "height": 964,
+  "thumb": "/media/7a/37/7a37c9e98e8aadd6b0d82df6a6cb92082c2c6a61894f87f041304faa9d66f4a2_thumb.webp",
+  "width": 1280
+ },
+ "55": {
+  "alt": "Имитация Шуховских башен",
+  "card": "/media/fa/54/fa541e3bc17c186d0a9f081a101c1ff5ad658ae78dd798ac4fa9c7b45d7fdf1a_card.webp",
+  "full": "/media/fa/54/fa541e3bc17c186d0a9f081a101c1ff5ad658ae78dd798ac4fa9c7b45d7fdf1a_full.webp",
+  "height": 768,
+  "thumb": "/media/fa/54/fa541e3bc17c186d0a9f081a101c1ff5ad658ae78dd798ac4fa9c7b45d7fdf1a_thumb.webp",
+  "width": 1024
+ },
+ "56": {
+  "alt": "Парк Победы",
+  "card": "/media/f1/9f/f19f50168fe6441e0c7c3baa91f79056feac7af6d3eeac4c8150f94b2f8a72e7_card.webp",
+  "full": "/media/f1/9f/f19f50168fe6441e0c7c3baa91f79056feac7af6d3eeac4c8150f94b2f8a72e7_full.webp",
+  "height": 720,
+  "thumb": "/media/f1/9f/f19f50168fe6441e0c7c3baa91f79056feac7af6d3eeac4c8150f94b2f8a72e7_thumb.webp",
+  "width": 1280
+ },
+ "57": {
+  "alt": "Памятник Петру 1",
+  "card": "/media/ac/86/ac867873103a05489c4e7f5e6c1cecb305326cf0e7785823bfe45c8ed5b7c0ae_card.webp",
+  "full": "/media/ac/86/ac867873103a05489c4e7f5e6c1cecb305326cf0e7785823bfe45c8ed5b7c0ae_full.webp",
+  "height": 800,
+  "thumb": "/media/ac/86/ac867873103a05489c4e7f5e6c1cecb305326cf0e7785823bfe45c8ed5b7c0ae_thumb.webp",
+  "width": 1200
+ },
+ "58": {
+  "alt": "Собор Пресвятой Богородицы (Рождественская церковь)",
+  "card": "/media/07/b2/07b22352ef118adfdc82b22247504d7b42a5f0a541e5d4fc9850b4cd802c9834_card.webp",
+  "full": "/media/07/b2/07b22352ef118adfdc82b22247504d7b42a5f0a541e5d4fc9850b4cd802c9834_full.webp",
+  "height": 638,
+  "thumb": "/media/07/b2/07b22352ef118adfdc82b22247504d7b42a5f0a541e5d4fc9850b4cd802c9834_thumb.webp",
+  "width": 1280
+ },
+ "59": {
+  "alt": "Дом на Суетинской, 29",
+  "card": "/media/5e/93/5e9370aec66f6e68370e4717cba2d0177f8e454aae45ae274e7b2a87b22bf3a6_card.webp",
+  "full": "/media/5e/93/5e9370aec66f6e68370e4717cba2d0177f8e454aae45ae274e7b2a87b22bf3a6_full.webp",
+  "height": 602,
+  "thumb": "/media/5e/93/5e9370aec66f6e68370e4717cba2d0177f8e454aae45ae274e7b2a87b22bf3a6_thumb.webp",
+  "width": 926
+ },
+ "60": {
+  "alt": "Трамплин",
+  "card": "/media/94/a1/94a13d97db6f93ad5ecb7e1f14c9c0994370a0b83cb091766056658c9f24711a_card.webp",
+  "full": "/media/94/a1/94a13d97db6f93ad5ecb7e1f14c9c0994370a0b83cb091766056658c9f24711a_full.webp",
+  "height": 720,
+  "thumb": "/media/94/a1/94a13d97db6f93ad5ecb7e1f14c9c0994370a0b83cb091766056658c9f24711a_thumb.webp",
+  "width": 1280
+ },
+ "61": {
+  "alt": "Колесо Обозрения",
+  "card": "/media/79/f7/79f7ca80e2d3ac1df4d1beab99a44bb990454d78de4634a52bc1969e81af4b5b_card.webp",
+  "full": "/media/79/f7/79f7ca80e2d3ac1df4d1beab99a44bb990454d78de4634a52bc1969e81af4b5b_full.webp",
+  "height": 853,
+  "thumb": "/media/79/f7/79f7ca80e2d3ac1df4d1beab99a44bb990454d78de4634a52bc1969e81af4b5b_thumb.webp",
+  "width": 1279
+ },
+ "62": {
+  "alt": "Спасский Староярмарочный собор",
+  "card": "/media/cd/5e/cd5ea54f040e5c09ed32c2a13a25230930ddfd718f8f230e874ec8572fa5bfb1_card.webp",
+  "full": "/media/cd/5e/cd5ea54f040e5c09ed32c2a13a25230930ddfd718f8f230e874ec8572fa5bfb1_full.webp",
+  "height": 900,
+  "thumb": "/media/cd/5e/cd5ea54f040e5c09ed32c2a13a25230930ddfd718f8f230e874ec8572fa5bfb1_thumb.webp",
+  "width": 1731
+ },
+ "63": {
+  "alt": "Художественные промыслы",
+  "card": "/media/32/e1/32e1dc6bb3f15f18e3051881e51811a830cd29c22db001170e0b2177b3a1a45f_card.webp",
+  "full": "/media/32/e1/32e1dc6bb3f15f18e3051881e51811a830cd29c22db001170e0b2177b3a1a45f_full.webp",
+  "height": 768,
+  "thumb": "/media/32/e1/32e1dc6bb3f15f18e3051881e51811a830cd29c22db001170e0b2177b3a1a45f_thumb.webp",
+  "width": 1024
+ },
+ "64": {
+  "alt": "Театр кукол",
+  "card": "/media/57/ed/57ed42f1e6598ba2d79b350df5e4a605f249421ea9ad6462de2bcd9ba2df2921_card.webp",
+  "full": "/media/57/ed/57ed42f1e6598ba2d79b350df5e4a605f249421ea9ad6462de2bcd9ba2df2921_full.webp",
+  "height": 1365,
+  "thumb": "/media/57/ed/57ed42f1e6598ba2d79b350df5e4a605f249421ea9ad6462de2bcd9ba2df2921_thumb.webp",
+  "width": 2048
+ },
+ "65": {
+  "alt": "Торговый флигель (Большая Покровская, 38)",
+  "card": "/media/6a/fd/6afdc23bec4f6ac0a9eede482f764ebdfef728b0b5c11c70f1edecbb173e2352_card.webp",
+  "full": "/media/6a/fd/6afdc23bec4f6ac0a9eede482f764ebdfef728b0b5c11c70f1edecbb173e2352_full.webp",
+  "height": 681,
+  "thumb": "/media/6a/fd/6afdc23bec4f6ac0a9eede482f764ebdfef728b0b5c11c70f1edecbb173e2352_thumb.webp",
+  "width": 1024
+ },
+ "66": {
+  "alt": "Дом Белавиных (ул. Большая Покровская, 40)",
+  "card": "/media/78/33/7833f30fb3f51e5c83f004f0a67f6bb5bffbee3aa540aa3dfde4ca6c147c8b4d_card.webp",
+  "full": "/media/78/33/7833f30fb3f51e5c83f004f0a67f6bb5bffbee3aa540aa3dfde4ca6c147c8b4d_full.webp",
+  "height": 2375,
+  "thumb": "/media/78/33/7833f30fb3f51e5c83f004f0a67f6bb5bffbee3aa540aa3dfde4ca6c147c8b4d_thumb.webp",
+  "width": 3498
+ },
+ "67": {
+  "alt": "Парк Швейцария",
+  "card": "/media/c1/17/c117ad05850c48f947b7f984c06e210eabcf7e65a25e4816dad46d3b5943e1ad_card.webp",
+  "full": "/media/c1/17/c117ad05850c48f947b7f984c06e210eabcf7e65a25e4816dad46d3b5943e1ad_full.webp",
+  "height": 852,
+  "thumb": "/media/c1/17/c117ad05850c48f947b7f984c06e210eabcf7e65a25e4816dad46d3b5943e1ad_thumb.webp",
+  "width": 1280
+ },
+ "68": {
+  "alt": "Собор во имя святого благоверного великого князя Александра Невского",
+  "card": "/media/5b/d9/5bd98e613225e33092e3d01ed314faebe673e63acac5f9a57141af20121fba82_card.webp",
+  "full": "/media/5b/d9/5bd98e613225e33092e3d01ed314faebe673e63acac5f9a57141af20121fba82_full.webp",
+  "height": 900,
+  "thumb": "/media/5b/d9/5bd98e613225e33092e3d01ed314faebe673e63acac5f9a57141af20121fba82_thumb.webp",
+  "width": 1200
+ },
+ "69": {
+  "alt": "Сормовский парк",
+  "card": "/media/21/15/21154393d0347742d3eae8e3e79121a21e0c0f69f3b65f4a6ceee4b6b3ec82ea_card.webp",
+  "full": "/media/21/15/21154393d0347742d3eae8e3e79121a21e0c0f69f3b65f4a6ceee4b6b3ec82ea_full.webp",
+  "height": 1000,
+  "thumb": "/media/21/15/21154393d0347742d3eae8e3e79121a21e0c0f69f3b65f4a6ceee4b6b3ec82ea_thumb.webp",
+  "width": 1500
+ },
+ "70": {
+  "alt": "Парк Дубки",
+  "card": "/media/ae/97/ae973340f3ae6a3139110eb5c41afd916b33be3a004bd59075708268dda35c5a_card.webp",
+  "full": "/media/ae/97/ae973340f3ae6a3139110eb5c41afd916b33be3a004bd59075708268dda35c5a_full.webp",
+  "height": 683,
+  "thumb": "/media/ae/97/ae973340f3ae6a3139110eb5c41afd916b33be3a004bd59075708268dda35c5a_thumb.webp",
+  "width": 1024
+ },
+ "71": {
+  "alt": "Автозаводский парк",
+  "card": "/media/56/35/5635360e26cebc9167fb6e4027b9d7c0ffe57ce4d9c61accce51da8316bac1de_card.webp",
+  "full": "/media/56/35/5635360e26cebc9167fb6e4027b9d7c0ffe57ce4d9c61accce51da8316bac1de_full.webp",
+  "height": 852,
+  "thumb": "/media/56/35/5635360e26cebc9167fb6e4027b9d7c0ffe57ce4d9c61accce51da8316bac1de_thumb.webp",
+  "width": 1280
+ },
+ "72": {
+  "alt": "Щелоковский хутор",
+  "card": "/media/ee/81/ee811e8250146935047e025e3a1cc350ba563bece240182f7da025b9aa29ba41_card.webp",
+  "full": "/media/ee/81/ee811e8250146935047e025e3a1cc350ba563bece240182f7da025b9aa29ba41_full.webp",
+  "height": 662,
+  "thumb": "/media/ee/81/ee811e8250146935047e025e3a1cc350ba563bece240182f7da025b9aa29ba41_thumb.webp",
+  "width": 1200
+ },
+ "73": {
+  "alt": "Театр «Комедiя»",
+  "card": "/media/75/fc/75fcb3e5bd1d592acd2a9089fb8bcbc9da7623fd5394ce8b4878dbbfcad25f1f_card.webp",
+  "full": "/media/75/fc/75fcb3e5bd1d592acd2a9089fb8bcbc9da7623fd5394ce8b4878dbbfcad25f1f_full.webp",
+  "height": 700,
+  "thumb": "/media/75/fc/75fcb3e5bd1d592acd2a9089fb8bcbc9da7623fd5394ce8b4878dbbfcad25f1f_thumb.webp",
+  "width": 1039
+ },
+ "74": {
+  "alt": "Театр «Вера»",
+  "card": "/media/37/d5/37d569ad8430a5f3f16d2c204393d9ccd790ae1b6acd7be589cfd74346646156_card.webp",
+  "full": "/media/37/d5/37d569ad8430a5f3f16d2c204393d9ccd790ae1b6acd7be589cfd74346646156_full.webp",
+  "height": 682,
+  "thumb": "/media/37/d5/37d569ad8430a5f3f16d2c204393d9ccd790ae1b6acd7be589cfd74346646156_thumb.webp",
+  "width": 1024
+ },
+ "75": {
+  "alt": "Театр драмы им. М. Горького",
+  "card": "/media/6e/2d/6e2d8167d5beb92ca2a8bd455414e4186c15a973f81282bfae7e734989bcbf2a_card.webp",
+  "full": "/media/6e/2d/6e2d8167d5beb92ca2a8bd455414e4186c15a973f81282bfae7e734989bcbf2a_full.webp",
+  "height": 563,
+  "thumb": "/media/6e/2d/6e2d8167d5beb92ca2a8bd455414e4186c15a973f81282bfae7e734989bcbf2a_thumb.webp",
+  "width": 1000
+ },
+ "76": {
+  "alt": "Театр оперы и балета им. А.С. Пушкина.",
+  "card": "/media/5b/85/5b85c20c2a1e81c5984f5290d9dad5f9e13c0dbc30702063684527dd3c75fb2f_card.webp",
+  "full": "/media/5b/85/5b85c20c2a1e81c5984f5290d9dad5f9e13c0dbc30702063684527dd3c75fb2f_full.webp",
+  "height": 800,
+  "thumb": "/media/5b/85/5b85c20c2a1e81c5984f5290d9dad5f9e13c0dbc30702063684527dd3c75fb2f_thumb.webp",
+  "width": 1200
+ },
+ "77": {
+  "alt": "Независимый театр «На счастливой»",
+  "card": "/media/34/0d/340d167d162c94ecd673ee80cd2a239ea75de1d75371bb724bc8888edb5c1e5c_card.webp",
+  "full": "/media/34/0d/340d167d162c94ecd673ee80cd2a239ea75de1d75371bb724bc8888edb5c1e5c_full.webp",
+  "height": 676,
+  "thumb": "/media/34/0d/340d167d162c94ecd673ee80cd2a239ea75de1d75371bb724bc8888edb5c1e5c_thumb.webp",
+  "width": 1200
+ },
+ "78": {
+  "alt": "Филармония имени М. Ростроповича",
+  "card": "/media/f1/0e/f10e657f28867fb625ac048e462378f41fe30c4958a7b5fb38ce297611ad4217_card.webp",
+  "full": "/media/f1/0e/f10e657f28867fb625ac048e462378f41fe30c4958a7b5fb38ce297611ad4217_full.webp",
+  "height": 1824,
+  "thumb": "/media/f1/0e/f10e657f28867fb625ac048e462378f41fe30c4958a7b5fb38ce297611ad4217_thumb.webp",
+  "width": 2736
+ },
+ "79": {
+  "alt": "Театр юного зрителя",
+  "card": "/media/1f/90/1f90b877c530d8e4ceffc2b0687360264ff9dc8ed9da6d9d4315a1900e869b9f_card.webp",
+  "full": "/media/1f/90/1f90b877c530d8e4ceffc2b0687360264ff9dc8ed9da6d9d4315a1900e869b9f_full.webp",
+  "height": 730,
+  "thumb": "/media/1f/90/1f90b877c530d8e4ceffc2b0687360264ff9dc8ed9da6d9d4315a1900e869b9f_thumb.webp",
+  "width": 983
+ },
+ "8": {
+  "alt": "Стадион Нижний Новгород",
+  "card": "/media/47/f7/47f76766314bc010fa36b881b57f5973c48a6a50d90ff4fafdcd0bc83c7c0017_card.webp",
+  "full": "/media/47/f7/47f76766314bc010fa36b881b57f5973c48a6a50d90ff4fafdcd0bc83c7c0017_full.webp",
+  "height": 900,
+  "thumb": "/media/47/f7/47f76766314bc010fa36b881b57f5973c48a6a50d90ff4fafdcd0bc83c7c0017_thumb.webp",
+  "width": 1200
+ },
+ "80": {
+  "alt": "Парк 1 мая",
+  "card": "/media/aa/82/aa820ba24fed753cd0895d78d83203baba6769b0678c27c4c757329ac29baf9b_card.webp",
+  "full": "/media/aa/82/aa820ba24fed753cd0895d78d83203baba6769b0678c27c4c757329ac29baf9b_full.webp",
+  "height": 1704,
+  "thumb": "/media/aa/82/aa820ba24fed753cd0895d78d83203baba6769b0678c27c4c757329ac29baf9b_thumb.webp",
+  "width": 2272
+ },
+ "81": {
+  "alt": "Парк Пушкина",
+  "card": "/media/40/01/40018665eea0489b4ef935718d4ca4977eedda90761d04ae77582190dfd05918_card.webp",
+  "full": "/media/40/01/40018665eea0489b4ef935718d4ca4977eedda90761d04ae77582190dfd05918_full.webp",
+  "height": 771,
+  "thumb": "/media/40/01/40018665eea0489b4ef935718d4ca4977eedda90761d04ae77582190dfd05918_thumb.webp",
+  "width": 1024
+ },
+ "82": {
+  "alt": "Парк Кулибина",
+  "card": "/media/38/f9/38f91455c1b66cb9938cef26e894545d4ca4e41ce4622b11434f95b7c1eb6770_card.webp",
+  "full": "/media/38/f9/38f91455c1b66cb9938cef26e894545d4ca4e41ce4622b11434f95b7c1eb6770_full.webp",
+  "height": 3024,
+  "thumb": "/media/38/f9/38f91455c1b66cb9938cef26e894545d4ca4e41ce4622b11434f95b7c1eb6770_thumb.webp",
+  "width": 4032
+ },
+ "83": {
+  "alt": "Сквер Горького",
+  "card": "/media/a2/a0/a2a077da9793bf67cfe5239605cafcd8a63071e6e95fdf0e4a2ce550709193c5_card.webp",
+  "full": "/media/a2/a0/a2a077da9793bf67cfe5239605cafcd8a63071e6e95fdf0e4a2ce550709193c5_full.webp",
+  "height": 720,
+  "thumb": "/media/a2/a0/a2a077da9793bf67cfe5239605cafcd8a63071e6e95fdf0e4a2ce550709193c5_thumb.webp",
+  "width": 1080
+ },
+ "84": {
+  "alt": "Сквер Свердлова",
+  "card": "/media/6c/ab/6cabeaad34c1a5935a112eba0c2514927ffdeec068b6b81bc50fea7374948718_card.webp",
+  "full": "/media/6c/ab/6cabeaad34c1a5935a112eba0c2514927ffdeec068b6b81bc50fea7374948718_full.webp",
+  "height": 640,
+  "thumb": "/media/6c/ab/6cabeaad34c1a5935a112eba0c2514927ffdeec068b6b81bc50fea7374948718_thumb.webp",
+  "width": 960
+ },
+ "85": {
+  "alt": "Парк 800-летия",
+  "card": "/media/c8/58/c858c9d553620abc76d96e2c7440c069d0c43924721f0d2db25630b57ac7680c_card.webp",
+  "full": "/media/c8/58/c858c9d553620abc76d96e2c7440c069d0c43924721f0d2db25630b57ac7680c_full.webp",
+  "height": 1400,
+  "thumb": "/media/c8/58/c858c9d553620abc76d96e2c7440c069d0c43924721f0d2db25630b57ac7680c_thumb.webp",
+  "width": 2102
+ },
+ "86": {
+  "alt": "Мещерское озеро",
+  "card": "/media/4e/2c/4e2c3c86251e9cc5be4398ecefc60e68b81cdb3b48eeff56bac38360b642c291_card.webp",
+  "full": "/media/4e/2c/4e2c3c86251e9cc5be4398ecefc60e68b81cdb3b48eeff56bac38360b642c291_full.webp",
+  "height": 1280,
+  "thumb": "/media/4e/2c/4e2c3c86251e9cc5be4398ecefc60e68b81cdb3b48eeff56bac38360b642c291_thumb.webp",
+  "width": 1920
+ },
+ "87": {
+  "alt": "Бурнаковское озеро",
+  "card": "/media/4d/17/4d1730fc3ee033eb26e48fef057e92b2afbcbd7eb3307239f3fdf7b6f60c12e3_card.webp",
+  "full": "/media/4d/17/4d1730fc3ee033eb26e48fef057e92b2afbcbd7eb3307239f3fdf7b6f60c12e3_full.webp",
+  "height": 900,
+  "thumb": "/media/4d/17/4d1730fc3ee033eb26e48fef057e92b2afbcbd7eb3307239f3fdf7b6f60c12e3_thumb.webp",
+  "width": 1200
+ },
+ "88": {
+  "alt": "Ботанический сад ННГУ",
+  "card": "/media/77/e2/77e21486216a8be10380d1b7089c383c0e227c13f95e3b46c5ad9046eec09952_card.webp",
+  "full": "/media/77/e2/77e21486216a8be10380d1b7089c383c0e227c13f95e3b46c5ad9046eec09952_full.webp",
+  "height": 768,
+  "thumb": "/media/77/e2/77e21486216a8be10380d1b7089c383c0e227c13f95e3b46c5ad9046eec09952_thumb.webp",
+  "width": 1024
+ },
+ "89": {
+  "alt": "Площадь Маркина",
+  "card": "/media/b6/69/b6690ae13d1547c61f3f865ab80f14ca094918b79825538f21f0c53e4491e698_card.webp",
+  "full": "/media/b6/69/b6690ae13d1547c61f3f865ab80f14ca094918b79825538f21f0c53e4491e698_full.webp",
+  "height": 853,
+  "thumb": "/media/b6/69/b6690ae13d1547c61f3f865ab80f14ca094918b79825538f21f0c53e4491e698_thumb.webp",
+  "width": 1280
+ },
+ "9": {
+  "alt": "Нижегородское отделение Государственного банка",
+  "card": "/media/72/15/7215bd51e2d169d1e78547d0de0ab1854972e45f31babc95c20a06715d2732bc_card.webp",
+  "full": "/media/72/15/7215bd51e2d169d1e78547d0de0ab1854972e45f31babc95c20a06715d2732bc_full.webp",
+  "height": 2943,
+  "thumb": "/media/72/15/7215bd51e2d169d1e78547d0de0ab1854972e45f31babc95c20a06715d2732bc_thumb.webp",
+  "width": 3417
+ },
+ "90": {
+  "alt": "Детская железная дорога",
+  "card": "/media/ea/28/ea286415dd7904f53feb2f73d4a62456a965aa63a0e3ba31bfb38b0b1851cb4d_card.webp",
+  "full": "/media/ea/28/ea286415dd7904f53feb2f73d4a62456a965aa63a0e3ba31bfb38b0b1851cb4d_full.webp",
+  "height": 667,
+  "thumb": "/media/ea/28/ea286415dd7904f53feb2f73d4a62456a965aa63a0e3ba31bfb38b0b1851cb4d_thumb.webp",
+  "width": 1000
+ },
+ "91": {
+  "alt": "Железнодорожный вокзал",
+  "card": "/media/70/81/7081ca0b6e49413edf2174c136a6e5a33135d3880605b16d942d50b55a3e7c14_card.webp",
+  "full": "/media/70/81/7081ca0b6e49413edf2174c136a6e5a33135d3880605b16d942d50b55a3e7c14_full.webp",
+  "height": 960,
+  "thumb": "/media/70/81/7081ca0b6e49413edf2174c136a6e5a33135d3880605b16d942d50b55a3e7c14_thumb.webp",
+  "width": 1280
+ },
+ "92": {
+  "alt": "Палаты Пушникова",
+  "card": "/media/16/b4/16b45a4883a64d74af50b85ca4ca8c0bc9ac5c54b442700575774c5e1d042957_card.webp",
+  "full": "/media/16/b4/16b45a4883a64d74af50b85ca4ca8c0bc9ac5c54b442700575774c5e1d042957_full.webp",
+  "height": 800,
+  "thumb": "/media/16/b4/16b45a4883a64d74af50b85ca4ca8c0bc9ac5c54b442700575774c5e1d042957_thumb.webp",
+  "width": 1200
+ },
+ "93": {
+  "alt": "Квартал трех Святителей",
+  "card": "/media/ff/e6/ffe60a1535f2647b0aad854295858d4f5e8a46c33b675005cf0104a3903d9270_card.webp",
+  "full": "/media/ff/e6/ffe60a1535f2647b0aad854295858d4f5e8a46c33b675005cf0104a3903d9270_full.webp",
+  "height": 960,
+  "thumb": "/media/ff/e6/ffe60a1535f2647b0aad854295858d4f5e8a46c33b675005cf0104a3903d9270_thumb.webp",
+  "width": 1440
+ },
+ "94": {
+  "alt": "Фонтан на пл. Минина",
+  "card": "/media/4f/6f/4f6fb6d8bbc246c20a1b45a6d4a7686ca1f6c567277777eb9b6ba58ae4aca492_card.webp",
+  "full": "/media/4f/6f/4f6fb6d8bbc246c20a1b45a6d4a7686ca1f6c567277777eb9b6ba58ae4aca492_full.webp",
+  "height": 2592,
+  "thumb": "/media/4f/6f/4f6fb6d8bbc246c20a1b45a6d4a7686ca1f6c567277777eb9b6ba58ae4aca492_thumb.webp",
+  "width": 3872
+ },
+ "95": {
+  "alt": "Старобусыгинские дома",
+  "card": "/media/da/01/da018dad8d4167804856f216a2b19ea7202fc8abafb8774bb5b66f309d851ba3_card.webp",
+  "full": "/media/da/01/da018dad8d4167804856f216a2b19ea7202fc8abafb8774bb5b66f309d851ba3_full.webp",
+  "height": 643,
+  "thumb": "/media/da/01/da018dad8d4167804856f216a2b19ea7202fc8abafb8774bb5b66f309d851ba3_thumb.webp",
+  "width": 1280
+ },
+ "96": {
+  "alt": "Бывший речной вокзал",
+  "card": "/media/89/76/89768a8858a54134531424ccbbe89cb92530445e2d4c4a4ed041c280837e09c0_card.webp",
+  "full": "/media/89/76/89768a8858a54134531424ccbbe89cb92530445e2d4c4a4ed041c280837e09c0_full.webp",
+  "height": 640,
+  "thumb": "/media/89/76/89768a8858a54134531424ccbbe89cb92530445e2d4c4a4ed041c280837e09c0_thumb.webp",
+  "width": 1280
+ },
+ "97": {
+  "alt": "Фуникулер",
+  "card": "/media/26/af/26af108716f2193bcb8eecfe1b7102dbced70940c0968bc4cf65a51746823f09_card.webp",
+  "full": "/media/26/af/26af108716f2193bcb8eecfe1b7102dbced70940c0968bc4cf65a51746823f09_full.webp",
+  "height": 667,
+  "thumb": "/media/26/af/26af108716f2193bcb8eecfe1b7102dbced70940c0968bc4cf65a51746823f09_thumb.webp",
+  "width": 1000
+ },
+ "98": {
+  "alt": "Никольская башня",
+  "card": "/media/0a/91/0a91bd5aac1f921a2b0879eae2d7fe7f366564fc95759410e26a162c9423beae_card.webp",
+  "full": "/media/0a/91/0a91bd5aac1f921a2b0879eae2d7fe7f366564fc95759410e26a162c9423beae_full.webp",
+  "height": 1667,
+  "thumb": "/media/0a/91/0a91bd5aac1f921a2b0879eae2d7fe7f366564fc95759410e26a162c9423beae_thumb.webp",
+  "width": 2500
+ },
+ "99": {
+  "alt": "Георгиевская башня",
+  "card": "/media/27/30/2730c00840130b41be58ef7267814a647615f0a036e1ad7a242c6bd3032d63bf_card.webp",
+  "full": "/media/27/30/2730c00840130b41be58ef7267814a647615f0a036e1ad7a242c6bd3032d63bf_full.webp",
+  "height": 900,
+  "thumb": "/media/27/30/2730c00840130b41be58ef7267814a647615f0a036e1ad7a242c6bd3032d63bf_thumb.webp",
+  "width": 1200
+ }
+}

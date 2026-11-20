@@ -99,7 +99,24 @@ export DATABASE_URL='postgres://familyroutes:<пароль>@127.0.0.1:5432/famil
 go run ./cmd/dbload
 ```
 
-Загрузчик идемпотентен: повторный запуск обновляет данные и не создаёт дублей. Файл `.env` не попадает в Git. Картинки в БД не хранятся: в таблице `item_images` лежат метаданные и хеш, сами файлы будут на диске.
+Загрузчик идемпотентен: повторный запуск обновляет данные и не создаёт дублей. Файл `.env` не попадает в Git. Картинки в БД не хранятся: в таблице `item_images` лежат метаданные и хеш, а сами файлы лежат в репозитории (см. ниже). `dbload` после загрузки наборов читает `db/seed/card_images.csv` и записывает обложки 174 карточек в `item_images`.
+
+### Картинки карточек
+
+Готовые WebP лежат в Git, в `assets/images/ab/cd/<sha256>_{thumb,card,full}.webp` (320, 800 и 1280 px по ширине, около 37 МБ). Имя файла — SHA-256 оригинала, поэтому содержимое по ссылке не меняется. `assets/images/manifest.json` сопоставляет `id` из `main.csv` ссылкам:
+
+```json
+"57": {"thumb": "/media/ac/86/ac86…_thumb.webp", "card": "/media/…_card.webp", "full": "/media/…_full.webp", "alt": "Памятник Петру 1", "width": 1200, "height": 800}
+```
+
+Backend раздаёт их по `/media/…` (флаг `-images-dir`, по умолчанию `assets/images`; отдаются только `.webp` и `manifest.json`, `*.webp` — с `Cache-Control: immutable`). Фронт при проксировании `/api` должен проксировать и `/media`:
+
+```html
+<img src="/media/…_card.webp" alt="Памятник Петру 1" loading="lazy">
+```
+
+Оригиналы (`data/card_images/`, не в Git) нужны только для пересборки: `pip install pillow && python scripts/build-card-images.py`. Источник каждой картинки записан в `db/seed/card_images.csv` (`source_url`).
+
 
 ## Запуск маршрутизатора
 

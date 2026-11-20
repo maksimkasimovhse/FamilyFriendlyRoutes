@@ -52,4 +52,30 @@ func main() {
 		}
 		fmt.Printf("%s: загружено %d записей\n", ds.Name, len(rows))
 	}
+	loadImages(ctx, conn, filepath.Join(*seedDir, "card_images.csv"))
+}
+
+// loadImages записывает обложки карточек (набор main) из card_images.csv.
+func loadImages(ctx context.Context, conn *pgx.Conn, path string) {
+	file, err := os.Open(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	images, err := catalog.ParseImages(file)
+	file.Close()
+	if err != nil {
+		log.Fatalf("%s: %v", path, err)
+	}
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := catalog.LoadImages(ctx, tx, "main", images); err != nil {
+		_ = tx.Rollback(ctx)
+		log.Fatalf("%s: %v", path, err)
+	}
+	if err := tx.Commit(ctx); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("картинки: загружено %d обложек\n", len(images))
 }

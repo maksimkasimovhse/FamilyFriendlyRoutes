@@ -22,6 +22,7 @@ func main() {
 	listen := flag.String("listen", "127.0.0.1:8080", "Development backend address")
 	database := flag.String("store", "data/backend/state.json", "Single-process development store")
 	demo := flag.Bool("demo-catalog", false, "Explicitly enable synthetic integration activities, NOT real venue data")
+	imagesDir := flag.String("images-dir", "assets/images", "Directory with card images served under /media/")
 	mlURL := flag.String("ml-url", "", "Full internal ML recommendations endpoint")
 	catalogVersion := flag.String("catalog-version", "", "Catalog version agreed with ML")
 	flag.Parse()
@@ -51,7 +52,13 @@ func main() {
 	} else {
 		p.Source = planner.HTTPSource{Endpoint: *mlURL, Version: *catalogVersion, Token: os.Getenv("ML_API_TOKEN")}
 	}
-	server := &http.Server{Addr: *listen, Handler: httpapi.TripHandler(store, p), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 40 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
+	if _, err := os.Stat(*imagesDir); err != nil {
+		log.Fatalf("images-dir: %v", err)
+	}
+	root := http.NewServeMux()
+	root.Handle("/media/", httpapi.MediaHandler(*imagesDir))
+	root.Handle("/", httpapi.TripHandler(store, p))
+	server := &http.Server{Addr: *listen, Handler: root, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 40 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	go func() {
