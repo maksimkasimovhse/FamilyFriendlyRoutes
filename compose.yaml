@@ -29,5 +29,31 @@ services:
       retries: 6
       start_period: 900s
     restart: unless-stopped
+
+  # Go-бекенд. network_mode: host — потому что бекенд слушает только 127.0.0.1:8080
+  # и ищет Valhalla на 127.0.0.1:8002 (так написан cmd/backend). Работает на Linux;
+  # на Docker Desktop (Windows/macOS) нужно включить host networking в настройках.
+  backend:
+    build:
+      context: .
+      dockerfile: infra/docker/backend.Dockerfile
+    network_mode: host
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      valhalla:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Фронтенд (обычные HTML/CSS/JS из ./frontend) + прокси /api на бекенд.
+  # Открывать: http://localhost:8000
+  web:
+    image: nginx:1.27-alpine
+    network_mode: host
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./infra/docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+
 volumes:
   valhalla-data:

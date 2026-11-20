@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="400" height="440">
+<defs>
+<symbol id="fwBack" viewBox="0 0 200 220">
+<ellipse cx="100" cy="212" rx="64" ry="7" fill="#000000" opacity="0.12"></ellipse>
+<ellipse cx="160" cy="166" rx="15" ry="9" transform="rotate(-35 160 166)" fill="#C98B4E"></ellipse>
+<ellipse cx="164" cy="162" rx="8" ry="4.5" transform="rotate(-35 164 162)" fill="#F6E3C4"></ellipse>
+<path d="M62 205C52 160 70 118 100 112C134 106 162 140 160 182C158 200 150 208 136 208Z" fill="#C98B4E"></path>
+<ellipse cx="138" cy="182" rx="30" ry="24" fill="#B87B41"></ellipse>
+<ellipse cx="152" cy="205" rx="15" ry="6" fill="#5A3A22"></ellipse>
+<g fill="#F6E3C4"><ellipse cx="128" cy="140" rx="6" ry="4"></ellipse><ellipse cx="144" cy="134" rx="4.5" ry="3"></ellipse><ellipse cx="148" cy="152" rx="5" ry="3.5"></ellipse><ellipse cx="134" cy="174" rx="5" ry="3.5"></ellipse><ellipse cx="150" cy="186" rx="4" ry="3"></ellipse></g>
+</symbol>
+<symbol id="fwFront" viewBox="0 0 200 220">
+<path d="M78 202C74 170 84 140 100 132C114 140 120 170 116 202Z" fill="#F6E3C4"></path>
+<rect x="80" y="166" width="14" height="40" rx="7" fill="#B87B41"></rect>
+<rect x="104" y="166" width="14" height="40" rx="7" fill="#B87B41"></rect>
+<ellipse cx="87" cy="206" rx="9" ry="5" fill="#5A3A22"></ellipse>
+<ellipse cx="111" cy="206" rx="9" ry="5" fill="#5A3A22"></ellipse>
+<path d="M84 142C80 120 120 114 118 134L116 146L86 148Z" fill="#C98B4E"></path>
+</symbol>
+<symbol id="fwHead" viewBox="0 0 200 220">
+<ellipse cx="50" cy="62" rx="27" ry="12" transform="rotate(-24 50 62)" fill="#C98B4E"></ellipse>
+<ellipse cx="53" cy="63" rx="17" ry="6.5" transform="rotate(-24 53 63)" fill="#F2C7A5"></ellipse>
+<ellipse cx="150" cy="62" rx="27" ry="12" transform="rotate(24 150 62)" fill="#C98B4E"></ellipse>
+<ellipse cx="147" cy="63" rx="17" ry="6.5" transform="rotate(24 147 63)" fill="#F2C7A5"></ellipse>
+<ellipse cx="82" cy="42" rx="7" ry="9" fill="#E9D3A8"></ellipse>
+<ellipse cx="118" cy="42" rx="7" ry="9" fill="#E9D3A8"></ellipse>
+<ellipse cx="100" cy="82" rx="50" ry="46" fill="#C98B4E"></ellipse>
+<path d="M88 40C94 30 106 30 112 40C106 46 94 46 88 40Z" fill="#B87B41"></path>
+<ellipse cx="100" cy="106" rx="27" ry="19" fill="#F6E3C4"></ellipse>
+<ellipse cx="100" cy="97" rx="9.5" ry="6.5" fill="#2A1E14"></ellipse>
+<ellipse cx="97" cy="95" rx="3.2" ry="1.7" fill="#FFFFFF" opacity="0.7"></ellipse>
+<ellipse cx="66" cy="98" rx="8" ry="5" fill="#E8957A" opacity="0.5"></ellipse>
+<ellipse cx="134" cy="98" rx="8" ry="5" fill="#E8957A" opacity="0.5"></ellipse>
+</symbol>
+<symbol id="fwFace" viewBox="0 0 200 220">
+<ellipse cx="78" cy="78" rx="8.5" ry="10.5" fill="#2A1E14"></ellipse>
+<ellipse cx="122" cy="78" rx="8.5" ry="10.5" fill="#2A1E14"></ellipse>
+<circle cx="81" cy="74" r="3.2" fill="#FFFFFF"></circle>
+<circle cx="76" cy="83" r="1.5" fill="#FFFFFF"></circle>
+<circle cx="125" cy="74" r="3.2" fill="#FFFFFF"></circle>
+<circle cx="120" cy="83" r="1.5" fill="#FFFFFF"></circle>
+<path d="M93 110Q100 116 107 110" fill="none" stroke="#2A1E14" stroke-width="2.4" stroke-linecap="round"></path>
+</symbol>
+</defs>
+
+      <use href="#fwBack" width="200" height="220"></use>
+      <use href="#fwFront" width="200" height="220"></use>
+      <use href="#fwHead" width="200" height="220"></use>
+      <use href="#fwFace" width="200" height="220"></use>
+    
+</svg>

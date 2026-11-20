@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Сравнение стилей карты</title>
+<link href="https://fonts.googleapis.com/css2?family=Prata&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<style>
+  :root {
+    --volga-night: #13223A; --carving: #F1E7D6; --shutters: #2F5D8C; --sepia: #8A5A2B;
+    --ochre: #D8A23A; --now: #2463D6; --kid: #E8641F; --paper: #F3ECDF; --ink: #2A1E14; --ink-2: #5B4A3A;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #ddd5c7; font-family: Nunito, sans-serif; color: var(--ink);
+         display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 16px; }
+  h1 { font-family: Prata, serif; font-weight: 400; margin: 0; font-size: 22px; }
+  .styles { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .styles button { font: 700 14px Nunito, sans-serif; padding: 10px 14px; border-radius: 999px; min-height: 44px;
+                   border: 2px solid var(--sepia); background: var(--paper); color: var(--sepia); cursor: pointer; }
+  .styles button.on { background: var(--sepia); color: #fff; }
+  .note { max-width: 420px; text-align: center; font-size: 14px; color: var(--ink-2); margin: 0; }
+
+  /* Телефон */
+  .phone { width: 390px; max-width: 100%; height: 780px; border-radius: 36px; overflow: hidden; position: relative;
+           background: var(--paper); box-shadow: 0 20px 50px rgba(0,0,0,.25); display: flex; flex-direction: column; }
+  .top { padding: 14px 16px 10px; display: flex; align-items: center; justify-content: space-between; background: var(--paper); z-index: 2; }
+  .top b { font-family: Prata, serif; font-weight: 400; font-size: 22px; }
+  .days { display: flex; background: #e6dccb; border-radius: 999px; padding: 3px; }
+  .days span { padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+  .days .on { background: #fff; }
+  #map { flex: 1; position: relative; }
+  .layers { position: absolute; left: 12px; bottom: 150px; display: flex; gap: 8px; z-index: 2; }
+  .layers span { background: #fff; border-radius: 12px; padding: 8px 10px; font-size: 13px; font-weight: 700; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 64px; background: #fff; border-radius: 20px 20px 0 0;
+           padding: 14px 16px; box-shadow: 0 -4px 16px rgba(0,0,0,.12); z-index: 2; }
+  .sheet .era { color: var(--sepia); font-family: Prata, serif; }
+  .sheet h3 { margin: 2px 0 4px; font-size: 17px; }
+  .sheet p { margin: 0 0 10px; color: var(--ink-2); font-size: 14px; }
+  .sheet .row { display: flex; gap: 8px; }
+  .sheet button { flex: 1; min-height: 44px; border-radius: 12px; font: 800 15px Nunito, sans-serif; border: 0; }
+  .sheet .main { background: var(--sepia); color: #fff; }
+  .sheet .alt { background: #eef2fb; color: var(--now); }
+  .tabbar { height: 64px; display: flex; background: #fff; border-top: 1px solid #e6dccb; z-index: 3; }
+  .tabbar span { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--ink-2); gap: 3px; }
+  .tabbar span::before { content: ""; width: 22px; height: 22px; border-radius: 6px; background: currentColor; opacity: .25; }
+  .tabbar .on { color: var(--sepia); }
+  .tabbar .on::before { opacity: 1; }
+  .tabbar .kid { color: var(--kid); }
+
+  /* Метки */
+  .win { width: 44px; height: 44px; border-radius: 50%; background: var(--sepia); color: #fff; border: 3px solid var(--carving);
+         display: flex; align-items: center; justify-content: center; font: 800 12px Nunito, sans-serif; box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+  .win.sel { outline: 3px solid var(--ochre); }
+  .mosaic { width: 16px; height: 16px; background: var(--kid); border: 2px solid #fff; border-radius: 3px; transform: rotate(45deg); box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+  .me { width: 18px; height: 18px; border-radius: 50%; background: var(--now); border: 3px solid #fff; box-shadow: 0 0 0 6px rgba(36,99,214,.2); }
+  .maplibregl-ctrl-attrib { font-size: 10px; }
+</style>
+</head>
+<body>
+<h1>Какая карта красивее?</h1>
+<div class="styles" id="styles"></div>
+<p class="note" id="note"></p>
+
+<div class="phone">
+  <div class="top"><b>Карта</b><div class="days"><span class="on">Сб</span><span>Вс</span></div></div>
+  <div id="map"></div>
+  <div class="layers"><span>🚻 Туалеты</span><span>🛝 Площадки</span><span>☕ Кафе</span></div>
+  <div class="sheet">
+    <div class="era">ПРИМЕР · 1949</div>
+    <h3>Чкаловская лестница</h3>
+    <p>12 мин пешком · 900 м</p>
+    <div class="row"><button class="main">Открыть окно</button><button class="alt">Как дойти</button></div>
+  </div>
+  <div class="tabbar"><span>Сегодня</span><span class="on">Карта</span><span class="kid">Маша</span><span>Помощник</span><span>Альбом</span></div>
+</div>
+<p class="note">Метки окон и годы на этой странице — пример для оценки внешнего вида, а не реальные данные. Пунктир — заглушка: в приложении здесь будет линия по улицам от графа Максима.</p>
+
+<script>
+// Примеры точек (координаты мест из датасета кейса, годы — заглушки)
+const WINDOWS = [
+  { year: '1612', lon: 44.005695, lat: 56.32711 },   // Дмитриевская башня
+  { year: 'XIX', lon: 43.998938, lat: 56.320757 },   // Большая Покровская
+  { year: '1896', lon: 43.988951, lat: 56.328575 },  // Рождественская
+  { year: '1949', lon: 44.00945, lat: 56.330336, sel: true }, // Чкаловская лестница
+];
+const MOSAIC = { lon: 43.995234, lat: 56.318136 };  // мозаика «Художественные промыслы»
+const ME = { lon: 44.0035, lat: 56.3235 };
+
+const STYLES = {
+  liberty:  { name: 'Liberty',   url: 'https://tiles.openfreemap.org/styles/liberty',  note: 'Подробная, как обычная карта навигатора.' },
+  bright:   { name: 'Bright',    url: 'https://tiles.openfreemap.org/styles/bright',   note: 'Яркая, похожа на классическую OSM.' },
+  positron: { name: 'Positron',  url: 'https://tiles.openfreemap.org/styles/positron', note: 'Светлая и спокойная: всё внимание на наших метках.' },
+  ours:     { name: 'Наш стиль', url: 'https://tiles.openfreemap.org/styles/positron', note: 'Positron, перекрашенный в цвета «Окна в прошлое»: бумага, сепия, синяя Волга.', recolor: true },
+};
+
+// Подписи на карте — по-русски (по умолчанию стили показывают латиницу + кириллицу)
+const RU = ['coalesce', ['get', 'name:ru'], ['get', 'name']];
+
+// Наша палитра для перекраски
+function recolor(layer) {
+  const id = layer.id, p = layer.paint = layer.paint || {};
+  if (layer.type === 'background') p['background-color'] = '#F3ECDF';
+  if (layer.type === 'fill') {
+    if (id.includes('water')) p['fill-color'] = '#AFC4D6';
+    else if (id.includes('park') || id.includes('wood')) p['fill-color'] = '#DCE0C3';
+    else if (id.includes('building')) { p['fill-color'] = '#E4D5BE'; p['fill-outline-color'] = '#D6C3A5'; }
+    else if (id.includes('residential')) p['fill-color'] = '#EFE6D6';
+  }
+  if (layer.type === 'line') {
+    if (id.includes('water')) p['line-color'] = '#AFC4D6';
+    else if (id.includes('casing')) p['line-color'] = '#D9C8AD';
+    else if (id.includes('highway')) p['line-color'] = id.includes('minor') || id.includes('path') ? '#FFFDF8' : '#F7E9CF';
+    else if (id.includes('rail')) p['line-color'] = '#C9B79C';
+  }
+  if (layer.type === 'symbol') {
+    p['text-color'] = id.includes('water') ? '#2F5D8C' : '#5B4A3A';
+    p['text-halo-color'] = '#F3ECDF';
+  }
+}
+
+async function loadStyle(key) {
+  const s = STYLES[key];
+  const style = await (await fetch(s.url)).json();
+  for (const layer of style.layers) {
+    if (layer.type === 'symbol' && layer.layout && layer.layout['text-field']) layer.layout['text-field'] = RU;
+    if (s.recolor) recolor(layer);
+  }
+  return style;
+}
+
+const map = new maplibregl.Map({
+  container: 'map', center: [43.999, 56.3255], zoom: 13.5, attributionControl: { compact: true },
+});
+// Показать все окна целиком, с отступом снизу под карточку
+map.fitBounds([[43.986, 56.318], [44.012, 56.332]], { padding: { top: 30, bottom: 200, left: 30, right: 30 }, animate: false });
+
+function addOverlays() {
+  // Заглушка маршрута: пунктир между окнами по порядку
+  if (map.getSource('route')) return;
+  map.addSource('route', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString',
+    coordinates: [[ME.lon, ME.lat], ...WINDOWS.map(w => [w.lon, w.lat])] } } });
+  map.addLayer({ id: 'route', type: 'line', source: 'route',
+    paint: { 'line-color': '#8A5A2B', 'line-width': 5, 'line-dasharray': [1.5, 1.2], 'line-opacity': .85 },
+    layout: { 'line-cap': 'round' } });
+}
+
+function marker(cls, text, p) {
+  const el = document.createElement('div');
+  el.className = cls;
+  if (text) el.textContent = text;
+  new maplibregl.Marker({ element: el }).setLngLat([p.lon, p.lat]).addTo(map);
+}
+WINDOWS.forEach(w => marker('win' + (w.sel ? ' sel' : ''), w.year, w));
+marker('mosaic', '', MOSAIC);
+marker('me', '', ME);
+
+map.on('style.load', addOverlays);
+map.on('error', e => {
+  document.getElementById('note').textContent = 'Ошибка карты: ' + (e.error && e.error.message || e);
+});
+const box = document.getElementById('styles');
+async function pick(key) {
+  [...box.children].forEach(b => b.classList.toggle('on', b.dataset.key === key));
+  document.getElementById('note').textContent = STYLES[key].note;
+  map.setStyle(await loadStyle(key));
+}
+for (const [key, s] of Object.entries(STYLES)) {
+  const b = document.createElement('button');
+  b.textContent = s.name; b.dataset.key = key;
+  b.onclick = () => pick(key);
+  box.append(b);
+}
+pick('ours');
+</script>
+</body>
+</html>
