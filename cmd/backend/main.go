@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 	"net"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 	"time"
 
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/httpapi"
+	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/mapdata"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/planner"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/routing"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/tripstore"
@@ -56,6 +58,28 @@ func main() {
 		log.Fatalf("images-dir: %v", err)
 	}
 	root := http.NewServeMux()
+	var mapRepository mapdata.Repository
+	if databaseURL := os.Getenv("DATABASE_URL"); databaseURL != "" {
+		config, err := pgxpool.ParseConfig(databaseURL)
+		if err != nil {
+			log.Fatal("Invalid DATABASE_URL")
+		}
+		config.MaxConns = 8
+		config.ConnConfig.ConnectTimeout = 5 * time.Second
+		pool, err := pgxpool.NewWithConfig(context.Background(), config)
+		if err != nil {
+			log.Fatal("Cannot initialize catalog database pool")
+		}
+		defer pool.Close()
+		probe, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		err = pool.Ping(probe)
+		cancel()
+		if err != nil {
+			log.Fatal("Catalog database unavailable; check DATABASE_URL and PostgreSQL")
+		}
+		mapRepository = mapdata.Postgres{Pool: pool}
+	}
+	root.Handle("/api/v1/map/places", httpapi.MapHandler(mapRepository))
 	root.Handle("/media/", httpapi.MediaHandler(*imagesDir))
 	root.Handle("/", httpapi.TripHandler(store, p))
 	server := &http.Server{Addr: *listen, Handler: root, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 40 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}

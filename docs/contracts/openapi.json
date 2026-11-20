@@ -1007,15 +1007,11 @@
     "/api/v1/map/places": {
       "get": {
         "operationId": "getMapPlaces",
-        "summary": "Семейные и нейтральные места на карте",
+        "summary": "Инфраструктура из PostgreSQL в радиусе точки или bbox",
         "tags": [
           "Public Backend"
         ],
-        "security": [
-          {
-            "GuestSession": []
-          }
-        ],
+        "security": [],
         "parameters": [
           {
             "name": "X-Request-ID",
@@ -1029,7 +1025,7 @@
           {
             "name": "bbox",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "array",
               "items": {
@@ -1043,37 +1039,26 @@
             "explode": false
           },
           {
-            "name": "date",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ISODate"
-            },
-            "description": ""
-          },
-          {
             "name": "categories",
             "in": "query",
             "required": false,
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/components/schemas/Category"
+                "type": "string",
+                "enum": [
+                  "playground",
+                  "park",
+                  "bench",
+                  "toilet",
+                  "pharmacy",
+                  "restaurant"
+                ]
               }
             },
-            "description": "",
+            "description": "Repeated query parameters or comma-separated: playground,park,bench,toilet,pharmacy,restaurant",
             "style": "form",
             "explode": true
-          },
-          {
-            "name": "include_other",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
-            },
-            "description": "true также включает other/unknown"
           },
           {
             "name": "cursor",
@@ -1082,7 +1067,7 @@
             "schema": {
               "type": "string"
             },
-            "description": ""
+            "description": "Opaque next_cursor from previous response. Keep the same spatial filter, categories and limit. Offset pagination can shift when catalog changes."
           },
           {
             "name": "limit",
@@ -1090,9 +1075,44 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "minimum": 1
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100
             },
             "description": ""
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            },
+            "description": "Longitude of centre"
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "description": "Latitude of centre"
+          },
+          {
+            "name": "radius_km",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 20
+            },
+            "description": "Radius in kilometres, greater than zero"
           }
         ],
         "responses": {
@@ -1135,7 +1155,8 @@
           "503": {
             "$ref": "#/components/responses/Error503"
           }
-        }
+        },
+        "description": "Read-only public catalog. Exactly one search mode: lon+lat+radius_km OR bbox. Radius in km (0,20], distance_m in metres on the spheroid, not walking distance. Defaults to all supported categories. Radius results ordered by distance then place_id; bbox results by place_id. OSM availability is not verified on site; date does not filter by opening hours. Unsupported categories return 422. No mock fallback; unavailable database returns 503."
       }
     },
     "/api/v1/trips/{trip_id}/taxi-suggestions": {
@@ -2197,7 +2218,8 @@
           "bench",
           "shelter",
           "landmark",
-          "other"
+          "other",
+          "pharmacy"
         ]
       },
       "Point": {
@@ -3289,6 +3311,55 @@
                 "type": "null"
               }
             ]
+          },
+          "address": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Address from database; may be empty."
+          },
+          "opening_hours_raw": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Raw source notation; not parsed into confirmed hours."
+          },
+          "access_raw": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Raw access condition, e.g. customers."
+          },
+          "fee_raw": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Raw fee value from source."
+          },
+          "distance_m": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Centre-to-object geodesic distance in metres. Present only in radius search; not walking distance."
           }
         },
         "required": [

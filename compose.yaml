@@ -109,6 +109,8 @@ services:
       context: .
       dockerfile: infra/docker/backend.Dockerfile
     network_mode: host
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-}
     # Места для маршрута берёт у ML по контракту /internal/v1/recommendations.
     # Пока у Вильдана нет сервиса — у мока (mock-api). Вернуть синтетику: command: ["-demo-catalog"]
     command: ["-ml-url", "http://127.0.0.1:8090/internal/v1/recommendations", "-catalog-version", "mock-ml-v1"]
@@ -121,9 +123,26 @@ services:
         condition: service_healthy
       mock-api:
         condition: service_started
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
-  # МОК по контрактам для демо: рекомендации ML + /api/v1/map/places. Только 127.0.0.1:8090.
+  infra-import:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: infra/docker/backend.Dockerfile
+    network_mode: host
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-}
+    entrypoint: ["/usr/local/bin/infraload"]
+    volumes:
+      - ./data/infrastructure:/app/data/infrastructure:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # МОК рекомендаций ML. Инфраструктура карты читается Go-бэкендом из PostgreSQL.
   mock-api:
     build: ./infra/mock-api
     network_mode: host

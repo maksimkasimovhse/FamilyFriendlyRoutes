@@ -39,7 +39,7 @@ export type Position = [longitude: number, latitude: number]; // WGS84
 export type Mode = 'walk' | 'car';
 export type DisplayClass = 'family' | 'neutral' | 'other' | 'unknown';
 export type Category = 'museum' | 'event' | 'park' | 'playground' | 'restaurant' |
-  'toilet' | 'bench' | 'shelter' | 'landmark' | 'other';
+  'toilet' | 'bench' | 'pharmacy' | 'shelter' | 'landmark' | 'other';
 
 export interface Point { coordinates: Position; label: string | null }
 export interface Interval { start_at: Instant; end_at: Instant }
@@ -108,6 +108,11 @@ export interface Place {
   entrance: Point | null; categories: Category[]; display_class: DisplayClass;
   indoor: Fact<boolean>; toilet: Fact<boolean>; shelter: Fact<boolean>;
   seating: Fact<boolean>;
+  distance_m?: number; // geodesic metres from centre; radius search only
+  address?: string | null;
+  opening_hours_raw?: string | null;
+  access_raw?: string | null;
+  fee_raw?: string | null;
   restaurant: {
     children_menu: Fact<boolean>; small_portions: Fact<boolean>;
     play_area: Fact<boolean>; play_area_min_age: Fact<number>;

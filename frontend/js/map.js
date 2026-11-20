@@ -93,6 +93,9 @@ const AMENITIES = {
   toilets:    { label: 'Туалет',           color: '#1F8A4F', shape: 'square' },
   cafe:       { label: 'Еда',              color: '#FFC94A', shape: 'circle' },
   playground: { label: 'Детская площадка', color: '#E8641F', shape: 'circle' },
+  park:       { label: 'Парк', color: '#27AE60', shape: 'circle' },
+  bench:      { label: 'Скамейка', color: '#795548', shape: 'square' },
+  pharmacy:   { label: 'Аптека', color: '#C0392B', shape: 'square' },
 };
 
 function makeIcon(color, shape) {
@@ -268,7 +271,7 @@ function showPlace(place, nearM) {
   const badges = cafeBadges(place).map(b =>
     `<span class="badge ${b.state}">${b.state === 'yes' ? '✓ ' : b.state === 'no' ? '✕ ' : ''}${b.text}${b.state === 'unknown' ? ': нет данных' : ''}</span>`);
   if (isDemo(place)) badges.push('<span class="badge demo">демо-данные</span>');
-  const label = { toilets: 'Туалет', playground: 'Детская площадка', cafe: 'Кафе' }[kind];
+  const label = AMENITIES[kind]?.label || 'Место';
   sheetBody.innerHTML = `
     <div class="card plain">
       <h2><i class="dot ${kind}"></i>${escapeHtml(place.name)}${nearM !== undefined ? ` · ~${walkMinutes(nearM)} мин от маршрута` : ''}</h2>

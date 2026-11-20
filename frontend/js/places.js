@@ -1,5 +1,5 @@
 // Места вокруг маршрута: туалеты, площадки, кафе — по контракту GET /api/v1/map/places.
-// (Пока ручку отдаёт мок infra/mock-api; формат — схема Place из openapi.json.)
+// Ручка читает PostgreSQL; формат — схема Place из openapi.json.
 // Факты у мест: { state: 'known', value: true/false } или { state: 'unknown' } — «нет данных» ≠ «нет».
 
 let places = [];
@@ -13,9 +13,7 @@ export function loadPlaces() {
 }
 async function fetchPlaces() {
   try {
-    const res = await fetch('/api/v1/map/places?bbox=43.95,56.30,44.06,56.345&limit=1000');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
+    const data = await fetchPlacesInRadius({ lon: 44.0066, lat: 56.3273, radiusKm: 5 });
     places = data.items;
     evidence = new Map(data.evidence.map(e => [e.evidence_id, e]));
   } catch (err) {
@@ -23,6 +21,27 @@ async function fetchPlaces() {
     places = [];
   }
   return places;
+}
+// Для произвольной точки/радиуса. Загружает все страницы; расстояние в ответе — по геодезической.
+// Не подменяет общий набор карты. categories: ['toilet','pharmacy'] либо без фильтра.
+export async function fetchPlacesInRadius({ lon, lat, radiusKm, categories, signal }) {
+  const query = new URLSearchParams({ lon, lat, radius_km: radiusKm, limit: 1000 });
+  if (categories) categories.forEach(c => query.append('categories', c));
+  const result = { items: [], evidence: [], next_cursor: null, catalog_version: '' };
+  const evidenceById = new Map();
+  let cursor;
+  do {
+    if (cursor) query.set('cursor', cursor);
+    const res = await fetch('/api/v1/map/places?' + query, { signal });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Инфраструктура: HTTP ' + res.status);
+    result.items.push(...data.items);
+    data.evidence.forEach(e => evidenceById.set(e.evidence_id, e));
+    result.catalog_version = data.catalog_version;
+    cursor = data.next_cursor;
+  } while (cursor);
+  result.evidence = [...evidenceById.values()];
+  return result;
 }
 export const allPlaces = () => places;
 
@@ -37,6 +56,9 @@ export const walkMinutes = m => Math.max(1, Math.round(m * 1.3 / 50));
 
 export const kindOf = p => p.categories.includes('toilet') ? 'toilets'
   : p.categories.includes('playground') ? 'playground'
+  : p.categories.includes('park') ? 'park'
+  : p.categories.includes('bench') ? 'bench'
+  : p.categories.includes('pharmacy') ? 'pharmacy'
   : p.categories.includes('restaurant') ? 'cafe' : 'other';
 
 // Ближайшие места нужного вида к точке

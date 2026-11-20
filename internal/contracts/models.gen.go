@@ -135,6 +135,11 @@ type Place struct {
 		PlayAreaMaxAge      json.RawMessage `json:"play_area_max_age"`
 		PlayAreaSupervision json.RawMessage `json:"play_area_supervision"`
 	} `json:"restaurant"`
+	Address         *string  `json:"address,omitempty"`
+	OpeningHoursRaw *string  `json:"opening_hours_raw,omitempty"`
+	AccessRaw       *string  `json:"access_raw,omitempty"`
+	FeeRaw          *string  `json:"fee_raw,omitempty"`
+	DistanceM       *float64 `json:"distance_m,omitempty"`
 }
 
 type DurationEstimate struct {
@@ -192,6 +197,10 @@ type Candidate struct {
 			ChildID ID      `json:"child_id"`
 			Value   float64 `json:"value"`
 		} `json:"child_interest"`
+		ChildAgeFit []struct {
+			ChildID ID       `json:"child_id"`
+			Value   *float64 `json:"value"`
+		} `json:"child_age_fit"`
 		AdultInterest  float64 `json:"adult_interest"`
 		Popularity     float64 `json:"popularity"`
 		FinalRelevance float64 `json:"final_relevance"`
