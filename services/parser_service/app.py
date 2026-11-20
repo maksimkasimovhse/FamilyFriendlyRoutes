@@ -33,7 +33,9 @@ def online_client(interactive: bool = True):
 @app.middleware("http")
 async def service_auth(request: Request, call_next):
     token = os.environ.get("ML_API_TOKEN", "")
-    if request.url.path != "/health" and token and not hmac.compare_digest(
+    legacy = request.url.path in ("/internal/v1/request-parses", "/internal/v1/catalog-extractions")
+    requires_auth = not legacy or os.environ.get("ML_REQUIRE_LEGACY_AUTH", "false").lower() == "true"
+    if request.url.path != "/health" and requires_auth and token and not hmac.compare_digest(
         request.headers.get("authorization", "").encode(), ("Bearer " + token).encode()
     ):
         return JSONResponse(status_code=401, content={"detail": "Service authentication required"})

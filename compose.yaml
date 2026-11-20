@@ -8,6 +8,7 @@ services:
     environment:
       SOURCE_REGISTRY_PATH: /app/config/source_registry.json
       ML_API_TOKEN: ${ML_API_TOKEN:-}
+      ML_REQUIRE_LEGACY_AUTH: ${ML_REQUIRE_LEGACY_AUTH:-false}
       GIGACHAT_CREDENTIALS: ${GIGACHAT_CREDENTIALS:-}
       GIGACHAT_ACCESS_TOKEN: ${GIGACHAT_ACCESS_TOKEN:-}
       GIGACHAT_SCOPE: ${GIGACHAT_SCOPE:-GIGACHAT_API_B2B}
@@ -33,7 +34,8 @@ services:
     environment:
       MODEL_CATALOG_VERSION: ${MODEL_CATALOG_VERSION:-city-osm-v2}
       ML_API_TOKEN: ${ML_API_TOKEN:-}
-      REQUEST_PARSER_URL: http://parser-service:8080/internal/v1/request-parses
+      ML_REQUIRE_LEGACY_AUTH: ${ML_REQUIRE_LEGACY_AUTH:-false}
+      REQUEST_PARSER_URL: ${REQUEST_PARSER_URL:-}
     ports:
       - "127.0.0.1:8082:8080"
     read_only: true
@@ -115,8 +117,14 @@ services:
       DATABASE_URL: ${DOCKER_DATABASE_URL:-postgres://familyroutes:${POSTGRES_PASSWORD:-}@postgres:5432/familyroutes?sslmode=disable}
       ML_API_TOKEN: ${ML_API_TOKEN:-}
       ASSISTANT_URL: http://parser-service:8080/internal/v1/assistant-intents
-    # Реальный небольшой seed-каталог и content baseline, без онлайн-загрузки сайтов.
-    command: ["-listen", "0.0.0.0:8080", "-allow-network-listen", "-routing-url", "http://valhalla:8002", "-ml-url", "http://model-service:8080/internal/v1/recommendations", "-catalog-version", "${MODEL_CATALOG_VERSION:-city-osm-v2}"]
+      INITIAL_LLM_ENABLED: ${INITIAL_LLM_ENABLED:-false}
+      LEGACY_ML_URL: http://mock-api:8090/internal/v1/recommendations
+      CITY_ML_URL: http://model-service:8080/internal/v1/recommendations
+      CITY_CATALOG_VERSION: ${MODEL_CATALOG_VERSION:-city-osm-v2}
+    # Существующий backend сохраняет прежний источник. Новый каталог включается явно.
+    command: ["-listen", "0.0.0.0:8080", "-allow-network-listen", "-routing-url", "http://valhalla:8002", "-ml-url", "${BACKEND_ML_URL:-http://mock-api:8090/internal/v1/recommendations}", "-catalog-version", "${BACKEND_CATALOG_VERSION:-mock-ml-v1}"]
+    ports:
+      - "127.0.0.1:8083:8080"
     volumes:
       - ./data:/app/data
       # Картинки карточек: backend отдаёт их под /media/ и без папки не стартует (-images-dir)
@@ -124,11 +132,16 @@ services:
     depends_on:
       valhalla:
         condition: service_healthy
-      model-service:
-        condition: service_healthy
+      mock-api:
+        condition: service_started
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/backend", "-healthcheck"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
 
   infra-import:
     profiles: ["tools"]
@@ -146,7 +159,6 @@ services:
 
   # МОК рекомендаций ML. Инфраструктура карты читается Go-бэкендом из PostgreSQL.
   mock-api:
-    profiles: ["mock"]
     build: ./infra/mock-api
     environment:
       MOCK_API_LISTEN: 0.0.0.0:8090
@@ -160,6 +172,9 @@ services:
     image: nginx:1.27-alpine
     ports:
       - "127.0.0.1:8000:8000"
+    depends_on:
+      backend:
+        condition: service_healthy
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
       - ./assets/images:/usr/share/nginx/card-images:ro

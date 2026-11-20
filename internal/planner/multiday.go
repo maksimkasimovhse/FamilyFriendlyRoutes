@@ -114,6 +114,11 @@ func (p Planner) candidateOpenOnDate(id c.ID, date c.ISODate, occurrence *c.ID) 
 }
 
 func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.TripView, error) {
+	var sourceError error
+	p, sourceError = p.ForCatalog(view.CatalogVersion)
+	if sourceError != nil {
+		return c.TripView{}, sourceError
+	}
 	for _, day := range view.Days {
 		if day.Execution != nil {
 			return c.TripView{}, stateError("ACTIVE_TRIP", "Для начатой поездки используйте пересчёт дня, сохраняя историю.")

@@ -46,7 +46,7 @@ func TestMVPAssistantInitialAndCatalogChoice(t *testing.T) {
 		idValue := choices[1]["place_id"].(c.ID)
 		return assistant.Intent{Action: "add_activity", PlaceID: &idValue}, nil
 	})
-	handler := TripHandlerWithAssistant(store, planner.Planner{Router: dayRouter{}, Source: source}, language, nil)
+	handler := TripHandlerWithAssistant(store, planner.Planner{Router: dayRouter{}, Source: source, Interpreter: language}, language, nil)
 	browser := bootstrap(t, handler)
 	raw, _ := os.ReadFile("../../examples/trip-one-day.json")
 	var input c.TripInput

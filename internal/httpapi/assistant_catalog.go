@@ -25,7 +25,11 @@ func (a *tripAPI) findAssistantActivities(ctx context.Context, view c.TripView, 
 	if parsed.NeedsClarification && parsed.ClarificationQuestion != nil {
 		return nil, nil, nil, failure(422, "REQUEST_CLARIFICATION_REQUIRED", *parsed.ClarificationQuestion)
 	}
-	source := a.planner.Source
+	selected, err := a.planner.ForCatalog(view.CatalogVersion)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	source := selected.Source
 	if httpSource, ok := source.(planner.HTTPSource); ok {
 		httpSource.ParsedRequest = &parsed
 		for _, d := range view.Days {

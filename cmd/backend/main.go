@@ -32,7 +32,15 @@ func main() {
 	mlURL := flag.String("ml-url", "", "Full internal ML recommendations endpoint")
 	catalogVersion := flag.String("catalog-version", "", "Catalog version agreed with ML")
 	assistantURL := flag.String("assistant-url", os.Getenv("ASSISTANT_URL"), "Internal contextual LLM intent endpoint")
+	initialLLM := flag.Bool("initial-llm", os.Getenv("INITIAL_LLM_ENABLED") == "true", "Explicitly enable LLM parsing during initial planning")
+	healthcheck := flag.Bool("healthcheck", false, "Check the local Go backend and exit")
 	flag.Parse()
+	if *healthcheck {
+		if err := checkBackendHealth("http://127.0.0.1:8080/healthz"); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 	if *demo == (*mlURL != "") || (!*demo && *catalogVersion == "") {
 		log.Fatal("Choose -demo-catalog OR -ml-url <endpoint> -catalog-version <version>.")
 	}
@@ -58,6 +66,16 @@ func main() {
 		p.Activities = planner.DemoActivities()
 	} else {
 		p.Source = planner.HTTPSource{Endpoint: *mlURL, Version: *catalogVersion, Token: os.Getenv("ML_API_TOKEN")}
+		alternatives := map[string]planner.CandidateSource{}
+		if endpoint := os.Getenv("LEGACY_ML_URL"); endpoint != "" {
+			alternatives["mock-ml-v1"] = planner.HTTPSource{Endpoint: endpoint, Version: "mock-ml-v1", Token: os.Getenv("ML_API_TOKEN")}
+		}
+		if endpoint, version := os.Getenv("CITY_ML_URL"), os.Getenv("CITY_CATALOG_VERSION"); endpoint != "" && version != "" {
+			alternatives[version] = planner.HTTPSource{Endpoint: endpoint, Version: version, Token: os.Getenv("ML_API_TOKEN")}
+		}
+		if len(alternatives) > 0 {
+			p.Source = planner.CatalogSources{Default: p.Source, Versions: alternatives}
+		}
 	}
 	if _, err := os.Stat(*imagesDir); err != nil {
 		log.Fatalf("images-dir: %v", err)
@@ -90,6 +108,12 @@ func main() {
 	var interpreter assistant.Interpreter
 	if *assistantURL != "" {
 		interpreter = assistant.HTTPInterpreter{Endpoint: *assistantURL, Token: os.Getenv("ML_API_TOKEN")}
+	}
+	if *initialLLM {
+		if interpreter == nil {
+			log.Fatal("-initial-llm requires -assistant-url or ASSISTANT_URL")
+		}
+		p.Interpreter = interpreter
 	}
 	root.Handle("/", httpapi.TripHandlerWithAssistant(store, p, interpreter, mapRepository))
 	server := &http.Server{Addr: *listen, Handler: root, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 70 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}

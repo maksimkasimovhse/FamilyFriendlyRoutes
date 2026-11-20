@@ -69,10 +69,12 @@ func tripHandler(store *tripstore.Store, p planner.Planner, now func() time.Time
 	return tripHandlerWithAssistant(store, p, now, nil, nil)
 }
 func tripHandlerWithAssistant(store *tripstore.Store, p planner.Planner, now func() time.Time, interpreter assistant.Interpreter, places mapdata.Repository) http.Handler {
-	p.Interpreter = interpreter
 	api := &tripAPI{store: store, planner: p, now: now, auth: newAuthGuard(), assistant: interpreter, places: places}
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, map[string]string{"status": "alive"}) })
+	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Family-Routes-Service", "backend")
+		writeJSON(w, 200, map[string]string{"status": "alive"})
+	})
 	mux.HandleFunc("GET /api/v1/session", api.session)
 	mux.HandleFunc("POST /api/v1/auth/register", api.credentials)
 	mux.HandleFunc("POST /api/v1/auth/login", api.credentials)
@@ -83,7 +85,7 @@ func tripHandlerWithAssistant(store *tripstore.Store, p planner.Planner, now fun
 	mux.HandleFunc("GET /api/v1/trips", api.listTrips)
 	mux.HandleFunc("POST /api/v1/trips/from-profile", api.post)
 	mux.HandleFunc("GET /api/v1/reference-data", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, 200, map[string]any{"interest_options": []map[string]string{{"id": "history", "label": "История"}, {"id": "science", "label": "Наука"}, {"id": "play", "label": "Игры"}}, "categories": []map[string]string{{"id": "landmark", "label": "Тестовые остановки"}}, "supported_city_ids": []string{"nizhny_novgorod"}, "supported_child_age": map[string]int{"min": 3, "max": 11}, "capabilities": map[string]bool{"taxi_suggestions": false, "weather_automation": false, "free_text": p.Source != nil, "assistant": interpreter != nil, "llm_understanding": interpreter != nil}, "default_family_policy": planner.NewDraft("", c.TripInput{}, api.now()).Policy, "demo_activities": p.Activities, "implementation_stage": "multi_day_pool"})
+		writeJSON(w, 200, map[string]any{"interest_options": []map[string]string{{"id": "history", "label": "История"}, {"id": "science", "label": "Наука"}, {"id": "play", "label": "Игры"}}, "categories": []map[string]string{{"id": "landmark", "label": "Тестовые остановки"}}, "supported_city_ids": []string{"nizhny_novgorod"}, "supported_child_age": map[string]int{"min": 3, "max": 11}, "capabilities": map[string]bool{"taxi_suggestions": false, "weather_automation": false, "free_text": p.Source != nil, "assistant": interpreter != nil, "llm_understanding": p.Interpreter != nil}, "default_family_policy": planner.NewDraft("", c.TripInput{}, api.now()).Policy, "demo_activities": p.Activities, "implementation_stage": "multi_day_pool"})
 	})
 	mux.HandleFunc("POST /api/v1/trips", api.post)
 	mux.HandleFunc("GET /api/v1/trips/{trip_id}", api.getTrip)

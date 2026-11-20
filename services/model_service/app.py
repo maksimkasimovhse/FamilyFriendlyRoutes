@@ -49,7 +49,9 @@ def recommendation_engine() -> RecommendationEngine:
 @app.middleware("http")
 async def service_auth(request: Request, call_next):
     token = os.environ.get("ML_API_TOKEN", "")
-    if request.url.path != "/health" and token and not hmac.compare_digest(
+    legacy = request.url.path == "/internal/v1/rankings"
+    requires_auth = not legacy or os.environ.get("ML_REQUIRE_LEGACY_AUTH", "false").lower() == "true"
+    if request.url.path != "/health" and requires_auth and token and not hmac.compare_digest(
         request.headers.get("authorization", "").encode(), ("Bearer " + token).encode()
     ):
         return api_error(401, "SERVICE_AUTH_REQUIRED", "Требуется сервисный токен.")

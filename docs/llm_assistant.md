@@ -52,7 +52,8 @@
 
 ## Начальная генерация
 
-При заданном `ASSISTANT_URL` backend разбирает исходное пожелание перед генерацией:
+При явном `INITIAL_LLM_ENABLED=true` (или `-initial-llm`) и заданном
+`ASSISTANT_URL` backend разбирает исходное пожелание перед генерацией:
 передаёт валидированные предпочтения рекомендателю в `parsed_request`, применяет
 явно названные ограничения времени и ходьбы и сохраняет исходную анкету.
 Дневной `max_walk_distance_m` дополнительно ограничивается общим семейным лимитом.
@@ -86,8 +87,13 @@
 
 ## Настройка
 
-Compose уже связывает backend с parser-service и передаёт общий `ML_API_TOKEN`
-в backend, parser-service и model-service. Для запуска вне Docker:
+Compose связывает чат с parser-service отдельно от основного API. По умолчанию
+старые поездки и основной источник рекомендаций сохраняются; городской каталог
+для новых поездок включается через `BACKEND_ML_URL` / `BACKEND_CATALOG_VERSION`.
+[Исправление совместимости и восстановление стенда](backend_compatibility.md).
+Compose передаёт общий `ML_API_TOKEN`
+в backend, parser-service и model-service. Токен на legacy endpoint включается
+отдельным `ML_REQUIRE_LEGACY_AUTH=true` после перевода клиентов. Для запуска вне Docker:
 
 ```bash
 export ASSISTANT_URL=http://127.0.0.1:8081/internal/v1/assistant-intents

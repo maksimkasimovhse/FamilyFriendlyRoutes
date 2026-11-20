@@ -36,10 +36,14 @@ func (p Planner) selectedCandidate(ctx context.Context, view c.TripView, selecti
 		return candidate, nil, nil
 	}
 	if p.Source != nil {
+		selected, err := p.ForCatalog(view.CatalogVersion)
+		if err != nil {
+			return c.Candidate{}, nil, err
+		}
 		probe := view
 		probe.Input.Selections = []c.Selection{selection}
 		probe.Input.RequestText = nil
-		response, err := p.Source.Recommend(ctx, probe)
+		response, err := selected.Source.Recommend(ctx, probe)
 		if err != nil {
 			return c.Candidate{}, nil, err
 		}
