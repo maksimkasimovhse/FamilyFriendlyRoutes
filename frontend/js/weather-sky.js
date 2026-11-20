@@ -121,7 +121,7 @@ let lastKey = '';
 async function update() {
   const day = today();
   if (!day) return;
-  const key = day.date + '|' + day.start_point?.coordinates;
+  const key = day.date;
   if (key === lastKey) return;
   lastKey = key;
   try {

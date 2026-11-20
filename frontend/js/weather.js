@@ -1,10 +1,12 @@
 // Погода на день прогулки и советы, что надеть и взять с собой.
 // Источник — Open-Meteo (бесплатно, без ключа, браузер ходит туда напрямую).
-// Наружу уходят только координаты старта и дата прогулки. Нет связи — блок просто не показывается.
+// Наружу уходят только дата прогулки и координаты центра Нижнего Новгорода. Нет связи — блок просто не показывается.
 
 const API = 'https://api.open-meteo.com/v1/forecast';
 const HOURLY = 'temperature_2m,apparent_temperature,precipitation,snowfall,precipitation_probability,weather_code,wind_gusts_10m,uv_index';
 const TTL = 30 * 60 * 1000;
+// Прогноз всегда для Нижнего Новгорода (центр города), а не для геолокации или точки старта
+const NN = { lat: 56.3273, lon: 44.0066 };
 
 // ---------- Запрос ----------
 async function fetchHours(lat, lon, date) {
@@ -92,9 +94,8 @@ export function skyKind(h) {
 
 // Прогноз на часы прогулки дня: { h, from, to } или null. Повторные вызовы не ходят в сеть (кэш).
 export async function forecastFor(day) {
-  if (!day?.start_point?.coordinates) return null;
-  const [lon, lat] = day.start_point.coordinates;
-  const all = await fetchHours(lat, lon, day.date);
+  if (!day) return null;
+  const all = await fetchHours(NN.lat, NN.lon, day.date);
   const times = day.stops.flatMap(s => [s.timing?.estimated_arrival_at, s.timing?.estimated_departure_at]).filter(Boolean)
     .map(t => Number(new Date(t).toLocaleString('en-GB', { hour: '2-digit', hour12: false, timeZone: 'Europe/Moscow' })));
   const from = times.length ? Math.min(...times) : 9, to = times.length ? Math.max(...times) : 20;
@@ -110,8 +111,8 @@ let shown = '';
 
 // day — день плана (date, start_point, stops). Рисует блок в элементе el.
 export async function renderWeather(el, day) {
-  if (!el || !day?.start_point?.coordinates) return;
-  const key = `${day.date}|${day.start_point.coordinates}`;
+  if (!el || !day) return;
+  const key = day.date;
   if (shown === key) return;
   shown = key;
   try {
