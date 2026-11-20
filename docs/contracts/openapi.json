@@ -1,0 +1,5177 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Доступный Нижний — ML Backend Frontend API",
+    "version": "1.0.0-draft",
+    "description": "Проект для согласования. Источник истины HTTP-контрактов. Семьи с детьми 3–11, Нижний Новгород. Не подтверждает реализацию. Внутренние ML пути не публикуются в браузер. Бизнес-инварианты дополнены в integration_contracts_v1.md."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Публичные операции обслуживает backend; внутренние — провайдер ML/каталога по закрытому адресу, выбранному при развёртывании."
+    }
+  ],
+  "tags": [
+    {
+      "name": "Public Backend",
+      "description": "Frontend -> backend"
+    },
+    {
+      "name": "Internal ML",
+      "description": "Backend -> ML, закрытый сервис"
+    }
+  ],
+  "paths": {
+    "/api/v1/session": {
+      "get": {
+        "operationId": "getSession",
+        "summary": "Получить или создать гостевую сессию",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Идентификатор трассировки",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "family_session=<opaque>; Path=/; HttpOnly; SameSite=Lax; Secure в production"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "description": "Первое обращение создаёт сессию. Существующая сохраняется. Возвращает CSRF-токен; устанавливает HttpOnly SameSite=Lax cookie family_session (Secure в production). Не возвращать общий кэш: Cache-Control: no-store."
+      }
+    },
+    "/api/v1/reference-data": {
+      "get": {
+        "operationId": "getReferenceData",
+        "summary": "Справочники и capabilities",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Идентификатор трассировки",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceData"
+                }
+              }
+            }
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    },
+    "/api/v1/trips": {
+      "post": {
+        "operationId": "createTrip",
+        "summary": "Создать draft поездки",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Повтор с тем же телом возвращает исходный результат; другой payload — 409."
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Токен сессии; backend также проверяет Origin."
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Успешный результат",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Идентификатор трассировки",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Location": {
+                "description": "URL созданной поездки или preview",
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TripInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trips/{trip_id}": {
+      "get": {
+        "operationId": "getTrip",
+        "summary": "Прочитать поездку и прогресс",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            },
+            "description": ""
+          },
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Идентификатор трассировки",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    },
+    "/api/v1/trips/{trip_id}/recommendations": {
+      "post": {
+        "operationId": "recommendForTrip",
+        "summary": "Получить рекомендации без изменения поездки",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            },
+            "description": ""
+          },
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Токен сессии; backend также проверяет Origin."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Идентификатор трассировки",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicRecommendationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "502": {
+            "$ref": "#/components/responses/Error502"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublicRecommendationRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trips/{trip_id}/previews": {
+      "post": {
+        "operationId": "createPreview",
+        "summary": "Рассчитать изменение без сохранения Trip",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            },
+            "description": ""
+          },
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Токен сессии; backend также проверяет Origin."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Preview создан; can_apply=false допустим и означает невыполнимый вариант.",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Идентификатор трассировки",
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Location": {
+                "description": "URL созданной поездки или preview",
+                "schema": {
+                  "type": "string",
+                  "format": "uri-reference"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanPreview"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "502": {
+            "$ref": "#/components/responses/Error502"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviewRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trips/{trip_id}/previews/{preview_id}": {
+      "get": {
+        "operationId": "getPreview",
+        "summary": "Прочитать сохранённый preview",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            },
+            "description": ""
+          },
+          {
+            "name": "preview_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            },
+            "description": ""
+          },
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Идентификатор трассировки",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanPreview"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "410": {
+            "$ref": "#/components/responses/Error410"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    },
+    "/api/v1/trips/{trip_id}/previews/{preview_id}/apply": {
+      "post": {
+        "operationId": "applyPreview",
+        "summary": "Атомарно применить preview",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            },
+            "description": ""
+          },
+          {
+            "name": "preview_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            },
+            "description": ""
+          },
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Повтор с тем же телом возвращает исходный результат; другой payload — 409."
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Токен сессии; backend также проверяет Origin."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Идентификатор трассировки",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Error410"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "description": "Проверяет владельца, base_version, срок, каталог и актуальность расписания. Повтор ключа возвращает исходный ответ; не применяет другой вариант молча.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trips/{trip_id}/progress": {
+      "post": {
+        "operationId": "updateProgress",
+        "summary": "Отметить посещение или пропуск",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            },
+            "description": ""
+          },
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Повтор с тем же телом возвращает исходный результат; другой payload — 409."
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Токен сессии; backend также проверяет Origin."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Идентификатор трассировки",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "description": "Увеличивает version, не перестраивает маршрут неявно. Пропуск обязательного stop запрещён.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProgressRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trips/{trip_id}/needs": {
+      "post": {
+        "operationId": "getNeedOptions",
+        "summary": "Получить варианты срочной потребности",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            },
+            "description": ""
+          },
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Токен сессии; backend также проверяет Origin."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Идентификатор трассировки",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NeedResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "502": {
+            "$ref": "#/components/responses/Error502"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "description": "Не изменяет Trip. Rain — ручной сценарий без обязательного прогноза. Выбранный вариант применяется через preview/apply.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NeedRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/map/places": {
+      "get": {
+        "operationId": "getMapPlaces",
+        "summary": "Семейные и нейтральные места на карте",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "bbox",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 4,
+              "maxItems": 4
+            },
+            "description": "minLon,minLat,maxLon,maxLat; корректность и диапазоны проверяет backend",
+            "style": "form",
+            "explode": false
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ISODate"
+            },
+            "description": ""
+          },
+          {
+            "name": "categories",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/Category"
+              }
+            },
+            "description": "",
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "include_other",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "true также включает other/unknown"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": ""
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Идентификатор трассировки",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MapResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    },
+    "/api/v1/trips/{trip_id}/taxi-suggestions": {
+      "get": {
+        "operationId": "getTaxiSuggestions",
+        "summary": "Только предложения такси, без вызова",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            },
+            "description": ""
+          },
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ISODate"
+            },
+            "description": ""
+          },
+          {
+            "name": "leg_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Идентификатор трассировки",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TaxiSuggestion"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "501": {
+            "$ref": "#/components/responses/Error501"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "description": "car_duration_sec — время движения автомобиля. Не включает неизвестную подачу. Не меняет пеший план."
+      }
+    },
+    "/internal/v1/recommendations": {
+      "post": {
+        "operationId": "recommendInternal",
+        "summary": "Подбор ML по снимку семьи и поездки",
+        "tags": [
+          "Internal ML"
+        ],
+        "security": [
+          {
+            "ServiceBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Идентификатор трассировки",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "description": "ML не сохраняет Trip. Возвращает исходные request_id/trip_id/trip_version/catalog_version. no_candidates не маскирует недоступность модели.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecommendationRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/internal/v1/catalog/activities": {
+      "get": {
+        "operationId": "getCatalogActivities",
+        "summary": "Получить версионированные активности",
+        "tags": [
+          "Internal ML"
+        ],
+        "security": [
+          {
+            "ServiceBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "activity_ids",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/ID"
+              },
+              "minItems": 1
+            },
+            "description": "",
+            "explode": true
+          },
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ISODate"
+            },
+            "description": ""
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ISODate"
+            },
+            "description": ""
+          },
+          {
+            "name": "catalog_version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Идентификатор трассировки",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ID": {
+        "type": "string",
+        "minLength": 1
+      },
+      "ISODate": {
+        "type": "string",
+        "format": "date"
+      },
+      "Instant": {
+        "type": "string",
+        "format": "date-time",
+        "description": "RFC3339 с обязательным offset. Календарная зона Нижнего Europe/Moscow."
+      },
+      "TimeZone": {
+        "type": "string",
+        "const": "Europe/Moscow"
+      },
+      "Position": {
+        "type": "array",
+        "prefixItems": [
+          {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180
+          },
+          {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90
+          }
+        ],
+        "minItems": 2,
+        "maxItems": 2,
+        "description": "WGS84 [longitude, latitude]"
+      },
+      "Mode": {
+        "type": "string",
+        "enum": [
+          "walk",
+          "car"
+        ]
+      },
+      "DisplayClass": {
+        "type": "string",
+        "enum": [
+          "family",
+          "neutral",
+          "other",
+          "unknown"
+        ]
+      },
+      "Category": {
+        "type": "string",
+        "enum": [
+          "museum",
+          "event",
+          "park",
+          "playground",
+          "restaurant",
+          "toilet",
+          "bench",
+          "shelter",
+          "landmark",
+          "other"
+        ]
+      },
+      "Point": {
+        "type": "object",
+        "properties": {
+          "coordinates": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "label": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "coordinates",
+          "label"
+        ]
+      },
+      "Interval": {
+        "type": "object",
+        "properties": {
+          "start_at": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "end_at": {
+            "$ref": "#/components/schemas/Instant"
+          }
+        },
+        "required": [
+          "start_at",
+          "end_at"
+        ],
+        "description": "Полуоткрытый интервал [start_at,end_at), start_at < end_at проверяется сервером."
+      },
+      "Evidence": {
+        "type": "object",
+        "properties": {
+          "evidence_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "source_url": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_kind": {
+            "type": "string",
+            "enum": [
+              "official",
+              "osm",
+              "review",
+              "manual"
+            ]
+          },
+          "checked_at": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "valid_until": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Instant"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "evidence_id",
+          "source_url",
+          "source_kind",
+          "checked_at",
+          "valid_until"
+        ]
+      },
+      "Warning": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "info",
+              "warning",
+              "blocking"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "place_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "activity_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stop_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "child_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ID"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "severity",
+          "message",
+          "place_id",
+          "activity_id",
+          "stop_id",
+          "child_id",
+          "evidence_ids"
+        ]
+      },
+      "Reason": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "child_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ID"
+            }
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ID"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "child_ids",
+          "evidence_ids"
+        ]
+      },
+      "FamilyProfile": {
+        "type": "object",
+        "properties": {
+          "children": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "child_id": {
+                  "$ref": "#/components/schemas/ID"
+                },
+                "age_years": {
+                  "type": "integer",
+                  "minimum": 3,
+                  "maximum": 11
+                },
+                "height_cm": {
+                  "oneOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "interest_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "child_id",
+                "age_years",
+                "height_cm",
+                "interest_ids"
+              ]
+            },
+            "minItems": 1
+          },
+          "adult_count": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "adult_interest_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "children",
+          "adult_count",
+          "adult_interest_ids"
+        ]
+      },
+      "FamilyPolicy": {
+        "type": "object",
+        "properties": {
+          "child_interest_weights": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "child_id": {
+                  "$ref": "#/components/schemas/ID"
+                },
+                "weight": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "required": [
+                "child_id",
+                "weight"
+              ]
+            }
+          },
+          "activity_balance": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "const": "equal_count_target"
+              },
+              "scope": {
+                "type": "string",
+                "const": "trip"
+              },
+              "shared_activity_credit": {
+                "type": "string",
+                "const": "split_equally"
+              }
+            },
+            "required": [
+              "mode",
+              "scope",
+              "shared_activity_credit"
+            ]
+          },
+          "adult_interest_weight": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "required": [
+          "child_interest_weights",
+          "activity_balance",
+          "adult_interest_weight"
+        ]
+      },
+      "LoadLimits": {
+        "type": "object",
+        "properties": {
+          "pace": {
+            "type": "string",
+            "enum": [
+              "relaxed",
+              "standard",
+              "intensive"
+            ]
+          },
+          "max_walk_distance_m_per_day": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "max_continuous_walk_duration_sec": {
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "pace",
+          "max_walk_distance_m_per_day",
+          "max_continuous_walk_duration_sec"
+        ]
+      },
+      "DayInput": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "$ref": "#/components/schemas/ISODate"
+          },
+          "start_point": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "end_point": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "available_window": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Interval"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duration_budget_sec": {
+            "type": "number",
+            "minimum": 0,
+            "exclusiveMinimum": 0
+          },
+          "meal_window": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Interval"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rest_budget_sec": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "date",
+          "start_point",
+          "end_point",
+          "available_window",
+          "duration_budget_sec",
+          "meal_window",
+          "rest_budget_sec"
+        ]
+      },
+      "Selection": {
+        "type": "object",
+        "properties": {
+          "place_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "activity_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "occurrence_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "preferred_date": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ISODate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "place_id",
+          "activity_id",
+          "occurrence_id",
+          "mandatory",
+          "preferred_date"
+        ]
+      },
+      "TripInput": {
+        "type": "object",
+        "properties": {
+          "city_id": {
+            "type": "string",
+            "const": "nizhny_novgorod"
+          },
+          "timezone": {
+            "$ref": "#/components/schemas/TimeZone"
+          },
+          "planning_context": {
+            "type": "string",
+            "enum": [
+              "before_arrival",
+              "in_city"
+            ]
+          },
+          "family": {
+            "$ref": "#/components/schemas/FamilyProfile"
+          },
+          "load_limits": {
+            "$ref": "#/components/schemas/LoadLimits"
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayInput"
+            },
+            "minItems": 1
+          },
+          "selections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Selection"
+            }
+          },
+          "request_text": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "city_id",
+          "timezone",
+          "planning_context",
+          "family",
+          "load_limits",
+          "days",
+          "selections",
+          "request_text"
+        ]
+      },
+      "Place": {
+        "type": "object",
+        "properties": {
+          "place_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "name": {
+            "type": "string"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "entrance": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Point"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          },
+          "display_class": {
+            "$ref": "#/components/schemas/DisplayClass"
+          },
+          "indoor": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "known"
+                  },
+                  "value": {
+                    "type": "boolean"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "unknown"
+                  },
+                  "value": {
+                    "type": "null"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    }
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              }
+            ]
+          },
+          "toilet": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "known"
+                  },
+                  "value": {
+                    "type": "boolean"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "unknown"
+                  },
+                  "value": {
+                    "type": "null"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    }
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              }
+            ]
+          },
+          "shelter": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "known"
+                  },
+                  "value": {
+                    "type": "boolean"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "unknown"
+                  },
+                  "value": {
+                    "type": "null"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    }
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              }
+            ]
+          },
+          "seating": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "known"
+                  },
+                  "value": {
+                    "type": "boolean"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "unknown"
+                  },
+                  "value": {
+                    "type": "null"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    }
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              }
+            ]
+          },
+          "restaurant": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "children_menu": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "const": "known"
+                          },
+                          "value": {
+                            "type": "boolean"
+                          },
+                          "evidence_ids": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/ID"
+                            },
+                            "minItems": 1
+                          }
+                        },
+                        "required": [
+                          "state",
+                          "value",
+                          "evidence_ids"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "const": "unknown"
+                          },
+                          "value": {
+                            "type": "null"
+                          },
+                          "evidence_ids": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/ID"
+                            }
+                          }
+                        },
+                        "required": [
+                          "state",
+                          "value",
+                          "evidence_ids"
+                        ]
+                      }
+                    ]
+                  },
+                  "small_portions": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "const": "known"
+                          },
+                          "value": {
+                            "type": "boolean"
+                          },
+                          "evidence_ids": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/ID"
+                            },
+                            "minItems": 1
+                          }
+                        },
+                        "required": [
+                          "state",
+                          "value",
+                          "evidence_ids"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "const": "unknown"
+                          },
+                          "value": {
+                            "type": "null"
+                          },
+                          "evidence_ids": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/ID"
+                            }
+                          }
+                        },
+                        "required": [
+                          "state",
+                          "value",
+                          "evidence_ids"
+                        ]
+                      }
+                    ]
+                  },
+                  "play_area": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "const": "known"
+                          },
+                          "value": {
+                            "type": "boolean"
+                          },
+                          "evidence_ids": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/ID"
+                            },
+                            "minItems": 1
+                          }
+                        },
+                        "required": [
+                          "state",
+                          "value",
+                          "evidence_ids"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "const": "unknown"
+                          },
+                          "value": {
+                            "type": "null"
+                          },
+                          "evidence_ids": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/ID"
+                            }
+                          }
+                        },
+                        "required": [
+                          "state",
+                          "value",
+                          "evidence_ids"
+                        ]
+                      }
+                    ]
+                  },
+                  "play_area_min_age": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "const": "known"
+                          },
+                          "value": {
+                            "type": "number"
+                          },
+                          "evidence_ids": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/ID"
+                            },
+                            "minItems": 1
+                          }
+                        },
+                        "required": [
+                          "state",
+                          "value",
+                          "evidence_ids"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "const": "unknown"
+                          },
+                          "value": {
+                            "type": "null"
+                          },
+                          "evidence_ids": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/ID"
+                            }
+                          }
+                        },
+                        "required": [
+                          "state",
+                          "value",
+                          "evidence_ids"
+                        ]
+                      }
+                    ]
+                  },
+                  "play_area_max_age": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "const": "known"
+                          },
+                          "value": {
+                            "type": "number"
+                          },
+                          "evidence_ids": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/ID"
+                            },
+                            "minItems": 1
+                          }
+                        },
+                        "required": [
+                          "state",
+                          "value",
+                          "evidence_ids"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "const": "unknown"
+                          },
+                          "value": {
+                            "type": "null"
+                          },
+                          "evidence_ids": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/ID"
+                            }
+                          }
+                        },
+                        "required": [
+                          "state",
+                          "value",
+                          "evidence_ids"
+                        ]
+                      }
+                    ]
+                  },
+                  "play_area_supervision": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "const": "known"
+                          },
+                          "value": {
+                            "type": "boolean"
+                          },
+                          "evidence_ids": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/ID"
+                            },
+                            "minItems": 1
+                          }
+                        },
+                        "required": [
+                          "state",
+                          "value",
+                          "evidence_ids"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "const": "unknown"
+                          },
+                          "value": {
+                            "type": "null"
+                          },
+                          "evidence_ids": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/ID"
+                            }
+                          }
+                        },
+                        "required": [
+                          "state",
+                          "value",
+                          "evidence_ids"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "children_menu",
+                  "small_portions",
+                  "play_area",
+                  "play_area_min_age",
+                  "play_area_max_age",
+                  "play_area_supervision"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "place_id",
+          "name",
+          "location",
+          "entrance",
+          "categories",
+          "display_class",
+          "indoor",
+          "toilet",
+          "shelter",
+          "seating",
+          "restaurant"
+        ]
+      },
+      "DurationEstimate": {
+        "type": "object",
+        "properties": {
+          "duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "official",
+              "estimated",
+              "user"
+            ]
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ID"
+            }
+          }
+        },
+        "required": [
+          "duration_sec",
+          "source",
+          "evidence_ids"
+        ]
+      },
+      "Activity": {
+        "type": "object",
+        "properties": {
+          "activity_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "place_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "title": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "visit",
+              "session",
+              "meal",
+              "rest",
+              "utility"
+            ]
+          },
+          "age_min_years": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "known"
+                  },
+                  "value": {
+                    "type": "number"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "unknown"
+                  },
+                  "value": {
+                    "type": "null"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    }
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              }
+            ]
+          },
+          "age_max_years": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "known"
+                  },
+                  "value": {
+                    "type": "number"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "unknown"
+                  },
+                  "value": {
+                    "type": "null"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    }
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              }
+            ]
+          },
+          "recommended_age_min_years": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "known"
+                  },
+                  "value": {
+                    "type": "number"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "unknown"
+                  },
+                  "value": {
+                    "type": "null"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    }
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              }
+            ]
+          },
+          "recommended_age_max_years": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "known"
+                  },
+                  "value": {
+                    "type": "number"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "unknown"
+                  },
+                  "value": {
+                    "type": "null"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    }
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              }
+            ]
+          },
+          "height_min_cm": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "known"
+                  },
+                  "value": {
+                    "type": "number"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "unknown"
+                  },
+                  "value": {
+                    "type": "null"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    }
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              }
+            ]
+          },
+          "duration": {
+            "$ref": "#/components/schemas/DurationEstimate"
+          },
+          "admission_rule": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "known"
+                  },
+                  "value": {
+                    "type": "string",
+                    "enum": [
+                      "allowed",
+                      "adult_required",
+                      "forbidden"
+                    ]
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "unknown"
+                  },
+                  "value": {
+                    "type": "null"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    }
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              }
+            ]
+          },
+          "booking_required": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "known"
+                  },
+                  "value": {
+                    "type": "boolean"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "state": {
+                    "type": "string",
+                    "const": "unknown"
+                  },
+                  "value": {
+                    "type": "null"
+                  },
+                  "evidence_ids": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ID"
+                    }
+                  }
+                },
+                "required": [
+                  "state",
+                  "value",
+                  "evidence_ids"
+                ]
+              }
+            ]
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ID"
+            }
+          }
+        },
+        "required": [
+          "activity_id",
+          "place_id",
+          "title",
+          "kind",
+          "age_min_years",
+          "age_max_years",
+          "recommended_age_min_years",
+          "recommended_age_max_years",
+          "height_min_cm",
+          "duration",
+          "admission_rule",
+          "booking_required",
+          "evidence_ids"
+        ]
+      },
+      "AvailabilityDay": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "$ref": "#/components/schemas/ISODate"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed",
+              "unknown"
+            ]
+          },
+          "visit_windows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Interval"
+            }
+          },
+          "last_entry_at": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Instant"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "occurrences": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "occurrence_id": {
+                  "$ref": "#/components/schemas/ID"
+                },
+                "interval": {
+                  "$ref": "#/components/schemas/Interval"
+                },
+                "booking_status": {
+                  "type": "string",
+                  "enum": [
+                    "available",
+                    "sold_out",
+                    "unknown"
+                  ]
+                }
+              },
+              "required": [
+                "occurrence_id",
+                "interval",
+                "booking_status"
+              ]
+            }
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ID"
+            }
+          }
+        },
+        "required": [
+          "date",
+          "state",
+          "visit_windows",
+          "last_entry_at",
+          "occurrences",
+          "evidence_ids"
+        ]
+      },
+      "CatalogItem": {
+        "type": "object",
+        "properties": {
+          "place": {
+            "$ref": "#/components/schemas/Place"
+          },
+          "activity": {
+            "$ref": "#/components/schemas/Activity"
+          },
+          "availability": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityDay"
+            }
+          }
+        },
+        "required": [
+          "place",
+          "activity",
+          "availability"
+        ]
+      },
+      "Candidate": {
+        "type": "object",
+        "properties": {
+          "place": {
+            "$ref": "#/components/schemas/Place"
+          },
+          "activity": {
+            "$ref": "#/components/schemas/Activity"
+          },
+          "availability": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityDay"
+            }
+          },
+          "eligibility": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "child_id": {
+                  "$ref": "#/components/schemas/ID"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "eligible",
+                    "ineligible",
+                    "unknown"
+                  ]
+                },
+                "reasons": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Reason"
+                  }
+                }
+              },
+              "required": [
+                "child_id",
+                "status",
+                "reasons"
+              ]
+            }
+          },
+          "scores": {
+            "type": "object",
+            "properties": {
+              "child_interest": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "child_id": {
+                      "$ref": "#/components/schemas/ID"
+                    },
+                    "value": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "child_id",
+                    "value"
+                  ]
+                }
+              },
+              "adult_interest": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "popularity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "final_relevance": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "required": [
+              "child_interest",
+              "adult_interest",
+              "popularity",
+              "final_relevance"
+            ]
+          },
+          "balance_credit": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "child_id": {
+                  "$ref": "#/components/schemas/ID"
+                },
+                "value": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "child_id",
+                "value"
+              ]
+            }
+          },
+          "is_top_place": {
+            "type": "boolean"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Reason"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Warning"
+            }
+          }
+        },
+        "required": [
+          "place",
+          "activity",
+          "availability",
+          "eligibility",
+          "scores",
+          "balance_credit",
+          "is_top_place",
+          "reasons",
+          "warnings"
+        ]
+      },
+      "RecommendationRequest": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "string",
+            "const": "1.0"
+          },
+          "request_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "trip_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "trip_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "catalog_version": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "initial",
+              "restaurant",
+              "along_route",
+              "toilet",
+              "rain",
+              "playground",
+              "rest"
+            ]
+          },
+          "profile": {
+            "$ref": "#/components/schemas/FamilyProfile"
+          },
+          "policy": {
+            "$ref": "#/components/schemas/FamilyPolicy"
+          },
+          "load_limits": {
+            "$ref": "#/components/schemas/LoadLimits"
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayInput"
+            }
+          },
+          "selections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Selection"
+            }
+          },
+          "current_day_date": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ISODate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "current_point": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Point"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "visited_activity_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ID"
+            }
+          },
+          "excluded_activity_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ID"
+            }
+          },
+          "request_text": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "spatial_scope": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "center": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/Point"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "radius_m": {
+                    "oneOf": [
+                      {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "route": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "LineString"
+                          },
+                          "coordinates": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/Position"
+                            }
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "coordinates"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "corridor_width_m": {
+                    "oneOf": [
+                      {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "center",
+                  "radius_m",
+                  "route",
+                  "corridor_width_m"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "contract_version",
+          "request_id",
+          "trip_id",
+          "trip_version",
+          "catalog_version",
+          "purpose",
+          "profile",
+          "policy",
+          "load_limits",
+          "days",
+          "selections",
+          "current_day_date",
+          "current_point",
+          "visited_activity_ids",
+          "excluded_activity_ids",
+          "request_text",
+          "spatial_scope",
+          "limit"
+        ]
+      },
+      "RecommendationResponse": {
+        "type": "object",
+        "properties": {
+          "contract_version": {
+            "type": "string",
+            "const": "1.0"
+          },
+          "request_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "trip_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "trip_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "catalog_version": {
+            "type": "string"
+          },
+          "model_version": {
+            "type": "string"
+          },
+          "generated_at": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "complete",
+              "partial",
+              "no_candidates"
+            ]
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Candidate"
+            }
+          },
+          "rejected": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "activity_id": {
+                  "$ref": "#/components/schemas/ID"
+                },
+                "reasons": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Reason"
+                  }
+                }
+              },
+              "required": [
+                "activity_id",
+                "reasons"
+              ]
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Warning"
+            }
+          }
+        },
+        "required": [
+          "contract_version",
+          "request_id",
+          "trip_id",
+          "trip_version",
+          "catalog_version",
+          "model_version",
+          "generated_at",
+          "status",
+          "candidates",
+          "rejected",
+          "evidence",
+          "warnings"
+        ]
+      },
+      "StopRef": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "day_start"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "day_end"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "stop"
+              },
+              "stop_id": {
+                "$ref": "#/components/schemas/ID"
+              }
+            },
+            "required": [
+              "kind",
+              "stop_id"
+            ]
+          }
+        ]
+      },
+      "Stop": {
+        "type": "object",
+        "properties": {
+          "stop_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "place_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "activity_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "occurrence_id": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "mandatory": {
+            "type": "boolean"
+          },
+          "progress": {
+            "type": "string",
+            "enum": [
+              "planned",
+              "visited",
+              "skipped"
+            ]
+          },
+          "duration": {
+            "$ref": "#/components/schemas/DurationEstimate"
+          },
+          "timing": {
+            "type": "object",
+            "properties": {
+              "estimated_arrival_at": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Instant"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "estimated_visit_start_at": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Instant"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "estimated_departure_at": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Instant"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fixed_event_interval": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Interval"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "estimated_arrival_at",
+              "estimated_visit_start_at",
+              "estimated_departure_at",
+              "fixed_event_interval"
+            ]
+          },
+          "balance_credit": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "child_id": {
+                  "$ref": "#/components/schemas/ID"
+                },
+                "value": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "child_id",
+                "value"
+              ]
+            }
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Reason"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Warning"
+            }
+          }
+        },
+        "required": [
+          "stop_id",
+          "place_id",
+          "activity_id",
+          "occurrence_id",
+          "title",
+          "category",
+          "location",
+          "mandatory",
+          "progress",
+          "duration",
+          "timing",
+          "balance_credit",
+          "reasons",
+          "warnings"
+        ]
+      },
+      "Leg": {
+        "type": "object",
+        "properties": {
+          "leg_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "from": {
+            "$ref": "#/components/schemas/StopRef"
+          },
+          "to": {
+            "$ref": "#/components/schemas/StopRef"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/Mode"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "calculated",
+              "unavailable"
+            ]
+          },
+          "distance_m": {
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "travel_duration_sec": {
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "geometry": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "const": "LineString"
+                  },
+                  "coordinates": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Position"
+                    }
+                  }
+                },
+                "required": [
+                  "type",
+                  "coordinates"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "routing_data_version": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Warning"
+            }
+          }
+        },
+        "required": [
+          "leg_id",
+          "from",
+          "to",
+          "mode",
+          "status",
+          "distance_m",
+          "travel_duration_sec",
+          "geometry",
+          "routing_data_version",
+          "warnings"
+        ],
+        "description": "calculated требует ненулевые geometry/distance/time; unavailable требует null. Реальный путь, не прямая линия."
+      },
+      "DayPlan": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "$ref": "#/components/schemas/ISODate"
+          },
+          "presentation": {
+            "type": "string",
+            "enum": [
+              "relative",
+              "clock"
+            ]
+          },
+          "start_point": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "end_point": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "available_window": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Interval"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "feasibility": {
+            "type": "string",
+            "enum": [
+              "feasible",
+              "conditional",
+              "infeasible"
+            ]
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "stops": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Stop"
+            }
+          },
+          "legs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Leg"
+            }
+          },
+          "totals": {
+            "type": "object",
+            "properties": {
+              "walk_distance_m": {
+                "oneOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "walk_duration_sec": {
+                "oneOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "visit_duration_sec": {
+                "type": "number",
+                "minimum": 0
+              },
+              "wait_duration_sec": {
+                "oneOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "rest_duration_sec": {
+                "type": "number",
+                "minimum": 0
+              },
+              "meal_duration_sec": {
+                "type": "number",
+                "minimum": 0
+              },
+              "elapsed_duration_sec": {
+                "oneOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "walk_distance_m",
+              "walk_duration_sec",
+              "visit_duration_sec",
+              "wait_duration_sec",
+              "rest_duration_sec",
+              "meal_duration_sec",
+              "elapsed_duration_sec"
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Warning"
+            }
+          }
+        },
+        "required": [
+          "date",
+          "presentation",
+          "start_point",
+          "end_point",
+          "available_window",
+          "feasibility",
+          "assumptions",
+          "stops",
+          "legs",
+          "totals",
+          "warnings"
+        ]
+      },
+      "TripView": {
+        "type": "object",
+        "properties": {
+          "trip_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "updated_at": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "planned",
+              "active",
+              "completed"
+            ]
+          },
+          "input": {
+            "$ref": "#/components/schemas/TripInput"
+          },
+          "policy": {
+            "$ref": "#/components/schemas/FamilyPolicy"
+          },
+          "catalog_version": {
+            "type": "string"
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayPlan"
+            },
+            "description": "Пустой массив допустим только для draft."
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            }
+          },
+          "family_balance": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "child_id": {
+                  "$ref": "#/components/schemas/ID"
+                },
+                "target_share": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "planned_credit": {
+                  "type": "number"
+                },
+                "achieved_share": {
+                  "oneOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "child_id",
+                "target_share",
+                "planned_credit",
+                "achieved_share"
+              ]
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Warning"
+            }
+          }
+        },
+        "required": [
+          "trip_id",
+          "version",
+          "updated_at",
+          "status",
+          "input",
+          "policy",
+          "catalog_version",
+          "days",
+          "evidence",
+          "family_balance",
+          "warnings"
+        ]
+      },
+      "PlanCommand": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "generate_plan"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "update_trip_input"
+              },
+              "input": {
+                "$ref": "#/components/schemas/TripInput"
+              }
+            },
+            "required": [
+              "kind",
+              "input"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "add_activity"
+              },
+              "date": {
+                "$ref": "#/components/schemas/ISODate"
+              },
+              "selection": {
+                "$ref": "#/components/schemas/Selection"
+              },
+              "after_stop_id": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ID"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "kind",
+              "date",
+              "selection",
+              "after_stop_id"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "remove_stop"
+              },
+              "date": {
+                "$ref": "#/components/schemas/ISODate"
+              },
+              "stop_id": {
+                "$ref": "#/components/schemas/ID"
+              }
+            },
+            "required": [
+              "kind",
+              "date",
+              "stop_id"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "replace_stop"
+              },
+              "date": {
+                "$ref": "#/components/schemas/ISODate"
+              },
+              "stop_id": {
+                "$ref": "#/components/schemas/ID"
+              },
+              "selection": {
+                "$ref": "#/components/schemas/Selection"
+              }
+            },
+            "required": [
+              "kind",
+              "date",
+              "stop_id",
+              "selection"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "reorder_stops"
+              },
+              "date": {
+                "$ref": "#/components/schemas/ISODate"
+              },
+              "stop_ids": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ID"
+                }
+              }
+            },
+            "required": [
+              "kind",
+              "date",
+              "stop_ids"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "shorten_day"
+              },
+              "date": {
+                "$ref": "#/components/schemas/ISODate"
+              },
+              "target_remaining_duration_sec": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "kind",
+              "date",
+              "target_remaining_duration_sec"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "return_to_hotel"
+              },
+              "date": {
+                "$ref": "#/components/schemas/ISODate"
+              },
+              "hotel_point": {
+                "$ref": "#/components/schemas/Point"
+              }
+            },
+            "required": [
+              "kind",
+              "date",
+              "hotel_point"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "start_day"
+              },
+              "date": {
+                "$ref": "#/components/schemas/ISODate"
+              },
+              "point": {
+                "$ref": "#/components/schemas/Point"
+              },
+              "start_at": {
+                "$ref": "#/components/schemas/Instant"
+              }
+            },
+            "required": [
+              "kind",
+              "date",
+              "point",
+              "start_at"
+            ]
+          }
+        ]
+      },
+      "PreviewRequest": {
+        "type": "object",
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "command": {
+            "$ref": "#/components/schemas/PlanCommand"
+          },
+          "current_position": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Point"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observed_at": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Instant"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "expected_version",
+          "command",
+          "current_position",
+          "observed_at"
+        ]
+      },
+      "PlanPreview": {
+        "type": "object",
+        "properties": {
+          "preview_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "trip_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "base_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "catalog_version": {
+            "type": "string"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "expires_at": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "can_apply": {
+            "type": "boolean"
+          },
+          "required_acknowledgement_codes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "proposed_trip": {
+            "$ref": "#/components/schemas/TripView"
+          },
+          "diff": {
+            "type": "object",
+            "properties": {
+              "added_stop_ids": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ID"
+                }
+              },
+              "removed_stop_ids": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ID"
+                }
+              },
+              "moved_stop_ids": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ID"
+                }
+              },
+              "changed_dates": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ISODate"
+                }
+              },
+              "walk_delta_sec": {
+                "oneOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "elapsed_delta_sec": {
+                "oneOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "finish_delta_sec": {
+                "oneOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "explanations": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "added_stop_ids",
+              "removed_stop_ids",
+              "moved_stop_ids",
+              "changed_dates",
+              "walk_delta_sec",
+              "elapsed_delta_sec",
+              "finish_delta_sec",
+              "explanations"
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Warning"
+            }
+          }
+        },
+        "required": [
+          "preview_id",
+          "trip_id",
+          "base_version",
+          "catalog_version",
+          "created_at",
+          "expires_at",
+          "can_apply",
+          "required_acknowledgement_codes",
+          "proposed_trip",
+          "diff",
+          "warnings"
+        ],
+        "description": "Не изменяет сохранённую поездку. proposed_trip.version=base_version+1. Перед apply проверяются срок и версии."
+      },
+      "ApplyRequest": {
+        "type": "object",
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "acknowledged_warning_codes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "expected_version",
+          "acknowledged_warning_codes"
+        ]
+      },
+      "ProgressRequest": {
+        "type": "object",
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "date": {
+            "$ref": "#/components/schemas/ISODate"
+          },
+          "stop_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "visited",
+              "skipped"
+            ]
+          },
+          "observed_at": {
+            "$ref": "#/components/schemas/Instant"
+          }
+        },
+        "required": [
+          "expected_version",
+          "date",
+          "stop_id",
+          "status",
+          "observed_at"
+        ]
+      },
+      "NeedRequest": {
+        "type": "object",
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "date": {
+            "$ref": "#/components/schemas/ISODate"
+          },
+          "need": {
+            "type": "string",
+            "enum": [
+              "tired",
+              "toilet",
+              "rain",
+              "hotel",
+              "playground"
+            ]
+          },
+          "current_position": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Point"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observed_at": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Instant"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "expected_version",
+          "date",
+          "need",
+          "current_position",
+          "observed_at"
+        ]
+      },
+      "NeedOption": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "option_id": {
+                "$ref": "#/components/schemas/ID"
+              },
+              "kind": {
+                "type": "string",
+                "const": "candidate"
+              },
+              "candidate": {
+                "$ref": "#/components/schemas/Candidate"
+              },
+              "date": {
+                "$ref": "#/components/schemas/ISODate"
+              },
+              "preview_required": {
+                "type": "boolean",
+                "const": true
+              }
+            },
+            "required": [
+              "option_id",
+              "kind",
+              "candidate",
+              "date",
+              "preview_required"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "option_id": {
+                "$ref": "#/components/schemas/ID"
+              },
+              "kind": {
+                "type": "string",
+                "const": "plan_change"
+              },
+              "label": {
+                "type": "string"
+              },
+              "command": {
+                "$ref": "#/components/schemas/PlanCommand"
+              },
+              "preview_required": {
+                "type": "boolean",
+                "const": true
+              }
+            },
+            "required": [
+              "option_id",
+              "kind",
+              "label",
+              "command",
+              "preview_required"
+            ]
+          }
+        ]
+      },
+      "NeedResponse": {
+        "type": "object",
+        "properties": {
+          "trip_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "trip_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NeedOption"
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Warning"
+            }
+          }
+        },
+        "required": [
+          "trip_id",
+          "trip_version",
+          "options",
+          "evidence",
+          "warnings"
+        ]
+      },
+      "MapResponse": {
+        "type": "object",
+        "properties": {
+          "catalog_version": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Place"
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            }
+          },
+          "next_cursor": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "catalog_version",
+          "items",
+          "evidence",
+          "next_cursor"
+        ]
+      },
+      "ReferenceData": {
+        "type": "object",
+        "properties": {
+          "interest_options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "label"
+              ]
+            }
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/components/schemas/Category"
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "label"
+              ]
+            }
+          },
+          "supported_city_ids": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "type": "string",
+                "const": "nizhny_novgorod"
+              }
+            ],
+            "minItems": 1,
+            "maxItems": 1
+          },
+          "supported_child_age": {
+            "type": "object",
+            "properties": {
+              "min": {
+                "type": "number",
+                "const": 3
+              },
+              "max": {
+                "type": "number",
+                "const": 11
+              }
+            },
+            "required": [
+              "min",
+              "max"
+            ]
+          },
+          "capabilities": {
+            "type": "object",
+            "properties": {
+              "taxi_suggestions": {
+                "type": "boolean"
+              },
+              "weather_automation": {
+                "type": "boolean"
+              },
+              "free_text": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "taxi_suggestions",
+              "weather_automation",
+              "free_text"
+            ]
+          },
+          "default_family_policy": {
+            "$ref": "#/components/schemas/FamilyPolicy"
+          }
+        },
+        "required": [
+          "interest_options",
+          "categories",
+          "supported_city_ids",
+          "supported_child_age",
+          "capabilities",
+          "default_family_policy"
+        ]
+      },
+      "PublicRecommendationRequest": {
+        "type": "object",
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "initial",
+              "restaurant",
+              "along_route"
+            ]
+          },
+          "date": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ISODate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "request_text": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "exclude_activity_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ID"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "expected_version",
+          "purpose",
+          "date",
+          "request_text",
+          "exclude_activity_ids",
+          "limit"
+        ]
+      },
+      "PublicRecommendationResponse": {
+        "type": "object",
+        "properties": {
+          "trip_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "trip_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "catalog_version": {
+            "type": "string"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Candidate"
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Warning"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "complete",
+              "partial",
+              "no_candidates"
+            ]
+          }
+        },
+        "required": [
+          "trip_id",
+          "trip_version",
+          "catalog_version",
+          "candidates",
+          "evidence",
+          "warnings",
+          "status"
+        ]
+      },
+      "CatalogResponse": {
+        "type": "object",
+        "properties": {
+          "catalog_version": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogItem"
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            }
+          }
+        },
+        "required": [
+          "catalog_version",
+          "items",
+          "evidence"
+        ]
+      },
+      "TaxiSuggestion": {
+        "type": "object",
+        "properties": {
+          "trip_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "trip_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "date": {
+            "$ref": "#/components/schemas/ISODate"
+          },
+          "leg_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "walk_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "car_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "pickup_wait_duration_sec": {
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "booking_supported": {
+            "type": "boolean",
+            "const": false
+          },
+          "automatically_applied": {
+            "type": "boolean",
+            "const": false
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Warning"
+            }
+          }
+        },
+        "required": [
+          "trip_id",
+          "trip_version",
+          "date",
+          "leg_id",
+          "walk_duration_sec",
+          "car_duration_sec",
+          "pickup_wait_duration_sec",
+          "booking_supported",
+          "automatically_applied",
+          "warnings"
+        ]
+      },
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "request_id": {
+                "$ref": "#/components/schemas/ID"
+              },
+              "retryable": {
+                "type": "boolean"
+              },
+              "current_version": {
+                "oneOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "details": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "code": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "path",
+                    "code",
+                    "message"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "code",
+              "message",
+              "request_id",
+              "retryable",
+              "current_version",
+              "details"
+            ]
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "SessionResponse": {
+        "type": "object",
+        "properties": {
+          "csrf_token": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "csrf_token"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "GuestSession": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "family_session",
+        "description": "Гостевая сессия; права проверяются для каждого ресурса. Bootstrap GET /api/v1/session."
+      },
+      "ServiceBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Сервисный токен backend -> ML, не пользовательская сессия"
+      }
+    },
+    "responses": {
+      "Error400": {
+        "description": "INVALID_JSON",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Идентификатор трассировки",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error401": {
+        "description": "SESSION_REQUIRED или неверный сервисный токен",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Идентификатор трассировки",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error403": {
+        "description": "CSRF_FAILED",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Идентификатор трассировки",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error404": {
+        "description": "TRIP_NOT_FOUND / PREVIEW_NOT_FOUND",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Идентификатор трассировки",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error409": {
+        "description": "VERSION_CONFLICT / IDEMPOTENCY_CONFLICT / PREVIEW_STALE / CATALOG_VERSION_MISMATCH / CURSOR_STALE",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Идентификатор трассировки",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error410": {
+        "description": "PREVIEW_EXPIRED",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Идентификатор трассировки",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error422": {
+        "description": "VALIDATION_ERROR / UNKNOWN_ACTIVITY / HARD_CONSTRAINT_VIOLATION / LOCATION_REQUIRED / ACKNOWLEDGEMENT_REQUIRED / PREVIEW_NOT_APPLICABLE",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Идентификатор трассировки",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error429": {
+        "description": "RATE_LIMITED",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Идентификатор трассировки",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "Retry-After": {
+            "schema": {
+              "type": "string"
+            },
+            "description": "При известном времени повторного запроса"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error501": {
+        "description": "FEATURE_DISABLED",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Идентификатор трассировки",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error502": {
+        "description": "ML_CONTRACT_ERROR",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Идентификатор трассировки",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      },
+      "Error503": {
+        "description": "ML_UNAVAILABLE / ROUTING_UNAVAILABLE / CATALOG_UNAVAILABLE",
+        "headers": {
+          "X-Request-ID": {
+            "description": "Идентификатор трассировки",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "Retry-After": {
+            "schema": {
+              "type": "string"
+            },
+            "description": "При известном времени повторного запроса"
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiError"
+            }
+          }
+        }
+      }
+    }
+  }
+}
