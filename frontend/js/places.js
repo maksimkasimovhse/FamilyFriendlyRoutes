@@ -4,23 +4,74 @@
 
 let places = [];
 let evidence = new Map();
+let types = {};
+let typesLoading = null;
+export function loadPlaceTypes() {
+  if (!typesLoading) typesLoading = fetch('data/place-types.json')
+    .then(r => { if (!r.ok) throw new Error('place-types unavailable'); return r.json(); })
+    .then(value => { types = value; notify(); })
+    .catch(() => { types = {}; });
+  return typesLoading;
+}
+const listeners = [];
+export const onPlacesChange = fn => listeners.push(fn);
+const notify = () => listeners.forEach(fn => fn());
+let generation = 0;
+let controller = null;
+let routeKey = null;
 
-// Загружаем один раз: и карта, и «Сегодня», и «Помощник» ждут один и тот же запрос
+// До появления сохранённого маршрута инфраструктура пуста. Центр GPS не используется.
 let loading = null;
 export function loadPlaces() {
-  if (!loading) loading = fetchPlaces();
+  return loading || Promise.resolve(places);
+}
+export function clearRoutePlaces() {
+  generation++;
+  controller?.abort();
+  controller = null; routeKey = null; loading = null;
+  places = []; evidence = new Map(); notify();
+}
+export function loadRoutePlaces(trip, day = trip.days[0]) {
+  const key = `${trip.trip_id}:${trip.version}:${day.date}`;
+  if (routeKey === key && loading) return loading;
+  clearRoutePlaces();
+  routeKey = key;
+  const requestGeneration = generation;
+  controller = new AbortController();
+  loading = fetchPlacesAlongRoute({ tripId: trip.trip_id, version: trip.version, date: day.date, signal: controller.signal })
+    .then(data => {
+      if (requestGeneration !== generation) return places;
+      places = data.items;
+      evidence = new Map(data.evidence.map(e => [e.evidence_id, e]));
+      notify(); return places;
+    }).catch(err => {
+      if (requestGeneration !== generation || err.name === 'AbortError') return places;
+      routeKey = null; loading = null;
+      console.warn('Инфраструктура вдоль маршрута недоступна:', err);
+      throw err;
+    });
   return loading;
 }
-async function fetchPlaces() {
-  try {
-    const data = await fetchPlacesInRadius({ lon: 44.0066, lat: 56.3273, radiusKm: 5 });
-    places = data.items;
-    evidence = new Map(data.evidence.map(e => [e.evidence_id, e]));
-  } catch (err) {
-    console.warn('Места на карте недоступны:', err);
-    places = [];
-  }
-  return places;
+
+export async function fetchPlacesAlongRoute({ tripId, version, date, categories, signal }) {
+  const query = new URLSearchParams({ date, expected_version: version, buffer_m: 250, limit: 1000 });
+  if (categories) categories.forEach(c => query.append('categories', c));
+  const result = { items: [], evidence: [], next_cursor: null, catalog_version: '' };
+  const evidenceById = new Map();
+  let cursor;
+  do {
+    if (cursor) query.set('cursor', cursor);
+    const res = await fetch(`/api/v1/trips/${encodeURIComponent(tripId)}/map/places?` + query, { signal });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Инфраструктура: HTTP ' + res.status);
+    if (data.route_version !== version || data.route_date !== date) throw new Error('Маршрут изменился во время загрузки инфраструктуры');
+    result.items.push(...data.items);
+    data.evidence.forEach(e => evidenceById.set(e.evidence_id, e));
+    result.catalog_version = data.catalog_version;
+    cursor = data.next_cursor;
+  } while (cursor);
+  result.evidence = [...evidenceById.values()];
+  return result;
 }
 // Для произвольной точки/радиуса. Загружает все страницы; расстояние в ответе — по геодезической.
 // Не подменяет общий набор карты. categories: ['toilet','pharmacy'] либо без фильтра.
@@ -97,3 +148,12 @@ export function sourceOf(p) {
   const e = ids.map(id => evidence.get(id)).find(Boolean);
   return e ? e.source_kind : null;
 }
+
+// Тип заведения, как подпись в Яндекс Картах: «кофейня», «грузинская кухня»…
+// place_id из базы — свой номер; связь с OSM — через ссылку-источник (evidence map-source-<id>)
+function osmKey(p) {
+  const url = evidence.get('map-source-' + p.place_id)?.source_url || '';
+  const m = url.match(/openstreetmap\.org\/(node|way|relation)\/(\d+)/);
+  return m ? `osm-${m[1]}-${m[2]}` : p.place_id;
+}
+export const placeType = p => types[osmKey(p)] || null;

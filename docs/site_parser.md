@@ -118,7 +118,7 @@ Planner получает часы работы, конкретные occurrences
 
 ## GigaChat
 
-Интеграция использует `POST /v2/chat/completions` и `model_options.response_format.type=json_schema`. По умолчанию выбрана `GigaChat-2-Pro`; модель можно изменить через `GIGACHAT_MODEL`. OAuth-токен обновляется локально, ключ читается из `GIGACHAT_CREDENTIALS`, TLS-проверка не отключается.
+Интеграция использует `POST /v2/chat/completions` и `model_options.response_format.type=json_schema`. По умолчанию выбрана `GigaChat-3-Pro`; модель можно изменить через `GIGACHAT_MODEL`. Таймаут одного структурированного запроса — 180 секунд. Перед запуском нужно проверить `GET /v1/models` именно с используемым scope: доступность модели зависит от тарифа. OAuth-токен обновляется локально, ключ читается из `GIGACHAT_CREDENTIALS`, TLS-проверка не отключается.
 
 Запуск после создания проверенного реестра и настройки окружения:
 

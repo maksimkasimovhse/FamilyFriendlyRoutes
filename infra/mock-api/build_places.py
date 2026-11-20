@@ -88,6 +88,11 @@ for f in amenities["features"]:
             place["display_class"] = "family"
     items.append(place)
 
+# Тип заведения («кофейня», «пиццерия»…) — в схеме Place такого поля нет, поэтому отдельным файлом для фронта
+types = {"osm-" + f["properties"]["osm"].replace("/", "-"): f["properties"]["type"]
+         for f in amenities["features"] if f["properties"].get("type")}
+json.dump(types, open(os.path.join(ROOT, "frontend/data/place-types.json"), "w", encoding="utf-8"), ensure_ascii=False)
+
 out = {"catalog_version": "mock-places-v1",
        "about": "МОК для /api/v1/map/places. OSM-выгрузка + демо-факты у кафе (evidence ev-demo-*, не проверено).",
        "items": items, "evidence": evidence}

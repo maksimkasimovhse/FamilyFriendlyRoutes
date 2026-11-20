@@ -1,0 +1,164 @@
+{
+  "bbox": {
+    "max_lat": 56.38,
+    "max_lon": 44.15,
+    "min_lat": 56.2,
+    "min_lon": 43.75
+  },
+  "catalog_version": "osm-nizhny-20261120",
+  "category_counts": {
+    "bench": 100,
+    "event": 29,
+    "landmark": 187,
+    "museum": 56,
+    "other": 50,
+    "park": 1,
+    "playground": 165,
+    "restaurant": 309,
+    "shelter": 38,
+    "toilet": 65
+  },
+  "coverage": {
+    "age_fit": 0.0,
+    "coordinates": 100.0,
+    "duration": 0.0,
+    "opening_hours_from_osm": 27.2,
+    "sessions": 0.0,
+    "source_evidence": 100.0,
+    "website_from_osm": 19.4
+  },
+  "known_limitations": [
+    "OSM-only snapshot; it does not verify official hours, admissions, age rules, menu or event sessions.",
+    "Absence of a tag is represented as unknown, never false.",
+    "Only OSM nodes are selected in this first pass; polygonal parks and buildings need a separate geometry pass."
+  ],
+  "record_count": 1000,
+  "schema_version": "osm-enrichment-report-v1",
+  "seed_matches": 116,
+  "seed_source_rows": 259,
+  "source_pbf": "/home/votter/projects/hackatons/FamilyFriendlyRoutes/data/raw/osm_nizhny/volga-fed-district-261117.osm.pbf",
+  "source_sha256": "01920cdf81aeafb8e4907e0a56911b984a9985044f2c8a3d3f7469480a17e1d4",
+  "target_count": 1000,
+  "top_raw_tags": [
+    [
+      "name",
+      637
+    ],
+    [
+      "amenity",
+      574
+    ],
+    [
+      "opening_hours",
+      272
+    ],
+    [
+      "leisure",
+      183
+    ],
+    [
+      "historic",
+      179
+    ],
+    [
+      "cuisine",
+      158
+    ],
+    [
+      "outdoor_seating",
+      135
+    ],
+    [
+      "memorial",
+      133
+    ],
+    [
+      "indoor_seating",
+      118
+    ],
+    [
+      "check_date",
+      107
+    ],
+    [
+      "website",
+      105
+    ],
+    [
+      "phone",
+      102
+    ],
+    [
+      "contact:phone",
+      98
+    ],
+    [
+      "payment:credit_cards",
+      95
+    ],
+    [
+      "payment:debit_cards",
+      94
+    ],
+    [
+      "air_conditioning",
+      92
+    ],
+    [
+      "contact:website",
+      91
+    ],
+    [
+      "addr:housenumber",
+      86
+    ],
+    [
+      "smoking",
+      86
+    ],
+    [
+      "addr:street",
+      82
+    ],
+    [
+      "contact:email",
+      73
+    ],
+    [
+      "tourism",
+      67
+    ],
+    [
+      "backrest",
+      58
+    ],
+    [
+      "access",
+      51
+    ],
+    [
+      "description",
+      50
+    ],
+    [
+      "inscription",
+      48
+    ],
+    [
+      "contact:vk",
+      43
+    ],
+    [
+      "fee",
+      39
+    ],
+    [
+      "wheelchair",
+      39
+    ],
+    [
+      "level",
+      38
+    ]
+  ]
+}

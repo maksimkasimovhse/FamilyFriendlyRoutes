@@ -9,8 +9,8 @@ services:
       SOURCE_REGISTRY_PATH: /app/config/source_registry.json
       GIGACHAT_CREDENTIALS: ${GIGACHAT_CREDENTIALS:-}
       GIGACHAT_ACCESS_TOKEN: ${GIGACHAT_ACCESS_TOKEN:-}
-      GIGACHAT_SCOPE: ${GIGACHAT_SCOPE:-GIGACHAT_API_PERS}
-      GIGACHAT_MODEL: ${GIGACHAT_MODEL:-GigaChat-2-Pro}
+      GIGACHAT_SCOPE: ${GIGACHAT_SCOPE:-GIGACHAT_API_B2B}
+      GIGACHAT_MODEL: ${GIGACHAT_MODEL:-GigaChat-3-Pro}
       GIGACHAT_BASE_URL: ${GIGACHAT_BASE_URL:-https://api.giga.chat}
       GIGACHAT_CA_BUNDLE: ${GIGACHAT_CA_BUNDLE:-}
     ports:
@@ -101,19 +101,16 @@ services:
       - ./db/migrations:/migrations:ro
     command: ["up"]
 
-  # Go-бекенд. network_mode: host — потому что бекенд слушает только 127.0.0.1:8080
-  # и ищет Valhalla на 127.0.0.1:8002 (так написан cmd/backend). Работает на Linux;
-  # на Docker Desktop (Windows/macOS) нужно включить host networking в настройках.
+  # Обычная сеть Compose: контейнеры доступны друг другу по именам сервисов.
   backend:
     build:
       context: .
       dockerfile: infra/docker/backend.Dockerfile
-    network_mode: host
     environment:
-      DATABASE_URL: ${DATABASE_URL:-}
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgres://familyroutes:${POSTGRES_PASSWORD:-}@postgres:5432/familyroutes?sslmode=disable}
     # Места для маршрута берёт у ML по контракту /internal/v1/recommendations.
     # Пока у Вильдана нет сервиса — у мока (mock-api). Вернуть синтетику: command: ["-demo-catalog"]
-    command: ["-ml-url", "http://127.0.0.1:8090/internal/v1/recommendations", "-catalog-version", "mock-ml-v1"]
+    command: ["-listen", "0.0.0.0:8080", "-allow-network-listen", "-routing-url", "http://valhalla:8002", "-ml-url", "http://mock-api:8090/internal/v1/recommendations", "-catalog-version", "mock-ml-v1"]
     volumes:
       - ./data:/app/data
       # Картинки карточек: backend отдаёт их под /media/ и без папки не стартует (-images-dir)
@@ -132,9 +129,8 @@ services:
     build:
       context: .
       dockerfile: infra/docker/backend.Dockerfile
-    network_mode: host
     environment:
-      DATABASE_URL: ${DATABASE_URL:-}
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgres://familyroutes:${POSTGRES_PASSWORD:-}@postgres:5432/familyroutes?sslmode=disable}
     entrypoint: ["/usr/local/bin/infraload"]
     volumes:
       - ./data/infrastructure:/app/data/infrastructure:ro
@@ -145,14 +141,18 @@ services:
   # МОК рекомендаций ML. Инфраструктура карты читается Go-бэкендом из PostgreSQL.
   mock-api:
     build: ./infra/mock-api
-    network_mode: host
+    environment:
+      MOCK_API_LISTEN: 0.0.0.0:8090
+    ports:
+      - "127.0.0.1:8090:8090"
     restart: unless-stopped
 
   # Фронтенд (обычные HTML/CSS/JS из ./frontend) + прокси /api на бекенд.
   # Открывать: http://localhost:8000
   web:
     image: nginx:1.27-alpine
-    network_mode: host
+    ports:
+      - "127.0.0.1:8000:8000"
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
       - ./assets/images:/usr/share/nginx/card-images:ro

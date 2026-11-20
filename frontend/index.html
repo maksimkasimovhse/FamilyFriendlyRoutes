@@ -11,6 +11,7 @@
 <link href="css/kid.css" rel="stylesheet">
 <link href="css/pick.css" rel="stylesheet">
 <link href="css/games.css" rel="stylesheet">
+<link href="css/onboarding.css" rel="stylesheet">
 <script src="vendor/maplibre-gl-4.7.1/maplibre-gl.js"></script>
 <script type="module" src="js/app.js"></script>
 </head>
@@ -19,14 +20,6 @@
 
   <!-- ===== Экран «Карта» ===== -->
   <section class="screen" id="screen-map" data-tab="map">
-    <header class="top">
-      <h1>Карта</h1>
-      <button class="pick-open" id="open-pick">Подбор мест</button>
-      <div class="days" role="tablist" aria-label="День поездки">
-        <button class="on" role="tab" aria-selected="true">Сб</button>
-        <button role="tab" aria-selected="false" disabled title="Второй день появится, когда бекенд научится планировать 2 дня">Вс</button>
-      </div>
-    </header>
 
     <div class="map-wrap">
       <div id="map" aria-label="Карта маршрута"></div>
@@ -37,6 +30,10 @@
           <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3" stroke="currentColor" stroke-width="2"/></svg>
         </button>
       </div>
+
+      <!-- Источники карты (обязательны по лицензиям) и оговорки — спрятаны под «i», как в Яндекс/Google -->
+      <button id="btn-info" class="map-info" aria-label="О карте и маршруте" aria-expanded="false">i</button>
+      <div class="map-info-pop" id="map-info-pop" hidden></div>
 
     </div>
 
@@ -58,6 +55,11 @@
 
   <!-- ===== Экран «Подбор мест»: карточки как в Tinder ===== -->
   <section class="screen pick" id="screen-pick" data-tab="pick" hidden>
+    <!-- Только в «Новой поездке» (шаг 2 из 3): шапка шага и подзаголовок -->
+    <div class="pick-flow">
+      <div class="flow-step"><span>Новая поездка · шаг 2 из 3</span><div class="flow-bar kid"><i class="on"></i><i class="on"></i><i></i></div></div>
+      <p class="pick-flow-sub">Вправо — место обязательно будет в маршруте. Влево — не надо.</p>
+    </div>
     <header class="pick-top">
       <button class="pick-back" id="pick-back" aria-label="Назад к карте">‹</button>
       <h1>Подбор мест</h1>
@@ -78,6 +80,7 @@
     </div>
     <div class="pick-finish">
       <button class="btn main" id="pick-finish" disabled>Завершить подбор мест</button>
+      <button class="btn link pick-skip" id="pick-skip" type="button">Пропустить — подберите сами</button>
       <p class="pick-hint" id="pick-hint">Смахните карточку вправо — место попадёт в маршрут, влево — не нравится</p>
     </div>
 
@@ -279,7 +282,260 @@
       </button>
     </form>
   </section>
-  <section class="screen placeholder" data-tab="album" hidden><h1>Альбом</h1><p>Скоро.</p></section>
+  <!-- ===== Альбом и профиль: анкета, мои поездки, выход ===== -->
+  <section class="screen profile" data-tab="album" hidden>
+    <header class="today-top"><p class="today-sub" id="prof-who"></p><h1>Профиль</h1></header>
+    <div class="today-scroll">
+      <div class="card-w">
+        <b>Семья</b>
+        <p class="muted" id="prof-family"></p>
+        <div class="row">
+          <button class="btn alt slim" id="prof-edit">Изменить анкету</button>
+          <button class="btn main slim" id="prof-newtrip">Новая поездка</button>
+        </div>
+      </div>
+      <div class="card-w">
+        <b>Мои поездки</b>
+        <ul class="trip-list" id="prof-trips"><li class="muted">Загружаем…</li></ul>
+      </div>
+      <button class="btn alt" id="prof-auth">Выйти</button>
+      <p class="fine center">Альбом «тогда и сейчас» появится здесь.</p>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       Вход, анкета семьи и новая поездка (docs/tz-onboarding.md).
+       Экраны поверх приложения, нижнее меню скрыто. Логика: session.js, onboarding.js, trip-setup.js
+       ===================================================================== -->
+
+  <!-- Экран 1. Вход и регистрация -->
+  <section class="flow" id="onb-auth" hidden>
+    <div class="flow-scroll">
+      <svg class="auth-art" viewBox="0 0 320 150" aria-hidden="true">
+        <rect width="320" height="150" rx="24" fill="#E2ECFD"/>
+        <path d="M0 40c50-14 90 8 140-4s110-18 180-2V0H0z" fill="#BFDDF6"/>
+        <path d="M186 64h64v44h-64z" fill="#C4553A" opacity=".85"/>
+        <path d="M180 64l6-14 6 14m24 0l6-14 6 14m22 0l6-14 6 14" fill="#C4553A"/>
+        <path d="M30 122c40-10 60-40 100-44s60 20 90 10 50-30 80-36" fill="none" stroke="#2463D6" stroke-width="5" stroke-dasharray="1 11" stroke-linecap="round"/>
+        <circle cx="30" cy="122" r="8" fill="#2463D6"/><circle cx="130" cy="78" r="8" fill="#2463D6"/><circle cx="300" cy="52" r="8" fill="#E8641F"/>
+      </svg>
+      <h1 class="flow-title serif">Семейные прогулки по Нижнему</h1>
+      <p class="flow-sub">Маршрут под возраст и интересы ваших детей. Анкету заполните один раз — дальше только даты.</p>
+
+      <div class="seg" role="tablist" aria-label="Регистрация или вход">
+        <button type="button" role="tab" aria-selected="true" data-mode="register">Регистрация</button>
+        <button type="button" role="tab" aria-selected="false" data-mode="login">Вход</button>
+      </div>
+
+      <form class="card-w auth-form" id="auth-form" novalidate>
+        <label class="field">Почта
+          <input id="auth-email" type="email" autocomplete="email" inputmode="email" required>
+        </label>
+        <label class="field">Пароль
+          <span class="pw">
+            <input id="auth-password" type="password" autocomplete="new-password" required minlength="15" maxlength="128">
+            <button type="button" class="eye" id="auth-eye" aria-label="Показать пароль" aria-pressed="false">👁</button>
+          </span>
+        </label>
+        <p class="hint" id="auth-hint">Не короче 15 символов. Удобно фразой: «едем в нижний всей семьёй»</p>
+        <p class="form-error" id="auth-error" role="alert" hidden></p>
+        <button class="btn flow-main" id="auth-submit">Создать аккаунт</button>
+      </form>
+      <button type="button" class="btn link" id="auth-guest">Продолжить без входа</button>
+      <p class="fine">Без входа поездка живёт сутки на этом телефоне. Войдёте позже — она перейдёт в аккаунт.</p>
+    </div>
+  </section>
+
+  <!-- Экран 2. Анкета, шаг 1 — «Кто едет?» -->
+  <section class="flow" id="onb-family" hidden>
+    <header class="flow-top">
+      <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
+      <div class="flow-step"><span>Анкета семьи · шаг 1 из 3</span><div class="flow-bar"><i class="on"></i><i></i><i></i></div></div>
+    </header>
+    <div class="flow-scroll">
+      <h1 class="flow-title">Кто едет?</h1>
+      <p class="flow-sub">Заполняете один раз. Поменять можно в профиле.</p>
+
+      <div class="card-w">
+        <div class="row-between">
+          <b>Взрослые</b>
+          <div class="stepper">
+            <button type="button" id="adults-minus" aria-label="Меньше взрослых">−</button>
+            <output id="adults-count" aria-live="polite">2</output>
+            <button type="button" id="adults-plus" aria-label="Больше взрослых">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-w">
+        <b>Дети</b>
+        <div class="seg small" id="kids-count" role="radiogroup" aria-label="Сколько детей">
+          <button type="button" role="radio" aria-checked="true" data-n="1">1 ребёнок</button>
+          <button type="button" role="radio" aria-checked="false" data-n="2">2 ребёнка</button>
+        </div>
+        <p class="hint">Пока поддерживаем одного или двух детей от 3 до 11 лет.</p>
+      </div>
+      <div id="kids-cards"></div>
+      <p class="form-error" id="family-error" role="alert" hidden></p>
+    </div>
+    <div class="flow-bottom"><button class="btn flow-main" id="family-next">Дальше</button></div>
+  </section>
+
+  <!-- Экран 3. Анкета, шаг 2 — «Что интересно детям?» -->
+  <section class="flow" id="onb-kids" hidden>
+    <header class="flow-top">
+      <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
+      <div class="flow-step"><span>Анкета семьи · шаг 2 из 3</span><div class="flow-bar"><i class="on"></i><i class="on"></i><i></i></div></div>
+    </header>
+    <div class="flow-scroll">
+      <h1 class="flow-title">Что интересно детям?</h1>
+      <p class="flow-sub">Отметьте для каждого — можно несколько. Подберём места так, чтобы скучно не было никому.</p>
+      <div id="kids-interests"></div>
+    </div>
+    <div class="flow-bottom"><button class="btn flow-main" id="kids-next">Дальше</button></div>
+  </section>
+
+  <!-- Экран 4. Анкета, шаг 3 — «А что интересно вам?» -->
+  <section class="flow" id="onb-adults" hidden>
+    <header class="flow-top">
+      <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
+      <div class="flow-step"><span>Анкета семьи · шаг 3 из 3</span><div class="flow-bar"><i class="on"></i><i class="on"></i><i class="on"></i></div></div>
+    </header>
+    <div class="flow-scroll">
+      <h1 class="flow-title">А что интересно вам?</h1>
+      <div class="card-w">
+        <b>Взрослым</b>
+        <div class="chips-w" id="adult-interests"></div>
+      </div>
+      <div class="card-w">
+        <b>Темп прогулок</b>
+        <div class="pace" id="pace" role="radiogroup" aria-label="Темп прогулок">
+          <button type="button" role="radio" data-pace="relaxed"><b>Спокойный</b><small>больше привалов</small></button>
+          <button type="button" role="radio" data-pace="standard"><b>Обычный</b><small>как все</small></button>
+          <button type="button" role="radio" data-pace="intensive"><b>Активный</b><small>успеть больше</small></button>
+        </div>
+      </div>
+      <div class="card-w">
+        <label class="field" for="wishes"><b>Пожелания и ограничения</b> <span class="muted">— необязательно</span></label>
+        <textarea id="wishes" rows="3" maxlength="2000" placeholder="Например: ребёнок боится собак"></textarea>
+        <div class="chips-w quick" id="wish-chips">
+          <button type="button">Избегать лестниц</button>
+          <button type="button">Ребёнок не любит шум</button>
+          <button type="button">Частые перерывы</button>
+          <button type="button">Едем с коляской</button>
+          <button type="button">Нужен тихий отдых</button>
+        </div>
+        <p class="hint right" id="wishes-count">0 / 2000</p>
+      </div>
+      <p class="form-error" id="adults-error" role="alert" hidden></p>
+    </div>
+    <div class="flow-bottom">
+      <button class="btn flow-main" id="profile-save">Сохранить анкету</button>
+      <p class="fine center">Больше не спросим. Поменять можно в профиле.</p>
+    </div>
+  </section>
+
+  <!-- Экран 5. Новая поездка, шаг 1 — «Когда и откуда гуляем?» -->
+  <section class="flow trip" id="trip-when" hidden>
+    <header class="flow-top">
+      <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
+      <div class="flow-step"><span>Новая поездка · шаг 1 из 3</span><div class="flow-bar kid"><i class="on"></i><i></i><i></i></div></div>
+    </header>
+    <div class="flow-scroll">
+      <h1 class="flow-title">Когда и откуда гуляем?</h1>
+      <div class="card-w">
+        <b>Вы уже в Нижнем?</b>
+        <div class="seg small" id="trip-context" role="radiogroup" aria-label="Вы уже в Нижнем?">
+          <button type="button" role="radio" aria-checked="true" data-ctx="in_city">Уже здесь</button>
+          <button type="button" role="radio" aria-checked="false" data-ctx="before_arrival">Только собираемся</button>
+        </div>
+      </div>
+      <div class="card-w">
+        <div class="row-between">
+          <b>Даты прогулок</b>
+          <span class="cal-nav">
+            <button type="button" id="cal-prev" aria-label="Предыдущий месяц">‹</button>
+            <span id="cal-month"></span>
+            <button type="button" id="cal-next" aria-label="Следующий месяц">›</button>
+          </span>
+        </div>
+        <div class="cal" id="cal" role="grid" aria-label="Календарь"></div>
+        <p class="cal-sum" id="cal-sum"></p>
+      </div>
+      <div class="card-w">
+        <b>Сколько гуляете в день</b>
+        <div class="seg small three" id="trip-hours" role="radiogroup" aria-label="Сколько гуляете в день">
+          <button type="button" role="radio" data-h="3">до 3 часов</button>
+          <button type="button" role="radio" data-h="5">4–5 часов</button>
+          <button type="button" role="radio" data-h="8">весь день</button>
+        </div>
+      </div>
+      <div class="card-w">
+        <b>Откуда начинаете день</b>
+        <div class="chips-w" id="start-points" role="radiogroup" aria-label="Точка старта"></div>
+        <button type="button" class="btn alt slim geo" id="start-geo">📍 Моё местоположение</button>
+        <p class="hint" id="start-note"></p>
+        <div class="row-between switch-row">
+          <span id="return-label">Возвращаться сюда вечером</span>
+          <button type="button" class="switch" id="return-home" role="switch" aria-checked="true" aria-labelledby="return-label"><i></i></button>
+        </div>
+        <div id="end-block" hidden>
+          <b class="sub-b">Где заканчиваете день</b>
+          <div class="chips-w" id="end-points" role="radiogroup" aria-label="Точка финиша"></div>
+        </div>
+      </div>
+      <p class="form-error" id="when-error" role="alert" hidden></p>
+    </div>
+    <div class="flow-bottom"><button class="btn flow-main" id="when-next">Дальше: выбрать места</button></div>
+  </section>
+
+  <!-- Экран 7. Новая поездка, шаг 3 — «Что-то особенное в этот раз?» -->
+  <section class="flow trip" id="trip-wishes" hidden>
+    <header class="flow-top">
+      <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
+      <div class="flow-step"><span>Новая поездка · шаг 3 из 3</span><div class="flow-bar kid"><i class="on"></i><i class="on"></i><i class="on"></i></div></div>
+    </header>
+    <div class="flow-scroll">
+      <h1 class="flow-title">Что-то особенное в этот раз?</h1>
+      <div class="card-w">
+        <label class="field" for="trip-request"><b>Пожелания на эту поездку</b></label>
+        <textarea id="trip-request" rows="3" maxlength="2000"></textarea>
+        <p class="hint" id="request-hint">Пожелания из анкеты уже здесь. Допишите, что нужно именно сейчас — анкета не изменится.</p>
+      </div>
+      <div class="card-w">
+        <b>Что мы учтём</b>
+        <dl class="summary" id="trip-summary"></dl>
+      </div>
+      <p class="form-error" id="wishes-error" role="alert" hidden></p>
+    </div>
+    <div class="flow-bottom"><button class="btn flow-main" id="trip-build">Построить маршрут</button></div>
+  </section>
+
+  <!-- Экран 8. Предпросмотр и сохранение -->
+  <section class="flow trip" id="trip-preview" hidden>
+    <header class="flow-top">
+      <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
+      <div class="flow-step"><span class="draft-label">Черновик — ещё не сохранён</span></div>
+    </header>
+    <div class="flow-scroll">
+      <h1 class="flow-title" id="preview-title">Маршрут</h1>
+      <div class="day-tabs" id="preview-days" role="tablist" aria-label="Дни поездки"></div>
+      <p class="flow-sub" id="preview-line"></p>
+      <ol class="pv-list" id="preview-list"></ol>
+      <label class="ack" id="preview-ack" hidden>
+        <input type="checkbox" id="preview-ack-box">
+        <span id="preview-ack-text">Часы работы проверены не у всех мест — уточню перед выходом</span>
+      </label>
+      <p class="fine" id="preview-guest" hidden>Вы без входа — маршрут хранится сутки. <button type="button" class="btn link inline" id="preview-login">Войти, чтобы не потерять</button></p>
+      <p class="form-error" id="preview-error" role="alert" hidden></p>
+    </div>
+    <div class="flow-bottom"><button class="btn flow-main" id="preview-save">Сохранить маршрут</button></div>
+  </section>
+
+  <!-- Загрузка / ошибка запуска -->
+  <section class="flow" id="flow-loading" hidden>
+    <div class="flow-center"><div class="spinner" aria-hidden="true"></div><p id="flow-loading-text">Загружаем…</p></div>
+  </section>
 
   <!-- ===== Нижнее меню ===== -->
   <nav class="tabbar" aria-label="Разделы">
