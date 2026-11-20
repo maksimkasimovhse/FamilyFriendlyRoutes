@@ -74,7 +74,25 @@ PY
 fi
 
 docker compose --project-directory "${repo_dir}" config --quiet
-docker compose --project-directory "${repo_dir}" up -d --build --remove-orphans
+docker compose --project-directory "${repo_dir}" build
+
+mapfile -t configured_services < <(
+  docker compose --project-directory "${repo_dir}" config --services
+)
+if printf '%s\n' "${configured_services[@]}" | grep --quiet --line-regexp parser-service \
+  && printf '%s\n' "${configured_services[@]}" | grep --quiet --line-regexp model-service; then
+  mapfile -t legacy_ml_containers < <(
+    docker ps --all --quiet --filter label=com.docker.compose.project=familyfriendlyroutes \
+      --filter label=com.docker.compose.service=parser-service
+    docker ps --all --quiet --filter label=com.docker.compose.project=familyfriendlyroutes \
+      --filter label=com.docker.compose.service=model-service
+  )
+  if [[ ${#legacy_ml_containers[@]} -gt 0 ]]; then
+    docker rm --force "${legacy_ml_containers[@]}"
+  fi
+fi
+
+docker compose --project-directory "${repo_dir}" up -d --remove-orphans
 
 readarray -t expected_services < <(
   docker compose --project-directory "${repo_dir}" config --format json \
