@@ -168,6 +168,12 @@ func ref(kind string, id c.ID) c.StopRef {
 	raw, _ := json.Marshal(value)
 	return c.StopRef(raw)
 }
+func nonNil[T any](values []T) []T {
+	if values == nil {
+		return []T{}
+	}
+	return values
+}
 func (p Planner) buildDay(ctx context.Context, view c.TripView, now time.Time) (c.TripView, error) {
 	input := view.Input
 	day := input.Days[0]
@@ -239,7 +245,17 @@ func (p Planner) buildDay(ctx context.Context, view c.TripView, now time.Time) (
 		}
 		arrivalElapsed := elapsed
 		stop := c.Stop{StopID: stopID, PlaceID: a.PlaceID, ActivityID: a.ID, Title: a.Title, Category: "landmark", Location: a.Point, Mandatory: mandatory[a.ID], Progress: "planned", Duration: c.DurationEstimate{DurationSec: a.DurationSec, Source: "estimated", EvidenceIDS: []c.ID{}}, Reasons: []c.Reason{}, Warnings: []c.Warning{Warning("DEMO_CATALOG", "Тестовая остановка, не проверенный объект.")}}
+		kind := "visit"
+		stop.ActivityKind = &kind
 		if candidate, ok := p.metadata[a.ID]; ok {
+			kind = candidate.Activity.Kind
+			availability := append([]c.AvailabilityDay{}, candidate.Availability...)
+			for i := range availability {
+				availability[i].VisitWindows = nonNil(availability[i].VisitWindows)
+				availability[i].Occurrences = nonNil(availability[i].Occurrences)
+				availability[i].EvidenceIDS = nonNil(availability[i].EvidenceIDS)
+			}
+			stop.Availability = &availability
 			stop.Duration = candidate.Activity.Duration
 			stop.Reasons = candidate.Reasons
 			stop.Warnings = append([]c.Warning{}, candidate.Warnings...)
@@ -297,8 +313,8 @@ func (p Planner) buildDay(ctx context.Context, view c.TripView, now time.Time) (
 			_ = json.Unmarshal(raw, &stop.BalanceCredit)
 		}
 		elapsed += a.DurationSec
-		kind := p.metadata[a.ID].Activity.Kind
-		switch kind {
+		activityKind := p.metadata[a.ID].Activity.Kind
+		switch activityKind {
 		case "meal":
 			plan.Totals.MealDurationSec += a.DurationSec
 		case "rest":

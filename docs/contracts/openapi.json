@@ -521,7 +521,8 @@
               }
             }
           }
-        }
+        },
+        "description": "Implemented commands: generate_plan, start_day, remove_stop, replan_day. Active previews expire 30 seconds after observed_at and preserve confirmed history. Other command variants are target API and may return COMMAND_NOT_IMPLEMENTED."
       }
     },
     "/api/v1/trips/{trip_id}/previews/{preview_id}": {
@@ -3736,6 +3737,26 @@
             "items": {
               "$ref": "#/components/schemas/Warning"
             }
+          },
+          "activity_kind": {
+            "type": "string",
+            "enum": [
+              "visit",
+              "session",
+              "meal",
+              "rest",
+              "utility"
+            ]
+          },
+          "availability": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityDay"
+            },
+            "description": "Availability snapshot used for re-planning existing stops without fetching a new ML ranking."
+          },
+          "progress_observed_at": {
+            "$ref": "#/components/schemas/Instant"
           }
         },
         "required": [
@@ -3971,7 +3992,7 @@
                     "type": "null"
                   }
                 ],
-                "description": "Total travel, visits, waiting, meals and rest, including unallocated break reserves. UNSCHEDULED_BREAKS means break locations/times are not yet scheduled."
+                "description": "Before start: estimated travel, visits, waits and break reserves. After active replan: observed elapsed wall-clock time plus estimated remaining duration; historical category estimates can differ from observed time."
               },
               "walk_budget_m": {
                 "type": "number",
@@ -4003,6 +4024,16 @@
               },
               "budget_policy_version": {
                 "type": "string"
+              },
+              "remaining_walk_distance_m": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Original daily M minus confirmed estimated walked distance, before planning the remaining stops."
+              },
+              "remaining_duration_sec": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Original available day time minus observed elapsed time, before planning remaining stops."
               }
             },
             "required": [
@@ -4020,6 +4051,10 @@
             "items": {
               "$ref": "#/components/schemas/Warning"
             }
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DayExecution",
+            "description": "Present after start_day apply. The most recently started date is the active day; previous confirmed history is immutable."
           }
         },
         "required": [
@@ -4330,6 +4365,22 @@
               "point",
               "start_at"
             ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "replan_day"
+              },
+              "date": {
+                "$ref": "#/components/schemas/ISODate"
+              }
+            },
+            "required": [
+              "kind",
+              "date"
+            ]
           }
         ]
       },
@@ -4551,7 +4602,8 @@
           "stop_id",
           "status",
           "observed_at"
-        ]
+        ],
+        "description": "Only the next planned stop of the active day can be confirmed. Terminal progress is immutable. Skipping requires an explicit replan preview before continuing."
       },
       "NeedRequest": {
         "type": "object",
@@ -5238,6 +5290,72 @@
           "snapped_to",
           "walking_speed_kph",
           "warnings"
+        ]
+      },
+      "DayExecution": {
+        "type": "object",
+        "description": "Confirmed progress. Distance and category durations are estimates from confirmed planned legs/stops; elapsed is observed wall-clock time. Not GPS tracking.",
+        "properties": {
+          "started_at": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "observed_at": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "current_point": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "completed_leg_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ID"
+            }
+          },
+          "needs_replan": {
+            "type": "boolean"
+          },
+          "consumed_walk_distance_m": {
+            "type": "number",
+            "minimum": 0
+          },
+          "consumed_walk_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "consumed_visit_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "consumed_meal_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "consumed_rest_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "consumed_wait_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "elapsed_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "started_at",
+          "observed_at",
+          "current_point",
+          "completed_leg_ids",
+          "needs_replan",
+          "consumed_walk_distance_m",
+          "consumed_walk_duration_sec",
+          "consumed_visit_duration_sec",
+          "consumed_meal_duration_sec",
+          "consumed_rest_duration_sec",
+          "consumed_wait_duration_sec",
+          "elapsed_duration_sec"
         ]
       }
     },
