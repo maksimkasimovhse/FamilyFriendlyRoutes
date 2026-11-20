@@ -6,6 +6,19 @@
  */
 export type ID = string;
 export interface SessionResponse { csrf_token: string }
+/** Первый реализованный внутренний этап: Go adapter -> Valhalla. */
+export interface RoutingRequest {
+  from: Point; to: Point; mode: Mode;
+  walking_speed_kph?: number;
+}
+export interface RoutingResult {
+  mode: Mode; status: 'calculated'; distance_m: number; travel_duration_sec: number;
+  geometry: { type: 'LineString'; coordinates: Position[] };
+  routing_data_version: string; engine_version: string;
+  snapped_from: Position; snapped_to: Position;
+  walking_speed_kph: number | null;
+  warnings: { code: string; message: string }[];
+}
 export type ISODate = string; // YYYY-MM-DD
 export type Instant = string; // RFC3339 с обязательным UTC offset
 export type TimeZone = 'Europe/Moscow';

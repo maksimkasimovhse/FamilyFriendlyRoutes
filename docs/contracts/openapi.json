@@ -19,6 +19,10 @@
     {
       "name": "Internal ML",
       "description": "Backend -> ML, закрытый сервис"
+    },
+    {
+      "name": "Internal Routing",
+      "description": "Backend -> Go adapter -> Valhalla; реализован первый инфраструктурный этап, без Trip API."
     }
   ],
   "paths": {
@@ -1333,6 +1337,99 @@
           },
           "429": {
             "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    },
+    "/internal/v1/routing/route": {
+      "post": {
+        "operationId": "calculateRoute",
+        "tags": [
+          "Internal Routing"
+        ],
+        "summary": "Рассчитать реальный пеший или автомобильный путь OSM",
+        "description": "Внутренний сервис Go на отдельном loopback-порту 8081. Bearer token обязателен по умолчанию. Явный -allow-local-anonymous допускается только на loopback при локальной разработке. Подходы от исходных точек до snapped endpoints не включены. car не вызывает такси, не учитывает live traffic или подачу.",
+        "security": [
+          {
+            "ServiceBearer": []
+          }
+        ],
+        "servers": [
+          {
+            "url": "http://127.0.0.1:8081",
+            "description": "Локальный Go routing adapter; не внешний адрес ML/основного backend"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoutingRequest"
+              },
+              "example": {
+                "from": {
+                  "coordinates": [
+                    44.0059,
+                    56.3269
+                  ],
+                  "label": null
+                },
+                "to": {
+                  "coordinates": [
+                    44.0095,
+                    56.3286
+                  ],
+                  "label": null
+                },
+                "mode": "walk",
+                "walking_speed_kph": 3.5
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Рассчитанный путь; X-Request-ID генерируется сервером",
+            "headers": {
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutingResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "415": {
+            "description": "UNSUPPORTED_MEDIA_TYPE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "502": {
+            "$ref": "#/components/responses/Error502"
           },
           "503": {
             "$ref": "#/components/responses/Error503"
@@ -4946,6 +5043,131 @@
         "required": [
           "csrf_token"
         ]
+      },
+      "RoutingRequest": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "to": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/Mode"
+          },
+          "walking_speed_kph": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 8,
+            "description": "Только для walk; без параметра используется скорость движка, не семейная норма."
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "mode"
+        ],
+        "additionalProperties": false,
+        "description": "Координаты в bbox пилота [43.5,56.05,44.4,56.6]. Привязка к сети до 100 м. Обязательность полей и режим проверяются сервером."
+      },
+      "RoutingWarning": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "RoutingResult": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/Mode"
+          },
+          "status": {
+            "type": "string",
+            "const": "calculated"
+          },
+          "distance_m": {
+            "type": "number",
+            "minimum": 0
+          },
+          "travel_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "geometry": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "LineString"
+              },
+              "coordinates": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Position"
+                },
+                "minItems": 2
+              }
+            },
+            "required": [
+              "type",
+              "coordinates"
+            ]
+          },
+          "routing_data_version": {
+            "type": "string"
+          },
+          "engine_version": {
+            "type": "string"
+          },
+          "snapped_from": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "snapped_to": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "walking_speed_kph": {
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 0.5,
+                "maximum": 8
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoutingWarning"
+            }
+          }
+        },
+        "required": [
+          "mode",
+          "status",
+          "distance_m",
+          "travel_duration_sec",
+          "geometry",
+          "routing_data_version",
+          "engine_version",
+          "snapped_from",
+          "snapped_to",
+          "walking_speed_kph",
+          "warnings"
+        ]
       }
     },
     "securitySchemes": {
@@ -4981,7 +5203,7 @@
         }
       },
       "Error401": {
-        "description": "SESSION_REQUIRED или неверный сервисный токен",
+        "description": "SESSION_REQUIRED или неверный сервисный токен / SERVICE_AUTH_REQUIRED",
         "headers": {
           "X-Request-ID": {
             "description": "Идентификатор трассировки",
@@ -5071,7 +5293,7 @@
         }
       },
       "Error422": {
-        "description": "VALIDATION_ERROR / UNKNOWN_ACTIVITY / HARD_CONSTRAINT_VIOLATION / LOCATION_REQUIRED / ACKNOWLEDGEMENT_REQUIRED / PREVIEW_NOT_APPLICABLE",
+        "description": "VALIDATION_ERROR / UNKNOWN_ACTIVITY / HARD_CONSTRAINT_VIOLATION / LOCATION_REQUIRED / ACKNOWLEDGEMENT_REQUIRED / PREVIEW_NOT_APPLICABLE / NO_ROUTE",
         "headers": {
           "X-Request-ID": {
             "description": "Идентификатор трассировки",
@@ -5131,7 +5353,7 @@
         }
       },
       "Error502": {
-        "description": "ML_CONTRACT_ERROR",
+        "description": "ML_CONTRACT_ERROR / ROUTING_CONTRACT_ERROR",
         "headers": {
           "X-Request-ID": {
             "description": "Идентификатор трассировки",

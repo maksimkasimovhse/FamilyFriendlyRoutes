@@ -1,0 +1,235 @@
+{
+  "description": "Live local routing probes; approximate coordinates, not verified venue entrances",
+  "generated_at": "2026-11-20T08:18:46Z",
+  "routing_data_version": "osm-nizhny-b28000078dc7db390f7602a1c5caf3f8dfcc67bc1c5da67f5bbeb73aec29be31",
+  "source_url": "https://download.openstreetmap.fr/extracts/russia/volga_federal_district/nizhny_novgorod_oblast-latest.osm.pbf",
+  "engine_version": "valhalla-scripted@sha256:693617873d42f24d9023eaa9aa002dccd832c9629c9ce8b60eb4ff30547215e1",
+  "probes": [
+    {
+      "from": [
+        44.0059,
+        56.3269
+      ],
+      "to": [
+        44.0095,
+        56.3286
+      ],
+      "mode": "walk",
+      "distance_m": 502.395,
+      "travel_duration_sec": 552.75,
+      "geometry_point_count": 34,
+      "snapped_from": [
+        44.005857,
+        56.326924
+      ],
+      "snapped_to": [
+        44.009398,
+        56.328491
+      ]
+    },
+    {
+      "from": [
+        44.0059,
+        56.3269
+      ],
+      "to": [
+        44.0095,
+        56.3286
+      ],
+      "mode": "car",
+      "distance_m": 743.054,
+      "travel_duration_sec": 130.565,
+      "geometry_point_count": 47,
+      "snapped_from": [
+        44.005857,
+        56.326924
+      ],
+      "snapped_to": [
+        44.009398,
+        56.328491
+      ]
+    },
+    {
+      "from": [
+        44.0095,
+        56.3286
+      ],
+      "to": [
+        44.0213,
+        56.3283
+      ],
+      "mode": "walk",
+      "distance_m": 880.151,
+      "travel_duration_sec": 941.298,
+      "geometry_point_count": 32,
+      "snapped_from": [
+        44.009398,
+        56.328491
+      ],
+      "snapped_to": [
+        44.021319,
+        56.328323
+      ]
+    },
+    {
+      "from": [
+        44.0095,
+        56.3286
+      ],
+      "to": [
+        44.0213,
+        56.3283
+      ],
+      "mode": "car",
+      "distance_m": 905.151,
+      "travel_duration_sec": 165.615,
+      "geometry_point_count": 27,
+      "snapped_from": [
+        44.009398,
+        56.328491
+      ],
+      "snapped_to": [
+        44.021319,
+        56.328323
+      ]
+    },
+    {
+      "from": [
+        44.0213,
+        56.3283
+      ],
+      "to": [
+        44.043,
+        56.322
+      ],
+      "mode": "walk",
+      "distance_m": 1776.074,
+      "travel_duration_sec": 1833.818,
+      "geometry_point_count": 63,
+      "snapped_from": [
+        44.021319,
+        56.328323
+      ],
+      "snapped_to": [
+        44.043105,
+        56.321763
+      ]
+    },
+    {
+      "from": [
+        44.0213,
+        56.3283
+      ],
+      "to": [
+        44.043,
+        56.322
+      ],
+      "mode": "car",
+      "distance_m": 1938.073,
+      "travel_duration_sec": 244.626,
+      "geometry_point_count": 69,
+      "snapped_from": [
+        44.021319,
+        56.328323
+      ],
+      "snapped_to": [
+        44.043105,
+        56.321763
+      ]
+    },
+    {
+      "from": [
+        44.043,
+        56.322
+      ],
+      "to": [
+        43.9925,
+        56.3217
+      ],
+      "mode": "walk",
+      "distance_m": 3761.377,
+      "travel_duration_sec": 3889.844,
+      "geometry_point_count": 188,
+      "snapped_from": [
+        44.043105,
+        56.321763
+      ],
+      "snapped_to": [
+        43.992544,
+        56.321735
+      ]
+    },
+    {
+      "from": [
+        44.043,
+        56.322
+      ],
+      "to": [
+        43.9925,
+        56.3217
+      ],
+      "mode": "car",
+      "distance_m": 5710.378,
+      "travel_duration_sec": 493.468,
+      "geometry_point_count": 201,
+      "snapped_from": [
+        44.043105,
+        56.321763
+      ],
+      "snapped_to": [
+        43.992544,
+        56.321735
+      ]
+    },
+    {
+      "from": [
+        43.9925,
+        56.3217
+      ],
+      "to": [
+        44.0059,
+        56.3269
+      ],
+      "mode": "walk",
+      "distance_m": 1240.207,
+      "travel_duration_sec": 1281.641,
+      "geometry_point_count": 78,
+      "snapped_from": [
+        43.992544,
+        56.321735
+      ],
+      "snapped_to": [
+        44.005857,
+        56.326924
+      ]
+    },
+    {
+      "from": [
+        43.9925,
+        56.3217
+      ],
+      "to": [
+        44.0059,
+        56.3269
+      ],
+      "mode": "car",
+      "distance_m": 1837.548,
+      "travel_duration_sec": 202.823,
+      "geometry_point_count": 88,
+      "snapped_from": [
+        43.992544,
+        56.321735
+      ],
+      "snapped_to": [
+        44.005857,
+        56.326924
+      ]
+    }
+  ],
+  "limitations": [
+    "No field verification",
+    "No live traffic or taxi pickup time",
+    "No elevation or timezone database",
+    "Approaches from input to snapped points not included"
+  ]
+}

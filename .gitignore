@@ -1,0 +1,6 @@
+/data/
+/work/
+/bin/
+/.env
+*.test
+coverage.out

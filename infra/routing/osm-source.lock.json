@@ -1,0 +1,11 @@
+{
+  "source_url": "https://download.openstreetmap.fr/extracts/russia/volga_federal_district/nizhny_novgorod_oblast-latest.osm.pbf",
+  "downloaded_at": "2026-11-20T11:07:16.38324+03:00",
+  "provider_state": "sequenceNumber=7378689\ntimestamp=2026-11-19T00\\:01\\:34Z",
+  "md5": "cbb258030208172b8d31e9569e747d56",
+  "sha256": "b28000078dc7db390f7602a1c5caf3f8dfcc67bc1c5da67f5bbeb73aec29be31",
+  "size_bytes": 78154390,
+  "routing_data_version": "osm-nizhny-b28000078dc7db390f7602a1c5caf3f8dfcc67bc1c5da67f5bbeb73aec29be31",
+  "attribution": "© OpenStreetMap contributors",
+  "license_url": "https://www.openstreetmap.org/copyright"
+}

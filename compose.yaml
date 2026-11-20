@@ -1,0 +1,33 @@
+name: family-friendly-routes
+services:
+  valhalla:
+    image: ghcr.io/valhalla/valhalla-scripted@sha256:693617873d42f24d9023eaa9aa002dccd832c9629c9ce8b60eb4ff30547215e1
+    ports:
+      - "127.0.0.1:8002:8002"
+    volumes:
+      - valhalla-data:/custom_files
+      - type: bind
+        source: ./data/routing/nizhny-novgorod.osm.pbf
+        target: /custom_files/nizhny-novgorod.osm.pbf
+        read_only: true
+        bind:
+          create_host_path: false
+    environment:
+      server_threads: "2"
+      build_admins: "False"
+      build_time_zones: "False"
+      build_elevation: "False"
+      build_transit: "False"
+      use_default_speeds_config: "False"
+      use_tiles_ignore_pbf: "False"
+      force_rebuild: "False"
+      serve_tiles: "True"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8002/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 900s
+    restart: unless-stopped
+volumes:
+  valhalla-data:
