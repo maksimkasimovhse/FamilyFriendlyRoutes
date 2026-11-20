@@ -16,6 +16,7 @@ export function isGuest() { try { return localStorage.getItem(GUEST_KEY) === '1'
 function setGuest(on) { try { on ? localStorage.setItem(GUEST_KEY, '1') : localStorage.removeItem(GUEST_KEY); } catch { /* приватный режим */ } }
 
 export const enterGuest = () => setGuest(true);
+export const leaveGuest = () => setGuest(false);
 
 export async function startSession() {
   info = await openSession();

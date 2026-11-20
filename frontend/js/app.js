@@ -9,9 +9,9 @@
 // ?newtrip=1 — сразу «Новая поездка» (для репетиции демо).
 
 import { onTripChange, loadSavedTrip, loadCachedTrip, listTrips, openTrip, forget, getTrip } from './api.js';
-import { startSession, isAuthenticated, isGuest, enterGuest, userEmail, signOut, initAuthScreen, openAuth } from './session.js';
-import { loadFamily, syncLocalProfile, seedDemoNames, openOnboarding, closeOnboarding, currentProfile, childName, genitive, familySummary } from './onboarding.js';
-import { openTripSetup, afterPick, backToWhen, backToWishes, backToPreview, closeTripSetup } from './trip-setup.js';
+import { startSession, isAuthenticated, isGuest, enterGuest, leaveGuest, userEmail, signOut, initAuthScreen, openAuth } from './session.js';
+import { loadFamily, syncLocalProfile, seedDemoNames, clearDeviceData, openOnboarding, closeOnboarding, currentProfile, childName, genitive, familySummary } from './onboarding.js';
+import { openTripSetup, markStep, clearResume, afterPick, backToWhen, backToWishes, backToPreview, closeTripSetup } from './trip-setup.js';
 import { loadPlaces } from './places.js';
 import { initMap, resizeMap, focusPlace, showPicked, refreshMap } from './map.js';
 import { initPick, openPick } from './pick.js';
@@ -84,6 +84,7 @@ function startMain() {
 let pickInFlow = false;
 function enterPickStep() {
   pickInFlow = true;
+  markStep('pick');
   app.classList.add('flow-mode');
   openTab('pick');
   openPick();
@@ -109,12 +110,12 @@ document.addEventListener('pick:open', () => { openTab('pick'); openPick(); }); 
 document.addEventListener('pick:reset', () => showPicked(null));
 
 // ---------- Новая поездка ----------
-function startTripSetup({ keep = false } = {}) {
+function startTripSetup({ keep = false, resume = false } = {}) {
   loading('');
   app.classList.add('flow-mode');
   openTripSetup({
     authenticated: isAuthenticated(),
-    onBack: () => { if (mainStarted) { closeTripSetup(); startMain(); } else openProfileFlow({ firstTime: false }); },
+    onBack: () => { closeTripSetup(); if (mainStarted) startMain(); else { app.classList.remove('flow-mode'); showLanding(); } },
     onPick: enterPickStep,
     onEditProfile: () => openOnboarding({
       authenticated: isAuthenticated(),
@@ -129,7 +130,7 @@ function startTripSetup({ keep = false } = {}) {
       // показываем их на карте отдельно, как раньше (ТЗ, открытый вопрос 2)
       if (picked.length) { openTab('map'); showPicked(picked); }
     },
-  }, { keep });
+  }, { keep, resume });
 }
 
 // ---------- Анкета ----------
@@ -148,6 +149,9 @@ function openProfileFlow({ firstTime }) {
 let authCallback = null;
 function showLanding() {
   loading('');
+  const login = document.querySelector('.ld-login');
+  login.textContent = isAuthenticated() ? 'Выйти' : 'Войти';
+  login.title = isAuthenticated() ? 'Вы вошли как ' + userEmail() : '';
   $('onb-auth').hidden = true;
   $('landing').hidden = false;
   $('landing').scrollTop = 0;
@@ -159,14 +163,36 @@ function openAuthFlow(callback, mode) {
   authCallback = callback;
   openAuth(mode || (isGuest() ? 'login' : 'register'));
 }
-document.querySelectorAll('#landing [data-auth]').forEach(b => { b.onclick = () => openAuthFlow(afterAuth, b.dataset.auth); });
+// Якорные ссылки лендинга («Как это работает», логотип) только прокручивают — адрес страницы не меняем
+document.querySelectorAll('#landing a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = a.getAttribute('href') === '#top' ? $('landing') : $(a.getAttribute('href').slice(1));
+    if (target === $('landing')) $('landing').scrollTo({ top: 0, behavior: 'smooth' });
+    else target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+document.querySelectorAll('#landing [data-auth]').forEach(b => {
+  b.onclick = async () => {
+    if (b.classList.contains('ld-login') && isAuthenticated()) {   // «Выйти» на лендинге
+      await signOut(); forget(); clearDeviceData(); clearResume(); showLanding(); return;
+    }
+    if (isAuthenticated()) { $('landing').hidden = true; afterAuth(); return; }   // уже вошли — сразу к поездке
+    openAuthFlow(afterAuth, b.dataset.auth);
+  };
+});
 $('ld-guest').onclick = () => { $('landing').hidden = true; guestEnter(); };
 $('auth-back').onclick = () => { $('onb-auth').hidden = true; if (mainStarted) { app.classList.remove('flow-mode'); } else showLanding(); };
 initAuthScreen({
   onDone: async () => { $('onb-auth').hidden = true; await authCallback?.(); },
   onGuest: () => { $('onb-auth').hidden = true; guestEnter(); },
 });
-function guestEnter() { enterGuest(); afterAuth(); }
+// Гость всегда начинает с чистого листа: анкета и поездка заполняются с нуля
+async function guestEnter() {
+  if (isAuthenticated()) await signOut();   // был в аккаунте — выходим, иначе подтянется его анкета
+  enterGuest(); clearDeviceData(); clearResume(); forget();
+  afterAuth();
+}
 // После входа: анкету гостя — в аккаунт (если там пусто), дальше по обычной схеме
 async function afterAuth() {
   loading('Загружаем анкету…');
@@ -209,7 +235,7 @@ $('prof-edit').onclick = () => openOnboarding({
   onDone: () => location.reload(),          // имя и возраст ребёнка перечитаются везде
   onBack: () => { closeOnboarding(); app.classList.remove('flow-mode'); },
 });
-$('prof-newtrip').onclick = () => startTripSetup();
+$('prof-newtrip').onclick = () => { clearResume(); startTripSetup(); };
 $('prof-auth').onclick = async () => {
   if (isAuthenticated()) {
     await signOut();
@@ -234,11 +260,18 @@ async function continueBoot() {
   const profile = await loadFamily({ authenticated: isAuthenticated() });
   seedDemoNames(userEmail());
   if (!profile) return openProfileFlow({ firstTime: true });
-  if (q.has('newtrip')) { forget(); return startTripSetup(); }
+  if (q.has('newtrip')) {
+    // Разовая команда: сразу убираем её из адреса, иначе каждое обновление страницы начинало бы поездку заново
+    history.replaceState(null, '', location.pathname + location.hash);
+    q.delete('newtrip');
+    forget();
+    clearResume();
+    return startTripSetup();
+  }
   loading('Загружаем поездку…');
   const trip = await loadSavedTrip();
   if (trip) return startMain();
-  startTripSetup();
+  startTripSetup({ resume: true });   // после обновления страницы возвращаемся на тот же шаг
 }
 
 async function boot() {
@@ -251,7 +284,14 @@ async function boot() {
     await loadCachedTrip();
     return startMain();
   }
-  if (!isAuthenticated() && !isGuest()) return showLanding();
-  try { await continueBoot(); } catch (err) { showFatal(err); }
+  // Правило входа на страницу: есть сохранённый маршрут — открываем его; иначе ВСЕГДА лендинг
+  // (и для аккаунта, и для гостя). ?newtrip=1 — сразу «Новая поездка» (для репетиции, только если уже вошли).
+  if ((isAuthenticated() || isGuest()) && q.has('newtrip')) { try { return await continueBoot(); } catch (err) { return showFatal(err); } }
+  if (isAuthenticated() || isGuest()) {
+    if (await loadSavedTrip()) { try { return await continueBoot(); } catch (err) { return showFatal(err); } }
+    if (isGuest()) { leaveGuest(); clearDeviceData(); }   // гость без маршрута — начнёт с чистого листа
+  }
+  clearResume(); forget();
+  showLanding();
 }
 boot();

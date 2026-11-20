@@ -14,11 +14,11 @@ LIMITS = {"pace": "relaxed", "max_walk_distance_m_per_day": None, "max_continuou
 
 USERS = [
     # (почта, анкета или None — «новичок» пройдёт анкету сам)
-    ("mama@example.com", {
+    ("masha@example.com", {
         "family": {"children": [{"child_id": "child-1", "age_years": 7, "height_cm": None, "interest_ids": ["history", "animals"]}],
                    "adult_count": 2, "adult_interest_ids": ["history", "architecture"]},
         "load_limits": {**LIMITS, "pace": "relaxed"}, "wishes": "Частые перерывы"}),
-    ("dvoe@example.com", {
+    ("petya@example.com", {
         "family": {"children": [{"child_id": "child-1", "age_years": 4, "height_cm": None, "interest_ids": ["animals", "play"]},
                                 {"child_id": "child-2", "age_years": 9, "height_cm": None, "interest_ids": ["science", "history"]}],
                    "adult_count": 2, "adult_interest_ids": ["museums", "walks"]},

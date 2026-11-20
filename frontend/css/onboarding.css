@@ -75,7 +75,7 @@ textarea { resize: vertical; min-height: 84px; line-height: 1.4; }
 /* Карточка ребёнка */
 .kid-card-w { border-left: 0; }
 .kid-num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--kid); color: #fff; font-weight: 800; font-size: 14px; margin-right: 8px; }
-.kid-head { display: flex; align-items: center; margin-bottom: 12px; font-weight: 800; font-size: 16px; }
+.kid-head { display: flex; align-items: center; margin-bottom: 8px; font-weight: 800; font-size: 16px; }
 .ages { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; margin-top: 6px; }
 .ages button { min-height: 44px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 800; font-size: 15px; padding: 0; }
 .ages button[aria-pressed="true"] { background: var(--kid); border-color: var(--kid); color: #fff; }
@@ -183,3 +183,21 @@ textarea { resize: vertical; min-height: 84px; line-height: 1.4; }
 .demo-btns b { font-size: 13px; }
 .demo-btns small { color: var(--ink-2); font-weight: 600; font-size: 11px; }
 .demo-btns button:disabled { opacity: .5; }
+
+/* Возраст: компактно — «−  7 лет  +» и тонкий ползунок */
+.age-pick { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 0; }
+.age-btn { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--kid-soft); color: var(--kid); font-size: 24px; font-weight: 800; line-height: 1; cursor: pointer; padding: 0; }
+.age-btn:active { transform: scale(.92); }
+.age-val { display: flex; align-items: baseline; gap: 6px; line-height: 1; }
+.age-val b { font-size: 36px; font-weight: 800; color: var(--kid); }
+.age-val span { font-size: 17px; font-weight: 700; color: var(--ink-2); }
+.age-range { -webkit-appearance: none; appearance: none; display: block; width: 100%; height: 8px; margin: 10px 0 4px; padding: 0; border: 0; border-radius: 999px; outline: none; cursor: pointer;
+  background: linear-gradient(to right, var(--kid) var(--p, 0%), var(--line) var(--p, 0%)); }
+.age-range.empty { background: var(--line); }
+.age-range::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 3px solid var(--kid); box-shadow: 0 2px 6px rgba(232,100,31,.3); }
+.age-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 3px solid var(--kid); box-shadow: 0 2px 6px rgba(232,100,31,.3); }
+.age-range.empty::-webkit-slider-thumb { border-color: #C2C8D2; box-shadow: 0 2px 6px rgba(15,22,40,.15); }
+.age-range.empty::-moz-range-thumb { border-color: #C2C8D2; }
+
+/* Шаг «Что интересно детям?»: на карточке только имя и чипсы */
+.kid-title { margin: 0 0 12px; font-size: 20px; font-weight: 800; color: var(--kid); }

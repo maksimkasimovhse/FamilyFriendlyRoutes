@@ -40,7 +40,18 @@ function fmtDuration(sec) {
 const fmtTime = iso => iso ? new Date(iso).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Moscow' }) : '';
 
 // ---------- Состояние поездки ----------
+// Шаг и введённое запоминаем в sessionStorage (живёт, пока открыта вкладка): обновление страницы не сбрасывает мастер.
+const RESUME_KEY = 'trip-setup-v1';
 let st = null;
+let step = 'when';
+function persist() {
+  try { sessionStorage.setItem(RESUME_KEY, JSON.stringify({ step, st })); } catch { /* приватный режим */ }
+}
+export function clearResume() { try { sessionStorage.removeItem(RESUME_KEY); } catch { /* ничего */ } }
+function restore() {
+  try { return JSON.parse(sessionStorage.getItem(RESUME_KEY)); } catch { return null; }
+}
+export function markStep(name) { step = name; persist(); }
 let hooks = { authenticated: false, guest: false, onBack() {}, onPick() {}, onEditProfile() {}, onLogin() {}, onDone() {} };
 let draftTrip = null, preview = null, previewDay = 0;
 let capabilities = { free_text: false };
@@ -59,9 +70,11 @@ function freshState() {
 
 // ---------- Экран 5: когда и откуда ----------
 function renderWhen() {
+  step = 'when';
   document.querySelectorAll('#trip-context button').forEach(b => b.setAttribute('aria-checked', b.dataset.ctx === st.context));
   document.querySelectorAll('#trip-hours button').forEach(b => b.setAttribute('aria-checked', Number(b.dataset.h) === st.hours));
   renderCalendar();
+  persist();
   renderPoints('start-points', st.start, p => { st.start = p; renderWhen(); });
   renderPoints('end-points', st.end, p => { st.end = p; renderWhen(); });
   $('return-home').setAttribute('aria-checked', st.returnHome);
@@ -184,6 +197,7 @@ function buildRequest() {
 
 // ---------- Экран 7: пожелания и итог ----------
 function renderWishes() {
+  step = 'wishes';
   const p = currentProfile();
   if (st.request === null) st.request = p?.wishes || '';
   $('trip-request').value = st.request;
@@ -200,6 +214,7 @@ function renderWishes() {
     ['Обязательно', st.picked.length ? plural(st.picked.length, 'место', 'места', 'мест') + ' из подбора' : 'подберём сами', 'pick'],
   ];
   $('trip-summary').innerHTML = rows.map(([k, v, to]) => `<dt>${k}</dt><dd>${esc(v)}</dd><dd><button type="button" data-to="${to}">Изм.</button></dd>`).join('');
+  persist();
   $('trip-summary').querySelectorAll('[data-to]').forEach(b => {
     b.onclick = () => {
       st.request = $('trip-request').value;
@@ -284,6 +299,7 @@ async function savePreview() {
   try {
     const trip = await applyPreview(preview, preview.required_acknowledgement_codes || []);
     $('trip-preview').hidden = true;
+    clearResume();
     hooks.onDone(trip, st.picked);
   } catch (e) {
     if (e.code === 'PREVIEW_EXPIRED' || e.code === 'PREVIEW_STALE') {
@@ -304,10 +320,16 @@ async function savePreview() {
 // ---------- Вход в поток ----------
 let bound = false;
 // hooks: { authenticated, guest, onBack(), onPick(), onEditProfile(), onLogin(), onDone(trip, picked) }
-export async function openTripSetup(h, { keep = false } = {}) {
+export async function openTripSetup(h, { keep = false, resume = false } = {}) {
   hooks = { ...hooks, ...h };
   try { capabilities = (await referenceData()).capabilities || capabilities; } catch { /* оставляем demo */ }
-  if (!st || !keep) { st = freshState(); pickingEnd = false; }
+  const saved = resume ? restore() : null;
+  if (saved?.st) {
+    st = saved.st;
+    // Даты в прошлом (вчерашняя вкладка) не оставляем
+    if (st.from < firstAllowed(st.context)) { st.from = st.to = firstAllowed(st.context); st.month = st.from.slice(0, 7); }
+    step = saved.step;
+  } else if (!st || !keep) { st = freshState(); pickingEnd = false; step = 'when'; }
   if (!bound) {
     bound = true;
     bindWhen();
@@ -318,6 +340,9 @@ export async function openTripSetup(h, { keep = false } = {}) {
     $('preview-save').onclick = savePreview;
     $('preview-login').onclick = () => hooks.onLogin();
   }
+  // Вернуться туда, где остановились до обновления страницы
+  if (saved?.st && step === 'pick') { hooks.onPick(); return; }
+  if (saved?.st && step === 'wishes') { renderWishes(); $('trip-wishes').hidden = false; return; }
   renderWhen();
   $('trip-when').hidden = false;
 }
