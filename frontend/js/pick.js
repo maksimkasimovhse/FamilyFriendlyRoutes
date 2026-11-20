@@ -3,8 +3,11 @@
 // «Завершить подбор мест» отдаёт выбранные места наружу (onFinish) — app.js открывает карту.
 // Тексты вставляются только через textContent: описания приходят из данных, а не из нашей разметки.
 
-const SWIPE_PX = 100;        // на сколько нужно утянуть карточку, чтобы решение засчиталось
-const FLING_SPEED = 0.55;    // быстрый «щелчок» (px/мс) тоже засчитывается, даже если утянули недалеко
+import { loadCards } from './catalog.js';
+
+const SWIPE_PX = 45;         // на сколько нужно утянуть карточку, чтобы решение засчиталось
+const FLING_SPEED = 0.25;    // быстрый «щелчок» (px/мс) тоже засчитывается, даже если утянули недалеко
+const COMMIT_PX = 110;       // дальше этого решение принимается на лету, палец можно не отпускать
 const FLY_MS = 280;          // сколько летит карточка за экран
 const VISIBLE = 3;           // сколько карточек видно стопкой
 
@@ -21,18 +24,11 @@ let deck = [];           // порядок показа (перемешан)
 let pos = 0;             // индекс верхней карточки
 let liked = [];          // выбранные места, в порядке свайпов
 let disliked = 0;
-let busy = false;        // карточка улетает — новые решения пока не принимаем
 let onFinish = () => {};
 let onClose = () => {};
-let loading = null;
 
 // ---------- Данные ----------
-function loadCards() {
-  loading ??= fetch('data/cards.json')
-    .then(r => { if (!r.ok) throw new Error('cards.json: HTTP ' + r.status); return r.json(); })
-    .then(list => { all = list; });
-  return loading;
-}
+const loadAll = () => loadCards().then(list => { all = list; });
 
 function shuffled(list) {
   const a = [...list];
@@ -62,8 +58,8 @@ function buildCard(card) {
   const more = el('span', 'pcard-more', 'Читать полностью ›');
   body.append(desc, more);
 
-  const yes = el('div', 'stamp yes', 'В МАРШРУТ');
-  const no = el('div', 'stamp no', 'НЕТ');
+  const yes = el('div', 'pstamp yes', 'В МАРШРУТ');
+  const no = el('div', 'pstamp no', 'НЕТ');
   root.append(photo, body, yes, no);
   return root;
 }
@@ -71,7 +67,7 @@ function buildCard(card) {
 // Стопка: верхняя карточка тянется пальцем, остальные чуть меньше и ниже.
 function layoutStack() {
   const stack = $('deck');
-  const cards = [...stack.querySelectorAll('.pcard')];
+  const cards = [...stack.querySelectorAll('.pcard:not(.gone)')];   // улетающие уже не в стопке
   cards.forEach((c, i) => { c.dataset.pos = i; });
   while (cards.length < VISIBLE && pos + cards.length < deck.length) {
     const c = buildCard(deck[pos + cards.length]);
@@ -86,14 +82,10 @@ function layoutStack() {
 }
 
 function updateHud() {
-  const left = deck.length - pos;
-  $('pick-count').textContent = `Выбрано ${liked.length} · ещё ${left}`;
+  $('pick-count').textContent = liked.length ? `Выбрано: ${liked.length}` : '';
   const finish = $('pick-finish');
   finish.disabled = liked.length === 0;
   finish.textContent = liked.length ? `Завершить подбор мест (${liked.length})` : 'Завершить подбор мест';
-  $('pick-hint').hidden = liked.length > 0;
-  const empty = left === 0;
-  $('pick-yes').disabled = $('pick-no').disabled = $('pick-info').disabled = empty;
 }
 
 // ---------- Свайп ----------
@@ -102,7 +94,7 @@ function bindDrag(card) {
   let startX = 0, startY = 0, dx = 0, dy = 0, lastX = 0, lastT = 0, vx = 0, down = false;
 
   card.addEventListener('pointerdown', e => {
-    if (busy || e.button > 0) return;
+    if (e.button > 0) return;
     down = true;
     startX = lastX = e.clientX; startY = e.clientY; dx = dy = vx = 0; lastT = e.timeStamp;
     try { card.setPointerCapture(e.pointerId); } catch { /* указатель уже не активен — тянем без захвата */ }
@@ -116,6 +108,13 @@ function bindDrag(card) {
     if (dt > 0) vx = (e.clientX - lastX) / dt;
     lastX = e.clientX; lastT = e.timeStamp;
     setDrag(card, dx, dy);
+    // Увели достаточно далеко — решение принято сразу, не дожидаясь, пока отпустят палец
+    if (Math.abs(dx) > COMMIT_PX && Math.abs(dx) > Math.abs(dy) * 0.7) {
+      down = false;
+      card.classList.remove('drag');
+      try { card.releasePointerCapture(e.pointerId); } catch { /* захвата не было */ }
+      decide(dx > 0 ? 'yes' : 'no', dy, card);
+    }
   });
 
   const end = e => {
@@ -126,7 +125,7 @@ function bindDrag(card) {
     const moved = Math.hypot(dx, dy);
     if (e.type === 'pointercancel') return reset(card);
     if (moved < 8) { reset(card); openDetails(); return; }   // просто нажатие — читать полностью
-    if (Math.abs(dx) > SWIPE_PX || (Math.abs(vx) > FLING_SPEED && Math.abs(dx) > 30)) decide(dx > 0 ? 'yes' : 'no', dy);
+    if (Math.abs(dx) > Math.abs(dy) * 0.7 && (Math.abs(dx) > SWIPE_PX || (Math.abs(vx) > FLING_SPEED && Math.abs(dx) > 14))) decide(dx > 0 ? 'yes' : 'no', dy);
     else reset(card);
   };
   card.addEventListener('pointerup', end);
@@ -136,35 +135,30 @@ function bindDrag(card) {
 function setDrag(card, dx, dy) {
   card.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx / 18}deg)`;
   const k = Math.min(Math.abs(dx) / SWIPE_PX, 1);
-  card.querySelector('.stamp.yes').style.opacity = dx > 0 ? k : 0;
-  card.querySelector('.stamp.no').style.opacity = dx < 0 ? k : 0;
+  card.querySelector('.pstamp.yes').style.opacity = dx > 0 ? k : 0;
+  card.querySelector('.pstamp.no').style.opacity = dx < 0 ? k : 0;
 }
 
 function reset(card) {
   card.style.transform = '';
-  card.querySelectorAll('.stamp').forEach(s => { s.style.opacity = 0; });
+  card.querySelectorAll('.pstamp').forEach(s => { s.style.opacity = 0; });
 }
 
 // Решение: карточка улетает за экран, место попадает в «выбрано» или в «не нравится».
-function decide(choice, dy = 0) {
-  const stack = $('deck');
-  const top = stack.querySelector('.pcard[data-pos="0"]');
-  if (!top || busy) return;
-  busy = true;
+function decide(choice, dy = 0, fromCard = null) {
+  const top = fromCard || $('deck').querySelector('.pcard:not(.gone)');
+  if (!top || top.classList.contains('gone') || pos >= deck.length) return;
   closeDetails();
   const card = deck[pos];
   const dir = choice === 'yes' ? 1 : -1;
-  top.classList.add('fly');
+  top.classList.add('gone', 'fly');          // выбывает из стопки сразу: следующая карточка доступна без ожидания
+  top.dataset.pos = 'x';
   top.style.transform = `translate(${dir * (window.innerWidth + 200)}px, ${dy}px) rotate(${dir * 24}deg)`;
-  top.querySelector(`.stamp.${choice}`).style.opacity = 1;
+  top.querySelector(`.pstamp.${choice}`).style.opacity = 1;
   if (choice === 'yes') liked.push(card); else disliked++;
   pos++;
-  setTimeout(() => {
-    top.remove();
-    layoutStack();
-    busy = false;
-  }, FLY_MS);
-  updateHud();
+  layoutStack();
+  setTimeout(() => top.remove(), FLY_MS);
 }
 
 // ---------- Описание целиком ----------
@@ -188,7 +182,7 @@ function closeDetails() { $('pick-sheet').hidden = true; }
 // ---------- Запуск ----------
 function startDeck() {
   deck = shuffled(all);
-  pos = 0; liked = []; disliked = 0; busy = false;
+  pos = 0; liked = []; disliked = 0;
   $('deck').querySelectorAll('.pcard').forEach(c => c.remove());
   layoutStack();
 }
@@ -196,9 +190,6 @@ function startDeck() {
 export function initPick(handlers) {
   onFinish = handlers.onFinish;
   onClose = handlers.onClose;
-  $('pick-yes').addEventListener('click', () => decide('yes'));
-  $('pick-no').addEventListener('click', () => decide('no'));
-  $('pick-info').addEventListener('click', openDetails);
   $('pick-back').addEventListener('click', () => onClose());
   $('pick-finish').addEventListener('click', () => { if (liked.length) onFinish([...liked]); });
   $('pick-restart').addEventListener('click', startDeck);
@@ -217,7 +208,7 @@ export function initPick(handlers) {
 // Открыть экран. Колода собирается при первом открытии; потом продолжаем с того же места.
 export async function openPick() {
   try {
-    await loadCards();
+    await loadAll();
   } catch (err) {
     console.error(err);
     $('deck-empty').hidden = false;

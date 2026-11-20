@@ -2151,6 +2151,153 @@
         },
         "description": "Требует аккаунт и заполненную анкету. Изменение профиля не меняет созданные поездки. request_text=null использует wishes из профиля; пустая строка очищает пожелания для этой поездки."
       }
+    },
+    "/api/v1/trips/{trip_id}/map/places": {
+      "get": {
+        "operationId": "getRouteMapPlaces",
+        "summary": "Инфраструктура в коридоре 250 м вдоль сохранённого маршрута дня",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "categories",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "playground",
+                  "park",
+                  "bench",
+                  "toilet",
+                  "pharmacy",
+                  "restaurant"
+                ]
+              }
+            },
+            "description": "Repeated query parameters or comma-separated: playground,park,bench,toilet,pharmacy,restaurant",
+            "style": "form",
+            "explode": true
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Opaque next_cursor from previous response. Keep the same spatial filter, categories and limit. Offset pagination can shift when catalog changes."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 100
+            },
+            "description": ""
+          },
+          {
+            "name": "trip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ISODate"
+            }
+          },
+          {
+            "name": "expected_version",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "buffer_m",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1000,
+              "default": 250
+            },
+            "description": "Maximum geodesic distance from the route in metres; default 250."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Идентификатор трассировки",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MapResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "description": "Checks trip ownership and expected_version. Searches PostGIS using the complete original OSM leg geometries as a MultiLineString, without simplification or straight connectors between legs. Default buffer is 250 m to either side and around the ends. distance_to_route_m is the shortest geodesic distance to the line, not a walking detour. All saved legs of the selected day are included. Cursor is bound to route geometry, version, date and filters; version changes return 409. No GPS centre is used."
+      }
     }
   },
   "components": {
@@ -3360,6 +3507,11 @@
             "type": "number",
             "minimum": 0,
             "description": "Centre-to-object geodesic distance in metres. Present only in radius search; not walking distance."
+          },
+          "distance_to_route_m": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Shortest geodesic distance to the saved route line in metres, not walking distance. Route-corridor search only."
           }
         },
         "required": [
@@ -5577,6 +5729,13 @@
                 "type": "null"
               }
             ]
+          },
+          "route_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "route_date": {
+            "$ref": "#/components/schemas/ISODate"
           }
         },
         "required": [

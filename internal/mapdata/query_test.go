@@ -1,6 +1,7 @@
 package mapdata
 
 import (
+	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/routing"
 	"net/url"
 	"strings"
 	"testing"
@@ -32,6 +33,34 @@ func TestQueryValidationAndCursor(t *testing.T) {
 	v.Set("radius_km", "3")
 	if _, err := Parse(v); err == nil {
 		t.Fatal("cursor accepted different search")
+	}
+}
+func TestRouteCorridorQueryAndCursor(t *testing.T) {
+	lines := [][]routing.Position{{{44, 56}, {44.1, 56}}}
+	v, _ := url.ParseQuery("date=2030-06-15&expected_version=2&limit=1")
+	q, err := ParseRoute(v, lines)
+	if err != nil || q.RadiusM != 250 || q.RouteVersion != 2 {
+		t.Fatal(q, err)
+	}
+	v.Set("cursor", q.Next(1))
+	if next, err := ParseRoute(v, lines); err != nil || next.Offset != 1 {
+		t.Fatal("route cursor failed", err)
+	}
+	if _, err := ParseRoute(v, [][]routing.Position{{{44, 56}, {44.2, 56}}}); err == nil {
+		t.Fatal("cursor accepted another geometry")
+	}
+	v.Del("cursor")
+	v.Set("lon", "44")
+	if _, err := ParseRoute(v, lines); err == nil {
+		t.Fatal("route query accepted GPS centre")
+	}
+	v.Del("lon")
+	v.Set("buffer_m", "0")
+	if _, err := ParseRoute(v, lines); err == nil {
+		t.Fatal("zero corridor accepted")
+	}
+	if _, err := ParseRoute(v, nil); err == nil {
+		t.Fatal("empty route accepted")
 	}
 }
 

@@ -10,6 +10,7 @@
 <link href="css/app.css" rel="stylesheet">
 <link href="css/kid.css" rel="stylesheet">
 <link href="css/pick.css" rel="stylesheet">
+<link href="css/games.css" rel="stylesheet">
 <link href="css/onboarding.css" rel="stylesheet">
 <link href="css/landing.css" rel="stylesheet">
 <script src="vendor/maplibre-gl-4.7.1/maplibre-gl.js"></script>
@@ -94,6 +95,7 @@
 
     <div class="map-wrap">
       <div id="map" aria-label="Карта маршрута"></div>
+      <div id="map-sky" class="map-sky" hidden aria-hidden="true"><canvas></canvas></div>
 
       <div class="map-buttons">
         <button id="btn-3d" class="round" aria-label="Переключить 3D" title="2D / 3D">3D</button>
@@ -129,7 +131,6 @@
     <!-- Только в «Новой поездке» (шаг 2 из 3): шапка шага и подзаголовок -->
     <div class="pick-flow">
       <div class="flow-step"><span>Новая поездка · шаг 2 из 3</span><div class="flow-bar kid"><i class="on"></i><i class="on"></i><i></i></div></div>
-      <p class="pick-flow-sub">Вправо — место обязательно будет в маршруте. Влево — не надо.</p>
     </div>
     <header class="pick-top">
       <button class="pick-back" id="pick-back" aria-label="Назад к карте">‹</button>
@@ -144,15 +145,9 @@
       </div>
     </div>
 
-    <div class="pick-actions">
-      <button class="act no" id="pick-no" aria-label="Не нравится">✕</button>
-      <button class="act info" id="pick-info" aria-label="Читать описание">i</button>
-      <button class="act yes" id="pick-yes" aria-label="Добавить в маршрут">♥</button>
-    </div>
     <div class="pick-finish">
       <button class="btn main" id="pick-finish" disabled>Завершить подбор мест</button>
       <button class="btn link pick-skip" id="pick-skip" type="button">Пропустить — подберите сами</button>
-      <p class="pick-hint" id="pick-hint">Смахните карточку вправо — место попадёт в маршрут, влево — не нравится</p>
     </div>
 
     <!-- Описание целиком: открывается нажатием на карточку -->
@@ -185,6 +180,7 @@
       <div class="beads" id="today-stats"></div>
     </header>
     <div class="today-scroll">
+      <section id="today-weather" class="weather" hidden aria-live="polite"></section>
       <div id="today-now"></div>
       <ol class="timeline" id="today-list"></ol>
       <p class="source" id="today-source"></p>
@@ -231,20 +227,20 @@
     </button>
     <p class="fawn-bubble" id="fawn-bubble" hidden></p>
 
-    <!-- ===== Задание: оленёнок читает вслух, ответ — одна большая кнопка ===== -->
-    <section class="kid-page" id="task-page" hidden>
+    <!-- ===== Задание: игра с картинкой объекта (пазл, пиксель-пазл или раскраска) ===== -->
+    <section class="kid-page" id="game-page" hidden>
       <header class="kid-bar">
-        <b id="task-title"></b><span class="kid-chip" id="task-count"></span>
+        <b id="game-title"></b><span class="kid-chip" id="game-kind"></span>
         <button class="kid-exit" data-back aria-label="Назад к тропе">✕</button>
       </header>
-      <div class="kid-center">
-        <img class="fawn-big" id="task-fawn" alt="">
-        <p class="kid-say" id="task-text"></p>
-        <p class="kid-fact" id="task-intro"></p>
+      <div class="game-head">
+        <img id="game-fawn" alt="">
+        <p class="kid-say small" id="game-hint"></p>
       </div>
-      <div class="kid-bottom col">
-        <button class="btn kid-main big" id="task-done">Сделали!</button>
-        <button class="btn kid-ghost" id="task-speak">▶ Ещё раз</button>
+      <div class="game-area" id="game-area"></div>
+      <p class="game-progress" id="game-progress"></p>
+      <div class="kid-bottom">
+        <button class="btn kid-main big" id="game-done" disabled>Реши задание</button>
       </div>
     </section>
 

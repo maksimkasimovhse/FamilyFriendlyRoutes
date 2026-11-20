@@ -135,11 +135,12 @@ type Place struct {
 		PlayAreaMaxAge      json.RawMessage `json:"play_area_max_age"`
 		PlayAreaSupervision json.RawMessage `json:"play_area_supervision"`
 	} `json:"restaurant"`
-	Address         *string  `json:"address,omitempty"`
-	OpeningHoursRaw *string  `json:"opening_hours_raw,omitempty"`
-	AccessRaw       *string  `json:"access_raw,omitempty"`
-	FeeRaw          *string  `json:"fee_raw,omitempty"`
-	DistanceM       *float64 `json:"distance_m,omitempty"`
+	Address          *string  `json:"address,omitempty"`
+	OpeningHoursRaw  *string  `json:"opening_hours_raw,omitempty"`
+	AccessRaw        *string  `json:"access_raw,omitempty"`
+	FeeRaw           *string  `json:"fee_raw,omitempty"`
+	DistanceM        *float64 `json:"distance_m,omitempty"`
+	DistanceToRouteM *float64 `json:"distance_to_route_m,omitempty"`
 }
 
 type DurationEstimate struct {
@@ -426,6 +427,8 @@ type MapResponse struct {
 	Items          []Place    `json:"items"`
 	Evidence       []Evidence `json:"evidence"`
 	NextCursor     *string    `json:"next_cursor"`
+	RouteVersion   *int       `json:"route_version,omitempty"`
+	RouteDate      *ISODate   `json:"route_date,omitempty"`
 }
 
 type ReferenceData struct {

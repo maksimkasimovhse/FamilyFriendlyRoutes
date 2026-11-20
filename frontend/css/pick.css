@@ -30,6 +30,7 @@
 .pcard[data-pos="2"] { z-index: 1; transform: scale(.90) translateY(28px); }
 .pcard[data-pos="1"] > *, .pcard[data-pos="2"] > * { pointer-events: none; }
 .pcard.drag { transition: none; cursor: grabbing; }
+.pcard.gone { z-index: 4; pointer-events: none; }
 .pcard.fly { transition: transform .28s ease-in, opacity .28s ease-in; opacity: 0; }
 
 .pcard-photo { position: relative; flex: 0 0 56%; min-height: 0; background: #DDE3EC; }
@@ -48,13 +49,13 @@
 }
 .pcard-more { margin-top: auto; font-size: 13px; font-weight: 800; color: var(--now); }
 
-/* Печати «в маршрут» / «нет» при перетаскивании */
-.stamp {
+/* Печати «в маршрут» / «нет» при перетаскивании. Не .stamp: это класс штампа детского режима */
+.pstamp {
   position: absolute; top: 22px; padding: 6px 12px; border: 4px solid; border-radius: 12px;
   font-weight: 800; font-size: 22px; letter-spacing: .04em; opacity: 0; pointer-events: none; background: rgba(255,255,255,.85);
 }
-.stamp.yes { left: 18px; color: var(--ok); transform: rotate(-12deg); }
-.stamp.no { right: 18px; color: #D6322F; transform: rotate(12deg); }
+.pstamp.yes { left: 18px; color: var(--ok); transform: rotate(-12deg); }
+.pstamp.no { right: 18px; color: #D6322F; transform: rotate(12deg); }
 
 .deck-empty { position: absolute; inset: 0; display: grid; place-content: center; gap: 14px; text-align: center; color: var(--ink-2); font-weight: 700; padding: 0 24px; }
 .deck-empty p { margin: 0; font-size: 18px; }
