@@ -75,6 +75,27 @@ gofmt -w internal/contracts
 
 Генератор поддерживает используемое подмножество JSON Schema. Объединения команд представлены json.RawMessage и валидируются обработчиком; генерация моделей не заменяет runtime-валидацию.
 
+## База данных
+
+PostgreSQL 16 с PostGIS и pgvector хранит каталог мест, рестораны, события, объекты карты и данные рекомендательной системы. Схема и описание полей — [docs/db-schema.md](docs/db-schema.md). Миграции лежат в `db/migrations` и применяются goose из контейнера, поэтому Go на хосте для них не нужен.
+
+```bash
+cp .env.example .env                        # задайте POSTGRES_PASSWORD; при занятом 5432 укажите POSTGRES_PORT
+docker compose up -d --wait postgres
+docker compose run --rm migrate up          # применить миграции
+docker compose run --rm migrate down        # откатить последнюю
+docker compose run --rm migrate status
+```
+
+Загрузка начальных данных (`db/seed/main.csv` — 174 места для карточек, `db/seed/addition.csv` — 85 объектов, которые только подсвечиваются на карте):
+
+```bash
+export DATABASE_URL='postgres://familyroutes:<пароль>@127.0.0.1:5432/familyroutes?sslmode=disable'
+go run ./cmd/dbload
+```
+
+Загрузчик идемпотентен: повторный запуск обновляет данные и не создаёт дублей. Файл `.env` не попадает в Git. Картинки в БД не хранятся: в таблице `item_images` лежат метаданные и хеш, сами файлы будут на диске.
+
 ## Запуск маршрутизатора
 
 Требования: Docker Desktop с Linux engine, Go 1.26 и PowerShell. Команды выполняются из корня репозитория.
