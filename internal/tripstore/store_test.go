@@ -2,12 +2,33 @@ package tripstore
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
 	"sync"
 	"testing"
 
 	c "github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/contracts"
 )
+
+func TestOpenLegacyGuestStore(t *testing.T) {
+	filename := filepath.Join(t.TempDir(), "legacy.json")
+	if err := os.WriteFile(filename, []byte(`{"sessions":{"guest":{"csrf":"token","expires_at":"2030-01-01T00:00:00Z"}},"trips":{},"previews":{},"receipts":{}}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	s, err := Open(filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Update(func(state *State) error {
+		if state.Sessions["guest"].CSRF != "token" || state.Accounts == nil || state.FamilyProfiles == nil {
+			t.Fatal("legacy data lost or new maps missing")
+		}
+		state.Accounts["user"] = Account{UserID: "user", Email: "x@example.com", PasswordHash: "hash"}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+}
 
 func TestStorePersistenceIsolationAndConcurrentUpdates(t *testing.T) {
 	filename := filepath.Join(t.TempDir(), "state.json")

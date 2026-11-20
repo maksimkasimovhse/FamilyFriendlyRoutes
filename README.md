@@ -1,6 +1,6 @@
 # Family Friendly Routes
 
-Семейные маршруты по Нижнему Новгороду для детей 3–11 лет. ML возвращает до 50 рекомендованных мест на всю поездку. Backend распределяет их по дням, выбирает порядок и проверяет маршрут через OSM. Реализованы гостевая сессия, создание/чтение поездки, preview/apply, HTTP-адаптер ML и отдельный режим синтетического каталога. Реальный сервис ML и frontend ещё не подключены.
+Семейные маршруты по Нижнему Новгороду для детей 3–11 лет. ML возвращает до 50 рекомендованных мест на всю поездку. Backend распределяет их по дням, выбирает порядок и проверяет маршрут через OSM. Реализованы регистрация и вход, анкета семьи, гостевая сессия, создание/чтение поездки, preview/apply, HTTP-адаптер ML и отдельный режим синтетического каталога. Реальный сервис ML и frontend ещё не подключены.
 
 ## Backend маршрутов
 
@@ -22,7 +22,10 @@ go run ./cmd/backend -ml-url http://127.0.0.1:8090/internal/v1/recommendations -
 
 Поддержанные операции:
 
-- `GET /api/v1/session` — гостевая cookie и CSRF-токен.
+- `GET /api/v1/session` — cookie, CSRF-токен, статус аккаунта и заполнения анкеты.
+- `POST /api/v1/auth/register`, `/login`, `/logout`, `GET /api/v1/auth/me` — аккаунт по почте и паролю; гостевые поездки переносятся при входе.
+- `GET/PUT /api/v1/profile/family` — возраст и интересы детей, интересы взрослых, темп, ограничения и пожелания.
+- `POST /api/v1/trips/from-profile` — draft из снимка анкеты; `GET /api/v1/trips` — свои поездки.
 - `GET /api/v1/reference-data` — справочники и дополнительный demo_activities для интеграции.
 - `POST /api/v1/trips` и `GET /api/v1/trips/{trip_id}` — draft и чтение.
 - `POST /api/v1/trips/{trip_id}/previews` — generate_plan, start_day, remove_stop, replan_day.
@@ -30,7 +33,7 @@ go run ./cmd/backend -ml-url http://127.0.0.1:8090/internal/v1/recommendations -
 - `GET /api/v1/trips/{trip_id}/previews/{preview_id}` — чтение варианта.
 - `POST /api/v1/trips/{trip_id}/previews/{preview_id}/apply` — сохранение выбранного варианта с проверкой версии и предупреждений.
 
-Запросы POST требуют cookie, `X-CSRF-Token` и `Content-Type: application/json`. Создание поездки, progress и apply дополнительно требуют `Idempotency-Key`; для preview он необязателен. Frontend в разработке должен проксировать `/api` на backend, чтобы использовать один origin. Примеры входа — [один день](examples/trip-one-day.json), [два дня](examples/trip-two-days.json). [Сценарий продолжения прогулки](docs/active_day.md) описывает запросы старта, посещения, удаления и пересчёта.
+Мутации требуют cookie и `X-CSRF-Token`; для тела JSON нужен `Content-Type: application/json`. Создание поездки (включая from-profile), progress и apply дополнительно требуют `Idempotency-Key`; для preview он необязателен. Frontend в разработке должен проксировать `/api` на backend, чтобы использовать один origin. [Регистрация и анкета](docs/auth_onboarding.md), примеры поездок — [один день](examples/trip-one-day.json), [два дня](examples/trip-two-days.json). [Продолжение прогулки](docs/active_day.md) описывает запросы старта, посещения, удаления и пересчёта.
 
 Автоматическая проверка всей цепочки с реальными OSM-переходами, если установлен Node.js 22+:
 
