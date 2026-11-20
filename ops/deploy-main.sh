@@ -11,7 +11,8 @@ mkdir -p "${state_dir}"
 exec 9>"${lock_file}"
 flock -n 9 || exit 0
 
-git -C "${repo_dir}" fetch --quiet origin "${branch}"
+git -C "${repo_dir}" fetch --quiet origin \
+  "+refs/heads/${branch}:refs/remotes/origin/${branch}"
 target_commit="$(git -C "${repo_dir}" rev-parse "origin/${branch}")"
 deployed_commit="$(test -f "${state_file}" && cat "${state_file}" || true)"
 
