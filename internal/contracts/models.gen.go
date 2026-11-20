@@ -275,8 +275,11 @@ type Stop struct {
 		ChildID ID      `json:"child_id"`
 		Value   float64 `json:"value"`
 	} `json:"balance_credit"`
-	Reasons  []Reason  `json:"reasons"`
-	Warnings []Warning `json:"warnings"`
+	Reasons            []Reason           `json:"reasons"`
+	Warnings           []Warning          `json:"warnings"`
+	ActivityKind       *string            `json:"activity_kind,omitempty"`
+	Availability       *[]AvailabilityDay `json:"availability,omitempty"`
+	ProgressObservedAt *Instant           `json:"progress_observed_at,omitempty"`
 }
 
 type Leg struct {
@@ -320,8 +323,11 @@ type DayPlan struct {
 		TimeLimitedWalkBudgetM *float64 `json:"time_limited_walk_budget_m,omitempty"`
 		WalkingSpeedKPH        *float64 `json:"walking_speed_kph,omitempty"`
 		BudgetPolicyVersion    *string  `json:"budget_policy_version,omitempty"`
+		RemainingWalkDistanceM *float64 `json:"remaining_walk_distance_m,omitempty"`
+		RemainingDurationSec   *float64 `json:"remaining_duration_sec,omitempty"`
 	} `json:"totals"`
-	Warnings []Warning `json:"warnings"`
+	Warnings  []Warning     `json:"warnings"`
+	Execution *DayExecution `json:"execution,omitempty"`
 }
 
 type TripView struct {
@@ -519,4 +525,19 @@ type RoutingResult struct {
 	SnappedTo          Position         `json:"snapped_to"`
 	WalkingSpeedKPH    *float64         `json:"walking_speed_kph"`
 	Warnings           []RoutingWarning `json:"warnings"`
+}
+
+type DayExecution struct {
+	StartedAt                Instant `json:"started_at"`
+	ObservedAt               Instant `json:"observed_at"`
+	CurrentPoint             Point   `json:"current_point"`
+	CompletedLegIDS          []ID    `json:"completed_leg_ids"`
+	NeedsReplan              bool    `json:"needs_replan"`
+	ConsumedWalkDistanceM    float64 `json:"consumed_walk_distance_m"`
+	ConsumedWalkDurationSec  float64 `json:"consumed_walk_duration_sec"`
+	ConsumedVisitDurationSec float64 `json:"consumed_visit_duration_sec"`
+	ConsumedMealDurationSec  float64 `json:"consumed_meal_duration_sec"`
+	ConsumedRestDurationSec  float64 `json:"consumed_rest_duration_sec"`
+	ConsumedWaitDurationSec  float64 `json:"consumed_wait_duration_sec"`
+	ElapsedDurationSec       float64 `json:"elapsed_duration_sec"`
 }

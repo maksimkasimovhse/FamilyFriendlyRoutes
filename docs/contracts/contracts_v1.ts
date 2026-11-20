@@ -178,6 +178,9 @@ export interface Stop {
   title: string; category: Category; location: Point;
   mandatory: boolean; progress: 'planned' | 'visited' | 'skipped';
   duration: DurationEstimate;
+  activity_kind?: Activity['kind'];
+  availability?: AvailabilityDay[];
+  progress_observed_at?: Instant;
   timing: {
     estimated_arrival_at: Instant | null;
     estimated_visit_start_at: Instant | null;
@@ -193,6 +196,14 @@ export interface Leg {
   distance_m: number | null; travel_duration_sec: number | null;
   geometry: { type: 'LineString'; coordinates: Position[] } | null;
   routing_data_version: string | null; warnings: Warning[];
+}
+export interface DayExecution {
+  started_at: Instant; observed_at: Instant; current_point: Point;
+  completed_leg_ids: ID[]; needs_replan: boolean;
+  consumed_walk_distance_m: number; consumed_walk_duration_sec: number;
+  consumed_visit_duration_sec: number; consumed_meal_duration_sec: number;
+  consumed_rest_duration_sec: number; consumed_wait_duration_sec: number;
+  elapsed_duration_sec: number;
 }
 export interface DayPlan {
   date: ISODate;
@@ -214,8 +225,11 @@ export interface DayPlan {
     time_limited_walk_budget_m?: number;
     walking_speed_kph?: number;
     budget_policy_version?: string;
+    remaining_walk_distance_m?: number;
+    remaining_duration_sec?: number;
   };
   warnings: Warning[];
+  execution?: DayExecution;
 }
 export interface TripView {
   trip_id: ID; version: number; updated_at: Instant;
@@ -239,7 +253,8 @@ export type PlanCommand =
   | { kind: 'reorder_stops'; date: ISODate; stop_ids: ID[] }
   | { kind: 'shorten_day'; date: ISODate; target_remaining_duration_sec: number }
   | { kind: 'return_to_hotel'; date: ISODate; hotel_point: Point }
-  | { kind: 'start_day'; date: ISODate; point: Point; start_at: Instant };
+  | { kind: 'start_day'; date: ISODate; point: Point; start_at: Instant }
+  | { kind: 'replan_day'; date: ISODate };
 export interface PreviewRequest {
   expected_version: number; command: PlanCommand;
   current_position: Point | null; observed_at: Instant | null;
