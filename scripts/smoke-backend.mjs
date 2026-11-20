@@ -32,7 +32,7 @@ async function call(method,path,body,key,expected){
 }
 const session=await call('GET','/api/v1/session',undefined,undefined,200);cookie=session.response.headers.getSetCookie()[0].split(';')[0];csrf=session.value.csrf_token;validate(api.components.schemas.SessionResponse,session.value);
 const reference=await call('GET','/api/v1/reference-data',undefined,undefined,200);validate(api.components.schemas.ReferenceData,reference.value);
-const input=JSON.parse(fs.readFileSync('examples/trip-one-day.json','utf8'));validate(api.components.schemas.TripInput,input);
+const input=JSON.parse(fs.readFileSync(process.env.TRIP_INPUT||'examples/trip-one-day.json','utf8'));validate(api.components.schemas.TripInput,input);
 const createKey=randomUUID();const created=await call('POST','/api/v1/trips',input,createKey,201);validate(api.components.schemas.TripView,created.value);
 const repeated=await call('POST','/api/v1/trips',input,createKey,201);if(repeated.value.trip_id!==created.value.trip_id)throw Error('create not idempotent');
 const tripPath='/api/v1/trips/'+created.value.trip_id;
@@ -45,6 +45,9 @@ const applied=await call('POST',applyPath,applyBody,applyKey,200);validate(api.c
 const replay=await call('POST',applyPath,applyBody,applyKey,200);if(replay.value.version!==2)throw Error('apply replay changed version');
 await call('POST',applyPath,applyBody,randomUUID(),409);
 const saved=await call('GET',tripPath,undefined,undefined,200);validate(api.components.schemas.TripView,saved.value);if(saved.value.version!==2)throw Error('plan not saved');
+if(saved.value.days.length!==input.days.length)throw Error('missing trip days');
+const ids=new Set();for(const day of saved.value.days){if(day.legs.length!==day.stops.length+1)throw Error('missing legs');for(const stop of day.stops){if(ids.has(stop.place_id))throw Error('place scheduled twice');ids.add(stop.place_id);}}
 const report={checked_at:new Date().toISOString(),trip_id:saved.value.trip_id,version:saved.value.version,catalog_version:saved.value.catalog_version,feasibility:saved.value.days[0].feasibility,presentation:saved.value.days[0].presentation,stops:saved.value.days[0].stops.length,legs:saved.value.days[0].legs.length,totals:saved.value.days[0].totals,geometry_points:saved.value.days[0].legs.map(l=>l.geometry.coordinates.length),checks:['response schemas','idempotent create','preview does not mutate','apply','idempotent apply','stale version rejected','read saved plan']};
+report.days=saved.value.days.map(day=>({date:day.date,feasibility:day.feasibility,stops:day.stops.map(stop=>stop.activity_id),elapsed_duration_sec:day.totals.elapsed_duration_sec}));
 fs.mkdirSync('data/backend',{recursive:true});fs.writeFileSync('data/backend/smoke-report.json',JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify(report,null,2));

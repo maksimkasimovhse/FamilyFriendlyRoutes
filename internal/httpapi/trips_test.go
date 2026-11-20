@@ -161,3 +161,37 @@ func TestExpiredAndInfeasiblePreviewCannotApply(t *testing.T) {
 		t.Fatal("expired preview accepted")
 	}
 }
+
+func TestMultiDayPreviewCannotApplyWhenSecondDayIsInfeasible(t *testing.T) {
+	store, _ := tripstore.Open(filepath.Join(t.TempDir(), "state.json"))
+	handler := TripHandler(store, planner.Planner{Router: dayRouter{}, Activities: planner.DemoActivities()})
+	browser := bootstrap(t, handler)
+	raw, err := os.ReadFile("../../examples/trip-two-days.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var input c.TripInput
+	_ = json.Unmarshal(raw, &input)
+	input.Days[1].DurationBudgetSec = 10
+	date := input.Days[1].Date
+	input.Selections = []c.Selection{{ActivityID: "demo-1", PlaceID: "demo-place-1", Mandatory: true, PreferredDate: &date}}
+	raw, _ = json.Marshal(input)
+	created := request(handler, browser, "POST", "/api/v1/trips", string(raw), "create-multi")
+	if created.Code != 201 {
+		t.Fatal(created.Body.String())
+	}
+	var trip c.TripView
+	_ = json.Unmarshal(created.Body.Bytes(), &trip)
+	path := "/api/v1/trips/" + string(trip.TripID)
+	response := request(handler, browser, "POST", path+"/previews", `{"expected_version":1,"command":{"kind":"generate_plan"},"current_position":null,"observed_at":null}`, "")
+	var preview c.PlanPreview
+	_ = json.Unmarshal(response.Body.Bytes(), &preview)
+	if response.Code != 201 || len(preview.ProposedTrip.Days) != 2 || preview.ProposedTrip.Days[0].Feasibility == "infeasible" || preview.ProposedTrip.Days[1].Feasibility != "infeasible" || preview.CanApply || len(preview.Diff.ChangedDates) != 2 {
+		t.Fatal(response.Body.String())
+	}
+	body, _ := json.Marshal(c.ApplyRequest{ExpectedVersion: 1, AcknowledgedWarningCodes: preview.RequiredAcknowledgementCodes})
+	applied := request(handler, browser, "POST", path+"/previews/"+string(preview.PreviewID)+"/apply", string(body), "apply-multi")
+	if applied.Code != 422 {
+		t.Fatal(applied.Body.String())
+	}
+}

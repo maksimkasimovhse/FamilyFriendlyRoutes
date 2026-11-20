@@ -29,6 +29,37 @@ services:
       retries: 6
       start_period: 900s
     restart: unless-stopped
+  postgres:
+    build: ./infra/postgres
+    image: family-friendly-routes/postgres:16
+    environment:
+      POSTGRES_DB: familyroutes
+      POSTGRES_USER: familyroutes
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U familyroutes -d familyroutes"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    restart: unless-stopped
+  migrate:
+    build: ./infra/goose
+    image: family-friendly-routes/goose:3
+    profiles: ["tools"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      GOOSE_DRIVER: postgres
+      GOOSE_DBSTRING: postgres://familyroutes:${POSTGRES_PASSWORD:-}@postgres:5432/familyroutes?sslmode=disable
+      GOOSE_MIGRATION_DIR: /migrations
+    volumes:
+      - ./db/migrations:/migrations:ro
+    command: ["up"]
 
   # Go-бекенд. network_mode: host — потому что бекенд слушает только 127.0.0.1:8080
   # и ищет Valhalla на 127.0.0.1:8002 (так написан cmd/backend). Работает на Linux;
@@ -57,3 +88,4 @@ services:
 
 volumes:
   valhalla-data:
+  pg-data:

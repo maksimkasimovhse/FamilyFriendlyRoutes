@@ -22,9 +22,11 @@ func main() {
 	listen := flag.String("listen", "127.0.0.1:8080", "Development backend address")
 	database := flag.String("store", "data/backend/state.json", "Single-process development store")
 	demo := flag.Bool("demo-catalog", false, "Explicitly enable synthetic integration activities, NOT real venue data")
+	mlURL := flag.String("ml-url", "", "Full internal ML recommendations endpoint")
+	catalogVersion := flag.String("catalog-version", "", "Catalog version agreed with ML")
 	flag.Parse()
-	if !*demo {
-		log.Fatal("ML is not connected. For integration tests explicitly pass -demo-catalog.")
+	if *demo == (*mlURL != "") || (!*demo && *catalogVersion == "") {
+		log.Fatal("Choose -demo-catalog OR -ml-url <endpoint> -catalog-version <version>.")
 	}
 	host, _, err := net.SplitHostPort(*listen)
 	ip := net.ParseIP(host)
@@ -43,7 +45,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	server := &http.Server{Addr: *listen, Handler: httpapi.TripHandler(store, planner.Planner{Router: router, Activities: planner.DemoActivities()}), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 40 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
+	p := planner.Planner{Router: router}
+	if *demo {
+		p.Activities = planner.DemoActivities()
+	} else {
+		p.Source = planner.HTTPSource{Endpoint: *mlURL, Version: *catalogVersion, Token: os.Getenv("ML_API_TOKEN")}
+	}
+	server := &http.Server{Addr: *listen, Handler: httpapi.TripHandler(store, p), ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 40 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	go func() {
@@ -52,7 +60,7 @@ func main() {
 		defer cancel()
 		_ = server.Shutdown(shutdown)
 	}()
-	log.Printf("DEMO backend http://%s (one day, synthetic activities, real OSM paths)", *listen)
+	log.Printf("Backend http://%s (1..14 days, demo_catalog=%t, real OSM paths)", *listen, *demo)
 	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		log.Fatal(err)
 	}

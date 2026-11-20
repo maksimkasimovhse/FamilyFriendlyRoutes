@@ -1,0 +1,117 @@
+package planner
+
+import (
+	"context"
+	"testing"
+	"time"
+
+	c "github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/contracts"
+)
+
+func TestCombinedWalkingBudgetFormula(t *testing.T) {
+	tests := []struct {
+		name                                                                 string
+		limit, speed, day, visits, meals, rest, wait, reserve, want, walkSec float64
+	}{
+		{"time bound", 6000, 2.5, 8 * 3600, 4 * 3600, 1.5 * 3600, 1800, 0, 1000, 4000, 7200},
+		{"distance bound", 6000, 2.5, 8 * 3600, 3 * 3600, 1.5 * 3600, 1800, 0, 1000, 5000, 10800},
+		{"no free time", 6000, 2.5, 3600, 3600, 4500, 0, 0, 1000, 0, 0},
+		{"waiting counted", 6000, 2.5, 7200, 0, 0, 0, 3600, 1000, 1500, 3600},
+		{"reserve exceeds time bound", 6000, 2.5, 3600, 0, 0, 0, 0, 3000, 0, 3600},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, seconds, _ := primaryWalkingBudget(tt.limit, tt.speed, tt.day, tt.visits, tt.meals, tt.rest, tt.wait, tt.reserve)
+			if got != tt.want || seconds != tt.walkSec {
+				t.Fatalf("got %.2fm/%.2fs, want %.2fm/%.2fs", got, seconds, tt.want, tt.walkSec)
+			}
+		})
+	}
+}
+
+func TestAutomaticAgeAndMealDefaultsDoNotMutateInput(t *testing.T) {
+	input := sample(t)
+	input.LoadLimits.MaxWalkDistanceMPerDay = nil
+	input.LoadLimits.RestaurantWalkReserveMPerDay = nil
+	input.Days[0].MealDurationSec = nil
+	input.Days[0].MealCount = nil
+	input.Days[0].MealFormat = nil
+	p := Planner{Router: &testRouter{}, Activities: DemoActivities()}
+	view, err := p.Build(context.Background(), NewDraft("trip", input, time.Now()), time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if *view.Input.LoadLimits.MaxWalkDistanceMPerDay != 2500 || view.Days[0].Totals.MealDurationSec != 4500 || *view.Days[0].Totals.WalkingSpeedKPH != 2.5 || *view.Days[0].Totals.BudgetPolicyVersion != "family-budget-v1" {
+		t.Fatal("incorrect resolved parameters")
+	}
+	if input.LoadLimits.MaxWalkDistanceMPerDay != nil || input.Days[0].MealDurationSec != nil || input.Days[0].MealCount != nil {
+		t.Fatal("defaults mutated caller input")
+	}
+}
+
+func TestMealCountFormatAndExplicitOverride(t *testing.T) {
+	input := sample(t)
+	input.Days[0].MealDurationSec = nil
+	count, format := 2, "quick_service"
+	input.Days[0].MealCount = &count
+	input.Days[0].MealFormat = &format
+	resolved := resolveBudgetDefaults(input)
+	if *resolved.Days[0].MealDurationSec != 7200 {
+		t.Fatal("meal count and format ignored")
+	}
+	override := 1800.0
+	input.Days[0].MealDurationSec = &override
+	if got := *resolveBudgetDefaults(input).Days[0].MealDurationSec; got != 1800 {
+		t.Fatal("explicit meal override ignored")
+	}
+	count = 0
+	input.Days[0].MealDurationSec = nil
+	if got := *resolveBudgetDefaults(input).Days[0].MealDurationSec; got != 0 {
+		t.Fatal("zero meals not supported")
+	}
+}
+
+func TestLongerMealBudgetReducesOptionalVisits(t *testing.T) {
+	input := sample(t)
+	input.Days[0].DurationBudgetSec = 7200
+	input.Days[0].MealDurationSec = nil
+	p := Planner{Router: &testRouter{}, Activities: DemoActivities()}
+	short, err := p.Build(context.Background(), NewDraft("trip", input, time.Now()), time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	format := "meal_with_play"
+	input.Days[0].MealFormat = &format
+	long, err := p.Build(context.Background(), NewDraft("trip", input, time.Now()), time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(short.Days[0].Stops) != 3 || len(long.Days[0].Stops) != 1 {
+		t.Fatalf("meal reservation did not affect plan: %d vs %d", len(short.Days[0].Stops), len(long.Days[0].Stops))
+	}
+}
+
+func TestKnownMealAndRestStopsAreNotReservedTwice(t *testing.T) {
+	input := sample(t)
+	meal, rest := 900.0, 700.0
+	input.Days[0].MealDurationSec = &meal
+	input.Days[0].RestBudgetSec = rest
+	activities := DemoActivities()[:2]
+	metadata := map[c.ID]c.Candidate{}
+	a, b := c.Candidate{}, c.Candidate{}
+	a.Activity.Kind = "meal"
+	b.Activity.Kind = "rest"
+	metadata[activities[0].ID] = a
+	metadata[activities[1].ID] = b
+	input.Selections = []c.Selection{{PlaceID: activities[0].PlaceID, ActivityID: activities[0].ID}, {PlaceID: activities[1].PlaceID, ActivityID: activities[1].ID}}
+	p := Planner{Router: &testRouter{}, Activities: activities, metadata: metadata}
+	view, err := p.buildDay(context.Background(), NewDraft("trip", input, time.Now()), time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Real meal=600, top up to 900; real rest=900 already exceeds requested 700.
+	totals := view.Days[0].Totals
+	if totals.VisitDurationSec != 0 || totals.MealDurationSec != 900 || totals.RestDurationSec != 900 || *totals.ElapsedDurationSec != 1980 {
+		t.Fatalf("double-counted breaks: %+v", totals)
+	}
+}

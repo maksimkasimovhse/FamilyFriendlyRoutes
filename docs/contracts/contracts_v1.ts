@@ -62,6 +62,8 @@ export interface FamilyPolicy {
 export interface LoadLimits {
   pace: 'relaxed' | 'standard' | 'intensive';
   max_walk_distance_m_per_day: number | null;
+  // null => минимальный возрастной дефолт детей. Резерв P: метры, не длительность еды.
+  restaurant_walk_reserve_m_per_day?: number; // По умолчанию 0; 0 <= p <= m.
   max_continuous_walk_duration_sec: number | null;
 }
 export interface DayInput {
@@ -69,6 +71,9 @@ export interface DayInput {
   available_window: Interval | null;
   duration_budget_sec: number;
   meal_window: Interval | null; rest_budget_sec: number;
+  meal_count?: number; // По умолчанию 1; 0 отключает резерв при отсутствии override.
+  meal_format?: 'quick_service' | 'table_service' | 'meal_with_play';
+  meal_duration_sec?: number; // Суммарно за день; override выше count × format.
 }
 export interface Selection {
   place_id: ID; activity_id: ID;
@@ -79,7 +84,7 @@ export interface TripInput {
   city_id: 'nizhny_novgorod'; timezone: TimeZone;
   planning_context: 'before_arrival' | 'in_city';
   family: FamilyProfile; load_limits: LoadLimits;
-  days: DayInput[]; selections: Selection[];
+  days: DayInput[]; selections: Selection[]; // 1..14 дней.
   request_text: string | null; // Уточняет интересы, не hard constraints.
 }
 
@@ -154,14 +159,14 @@ export interface RecommendationRequest {
     route: { type: 'LineString'; coordinates: Position[] } | null;
     corridor_width_m: number | null;
   } | null;
-  limit: number;
+  limit: number; // 1..50; initial=50 на всю поездку, без плана и маршрутов.
 }
 export interface RecommendationResponse {
   contract_version: '1.0'; request_id: ID;
   trip_id: ID; trip_version: number; catalog_version: string;
   model_version: string; generated_at: Instant;
   status: 'complete' | 'partial' | 'no_candidates';
-  candidates: Candidate[];
+  candidates: Candidate[]; // <=limit, разные place_id, по убыванию релевантности.
   rejected: { activity_id: ID; reasons: Reason[] }[];
   evidence: Evidence[]; warnings: Warning[];
 }
@@ -202,6 +207,13 @@ export interface DayPlan {
     visit_duration_sec: number; wait_duration_sec: number | null;
     rest_duration_sec: number; meal_duration_sec: number;
     elapsed_duration_sec: number | null;
+    walk_budget_m?: number;
+    restaurant_walk_reserve_m?: number;
+    primary_walk_budget_m?: number;
+    walking_time_budget_sec?: number;
+    time_limited_walk_budget_m?: number;
+    walking_speed_kph?: number;
+    budget_policy_version?: string;
   };
   warnings: Warning[];
 }
