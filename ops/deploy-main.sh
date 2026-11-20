@@ -81,6 +81,7 @@ readarray -t expected_services < <(
     | python3 -c 'import json, sys; data=json.load(sys.stdin); print("\n".join(name for name, service in data["services"].items() if not service.get("profiles")))'
 )
 
+deployment_ready=false
 for attempt in $(seq 1 "${health_attempts}"); do
   all_ready=true
   for service in "${expected_services[@]}"; do
@@ -97,12 +98,20 @@ for attempt in $(seq 1 "${health_attempts}"); do
   done
 
   if [[ "${all_ready}" == true && ${#expected_services[@]} -gt 0 ]]; then
-    printf '%s\n' "${target_commit}" > "${state_file}"
-    printf 'Deployed origin/%s at %s\n' "${branch}" "${target_commit}"
-    exit 0
+    deployment_ready=true
+    break
   fi
   sleep "${health_interval}"
 done
+
+if [[ "${deployment_ready}" == true ]]; then
+  if docker compose --project-directory "${repo_dir}" config --services | grep --quiet --line-regexp migrate; then
+    docker compose --project-directory "${repo_dir}" --profile tools run --rm migrate
+  fi
+  printf '%s\n' "${target_commit}" > "${state_file}"
+  printf 'Deployed origin/%s at %s\n' "${branch}" "${target_commit}"
+  exit 0
+fi
 
 docker compose --project-directory "${repo_dir}" ps
 docker compose --project-directory "${repo_dir}" logs --no-color --tail=100
