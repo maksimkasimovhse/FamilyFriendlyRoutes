@@ -88,6 +88,9 @@ const AMENITIES = {
   toilets:    { label: 'Туалет',           color: '#1F8A4F', shape: 'square' },
   cafe:       { label: 'Еда',              color: '#F5B400', shape: 'circle' },
   playground: { label: 'Детская площадка', color: '#E8641F', shape: 'circle' },
+  park:       { label: 'Парк', color: '#27AE60', shape: 'circle' },
+  bench:      { label: 'Скамейка', color: '#795548', shape: 'square' },
+  pharmacy:   { label: 'Аптека', color: '#C0392B', shape: 'square' },
 };
 
 function makeIcon(color, shape) {
@@ -256,7 +259,8 @@ function showPlace(place, nearM) {
   selected = 'amenity';
   resetSelection();
   const kind = kindOf(place);
-  const label = { toilets: 'Туалет', playground: 'Детская площадка', cafe: 'Кафе' }[kind];
+  // Подпись типа: из AMENITIES (Максим: парки, скамейки, аптеки) или «кофейня», «пиццерия» для еды
+  const label = AMENITIES[kind]?.label || 'Место';
   const type = placeType(place) || (place.name !== label ? label : '');
   const badges = cafeBadges(place).filter(b => b.state !== 'unknown')
     .map(b => `<span class="badge ${b.state}">${b.state === 'yes' ? '✓' : '✕'} ${b.text}</span>`);

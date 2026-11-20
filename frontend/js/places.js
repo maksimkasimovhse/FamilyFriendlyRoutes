@@ -1,5 +1,5 @@
 // Места вокруг маршрута: туалеты, площадки, кафе — по контракту GET /api/v1/map/places.
-// (Пока ручку отдаёт мок infra/mock-api; формат — схема Place из openapi.json.)
+// Ручка читает PostgreSQL; формат — схема Place из openapi.json.
 // Факты у мест: { state: 'known', value: true/false } или { state: 'unknown' } — «нет данных» ≠ «нет».
 
 let places = [];
@@ -16,9 +16,7 @@ let types = {};   // place_id → «кофейня», «пиццерия»… (d
 async function fetchPlaces() {
   try { types = await (await fetch('data/place-types.json')).json(); } catch { types = {}; }
   try {
-    const res = await fetch('/api/v1/map/places?bbox=43.95,56.30,44.06,56.345&limit=1000');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
+    const data = await fetchPlacesInRadius({ lon: 44.0066, lat: 56.3273, radiusKm: 5 });
     places = data.items;
     evidence = new Map(data.evidence.map(e => [e.evidence_id, e]));
   } catch (err) {
@@ -26,6 +24,27 @@ async function fetchPlaces() {
     places = [];
   }
   return places;
+}
+// Для произвольной точки/радиуса. Загружает все страницы; расстояние в ответе — по геодезической.
+// Не подменяет общий набор карты. categories: ['toilet','pharmacy'] либо без фильтра.
+export async function fetchPlacesInRadius({ lon, lat, radiusKm, categories, signal }) {
+  const query = new URLSearchParams({ lon, lat, radius_km: radiusKm, limit: 1000 });
+  if (categories) categories.forEach(c => query.append('categories', c));
+  const result = { items: [], evidence: [], next_cursor: null, catalog_version: '' };
+  const evidenceById = new Map();
+  let cursor;
+  do {
+    if (cursor) query.set('cursor', cursor);
+    const res = await fetch('/api/v1/map/places?' + query, { signal });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Инфраструктура: HTTP ' + res.status);
+    result.items.push(...data.items);
+    data.evidence.forEach(e => evidenceById.set(e.evidence_id, e));
+    result.catalog_version = data.catalog_version;
+    cursor = data.next_cursor;
+  } while (cursor);
+  result.evidence = [...evidenceById.values()];
+  return result;
 }
 export const allPlaces = () => places;
 
@@ -40,6 +59,9 @@ export const walkMinutes = m => Math.max(1, Math.round(m * 1.3 / 50));
 
 export const kindOf = p => p.categories.includes('toilet') ? 'toilets'
   : p.categories.includes('playground') ? 'playground'
+  : p.categories.includes('park') ? 'park'
+  : p.categories.includes('bench') ? 'bench'
+  : p.categories.includes('pharmacy') ? 'pharmacy'
   : p.categories.includes('restaurant') ? 'cafe' : 'other';
 
 // Ближайшие места нужного вида к точке
@@ -80,4 +102,10 @@ export function sourceOf(p) {
 }
 
 // Тип заведения, как подпись в Яндекс Картах: «кофейня», «грузинская кухня»…
-export const placeType = p => types[p.place_id] || null;
+// place_id из базы — свой номер; связь с OSM — через ссылку-источник (evidence map-source-<id>)
+function osmKey(p) {
+  const url = evidence.get('map-source-' + p.place_id)?.source_url || '';
+  const m = url.match(/openstreetmap\.org\/(node|way|relation)\/(\d+)/);
+  return m ? `osm-${m[1]}-${m[2]}` : p.place_id;
+}
+export const placeType = p => types[osmKey(p)] || null;
