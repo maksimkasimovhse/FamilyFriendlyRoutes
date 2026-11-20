@@ -16,6 +16,7 @@ import { loadRoutePlaces, clearRoutePlaces, onPlacesChange, loadPlaceTypes } fro
 import { initMap, resizeMap, focusPlace, showPicked, refreshMap } from './map.js';
 import { initPick, openPick } from './pick.js';
 import { initToday, refreshToday } from './today.js';
+import { initWeatherSky } from './weather-sky.js';
 import { initAssistant, openAssistant } from './assistant.js';
 import { initKid, openKid, syncKidOrder, kidStopInfo, setKidPlaces, clearKidPlaces } from './kid.js';
 
@@ -102,6 +103,7 @@ function leavePickStep() {
   document.querySelector('#screen-pick .pick-top h1').textContent = 'Подбор мест';
   $('screen-pick').hidden = true;
 }
+initWeatherSky($('map-sky'));
 initPick({
   onFinish: places => {
     kidReady.then(() => setKidPlaces(places, today()?.start_point?.coordinates || [44.0066, 56.3273]));   // тропа Маши строится из выбранных мест

@@ -3,6 +3,7 @@
 // что там у ребёнка (задание / штамп) и что рядом (туалет, кафе для детей).
 
 import { onTripChange, today, getSource, startDay, markVisited, previewRemove, applyPreview, ApiError } from './api.js';
+import { renderWeather } from './weather.js';
 import { nearest, walkMinutes, isFamilyCafe } from './places.js';
 
 const $ = id => document.getElementById(id);
@@ -136,6 +137,7 @@ function render() {
     <span class="what"><b>Финиш</b><small>${esc(day.end_point.label || 'конец прогулки')} · ${fmtDuration(day.totals.elapsed_duration_sec)} на весь день</small></span></li>`);
   $('today-list').innerHTML = rows.join('');
 
+  renderWeather($('today-weather'), day);
   $('today-source').textContent = live ? '' : 'Нет связи с сервером — показан сохранённый план, отметки не работают.';
   bind(next);
 }
