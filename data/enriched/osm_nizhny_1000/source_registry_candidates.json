@@ -1,0 +1,1634 @@
+{
+  "sources": [
+    {
+      "source_id": "candidate-19rest-ru",
+      "allowed_hosts": [
+        "19rest.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-arina-orient-ru",
+      "allowed_hosts": [
+        "arina-orient.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-arlekino52-ru",
+      "allowed_hosts": [
+        "arlekino52.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-artmuseumnn-ru",
+      "allowed_hosts": [
+        "artmuseumnn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from official_site. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-augustrest-ru",
+      "allowed_hosts": [
+        "augustrest.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-bakladzhanrest-ru",
+      "allowed_hosts": [
+        "bakladzhanrest.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-bakustreet-ru",
+      "allowed_hosts": [
+        "bakustreet.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-bermudskiy-ru",
+      "allowed_hosts": [
+        "bermudskiy.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-bezuhov-ru",
+      "allowed_hosts": [
+        "bezuhov.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-biblionn-ru",
+      "allowed_hosts": [
+        "biblionn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-bubblecafe-ru",
+      "allowed_hosts": [
+        "bubblecafe.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-burgerkingrus-ru",
+      "allowed_hosts": [
+        "burgerkingrus.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-cadrspace-ru",
+      "allowed_hosts": [
+        "cadrspace.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-ceylon-salutandco-ru",
+      "allowed_hosts": [
+        "ceylon.salutandco.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-chaihona-ru",
+      "allowed_hosts": [
+        "chaihona.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-cheburek-me",
+      "allowed_hosts": [
+        "cheburek.me"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-cinnabonrussia-com",
+      "allowed_hosts": [
+        "cinnabonrussia.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-club-mate-nn-ru",
+      "allowed_hosts": [
+        "club-mate.nn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-club-zvezdochka-ru",
+      "allowed_hosts": [
+        "club-zvezdochka.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-coffee-like-com",
+      "allowed_hosts": [
+        "coffee-like.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-coffeehyggenn-tilda-ws",
+      "allowed_hosts": [
+        "coffeehyggenn.tilda.ws"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-custo-rest",
+      "allowed_hosts": [
+        "custo.rest"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-dadbilly-pirnnov-ru",
+      "allowed_hosts": [
+        "dadbilly.pirnnov.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-darkshaurma-com",
+      "allowed_hosts": [
+        "darkshaurma.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-de-kas-ru",
+      "allowed_hosts": [
+        "de-kas.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-deti-nn-ru",
+      "allowed_hosts": [
+        "deti-nn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-dodopizza-ru",
+      "allowed_hosts": [
+        "dodopizza.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-dront-ru",
+      "allowed_hosts": [
+        "dront.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-escape-rest",
+      "allowed_hosts": [
+        "escape.rest"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-fellininn-com",
+      "allowed_hosts": [
+        "fellininn.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-fitnesslifenn-ru",
+      "allowed_hosts": [
+        "fitnesslifenn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-fonoteca-nn-ru",
+      "allowed_hosts": [
+        "fonoteca-nn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-frankmeat-ru",
+      "allowed_hosts": [
+        "frankmeat.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-g-grouprestoran-ru",
+      "allowed_hosts": [
+        "g-grouprestoran.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-gooserest-ru",
+      "allowed_hosts": [
+        "gooserest.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-gorkybeer-ru",
+      "allowed_hosts": [
+        "gorkybeer.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-granatnn-ru",
+      "allowed_hosts": [
+        "granatnn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from official_site. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-hachapuriya-ru",
+      "allowed_hosts": [
+        "hachapuriya.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-hanguknn-ru",
+      "allowed_hosts": [
+        "hanguknn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-hinkali-nn-ru",
+      "allowed_hosts": [
+        "hinkali-nn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-hutorokrest-ru",
+      "allowed_hosts": [
+        "hutorokrest.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-instagram-com",
+      "allowed_hosts": [
+        "instagram.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-ivarestnn-ru",
+      "allowed_hosts": [
+        "ivarestnn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-jamcitycamp-com",
+      "allowed_hosts": [
+        "jamcitycamp.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-jivoeremeslo-ru",
+      "allowed_hosts": [
+        "jivoeremeslo.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-kefteme-nn-ru",
+      "allowed_hosts": [
+        "kefteme-nn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-kiber-one-com",
+      "allowed_hosts": [
+        "kiber-one.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-kidburg-ru",
+      "allowed_hosts": [
+        "kidburg.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-kladovkajournal-livejournal-com",
+      "allowed_hosts": [
+        "kladovkajournal.livejournal.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-krasarest-ru",
+      "allowed_hosts": [
+        "krasarest.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-krsormovo-nnov-ru",
+      "allowed_hosts": [
+        "krsormovo.nnov.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-kulturann-ru",
+      "allowed_hosts": [
+        "kulturann.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-kvantorium52-ru",
+      "allowed_hosts": [
+        "kvantorium52.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-kvarky-ru",
+      "allowed_hosts": [
+        "kvarky.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-lamanovamuseumnn-ru",
+      "allowed_hosts": [
+        "lamanovamuseumnn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-lamvil-ru",
+      "allowed_hosts": [
+        "lamvil.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-lobachevagallery-ru",
+      "allowed_hosts": [
+        "lobachevagallery.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-love-kino-ru",
+      "allowed_hosts": [
+        "love-kino.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-mahjong-ob-ob-ru",
+      "allowed_hosts": [
+        "mahjong.ob-ob.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-mamadomann-ru",
+      "allowed_hosts": [
+        "mamadomann.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-mango-nnov-ru",
+      "allowed_hosts": [
+        "mango.nnov.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-mayar-cafe",
+      "allowed_hosts": [
+        "mayar.cafe"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-mazltov-ru",
+      "allowed_hosts": [
+        "mazltov.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-meteorbistro-ru",
+      "allowed_hosts": [
+        "meteorbistro.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-mitrichsteakhouse-ru",
+      "allowed_hosts": [
+        "mitrichsteakhouse.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from official_site. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-molokocafe-ru",
+      "allowed_hosts": [
+        "molokocafe.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-moxcafe-ru",
+      "allowed_hosts": [
+        "moxcafe.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-mskstambul-ru",
+      "allowed_hosts": [
+        "mskstambul.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-museum-gaz-ru",
+      "allowed_hosts": [
+        "museum.gaz.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-muzey-shokolada-ru",
+      "allowed_hosts": [
+        "muzey-shokolada.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-myasoroob-ru",
+      "allowed_hosts": [
+        "myasoroob.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-nastroy-cafe",
+      "allowed_hosts": [
+        "nastroy.cafe"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-navigatcia-pirnnov-ru",
+      "allowed_hosts": [
+        "navigatcia.pirnnov.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-negronibar-ru",
+      "allowed_hosts": [
+        "negronibar.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-neteatr-com",
+      "allowed_hosts": [
+        "neteatr.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-ngiamz-ru",
+      "allowed_hosts": [
+        "ngiamz.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-ngvk-ru",
+      "allowed_hosts": [
+        "ngvk.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-nn-bocconcino-ru",
+      "allowed_hosts": [
+        "nn.bocconcino.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-nn-papajohns-ru",
+      "allowed_hosts": [
+        "nn.papajohns.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-noottoot-ru",
+      "allowed_hosts": [
+        "noottoot.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-nov-vot-takie-pirogi-ru",
+      "allowed_hosts": [
+        "nov.vot-takie-pirogi.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-ntu-nn-ru",
+      "allowed_hosts": [
+        "ntu-nn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-onegin-nn-ru",
+      "allowed_hosts": [
+        "onegin-nn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-onepricecoffee-com",
+      "allowed_hosts": [
+        "onepricecoffee.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-packhouses-strelkapark-ru",
+      "allowed_hosts": [
+        "packhouses.strelkapark.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-palitra-sushi-ru",
+      "allowed_hosts": [
+        "palitra-sushi.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-pandoknn-ru",
+      "allowed_hosts": [
+        "pandoknn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-pinci-ru",
+      "allowed_hosts": [
+        "pinci.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-pir-nnov-ru",
+      "allowed_hosts": [
+        "pir.nnov.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-pk-bistro-ru",
+      "allowed_hosts": [
+        "pk-bistro.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-prioklib-ru",
+      "allowed_hosts": [
+        "prioklib.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-prontopizza-ru",
+      "allowed_hosts": [
+        "prontopizza.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-pushkinmuzey-ru",
+      "allowed_hosts": [
+        "pushkinmuzey.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-pyatkin-pirnnov-ru",
+      "allowed_hosts": [
+        "pyatkin.pirnnov.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-qvevrirest-ru",
+      "allowed_hosts": [
+        "qvevrirest.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-radiolaboratorija-ru",
+      "allowed_hosts": [
+        "radiolaboratorija.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-redtiger52-ru",
+      "allowed_hosts": [
+        "redtiger52.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-regions-shoko-ru",
+      "allowed_hosts": [
+        "regions.shoko.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-restoran3apelcina-ru",
+      "allowed_hosts": [
+        "restoran3apelcina.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-ribs-nn-ru",
+      "allowed_hosts": [
+        "ribs-nn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-roberto-pirnnov-ru",
+      "allowed_hosts": [
+        "roberto.pirnnov.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-rowingnn-ru",
+      "allowed_hosts": [
+        "rowingnn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-salutandco-ru",
+      "allowed_hosts": [
+        "salutandco.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-samurai-ru",
+      "allowed_hosts": [
+        "samurai.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-school-12-ru",
+      "allowed_hosts": [
+        "school-12.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-seledkagazeta-ru",
+      "allowed_hosts": [
+        "seledkagazeta.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-simamma-ru",
+      "allowed_hosts": [
+        "simamma.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-sindbad-ob-ob-ru",
+      "allowed_hosts": [
+        "sindbad.ob-ob.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-skobar-ob-ob-ru",
+      "allowed_hosts": [
+        "skobar.ob-ob.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-skuratovcoffee-ru",
+      "allowed_hosts": [
+        "skuratovcoffee.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-solbirza-ru",
+      "allowed_hosts": [
+        "solbirza.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from official_site. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-sportdelfin-ru",
+      "allowed_hosts": [
+        "sportdelfin.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-steakmetruck-ru",
+      "allowed_hosts": [
+        "steakmetruck.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-strogov-restoran-ru",
+      "allowed_hosts": [
+        "strogov-restoran.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-sushi-bar-ru",
+      "allowed_hosts": [
+        "sushi-bar.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-sushi-karate-ru",
+      "allowed_hosts": [
+        "sushi-karate.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-tanukifamily-ru",
+      "allowed_hosts": [
+        "tanukifamily.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-tasamayashaurma-ru",
+      "allowed_hosts": [
+        "tasamayashaurma.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-teatrzoopark-narod-ru",
+      "allowed_hosts": [
+        "teatrzoopark.narod.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-tempcoffee-ru",
+      "allowed_hosts": [
+        "tempcoffee.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-traktir-patron-ru",
+      "allowed_hosts": [
+        "traktir-patron.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-tubeteyka-pirnnov-ru",
+      "allowed_hosts": [
+        "tubeteyka.pirnnov.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-ugolek-rest",
+      "allowed_hosts": [
+        "ugolek.rest"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-utugnn-ru",
+      "allowed_hosts": [
+        "utugnn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-vaffel-ru",
+      "allowed_hosts": [
+        "vaffel.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-vgavt-nn-ru",
+      "allowed_hosts": [
+        "vgavt-nn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-vhachapuri-ru",
+      "allowed_hosts": [
+        "vhachapuri.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-vinedo-ru",
+      "allowed_hosts": [
+        "vinedo.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-vk-com",
+      "allowed_hosts": [
+        "vk.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-vkusnoitochka-ru",
+      "allowed_hosts": [
+        "vkusnoitochka.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-wkitchen-ru",
+      "allowed_hosts": [
+        "wkitchen.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-wolkonsky-com",
+      "allowed_hosts": [
+        "wolkonsky.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-bibl-nngasu-ru",
+      "allowed_hosts": [
+        "www.bibl.nngasu.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-biblioteca-nn-ru",
+      "allowed_hosts": [
+        "www.biblioteca-nn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-cakeandpie-ru",
+      "allowed_hosts": [
+        "www.cakeandpie.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-cinemapark-ru",
+      "allowed_hosts": [
+        "www.cinemapark.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-coffee-cake-net",
+      "allowed_hosts": [
+        "www.coffee-cake.net"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-culture-ru",
+      "allowed_hosts": [
+        "www.culture.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from public_culture_catalog. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-fotomuseum-nnov-ru",
+      "allowed_hosts": [
+        "www.fotomuseum.nnov.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-instagram-com",
+      "allowed_hosts": [
+        "www.instagram.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-madlen-nn-ru",
+      "allowed_hosts": [
+        "www.madlen-nn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-mirpizzy-com",
+      "allowed_hosts": [
+        "www.mirpizzy.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-music-nn-ru",
+      "allowed_hosts": [
+        "www.music-nn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-novikovgroup-ru",
+      "allowed_hosts": [
+        "www.novikovgroup.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-nuare-ru",
+      "allowed_hosts": [
+        "www.nuare.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-park-k-ru",
+      "allowed_hosts": [
+        "www.park-k.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-pastapizza-nn-com",
+      "allowed_hosts": [
+        "www.pastapizza-nn.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-premiocentre-ru",
+      "allowed_hosts": [
+        "www.premiocentre.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-preo-su",
+      "allowed_hosts": [
+        "www.preo.su"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-schastievnn-ru",
+      "allowed_hosts": [
+        "www.schastievnn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-sportsstar-nn-ru",
+      "allowed_hosts": [
+        "www.sportsstar-nn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-surfcoffee-ru",
+      "allowed_hosts": [
+        "www.surfcoffee.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-syrovarnya-com",
+      "allowed_hosts": [
+        "www.syrovarnya.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-teatr-listopad-ru",
+      "allowed_hosts": [
+        "www.teatr-listopad.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-tepi-org",
+      "allowed_hosts": [
+        "www.tepi.org"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-volgageo-nn-ru",
+      "allowed_hosts": [
+        "www.volgageo.nn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-xn-e1apwg-xn-p1ai",
+      "allowed_hosts": [
+        "xn--e1apwg.xn--p1ai"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-zarniza-umi-ru",
+      "allowed_hosts": [
+        "zarniza.umi.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-xn-c1adbibb0aykc7n-xn-p1ai",
+      "allowed_hosts": [
+        "империягрез.рф"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-xn-90aakldmfd2bilp-xn-p1ai",
+      "allowed_hosts": [
+        "мистербублик.рф"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-xn-b1affjmkagzq-xn-p1ai",
+      "allowed_hosts": [
+        "музейсвонн.рф"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-xn-b1adulbbq2f-xn-p1ai",
+      "allowed_hosts": [
+        "солодовъ.рф"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-xn-jtbfjmwgaax-com",
+      "allowed_hosts": [
+        "ссср-музей.com"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    }
+  ]
+}

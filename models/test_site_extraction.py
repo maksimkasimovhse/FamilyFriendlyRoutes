@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from gigachat_client import StructuredResponse
+from gigachat_client import GigaChatStructuredClient, StructuredResponse
 from site_extractor import extract_site, normalize_occurrence_times, structured_schema
 from site_ingestion import normalize_html
 from site_schema import SiteExtraction, validate_evidence
@@ -106,6 +106,29 @@ class SiteExtractionTests(unittest.TestCase):
         extraction = SiteExtraction.model_validate(value)
         normalize_occurrence_times(extraction)
         self.assertEqual(extraction.activities[0].occurrences[0].duration_minutes, 90)
+
+    def test_unverified_llm_claim_is_dropped_with_warning(self):
+        value = extraction_value()
+        activity = value["activities"][0]
+        activity["description_evidence"] = [{
+            "quote": "Not on the page", "source_url": "https://wrong.example", "source_part": "visible_text",
+        }]
+        activity["booking_required"] = False
+        extraction, _ = extract_site(self.page, FakeClientWithValue(value))
+        self.assertIsNone(extraction.activities[0].description)
+        self.assertIsNone(extraction.activities[0].booking_required)
+        self.assertIn("DROPPED_UNVERIFIED_EVIDENCE_ACTIVITY_0_DESCRIPTION", extraction.warnings)
+
+    def test_gigachat_3_pro_is_default(self):
+        self.assertEqual(GigaChatStructuredClient(access_token="test").model, "GigaChat-3-Pro")
+
+
+class FakeClientWithValue:
+    def __init__(self, value: dict) -> None:
+        self.value = value
+
+    def extract(self, **_: object) -> StructuredResponse:
+        return StructuredResponse(value=self.value, model="fixture", usage={})
 
 
 if __name__ == "__main__":
