@@ -3,6 +3,8 @@
 // «Завершить подбор мест» отдаёт выбранные места наружу (onFinish) — app.js открывает карту.
 // Тексты вставляются только через textContent: описания приходят из данных, а не из нашей разметки.
 
+import { loadCards } from './catalog.js';
+
 const SWIPE_PX = 100;        // на сколько нужно утянуть карточку, чтобы решение засчиталось
 const FLING_SPEED = 0.55;    // быстрый «щелчок» (px/мс) тоже засчитывается, даже если утянули недалеко
 const FLY_MS = 280;          // сколько летит карточка за экран
@@ -24,15 +26,9 @@ let disliked = 0;
 let busy = false;        // карточка улетает — новые решения пока не принимаем
 let onFinish = () => {};
 let onClose = () => {};
-let loading = null;
 
 // ---------- Данные ----------
-function loadCards() {
-  loading ??= fetch('data/cards.json')
-    .then(r => { if (!r.ok) throw new Error('cards.json: HTTP ' + r.status); return r.json(); })
-    .then(list => { all = list; });
-  return loading;
-}
+const loadAll = () => loadCards().then(list => { all = list; });
 
 function shuffled(list) {
   const a = [...list];
@@ -62,8 +58,8 @@ function buildCard(card) {
   const more = el('span', 'pcard-more', 'Читать полностью ›');
   body.append(desc, more);
 
-  const yes = el('div', 'stamp yes', 'В МАРШРУТ');
-  const no = el('div', 'stamp no', 'НЕТ');
+  const yes = el('div', 'pstamp yes', 'В МАРШРУТ');
+  const no = el('div', 'pstamp no', 'НЕТ');
   root.append(photo, body, yes, no);
   return root;
 }
@@ -136,13 +132,13 @@ function bindDrag(card) {
 function setDrag(card, dx, dy) {
   card.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx / 18}deg)`;
   const k = Math.min(Math.abs(dx) / SWIPE_PX, 1);
-  card.querySelector('.stamp.yes').style.opacity = dx > 0 ? k : 0;
-  card.querySelector('.stamp.no').style.opacity = dx < 0 ? k : 0;
+  card.querySelector('.pstamp.yes').style.opacity = dx > 0 ? k : 0;
+  card.querySelector('.pstamp.no').style.opacity = dx < 0 ? k : 0;
 }
 
 function reset(card) {
   card.style.transform = '';
-  card.querySelectorAll('.stamp').forEach(s => { s.style.opacity = 0; });
+  card.querySelectorAll('.pstamp').forEach(s => { s.style.opacity = 0; });
 }
 
 // Решение: карточка улетает за экран, место попадает в «выбрано» или в «не нравится».
@@ -156,7 +152,7 @@ function decide(choice, dy = 0) {
   const dir = choice === 'yes' ? 1 : -1;
   top.classList.add('fly');
   top.style.transform = `translate(${dir * (window.innerWidth + 200)}px, ${dy}px) rotate(${dir * 24}deg)`;
-  top.querySelector(`.stamp.${choice}`).style.opacity = 1;
+  top.querySelector(`.pstamp.${choice}`).style.opacity = 1;
   if (choice === 'yes') liked.push(card); else disliked++;
   pos++;
   setTimeout(() => {
@@ -217,7 +213,7 @@ export function initPick(handlers) {
 // Открыть экран. Колода собирается при первом открытии; потом продолжаем с того же места.
 export async function openPick() {
   try {
-    await loadCards();
+    await loadAll();
   } catch (err) {
     console.error(err);
     $('deck-empty').hidden = false;

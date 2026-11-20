@@ -6,7 +6,7 @@ import { initMap, resizeMap, focusPlace, showPicked } from './map.js';
 import { initPick, openPick } from './pick.js';
 import { initToday, refreshToday } from './today.js';
 import { initAssistant, openAssistant } from './assistant.js';
-import { initKid, openKid, syncKidOrder, kidStopInfo } from './kid.js';
+import { initKid, openKid, syncKidOrder, kidStopInfo, setKidPlaces, clearKidPlaces } from './kid.js';
 
 // ---------- Параметры поездки ----------
 // Формат — TripInput из docs/contracts/openapi.json. Пока анкеты нет, семья задана здесь.
@@ -82,13 +82,17 @@ initAssistant({ onShowOnMap: place => { openTab('map'); focusPlace(place); } });
 
 // ---------- Подбор мест (карточки как в Tinder, экран Максима) ----------
 initPick({
-  onFinish: places => { openTab('map'); showPicked(places); },   // выбранные места → карта и маршрут
+  onFinish: places => {                                          // выбранные места → карта, маршрут и тропа Маши
+    openTab('map');
+    showPicked(places);
+    kidReady.then(() => setKidPlaces(places, START.coordinates));
+  },
   onClose: () => openTab('map'),
 });
 const startPick = () => { openTab('pick'); openPick(); };
 document.getElementById('open-pick').addEventListener('click', startPick);
 document.addEventListener('pick:open', startPick);                 // «Подобрать ещё» на карте
-document.addEventListener('pick:reset', () => showPicked(null));   // вернуть исходный маршрут дня
+document.addEventListener('pick:reset', () => { showPicked(null); kidReady.then(clearKidPlaces); });   // вернуть исходный маршрут дня
 
 // Тропа ребёнка — в порядке маршрута с бекенда; «Сегодня» — когда подгрузились места рядом
 onTripChange(trip => kidReady.then(() => syncKidOrder(trip.days[0].stops.map(s => s.activity_id))));

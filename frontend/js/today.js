@@ -1,6 +1,6 @@
 // Экран «Сегодня» — главный экран родителя (макет «Сегодня и Карта: что сейчас и что рядом»).
 // Карточка «Сейчас» + лента со временем. Под каждой точкой — одна «семейная» строка:
-// что там у ребёнка (окно в прошлое / задание / штамп) и что рядом (туалет, кафе для детей).
+// что там у ребёнка (задание / штамп) и что рядом (туалет, кафе для детей).
 
 import { onTripChange, today, getSource, startDay, markVisited, previewRemove, applyPreview, ApiError } from './api.js';
 import { nearest, walkMinutes, isFamilyCafe } from './places.js';
@@ -28,7 +28,7 @@ function kidLine(stop) {
   const k = opt.kidStopInfo(stop.activity_id);
   if (!k) return null;
   if (stop.progress === 'visited') return k.done ? `пройдено, штамп у ${opt.childNameGenitive}` : `у ${opt.childNameGenitive} ещё не открыто`;
-  return k.type === 'window' ? `у ${opt.childNameGenitive} окно в прошлое · ${k.years}` : `у ${opt.childNameGenitive} задание`;
+  return `у ${opt.childNameGenitive} задание: ${k.label.toLowerCase()}`;
 }
 // Что полезного рядом с точкой (до ~5 минут пешком)
 function nearbyChips(point) {
@@ -171,7 +171,7 @@ async function askSkip(stop) {
     if (d.walk_delta_sec) lines.push(`Идти на ${fmtDuration(Math.abs(d.walk_delta_sec))} ${d.walk_delta_sec < 0 ? 'меньше' : 'больше'}`);
     if (d.elapsed_delta_sec) lines.push(`Прогулка ${d.elapsed_delta_sec < 0 ? 'короче' : 'длиннее'} на ${fmtDuration(Math.abs(d.elapsed_delta_sec))}`);
     const kid = opt.kidStopInfo(stop.activity_id);
-    if (kid && !kid.done) lines.push(`У ${opt.childNameGenitive} пропадёт ${kid.type === 'window' ? 'окно в прошлое' : 'задание'} на этой точке`);
+    if (kid && !kid.done) lines.push(`У ${opt.childNameGenitive} пропадёт задание на этой точке`);
     $('skip-title').textContent = `Пропустить «${stop.title}»?`;
     $('skip-diff').innerHTML = lines.map(l => `<li>${esc(l)}</li>`).join('');
     $('skip-confirm').hidden = false;

@@ -3,6 +3,7 @@
 import { loadMapStyle } from './map-style.js';
 import { onTripChange, today, getSource } from './api.js';
 import { loadPlaces, allPlaces, kindOf, cafeBadges, isFamilyCafe, isDemo, walkMinutes } from './places.js';
+import { orderByNearest } from './catalog.js';
 
 const CENTER = [44.0066, 56.3273];   // площадь Минина и Пожарского, [долгота, широта]
 const NEAR_ROUTE_M = 250;            // удобства показываем только в этой полосе вдоль маршрута
@@ -312,20 +313,6 @@ function sourceNote() {
 // ---------- Маршрут из выбранных мест (экран «Подбор мест») ----------
 // Порядок обхода — «ближайший сосед» от точки старта. Линии пока прямые: маршрут по улицам
 // строит backend, сюда он ещё не подключён.
-function orderByNearest(places, from) {
-  const left = [...places];
-  const ordered = [];
-  let cur = from;
-  while (left.length) {
-    let best = 0;
-    left.forEach((p, i) => { if (distanceM(cur, p.location) < distanceM(cur, left[best].location)) best = i; });
-    const [next] = left.splice(best, 1);
-    ordered.push(next);
-    cur = next.location;
-  }
-  return ordered;
-}
-
 const PICKED_LAYERS = ['route-glow', 'route-line', 'route-active'];
 
 // places — массив выбранных карточек; null — вернуть исходный маршрут дня.

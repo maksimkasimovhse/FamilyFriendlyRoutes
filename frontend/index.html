@@ -10,6 +10,7 @@
 <link href="css/app.css" rel="stylesheet">
 <link href="css/kid.css" rel="stylesheet">
 <link href="css/pick.css" rel="stylesheet">
+<link href="css/games.css" rel="stylesheet">
 <script src="vendor/maplibre-gl-4.7.1/maplibre-gl.js"></script>
 <script type="module" src="js/app.js"></script>
 </head>
@@ -156,20 +157,20 @@
     </button>
     <p class="fawn-bubble" id="fawn-bubble" hidden></p>
 
-    <!-- ===== Задание: оленёнок читает вслух, ответ — одна большая кнопка ===== -->
-    <section class="kid-page" id="task-page" hidden>
+    <!-- ===== Задание: игра с картинкой объекта (пазл, пиксель-пазл или раскраска) ===== -->
+    <section class="kid-page" id="game-page" hidden>
       <header class="kid-bar">
-        <b id="task-title"></b><span class="kid-chip" id="task-count"></span>
+        <b id="game-title"></b><span class="kid-chip" id="game-kind"></span>
         <button class="kid-exit" data-back aria-label="Назад к тропе">✕</button>
       </header>
-      <div class="kid-center">
-        <img class="fawn-big" id="task-fawn" alt="">
-        <p class="kid-say" id="task-text"></p>
-        <p class="kid-fact" id="task-intro"></p>
+      <div class="game-head">
+        <img id="game-fawn" alt="">
+        <p class="kid-say small" id="game-hint"></p>
       </div>
-      <div class="kid-bottom col">
-        <button class="btn kid-main big" id="task-done">Сделали!</button>
-        <button class="btn kid-ghost" id="task-speak">▶ Ещё раз</button>
+      <div class="game-area" id="game-area"></div>
+      <p class="game-progress" id="game-progress"></p>
+      <div class="kid-bottom">
+        <button class="btn kid-main big" id="game-done" disabled>Реши задание</button>
       </div>
     </section>
 
