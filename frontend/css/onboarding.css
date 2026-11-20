@@ -1,0 +1,164 @@
+/* ===== Вход, анкета семьи, новая поездка (docs/tz-onboarding.md) — только токены из app.css ===== */
+
+/* Экран поверх приложения; нижнее меню не видно */
+.flow { position: absolute; inset: 0; z-index: 15; background: var(--bg); display: flex; flex-direction: column; }
+.flow[hidden] { display: none; }
+.flow-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 16px 16px; }
+.flow-bottom { flex: none; padding: 10px 16px 16px; background: var(--bg); }
+.flow-center { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: var(--ink-2); font-weight: 700; padding: 24px; text-align: center; }
+
+.flow-top { display: flex; align-items: center; gap: 12px; padding: 12px 16px 6px; flex: none; }
+.flow-back { width: 44px; height: 44px; flex: none; border-radius: 50%; border: 0; background: var(--surface); font-size: 24px; font-weight: 800; box-shadow: 0 1px 4px rgba(15,22,40,.08); }
+.flow-step { flex: 1; min-width: 0; }
+.flow-step span { display: block; font-size: 13px; font-weight: 700; color: var(--ink-2); margin-bottom: 6px; }
+.flow-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.flow-bar i { height: 5px; border-radius: 3px; background: var(--line); }
+.flow-bar i.on { background: var(--now); }
+.flow-bar.kid i.on { background: var(--kid); }
+.draft-label { color: var(--kid) !important; }
+
+.flow-title { font-size: 28px; font-weight: 800; margin: 8px 0 6px; line-height: 1.15; }
+.flow-title.serif { font-family: var(--font-title); font-weight: 400; }
+.flow-sub { color: var(--ink-2); font-weight: 600; margin: 0 0 14px; line-height: 1.4; }
+
+.card-w { background: var(--surface); border-radius: 20px; padding: 16px; margin-bottom: 12px; }
+.card-w > b, .sub-b { display: block; font-size: 16px; margin-bottom: 10px; }
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.row-between > b { margin: 0; }
+.hint { margin: 8px 0 0; color: var(--ink-2); font-size: 13px; font-weight: 600; line-height: 1.4; }
+.hint.right { text-align: right; }
+.fine { color: var(--ink-2); font-size: 12px; line-height: 1.4; margin: 6px 0 0; }
+.fine.center, .center { text-align: center; }
+.form-error { color: var(--brick); font-weight: 700; margin: 10px 0 0; }
+.btn.flow-main { background: var(--now); color: #fff; min-height: 54px; border-radius: 18px; font-size: 17px; }
+.btn.flow-main:disabled { opacity: .45; }
+.flow.trip .btn.flow-main { background: var(--now); }
+.btn.link.inline { width: auto; min-height: 0; padding: 0; margin: 0; font-size: 12px; text-decoration: underline; }
+
+/* Поля */
+.field { display: block; font-weight: 700; font-size: 14px; margin-bottom: 12px; }
+.field input, textarea {
+  display: block; width: 100%; margin-top: 6px; min-height: 48px; border-radius: 14px; border: 1.5px solid var(--line);
+  padding: 10px 14px; font: 600 16px var(--font-ui); background: var(--bg); color: var(--ink);
+}
+textarea { resize: vertical; min-height: 84px; line-height: 1.4; }
+.field input:focus, textarea:focus { outline: none; border-color: var(--now); background: #fff; }
+.pw { position: relative; display: block; }
+.pw input { padding-right: 52px; }
+.eye { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); margin-top: 3px; width: 44px; height: 44px; border: 0; background: none; font-size: 18px; }
+.eye[aria-pressed="true"] { opacity: .5; }
+
+/* Иллюстрация входа */
+.auth-art { width: 100%; height: auto; display: block; margin: 8px 0 4px; }
+
+/* Сегмент (Регистрация | Вход, 1 | 2 ребёнка) */
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--line); border-radius: 16px; padding: 4px; margin: 4px 0 14px; }
+.seg.small { margin: 0; }
+.seg.three { grid-template-columns: repeat(3, 1fr); }
+.seg button { border: 0; background: none; border-radius: 12px; min-height: 44px; font-weight: 800; font-size: 14px; color: var(--ink-2); }
+.seg button[aria-selected="true"], .seg button[aria-checked="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 4px rgba(15,22,40,.1); }
+
+/* Степпер взрослых */
+.stepper { display: flex; align-items: center; gap: 10px; }
+.stepper button { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--now-soft); color: var(--now); font-size: 22px; font-weight: 800; }
+.stepper button:disabled { opacity: .35; }
+.stepper output { min-width: 24px; text-align: center; font-size: 20px; font-weight: 800; }
+
+/* Карточка ребёнка */
+.kid-card-w { border-left: 0; }
+.kid-num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--kid); color: #fff; font-weight: 800; font-size: 14px; margin-right: 8px; }
+.kid-head { display: flex; align-items: center; margin-bottom: 12px; font-weight: 800; font-size: 16px; }
+.ages { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; margin-top: 6px; }
+.ages button { min-height: 44px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 800; font-size: 15px; padding: 0; }
+.ages button[aria-pressed="true"] { background: var(--kid); border-color: var(--kid); color: #fff; }
+
+/* Чипсы выбора (интересы, точки старта) */
+.chips-w { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips-w button { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 700; font-size: 14px; color: var(--ink); }
+.chips-w button[aria-pressed="true"], .chips-w button[aria-checked="true"] { background: var(--now); border-color: var(--now); color: #fff; }
+.chips-w button.unsure { border-style: dashed; }
+.chips-w.quick { margin-top: 10px; }
+.chips-w.quick button { min-height: 36px; font-size: 13px; background: var(--bg); border-color: transparent; }
+.avatar { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--kid-soft); color: var(--kid); font-weight: 800; font-size: 18px; margin-right: 10px; flex: none; }
+.kid-meta { display: flex; align-items: center; margin-bottom: 12px; }
+.kid-meta b { display: block; font-size: 16px; }
+.kid-meta small { color: var(--ink-2); font-weight: 700; }
+
+/* Темп */
+.pace { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.pace button { min-height: 72px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 8px 4px; }
+.pace button b { font-size: 15px; }
+.pace button small { color: var(--ink-2); font-weight: 600; font-size: 12px; line-height: 1.2; text-align: center; }
+.pace button[aria-checked="true"] { border-color: var(--now); background: var(--now-soft); }
+
+/* Календарь */
+.cal-nav { display: flex; align-items: center; gap: 4px; font-weight: 800; font-size: 14px; }
+.cal-nav button { width: 36px; height: 36px; border-radius: 50%; border: 0; background: var(--bg); font-size: 18px; font-weight: 800; }
+.cal-nav button:disabled { opacity: .3; }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-top: 10px; text-align: center; }
+.cal .wd { font-size: 12px; color: var(--ink-2); font-weight: 700; padding: 4px 0; }
+.cal button { min-height: 40px; border: 0; background: none; border-radius: 12px; font-weight: 700; font-size: 15px; }
+.cal button:disabled { color: #C2C8D2; }
+.cal button.today { box-shadow: inset 0 0 0 2px var(--now); }
+.cal button.in { background: var(--now-soft); border-radius: 0; }
+.cal button.edge { background: var(--now); color: #fff; }
+.cal-sum { margin: 10px 0 0; font-weight: 800; color: var(--now); }
+
+/* Точки старта, переключатель */
+.btn.geo { margin-top: 10px; }
+.switch-row { margin-top: 14px; font-weight: 700; }
+.switch { width: 52px; height: 32px; flex: none; border-radius: 999px; border: 0; background: var(--line); position: relative; padding: 0; }
+.switch i { position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: left .15s; }
+.switch[aria-checked="true"] { background: var(--now); }
+.switch[aria-checked="true"] i { left: 23px; }
+#end-block { margin-top: 12px; }
+
+/* Итог «Что мы учтём» */
+.summary { margin: 0; display: grid; grid-template-columns: auto 1fr auto; gap: 10px 12px; align-items: baseline; }
+.summary dt { color: var(--ink-2); font-weight: 700; font-size: 13px; }
+.summary dd { margin: 0; font-weight: 700; font-size: 14px; }
+.summary button { border: 0; background: none; color: var(--now); font-weight: 800; font-size: 13px; min-height: 32px; padding: 0 4px; }
+
+/* Предпросмотр */
+.day-tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 8px; scrollbar-width: none; }
+.day-tabs:empty { display: none; }
+.day-tabs button { flex: none; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 0; background: var(--surface); font-weight: 800; }
+.day-tabs button[aria-selected="true"] { background: var(--now); color: #fff; }
+.pv-list { list-style: none; margin: 0; padding: 0; background: var(--surface); border-radius: 20px; }
+.pv-list li { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.pv-list li:last-child { border-bottom: 0; }
+.pv-list .n { width: 30px; height: 30px; flex: none; border-radius: 50%; background: var(--now); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 14px; }
+.pv-list .n.end { background: var(--ink); font-size: 13px; }
+.pv-list b { display: block; font-size: 15px; }
+.pv-list small { color: var(--ink-2); font-weight: 600; }
+.ack { display: flex; gap: 10px; align-items: flex-start; background: #FFF3D1; color: #7A5200; border-radius: 16px; padding: 14px; margin-top: 12px; font-weight: 700; font-size: 14px; line-height: 1.35; }
+.ack[hidden] { display: none; }
+.ack input { width: 22px; height: 22px; flex: none; margin: 0; accent-color: var(--now); }
+
+/* Подбор мест в «Новой поездке» */
+.pick-flow { display: none; padding: 12px 16px 0; }
+.pick-skip { display: none; }
+.app.flow-mode .pick-flow, .app.flow-mode .pick-skip { display: block; }
+.pick-flow-sub { margin: 8px 0 0; color: var(--ink-2); font-weight: 600; font-size: 13px; }
+.app.flow-mode .tabbar { display: none; }
+
+/* Профиль */
+.profile { background: var(--bg); }
+.profile .card-w .row { margin-top: 10px; }
+.trip-list { list-style: none; margin: 0; padding: 0; }
+.trip-list li { padding: 10px 0; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.trip-list li:last-child { border-bottom: 0; }
+.trip-list b { display: block; font-size: 15px; }
+.trip-list small { color: var(--ink-2); font-weight: 600; }
+.trip-list .btn { width: auto; flex: none; padding: 0 14px; min-height: 40px; }
+.trip-list .cur { color: var(--ok); font-weight: 800; font-size: 13px; }
+
+/* Загрузка */
+.spinner { width: 40px; height: 40px; border-radius: 50%; border: 4px solid var(--line); border-top-color: var(--now); animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* В «Новой поездке» на экране карточек: «Пропустить» — ссылкой, заголовок поменьше */
+.app.flow-mode #screen-pick .pick-skip { background: none; color: var(--now); box-shadow: none; min-height: 44px; margin-top: 4px; font-weight: 800; }
+.app.flow-mode #screen-pick .pick-top h1 { font-size: 20px; line-height: 1.2; }
+.app.flow-mode #screen-pick .pick-top { flex-wrap: wrap; row-gap: 0; }
+.app.flow-mode #screen-pick .pick-count { flex-basis: 100%; padding-left: 56px; margin-top: -4px; }

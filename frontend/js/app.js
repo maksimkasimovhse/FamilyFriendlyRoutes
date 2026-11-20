@@ -1,6 +1,17 @@
-// Точка входа: параметры поездки, нижнее меню, запуск экранов.
+// Точка входа: запуск по состоянию сессии (docs/tz-onboarding.md, раздел 2), нижнее меню, профиль.
+//
+//   GET /session
+//   ├─ не вошли и не гость              → «Вход / регистрация»
+//   ├─ анкеты нет                        → анкета (3 шага)
+//   ├─ есть сохранённая поездка          → основной интерфейс («Сегодня», карта…)
+//   └─ иначе                             → «Новая поездка»
+//
+// ?newtrip=1 — сразу «Новая поездка» (для репетиции демо).
 
-import { loadTrip, resetTrip, onTripChange } from './api.js';
+import { onTripChange, loadSavedTrip, loadCachedTrip, listTrips, openTrip, forget, getTrip } from './api.js';
+import { startSession, isAuthenticated, isGuest, userEmail, signOut, initAuthScreen, openAuth } from './session.js';
+import { loadFamily, syncLocalProfile, openOnboarding, closeOnboarding, currentProfile, childName, genitive, familySummary } from './onboarding.js';
+import { openTripSetup, afterPick, backToWhen, backToWishes, backToPreview, closeTripSetup } from './trip-setup.js';
 import { loadPlaces } from './places.js';
 import { initMap, resizeMap, focusPlace, showPicked, refreshMap } from './map.js';
 import { initPick, openPick } from './pick.js';
@@ -8,99 +19,226 @@ import { initToday, refreshToday } from './today.js';
 import { initAssistant, openAssistant } from './assistant.js';
 import { initKid, openKid, syncKidOrder, kidStopInfo } from './kid.js';
 
-// ---------- Параметры поездки ----------
-// Формат — TripInput из docs/contracts/openapi.json. Пока анкеты нет, семья задана здесь.
-// День — сегодняшний (по Москве): бекенд разрешает «начать день» только в его дату и окно времени.
-// Режим in_city и окно «с текущей минуты» — чтобы время прибытия было видно сразу, ещё до старта.
-// Вечером (после 19:00) планируем завтрашнюю прогулку с 10:00 — сегодня уже мало что успеть.
-const FAMILY = { childName: 'Маша', childNameGenitive: 'Маши', childAge: 7 };
-const todayMsk = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' });   // 2026-11-20
-const nowMsk = new Date().toLocaleTimeString('ru-RU', { timeZone: 'Europe/Moscow', hour: '2-digit', minute: '2-digit' });
-const EVENING_HOUR = 19;
-const planTomorrow = Number(nowMsk.slice(0, 2)) >= EVENING_HOUR;
-const tripDate = planTomorrow
-  ? new Date(Date.now() + 24 * 3600 * 1000).toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' })
-  : todayMsk;
-const windowStart = planTomorrow ? '10:00' : nowMsk;
-const START = { coordinates: [44.0066, 56.3273], label: 'Площадь Минина и Пожарского' };
-
-const TRIP_INPUT = {
-  city_id: 'nizhny_novgorod',
-  timezone: 'Europe/Moscow',
-  planning_context: 'in_city',
-  family: {
-    children: [{ child_id: 'child-1', age_years: FAMILY.childAge, height_cm: null, interest_ids: ['history'] }],
-    adult_count: 2,
-    adult_interest_ids: ['history'],
-  },
-  load_limits: { pace: 'relaxed', max_walk_distance_m_per_day: 10000, max_continuous_walk_duration_sec: 3600, restaurant_walk_reserve_m_per_day: 0 },
-  days: [{
-    date: tripDate,
-    start_point: START,
-    end_point: START,
-    available_window: { start_at: `${tripDate}T${windowStart}:00+03:00`, end_at: tripDate + 'T23:30:00+03:00' },
-    duration_budget_sec: 7 * 3600,
-    meal_window: null,
-    rest_budget_sec: 0,
-  }],
-  selections: [],
-  request_text: null,
-};
+const $ = id => document.getElementById(id);
+const app = document.querySelector('.app');
+const q = new URLSearchParams(location.search);
 
 // ---------- Нижнее меню ----------
 const tabs = document.querySelectorAll('.tabbar button');
 const screens = document.querySelectorAll('.screen');
-
 let currentTab = 'today';
 function openTab(name) {
   // «Маша» — не вкладка, а детский режим на весь экран поверх приложения
   if (name === 'kid') { openKid(); return; }
-  currentTab = name;
+  if (name !== 'pick') currentTab = name;
   tabs.forEach(t => t.classList.toggle('on', t.dataset.tab === name));
   screens.forEach(s => { s.hidden = s.dataset.tab !== name; });
   if (name === 'map') resizeMap();
   if (name === 'helper') openAssistant();
+  if (name === 'album') renderProfile();
 }
 tabs.forEach(t => t.addEventListener('click', () => openTab(t.dataset.tab)));
-openTab(location.hash === '#map' ? 'map' : 'today');
 
-// ---------- Запуск экранов ----------
-const kidReady = initKid({
-  childName: FAMILY.childName,
-  childNameGenitive: FAMILY.childNameGenitive,
-  ageYears: FAMILY.childAge,
-  onExit: () => { openTab(currentTab); refreshToday(); },   // выход — обратно к родителю
-}).catch(err => console.error('Детский режим не загрузился', err));
-if (location.hash === '#kid') kidReady.then(() => openKid());
+// ---------- Загрузка ----------
+function loading(text) {
+  $('flow-loading-text').textContent = text;
+  $('flow-loading').hidden = !text;
+}
 
-initMap({ stopInfo: activityId => kidStopInfo(activityId) }).catch(err => {
-  console.error(err);
-  document.getElementById('sheet-body').innerHTML = `<p class="source warn">Не удалось загрузить карту: ${err.message}</p>`;
-});
+// ---------- Основной интерфейс (после того как поездка есть) ----------
+let mainStarted = false;
+let kidReady = Promise.resolve();
+function startMain() {
+  loading('');
+  app.classList.remove('flow-mode');
+  if (mainStarted) { refreshToday(); refreshMap(); openTab('today'); return; }
+  mainStarted = true;
+  // Имя ребёнка — из анкеты на этом устройстве; детский режим пока ведёт первого ребёнка
+  const name = childName(0);
+  const age = currentProfile()?.family.children[0]?.age_years || 7;
+  document.querySelectorAll('.tabbar .kid').forEach(b => { b.lastChild.textContent = name.startsWith('Ребёнок') ? 'Ребёнок' : name; });
+  document.querySelectorAll('.kid-badge').forEach(b => { b.textContent = name.charAt(0).toUpperCase(); });
 
-initToday({
-  childName: FAMILY.childName,
-  childNameGenitive: FAMILY.childNameGenitive,
-  kidStopInfo,
-  onOpenKid: () => openKid(),
-  onNeedNow: () => openTab('helper'),
-});
-initAssistant({ onShowOnMap: place => { openTab('map'); focusPlace(place); } });
+  kidReady = initKid({
+    childName: name, childNameGenitive: genitive(name), ageYears: age,
+    onExit: () => { openTab(currentTab); refreshToday(); },
+  }).catch(err => console.error('Детский режим не загрузился', err));
+  if (location.hash === '#kid') kidReady.then(() => openKid());
 
-// ---------- Подбор мест (карточки как в Tinder, экран Максима) ----------
+  initMap({ stopInfo: activityId => kidStopInfo(activityId) }).catch(err => {
+    console.error(err);
+    $('sheet-body').innerHTML = `<p class="source warn">Не удалось загрузить карту: ${err.message}</p>`;
+  });
+  initToday({ childName: name, childNameGenitive: genitive(name), kidStopInfo, onOpenKid: () => openKid(), onNeedNow: () => openTab('helper') });
+  initAssistant({ onShowOnMap: place => { openTab('map'); focusPlace(place); } });
+
+  // Тропа ребёнка — в порядке маршрута; «Сегодня» — когда подгрузились места рядом
+  const syncKid = trip => kidReady.then(() => syncKidOrder(trip.days[0].stops.map(s => s.activity_id)));
+  onTripChange(syncKid);
+  if (getTrip()) syncKid(getTrip());
+  Promise.all([loadPlaces(), kidReady]).then(() => { refreshToday(); refreshMap(); });
+  openTab(location.hash === '#map' ? 'map' : 'today');
+}
+
+// ---------- Подбор мест: шаг 2 «Новой поездки» или отдельно с карты ----------
+let pickInFlow = false;
+function enterPickStep() {
+  pickInFlow = true;
+  app.classList.add('flow-mode');
+  openTab('pick');
+  openPick();
+  document.querySelector('#screen-pick .pick-top h1').textContent = 'Что точно хотите увидеть?';
+}
+function leavePickStep() {
+  pickInFlow = false;
+  document.querySelector('#screen-pick .pick-top h1').textContent = 'Подбор мест';
+  $('screen-pick').hidden = true;
+}
 initPick({
-  onFinish: places => { openTab('map'); showPicked(places); },   // выбранные места → карта и маршрут
-  onClose: () => openTab('map'),
+  onFinish: places => {
+    if (pickInFlow) { leavePickStep(); afterPick(places); return; }
+    openTab('map'); showPicked(places);      // отдельно с карты: выбранные места → карта
+  },
+  onClose: () => {
+    if (pickInFlow) { leavePickStep(); backToWhen(); return; }
+    openTab('map');
+  },
 });
-const startPick = () => { openTab('pick'); openPick(); };
-// Кнопки «Подбор мест» пока нет: экран откроем после регистрации/анкеты (событие pick:open)
-document.addEventListener('pick:open', startPick);                 // «Подобрать ещё» на карте
-document.addEventListener('pick:reset', () => showPicked(null));   // вернуть исходный маршрут дня
+$('pick-skip').onclick = () => { leavePickStep(); afterPick([]); };
+document.addEventListener('pick:open', () => { openTab('pick'); openPick(); });   // «Подобрать ещё» на карте
+document.addEventListener('pick:reset', () => showPicked(null));
 
-// Тропа ребёнка — в порядке маршрута с бекенда; «Сегодня» — когда подгрузились места рядом
-onTripChange(trip => kidReady.then(() => syncKidOrder(trip.days[0].stops.map(s => s.activity_id))));
-Promise.all([loadPlaces(), kidReady]).then(() => { refreshToday(); refreshMap(); });
+// ---------- Новая поездка ----------
+function startTripSetup({ keep = false } = {}) {
+  loading('');
+  app.classList.add('flow-mode');
+  openTripSetup({
+    authenticated: isAuthenticated(),
+    onBack: () => { if (mainStarted) { closeTripSetup(); startMain(); } else openProfileFlow({ firstTime: false }); },
+    onPick: enterPickStep,
+    onEditProfile: () => openOnboarding({
+      authenticated: isAuthenticated(),
+      onDone: () => { closeOnboarding(); backToWishes(); },
+      onBack: () => backToWishes(),
+    }),
+    onLogin: () => openAuthFlow(async () => { await syncLocalProfile(); backToPreview(); }),
+    onDone: (trip, picked) => {
+      closeTripSetup();
+      startMain();
+      // Выбранные свайпами места пока не попадают в план (id карточек ≠ id мест ML) —
+      // показываем их на карте отдельно, как раньше (ТЗ, открытый вопрос 2)
+      if (picked.length) { openTab('map'); showPicked(picked); }
+    },
+  }, { keep });
+}
 
-// ?newtrip=1 — начать поездку заново (для репетиции демо)
-const q = new URLSearchParams(location.search);
-(q.has('newtrip') ? resetTrip(TRIP_INPUT) : loadTrip(TRIP_INPUT));
+// ---------- Анкета ----------
+function openProfileFlow({ firstTime }) {
+  loading('');
+  app.classList.add('flow-mode');
+  openOnboarding({
+    authenticated: isAuthenticated(),
+    onDone: () => { closeOnboarding(); startTripSetup(); },
+    onBack: () => { if (firstTime && !isAuthenticated()) openAuthFlow(afterAuth); else if (mainStarted) { closeOnboarding(); startMain(); } else openAuthFlow(afterAuth); },
+  });
+}
+
+// ---------- Вход ----------
+let authCallback = null;
+function openAuthFlow(callback) {
+  loading('');
+  app.classList.add('flow-mode');
+  authCallback = callback;
+  openAuth(isGuest() ? 'login' : 'register');
+}
+initAuthScreen({
+  onDone: async () => { $('onb-auth').hidden = true; await authCallback?.(); },
+  onGuest: () => { $('onb-auth').hidden = true; afterAuth(); },
+});
+// После входа: анкету гостя — в аккаунт (если там пусто), дальше по обычной схеме
+async function afterAuth() {
+  loading('Загружаем анкету…');
+  try {
+    if (isAuthenticated()) await syncLocalProfile();
+    await continueBoot();
+  } catch (err) { showFatal(err); }
+}
+
+// ---------- Профиль (вкладка «Альбом») ----------
+async function renderProfile() {
+  $('prof-who').textContent = isAuthenticated() ? userEmail() : 'Без входа · поездка хранится сутки на этом устройстве';
+  $('prof-family').textContent = familySummary() || 'Анкета не заполнена';
+  $('prof-auth').textContent = isAuthenticated() ? 'Выйти' : 'Войти или зарегистрироваться';
+  const list = $('prof-trips');
+  try {
+    const { items } = await listTrips();
+    const current = getTrip()?.trip_id;
+    list.innerHTML = items.length ? '' : '<li class="muted">Поездок пока нет</li>';
+    items.forEach(t => {
+      const li = document.createElement('li');
+      const date = new Date(t.updated_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+      li.innerHTML = `<span><b>Поездка от ${date}</b><small>${t.status === 'draft' ? 'черновик' : 'маршрут сохранён'}</small></span>`;
+      if (t.trip_id === current) li.insertAdjacentHTML('beforeend', '<span class="cur">открыта</span>');
+      else if (t.status !== 'draft') {
+        const b = document.createElement('button');
+        b.className = 'btn alt slim';
+        b.textContent = 'Открыть';
+        b.onclick = async () => { await openTrip(t.trip_id); openTab('today'); };
+        li.append(b);
+      }
+      list.append(li);
+    });
+  } catch {
+    list.innerHTML = '<li class="muted">Список поездок сейчас недоступен</li>';
+  }
+}
+$('prof-edit').onclick = () => openOnboarding({
+  authenticated: isAuthenticated(),
+  onDone: () => location.reload(),          // имя и возраст ребёнка перечитаются везде
+  onBack: () => { closeOnboarding(); app.classList.remove('flow-mode'); },
+});
+$('prof-newtrip').onclick = () => startTripSetup();
+$('prof-auth').onclick = async () => {
+  if (isAuthenticated()) {
+    await signOut();
+    forget();
+    // Анкету этого аккаунта с устройства убираем: телефоном может пользоваться кто-то ещё
+    try { localStorage.removeItem('family-profile-v1'); localStorage.removeItem('child-names-v1'); } catch { /* ничего */ }
+    location.reload();
+  } else {
+    openAuthFlow(async () => { await syncLocalProfile(); location.reload(); });
+  }
+};
+
+// ---------- Запуск ----------
+function showFatal(err) {
+  console.error(err);
+  loading('');
+  $('flow-loading').hidden = false;
+  $('flow-loading-text').textContent = 'Не получилось загрузить: ' + err.message;
+}
+
+async function continueBoot() {
+  const profile = await loadFamily({ authenticated: isAuthenticated() });
+  if (!profile) return openProfileFlow({ firstTime: true });
+  if (q.has('newtrip')) { forget(); return startTripSetup(); }
+  loading('Загружаем поездку…');
+  const trip = await loadSavedTrip();
+  if (trip) return startMain();
+  startTripSetup();
+}
+
+async function boot() {
+  loading('Загружаем…');
+  try {
+    await startSession();
+  } catch {
+    // Бекенд недоступен — запасной вариант для демо: сохранённый маршрут, только просмотр
+    await loadFamily({ authenticated: false });
+    await loadCachedTrip();
+    return startMain();
+  }
+  if (!isAuthenticated() && !isGuest()) return openAuthFlow(afterAuth);
+  try { await continueBoot(); } catch (err) { showFatal(err); }
+}
+boot();
