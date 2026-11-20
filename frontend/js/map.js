@@ -4,6 +4,7 @@ import { emojiAsset, placeEmojiHtml, createPlaceEmoji, thinBenches } from './pla
 import { loadMapStyle } from './map-style.js';
 import { onTripChange, today, getSource } from './api.js';
 import { allPlaces, loadNearbyBenches, clearNearbyBenches, BENCH_RADIUS_M, onPlacesChange, kindOf, cafeBadges, isFamilyCafe, isDemo, walkMinutes, placeType } from './places.js';
+import { orderByNearest } from './catalog.js';
 
 const CENTER = [44.0066, 56.3273];   // площадь Минина и Пожарского, [долгота, широта]
 const NEAR_ROUTE_M = 125;            // удобства показываем только в этой полосе вдоль маршрута
@@ -305,20 +306,6 @@ function bindInfo() {
 // ---------- Маршрут из выбранных мест (экран «Подбор мест», Максим) ----------
 // Порядок обхода — «ближайший сосед» от точки старта. Линии пока прямые: маршрут по улицам
 // строит backend, сюда он ещё не подключён.
-function orderByNearest(places, from) {
-  const left = [...places];
-  const ordered = [];
-  let cur = from;
-  while (left.length) {
-    let best = 0;
-    left.forEach((p, i) => { if (distanceM(cur, p.location) < distanceM(cur, left[best].location)) best = i; });
-    const [next] = left.splice(best, 1);
-    ordered.push(next);
-    cur = next.location;
-  }
-  return ordered;
-}
-
 const DAY_LAYERS = ['route-glow', 'route-line', 'route-active'];
 
 // places — массив выбранных карточек; null — вернуть исходный маршрут дня.

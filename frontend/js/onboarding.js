@@ -4,10 +4,13 @@
 // (в контракте поля нет; это лишние данные о ребёнке), рядом с child_id.
 
 import { getProfile, saveProfile, referenceData, ApiError } from './api.js';
+import { userEmail } from './session.js';
 
 const $ = id => document.getElementById(id);
 const PROFILE_KEY = 'family-profile-v1';
 const NAMES_KEY = 'child-names-v1';
+// Чья анкета и имена лежат на устройстве: 'guest' или почта аккаунта. Чужое не переносим и не показываем.
+const OWNER_KEY = 'family-owner-v1';
 const AGES = [3, 4, 5, 6, 7, 8, 9, 10, 11];
 
 // Интересы из макета. id для истории/науки/игр совпадают со справочником backend (history, science, play);
@@ -29,14 +32,34 @@ const write = (key, value) => { try { localStorage.setItem(key, JSON.stringify(v
 
 let profile = null;          // текущая анкета (или null — ещё не заполнена)
 let names = read(NAMES_KEY, {});
+let owner = read(OWNER_KEY, null);
+
+// Сменился хозяин данных на устройстве — стираем прежнюю анкету и имена детей
+function switchOwner(next, { keepGuest = false } = {}) {
+  if (owner && owner !== next && !(keepGuest && owner === 'guest')) {
+    names = {};
+    write(NAMES_KEY, names);
+    try { localStorage.removeItem(PROFILE_KEY); } catch { /* ничего */ }
+  }
+  owner = next;
+  write(OWNER_KEY, owner);
+}
+const fromView = v => ({ version: v.version, family: v.family, load_limits: v.load_limits, wishes: v.wishes });
 
 const emptyProfile = () => ({
   version: 0,
-  family: { children: [{ child_id: 'child-1', age_years: null, height_cm: null, interest_ids: [] }], adult_count: 2, adult_interest_ids: [] },
+  family: { children: [{ child_id: 'child-1', age_years: 6, height_cm: null, interest_ids: [] }], adult_count: 2, adult_interest_ids: [] },
   load_limits: { pace: 'relaxed', max_walk_distance_m_per_day: null, max_continuous_walk_duration_sec: null, restaurant_walk_reserve_m_per_day: 0 },
   wishes: null,
 });
 const clone = o => JSON.parse(JSON.stringify(o));
+
+// «Продолжить без входа» — всегда чистый гость: стираем анкету, имена и хозяина с устройства
+export function clearDeviceData() {
+  profile = null; names = {}; owner = 'guest';
+  for (const k of [PROFILE_KEY, NAMES_KEY, OWNER_KEY]) { try { localStorage.removeItem(k); } catch { /* ничего */ } }
+  write(OWNER_KEY, owner);
+}
 
 export const currentProfile = () => profile;
 export const profileVersion = () => profile?.version || 0;
@@ -44,24 +67,36 @@ export const profileVersion = () => profile?.version || 0;
 // Загрузить анкету: аккаунт — с сервера, гость — с устройства. null — анкеты нет
 export async function loadFamily({ authenticated }) {
   if (authenticated) {
+    switchOwner(userEmail());
     const view = await getProfile();
-    profile = view ? { version: view.version, family: view.family, load_limits: view.load_limits, wishes: view.wishes } : null;
+    profile = view ? fromView(view) : null;
     if (profile) write(PROFILE_KEY, profile);
   } else {
+    switchOwner('guest');
     profile = read(PROFILE_KEY, null);
   }
   return profile;
 }
 
-// После входа: если на сервере анкеты нет, а на устройстве есть (заполняли гостем) — сохранить её в аккаунт
+// После входа: переносим в аккаунт ТОЛЬКО анкету, заполненную гостем на этом устройстве
+// (и только если в аккаунте своей анкеты ещё нет). Анкету другого аккаунта не трогаем.
 export async function syncLocalProfile() {
-  const local = read(PROFILE_KEY, null);
+  const email = userEmail();
+  const wasGuest = owner === 'guest';
+  const local = wasGuest ? read(PROFILE_KEY, null) : null;
   const view = await getProfile();
-  if (view) { profile = { version: view.version, family: view.family, load_limits: view.load_limits, wishes: view.wishes }; write(PROFILE_KEY, profile); return profile; }
-  if (!local) { profile = null; return null; }
-  const saved = await saveProfile({ expected_version: 0, family: local.family, load_limits: local.load_limits, wishes: local.wishes });
-  profile = { version: saved.version, family: saved.family, load_limits: saved.load_limits, wishes: saved.wishes };
-  write(PROFILE_KEY, profile);
+  if (view) {
+    switchOwner(email);                       // в аккаунте своя анкета — гостевую не используем
+    profile = fromView(view);
+  } else if (local) {
+    const saved = await saveProfile({ expected_version: 0, family: local.family, load_limits: local.load_limits, wishes: local.wishes });
+    switchOwner(email, { keepGuest: true });  // имена детей гостя переходят вместе с анкетой
+    profile = fromView(saved);
+  } else {
+    switchOwner(email);
+    profile = null;
+  }
+  if (profile) write(PROFILE_KEY, profile);
   return profile;
 }
 
@@ -89,6 +124,19 @@ export function familySummary(p = profile) {
   if (!p) return '';
   const kids = p.family.children.map((c, i) => `${childName(i)}, ${ageText(c.age_years)}`).join('; ');
   return `${p.family.adult_count} взр. · ${kids}`;
+}
+
+// ДЕМО: у аккаунтов из scripts/seed-demo-users.py имён детей на сервере нет (их там вообще не хранят),
+// поэтому на новом устройстве подставляем имена, чтобы детский режим не говорил «Ребёнок 1».
+const DEMO_NAMES = {
+  'masha@example.com': { 'child-1': 'Маша' },
+  'petya@example.com': { 'child-1': 'Петя', 'child-2': 'Аня' },
+};
+export function seedDemoNames(email) {
+  const demo = DEMO_NAMES[(email || '').toLowerCase()];
+  if (!demo) return;
+  names = { ...demo, ...names };   // то, что человек ввёл сам на этом устройстве, важнее
+  write(NAMES_KEY, names);
 }
 
 // ---------- Экраны ----------
@@ -125,17 +173,30 @@ function renderFamily() {
     card.className = 'card-w kid-card-w';
     card.innerHTML = `
       <div class="kid-head"><span class="kid-num">${i + 1}</span>Ребёнок ${i + 1}</div>
-      <label class="field">Как обращаться в детском режиме <span class="muted">(необязательно)</span>
+      <label class="field">Имя
         <input type="text" maxlength="30" autocomplete="off" placeholder="Например, Маша"></label>
-      <b class="sub-b" id="age-label-${i}">Возраст, лет</b>
-      <div class="ages" role="group" aria-labelledby="age-label-${i}">${AGES.map(a =>
-        `<button type="button" aria-pressed="${child.age_years === a}" data-age="${a}">${a}</button>`).join('')}</div>`;
+      <div class="age-pick">
+        <button type="button" class="age-btn" data-d="-1" aria-label="Младше">−</button>
+        <div class="age-val" aria-live="polite"><b></b><span></span></div>
+        <button type="button" class="age-btn" data-d="1" aria-label="Старше">+</button>
+      </div>
+      <input type="range" class="age-range" min="3" max="11" step="1" aria-label="Возраст ребёнка">`;
     const input = card.querySelector('input');
     input.value = names[child.child_id] || '';
     input.oninput = () => { names[child.child_id] = input.value; };
-    card.querySelectorAll('[data-age]').forEach(b => {
-      b.onclick = () => { child.age_years = Number(b.dataset.age); renderFamily(); };
-    });
+    // Возраст: цифра, «−/+» и ползунок. Обновляем на месте, без перерисовки, чтобы ползунок можно было тянуть
+    const num = card.querySelector('.age-val b'), word = card.querySelector('.age-val span'), range = card.querySelector('.age-range');
+    const paint = () => {
+      const a = child.age_years;
+      num.textContent = a;
+      word.textContent = ageText(a).replace(/^\d+ /, '');
+      range.value = a;
+      range.style.setProperty('--p', ((range.value - 3) / 8 * 100) + '%');
+    };
+    const setAge = v => { child.age_years = Math.min(11, Math.max(3, v)); paint(); };
+    card.querySelectorAll('.age-btn').forEach(b => { b.onclick = () => setAge(child.age_years + Number(b.dataset.d)); });
+    range.oninput = () => setAge(Number(range.value));
+    paint();
     $('kids-cards').append(card);
   });
 }
@@ -148,7 +209,7 @@ function bindFamily() {
       const n = Number(b.dataset.n);
       const kids = draft.family.children;
       // child_id стабилен: второй ребёнок — всегда child-2
-      if (n === 2 && kids.length === 1) kids.push({ child_id: 'child-2', age_years: null, height_cm: null, interest_ids: [] });
+      if (n === 2 && kids.length === 1) kids.push({ child_id: 'child-2', age_years: 6, height_cm: null, interest_ids: [] });
       if (n === 1 && kids.length === 2) kids.pop();
       renderFamily();
     };
@@ -171,13 +232,11 @@ function renderKids() {
     card.className = 'card-w';
     const count = child.interest_ids.length;
     card.innerHTML = `
-      <div class="kid-meta"><span class="avatar"></span><span><b></b><small>${ageText(child.age_years)} · ${unsure[child.child_id] ? 'пока не знаем' : 'выбрано ' + count}</small></span></div>
+      <h2 class="kid-title"></h2>
       <div class="chips-w" role="group" aria-label="Интересы">${interestOptions.child.map(o =>
         `<button type="button" data-id="${o.id}" aria-pressed="${child.interest_ids.includes(o.id)}"></button>`).join('')}
-        <button type="button" class="unsure" data-unsure aria-pressed="${!!unsure[child.child_id]}">Пока не знаем</button></div>
-      <p class="hint">«Пока не знаем» — подберём то, что обычно нравится детям этого возраста.</p>`;
-    card.querySelector('.avatar').textContent = name.charAt(0).toUpperCase();
-    card.querySelector('.kid-meta b').textContent = name;
+        <button type="button" class="unsure" data-unsure aria-pressed="${!!unsure[child.child_id]}">Пока не знаем</button></div>`;
+    card.querySelector('.kid-title').textContent = name;
     card.querySelectorAll('[data-id]').forEach(b => {
       b.textContent = interestOptions.child.find(o => o.id === b.dataset.id).label;
       b.onclick = () => {
@@ -248,6 +307,8 @@ async function save() {
       draft.version = view.version;
     }
     profile = clone(draft);
+    owner = options.authenticated ? userEmail() : 'guest';
+    write(OWNER_KEY, owner);
     write(PROFILE_KEY, profile);
     write(NAMES_KEY, names);
     options.onDone(profile);

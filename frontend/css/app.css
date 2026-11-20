@@ -324,3 +324,22 @@ h2 .place-emoji { width: 26px; height: 26px; margin-right: 4px; }
 
 .chip .place-emoji { width: 18px; height: 18px; margin: -2px 0; }
 .chat-suggest button .place-emoji { width: 20px; height: 20px; margin: -2px 4px -2px 0; }
+/* ---------- Погода и советы на «Сегодня» ---------- */
+.weather { margin: 0 0 14px; padding: 12px 14px; border-radius: 18px; background: #E8F1FB; color: var(--ink); }
+.weather[hidden] { display: none; }
+.weather.warn { background: #FFF3D1; }
+.weather-head { display: flex; align-items: center; gap: 12px; }
+.weather-ico { font-size: 30px; line-height: 1; }
+.weather-head b { display: block; font-size: 17px; }
+.weather-head small { display: block; opacity: .7; font-size: 13px; }
+.weather-tips { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+.weather-tips li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; font-weight: 700; line-height: 1.3; }
+.weather-tips li.warn { color: #7A3B00; }
+.weather-tips li span { font-size: 20px; line-height: 1.1; }
+.weather-ok { margin: 8px 0 0; font-size: 14px; font-weight: 700; color: var(--ok); }
+
+/* ---------- Тематическая карта: небо по погоде сверху ---------- */
+.map-sky { position: absolute; left: 0; right: 0; top: 0; height: 38%; max-height: 260px; z-index: 1; pointer-events: none;
+  background: linear-gradient(to bottom, var(--sky, transparent) 0%, transparent 100%); transition: opacity .6s; }
+.map-sky[hidden] { display: none; }
+.map-sky canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
