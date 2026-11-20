@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT = ROOT / "data/enriched/osm_nizhny_1000/parsing_queue.csv"
 DEFAULT_OUTPUT = ROOT / "data/enriched/osm_nizhny_1000"
 DEFAULT_CATALOG = ROOT / "data/enriched/osm_nizhny_1000/catalog.jsonl"
+DEFAULT_MANUAL_SEEDS = ROOT / "data/enriched/osm_nizhny_1000/manual_source_seeds.json"
 WIKIDATA_API = "https://www.wikidata.org/w/api.php"
 WIKIDATA_BATCH_SIZE = 50
 
@@ -111,6 +112,30 @@ def brief_candidates() -> list[dict[str, str]]:
                 "notes": note,
             }
         )
+    return rows
+
+
+def manual_candidates(path: Path) -> list[dict[str, str]]:
+    """Load search-confirmed candidates without silently enabling their domains."""
+    if not path.exists():
+        return []
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    seeds = payload.get("seeds", []) if isinstance(payload, dict) else []
+    rows: list[dict[str, str]] = []
+    for seed in seeds:
+        if not isinstance(seed, dict):
+            continue
+        url = canonical_url(str(seed.get("candidate_url", "")))
+        if url is None:
+            raise ValueError(f"manual source seed has invalid candidate_url: {seed!r}")
+        rows.append({
+            "priority": "high", "place_id": str(seed.get("place_id", "")), "title": str(seed.get("title", "")),
+            "category": str(seed.get("category", "")), "candidate_url": url, "candidate_host": host_for(url),
+            "source_kind": str(seed.get("source_kind", "manual_candidate")),
+            "authority_status": str(seed.get("authority_status", "unverified_official_candidate")),
+            "discovery_status": "needs_domain_review", "parse_status": "blocked_until_source_enabled",
+            "notes": str(seed.get("notes", "")), "discovery_evidence_url": str(seed.get("verification_url", "")),
+        })
     return rows
 
 
@@ -206,7 +231,7 @@ def wikidata_candidates(records: list[dict[str, object]], cache: dict[str, list[
 def write_csv(rows: list[dict[str, str]], path: Path) -> None:
     fields = (
         "priority", "place_id", "title", "category", "candidate_url", "candidate_host", "source_kind",
-        "authority_status", "discovery_status", "parse_status", "notes",
+        "authority_status", "discovery_status", "parse_status", "notes", "discovery_evidence_url",
     )
     with path.open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
@@ -240,6 +265,7 @@ def main() -> None:
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
+    parser.add_argument("--manual-seeds", type=Path, default=DEFAULT_MANUAL_SEEDS)
     parser.add_argument("--refresh-wikidata", action="store_true", help="Refresh P856 official-website claims from Wikidata API")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
@@ -262,10 +288,11 @@ def main() -> None:
     else:
         cache = {}
     wikidata_rows = wikidata_candidates(records, cache)
-    all_rows = sorted(osm_rows + wikidata_rows + brief_candidates(), key=lambda row: (row["priority"] != "high", row["title"].casefold(), row["candidate_url"]))
+    manual_rows = manual_candidates(args.manual_seeds)
+    all_rows = sorted(osm_rows + wikidata_rows + brief_candidates() + manual_rows, key=lambda row: (row["priority"] != "high", row["title"].casefold(), row["candidate_url"]))
     write_csv(all_rows, args.output / "source_discovery_queue.csv")
     write_registry(all_rows, args.output / "source_registry_candidates.json")
-    print(json.dumps({"osm_url_candidates": len(osm_rows), "wikidata_url_candidates": len(wikidata_rows), "brief_seeds": len(BRIEF_SEEDS), "registry_candidates": len({row['candidate_host'] for row in all_rows if row['source_kind'] != 'discovery_only'})}, ensure_ascii=False))
+    print(json.dumps({"osm_url_candidates": len(osm_rows), "wikidata_url_candidates": len(wikidata_rows), "brief_seeds": len(BRIEF_SEEDS), "manual_candidates": len(manual_rows), "registry_candidates": len({row['candidate_host'] for row in all_rows if row['source_kind'] != 'discovery_only'})}, ensure_ascii=False))
 
 
 if __name__ == "__main__":

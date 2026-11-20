@@ -31,6 +31,16 @@
       "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
     },
     {
+      "source_id": "candidate-arsenal-museum-art",
+      "allowed_hosts": [
+        "arsenal-museum.art"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from web_search_official_candidate. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
       "source_id": "candidate-artmuseumnn-ru",
       "allowed_hosts": [
         "artmuseumnn.ru"
@@ -501,6 +511,16 @@
       "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
     },
     {
+      "source_id": "candidate-kremlnn-ru",
+      "allowed_hosts": [
+        "kremlnn.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from web_search_official_candidate. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
       "source_id": "candidate-krsormovo-nnov-ru",
       "allowed_hosts": [
         "krsormovo.nnov.ru"
@@ -538,7 +558,7 @@
       "enabled": false,
       "respect_robots": true,
       "max_response_bytes": 2000000,
-      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+      "note": "Candidate from osm_tag, web_search_official_candidate. Review ownership, robots.txt and redirects before enabling."
     },
     {
       "source_id": "candidate-lamanovamuseumnn-ru",
@@ -698,7 +718,17 @@
       "enabled": false,
       "respect_robots": true,
       "max_response_bytes": 2000000,
-      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+      "note": "Candidate from osm_tag, web_search_official_candidate. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-muzeybumagi-art",
+      "allowed_hosts": [
+        "muzeybumagi.art"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from web_search_official_candidate. Review ownership, robots.txt and redirects before enabling."
     },
     {
       "source_id": "candidate-myasoroob-ru",
@@ -758,7 +788,7 @@
       "enabled": false,
       "respect_robots": true,
       "max_response_bytes": 2000000,
-      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+      "note": "Candidate from osm_tag, web_search_official_candidate. Review ownership, robots.txt and redirects before enabling."
     },
     {
       "source_id": "candidate-ngvk-ru",
@@ -848,7 +878,7 @@
       "enabled": false,
       "respect_robots": true,
       "max_response_bytes": 2000000,
-      "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+      "note": "Candidate from osm_tag, web_search_official_candidate. Review ownership, robots.txt and redirects before enabling."
     },
     {
       "source_id": "candidate-palitra-sushi-ru",
@@ -959,6 +989,16 @@
       "respect_robots": true,
       "max_response_bytes": 2000000,
       "note": "Candidate from osm_tag. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-redox-ru",
+      "allowed_hosts": [
+        "redox.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from web_search_official_candidate. Review ownership, robots.txt and redirects before enabling."
     },
     {
       "source_id": "candidate-redtiger52-ru",
@@ -1439,6 +1479,16 @@
       "respect_robots": true,
       "max_response_bytes": 2000000,
       "note": "Candidate from wikidata_p856. Review ownership, robots.txt and redirects before enabling."
+    },
+    {
+      "source_id": "candidate-www-museumgorkogo-ru",
+      "allowed_hosts": [
+        "www.museumgorkogo.ru"
+      ],
+      "enabled": false,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Candidate from web_search_official_candidate. Review ownership, robots.txt and redirects before enabling."
     },
     {
       "source_id": "candidate-www-music-nn-ru",
