@@ -30,7 +30,7 @@ Backend остаётся оркестратором: хранит каталог
 | model | GET | `/health` | readiness процесса |
 | model | POST | `/internal/v1/rankings` | признаки кандидатов + claims → ранжированный список |
 
-Все запросы несут `contract_version="1.0"` и `request_id`. В production к ним нужно добавить service authentication/mTLS, tracing и retry policy; Compose публикует порты только на localhost. Контейнеры работают non-root и с read-only root filesystem.
+Все запросы несут `contract_version="1.0"` и `request_id`. В production к ним нужно добавить service authentication/mTLS, tracing и retry policy; Compose публикует порты только на localhost. Контейнеры работают non-root, с read-only root filesystem и политикой перезапуска `unless-stopped`.
 
 ## Запуск
 

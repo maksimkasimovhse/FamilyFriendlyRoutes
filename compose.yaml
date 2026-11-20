@@ -1,5 +1,6 @@
 services:
   parser-service:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: services/parser_service/Dockerfile
@@ -23,6 +24,7 @@ services:
       retries: 5
 
   model-service:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: services/model_service/Dockerfile
