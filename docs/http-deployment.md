@@ -10,6 +10,7 @@ Nginx принимает HTTP на порту 80, а контейнеры ост
 | `GET /model/health` | readiness model-service |
 | `GET /routing/status` | readiness Valhalla |
 | `POST /api/v1/rankings` | тестовое ранжирование без LLM credentials |
+| `/*` | frontend и его backend API через внутренний web-контейнер |
 
 PostgreSQL, полный Valhalla API и endpoints парсинга сайтов снаружи не публикуются. Для API
 установлены лимит 256 KiB и rate limit 10 запросов/с на IP. До появления домена стенд доступен по

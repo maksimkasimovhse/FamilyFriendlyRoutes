@@ -46,6 +46,7 @@ fi
 
 routing_lock="${repo_dir}/infra/routing/osm-source.lock.json"
 routing_file="${repo_dir}/data/routing/nizhny-novgorod.osm.pbf"
+routing_manifest="${repo_dir}/data/routing/source-manifest.json"
 if [[ -f "${routing_lock}" ]]; then
   readarray -t routing_source < <(python3 - "${routing_lock}" <<'PY'
 import json
@@ -71,6 +72,7 @@ PY
     mv "${routing_download}" "${routing_file}"
     trap - EXIT
   fi
+  install -m 0644 "${routing_lock}" "${routing_manifest}"
 fi
 
 docker compose --project-directory "${repo_dir}" config --quiet
