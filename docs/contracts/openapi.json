@@ -1972,7 +1972,8 @@
             "items": {
               "$ref": "#/components/schemas/DayInput"
             },
-            "minItems": 1
+            "minItems": 1,
+            "maxItems": 14
           },
           "selections": {
             "type": "array",
@@ -3419,7 +3420,9 @@
           },
           "limit": {
             "type": "integer",
-            "minimum": 1
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Initial planning requests 50 ranked distinct places for the entire trip. ML does not assign days or compute routes."
           }
         },
         "required": [
@@ -3481,7 +3484,9 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Candidate"
-            }
+            },
+            "maxItems": 50,
+            "description": "At most limit distinct place_id values, ordered by relevance; fewer valid places are allowed. No day assignment or geometry."
           },
           "rejected": {
             "type": "array",
@@ -4810,7 +4815,8 @@
           },
           "limit": {
             "type": "integer",
-            "minimum": 1
+            "minimum": 1,
+            "maximum": 50
           }
         },
         "required": [
@@ -4839,7 +4845,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Candidate"
-            }
+            },
+            "maxItems": 50
           },
           "evidence": {
             "type": "array",

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"strings"
 	"time"
 
 	c "github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/contracts"
@@ -38,15 +37,14 @@ type Router interface {
 type Planner struct {
 	Router     Router
 	Activities []Activity
+	Source     CandidateSource
+	metadata   map[c.ID]c.Candidate
 }
 
 var ErrValidation = errors.New("trip validation failed")
 
 func invalid(message string) error { return fmt.Errorf("%w: %s", ErrValidation, message) }
 func Validate(input c.TripInput) error {
-	if input.RequestText != nil && strings.TrimSpace(*input.RequestText) != "" {
-		return invalid("FREE_TEXT_NOT_IMPLEMENTED: ML is not connected")
-	}
 	if input.Selections == nil || input.Family.AdultInterestIDS == nil {
 		return invalid("selections and adult_interest_ids must be arrays, not null")
 	}
@@ -56,8 +54,8 @@ func Validate(input c.TripInput) error {
 	if input.PlanningContext != "before_arrival" && input.PlanningContext != "in_city" {
 		return invalid("invalid planning_context")
 	}
-	if len(input.Days) != 1 {
-		return invalid("MVP_ONE_DAY_ONLY: currently exactly one day is supported")
+	if len(input.Days) < 1 || len(input.Days) > 14 {
+		return invalid("trip must contain 1..14 days")
 	}
 	if len(input.Family.Children) < 1 || len(input.Family.Children) > 2 || input.Family.AdultCount < 1 {
 		return invalid("demo supports 1..2 children and at least one adult")
@@ -75,42 +73,48 @@ func Validate(input c.TripInput) error {
 			return invalid("invalid height")
 		}
 	}
-	day := input.Days[0]
-	date, err := time.Parse("2006-01-02", string(day.Date))
-	if err != nil {
-		return invalid("invalid day date")
-	}
-	if day.DurationBudgetSec <= 0 || !finite(day.DurationBudgetSec) || day.DurationBudgetSec > 24*3600 || day.RestBudgetSec < 0 || !finite(day.RestBudgetSec) {
-		return invalid("invalid duration budget")
-	}
-	if day.MealWindow != nil {
-		return invalid("MEAL_WINDOW_NOT_IMPLEMENTED: demo day planner does not schedule meals yet")
-	}
-	if day.RestBudgetSec > day.DurationBudgetSec {
-		return invalid("rest budget exceeds day budget")
-	}
-	if input.LoadLimits.Pace != "relaxed" && input.LoadLimits.Pace != "standard" && input.LoadLimits.Pace != "intensive" {
-		return invalid("invalid pace")
-	}
-	for _, v := range []*float64{input.LoadLimits.MaxWalkDistanceMPerDay, input.LoadLimits.MaxContinuousWalkDurationSec} {
-		if v != nil && (!finite(*v) || *v < 0) {
-			return invalid("invalid walking limit")
+	dates := map[c.ISODate]bool{}
+	for _, day := range input.Days {
+		if dates[day.Date] {
+			return invalid("duplicate day date")
 		}
-	}
-	probe := routing.Request{From: day.StartPoint, To: day.EndPoint, Mode: "walk"}
-	if err := probe.Validate(); err != nil {
-		return invalid(err.Error())
-	}
-	if day.AvailableWindow != nil {
-		start, e1 := time.Parse(time.RFC3339, string(day.AvailableWindow.StartAt))
-		end, e2 := time.Parse(time.RFC3339, string(day.AvailableWindow.EndAt))
-		zone := time.FixedZone("Europe/Moscow", 3*3600)
-		if e1 != nil || e2 != nil || !start.Before(end) || start.In(zone).Format("2006-01-02") != date.Format("2006-01-02") || end.In(zone).Format("2006-01-02") != date.Format("2006-01-02") {
-			return invalid("window must be ordered and within the selected Moscow calendar day")
+		dates[day.Date] = true
+		date, err := time.Parse("2006-01-02", string(day.Date))
+		if err != nil {
+			return invalid("invalid day date")
 		}
-	}
-	if input.PlanningContext == "in_city" && day.AvailableWindow == nil {
-		return invalid("available_window is required for in_city planning")
+		if day.DurationBudgetSec <= 0 || !finite(day.DurationBudgetSec) || day.DurationBudgetSec > 24*3600 || day.RestBudgetSec < 0 || !finite(day.RestBudgetSec) {
+			return invalid("invalid duration budget")
+		}
+		if day.MealWindow != nil {
+			return invalid("MEAL_WINDOW_NOT_IMPLEMENTED: demo day planner does not schedule meals yet")
+		}
+		if day.RestBudgetSec > day.DurationBudgetSec {
+			return invalid("rest budget exceeds day budget")
+		}
+		if input.LoadLimits.Pace != "relaxed" && input.LoadLimits.Pace != "standard" && input.LoadLimits.Pace != "intensive" {
+			return invalid("invalid pace")
+		}
+		for _, v := range []*float64{input.LoadLimits.MaxWalkDistanceMPerDay, input.LoadLimits.MaxContinuousWalkDurationSec} {
+			if v != nil && (!finite(*v) || *v < 0) {
+				return invalid("invalid walking limit")
+			}
+		}
+		probe := routing.Request{From: day.StartPoint, To: day.EndPoint, Mode: "walk"}
+		if err := probe.Validate(); err != nil {
+			return invalid(err.Error())
+		}
+		if day.AvailableWindow != nil {
+			start, e1 := time.Parse(time.RFC3339, string(day.AvailableWindow.StartAt))
+			end, e2 := time.Parse(time.RFC3339, string(day.AvailableWindow.EndAt))
+			zone := time.FixedZone("Europe/Moscow", 3*3600)
+			if e1 != nil || e2 != nil || !start.Before(end) || start.In(zone).Format("2006-01-02") != date.Format("2006-01-02") || end.In(zone).Format("2006-01-02") != date.Format("2006-01-02") {
+				return invalid("window must be ordered and within the selected Moscow calendar day")
+			}
+		}
+		if input.PlanningContext == "in_city" && day.AvailableWindow == nil {
+			return invalid("available_window is required for in_city planning")
+		}
 	}
 	selected := map[c.ID]bool{}
 	for _, s := range input.Selections {
@@ -118,10 +122,7 @@ func Validate(input c.TripInput) error {
 			return invalid("invalid or duplicate selection")
 		}
 		selected[s.ActivityID] = true
-		if s.OccurrenceID != nil {
-			return invalid("FIXED_EVENTS_NOT_IMPLEMENTED: demo catalog contains no sessions")
-		}
-		if s.PreferredDate != nil && *s.PreferredDate != day.Date {
+		if s.PreferredDate != nil && !dates[*s.PreferredDate] {
 			return invalid("selection date outside trip")
 		}
 	}
@@ -150,10 +151,7 @@ func ref(kind string, id c.ID) c.StopRef {
 	raw, _ := json.Marshal(value)
 	return c.StopRef(raw)
 }
-func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.TripView, error) {
-	if err := Validate(view.Input); err != nil {
-		return c.TripView{}, err
-	}
+func (p Planner) buildDay(ctx context.Context, view c.TripView, now time.Time) (c.TripView, error) {
 	input := view.Input
 	day := input.Days[0]
 	available := map[c.ID]Activity{}
@@ -161,11 +159,6 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 		available[a.ID] = a
 	}
 	selections := input.Selections
-	if len(selections) == 0 {
-		for _, a := range p.Activities {
-			selections = append(selections, c.Selection{PlaceID: a.PlaceID, ActivityID: a.ID})
-		}
-	}
 	chosen := []Activity{}
 	mandatory := map[c.ID]bool{}
 	for _, s := range selections {
@@ -181,8 +174,7 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 		chosen = append(chosen, a)
 		mandatory[a.ID] = s.Mandatory
 	}
-	// MVP preserves provider/explicit selection order. No optimal ordering claim.
-	plan := c.DayPlan{Date: day.Date, Presentation: "relative", StartPoint: day.StartPoint, EndPoint: day.EndPoint, AvailableWindow: day.AvailableWindow, Feasibility: "conditional", Assumptions: []string{"Демонстрационный каталог; порядок остановок не оптимизирован.", "Время подходов к сети и актуальность проходов не проверены."}, Stops: []c.Stop{}, Legs: []c.Leg{}, Warnings: []c.Warning{Warning("DEMO_CATALOG", "Это интеграционный план, не проверенная туристическая рекомендация.")}}
+	plan := c.DayPlan{Date: day.Date, Presentation: "relative", StartPoint: day.StartPoint, EndPoint: day.EndPoint, AvailableWindow: day.AvailableWindow, Feasibility: "conditional", Assumptions: []string{"Эвристическое распределение и порядок; глобальный оптимум не гарантирован.", "Время подходов к сети и актуальность проходов не проверены."}, Stops: []c.Stop{}, Legs: []c.Leg{}, Warnings: []c.Warning{Warning("DEMO_CATALOG", "Это интеграционный план, не проверенная туристическая рекомендация.")}}
 	var clock time.Time
 	if day.AvailableWindow != nil {
 		clock, _ = time.Parse(time.RFC3339, string(day.AvailableWindow.StartAt))
@@ -214,7 +206,7 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 		var geometry c.Leg
 		_ = json.Unmarshal([]byte(`{"geometry":`+string(raw)+`}`), &geometry)
 		version := result.RoutingDataVersion
-		plan.Legs = append(plan.Legs, c.Leg{LegID: c.ID(fmt.Sprintf("leg-%d", len(plan.Legs)+1)), From: previous, To: to, Mode: "walk", Status: "calculated", DistanceM: &d, TravelDurationSec: &t, Geometry: geometry.Geometry, RoutingDataVersion: &version, Warnings: []c.Warning{Warning("SNAPPED_ENDPOINTS", "Подходы к точкам сети не включены.")}})
+		plan.Legs = append(plan.Legs, c.Leg{LegID: c.ID(fmt.Sprintf("leg-%s-%d", day.Date, len(plan.Legs)+1)), From: previous, To: to, Mode: "walk", Status: "calculated", DistanceM: &d, TravelDurationSec: &t, Geometry: geometry.Geometry, RoutingDataVersion: &version, Warnings: []c.Warning{Warning("SNAPPED_ENDPOINTS", "Подходы к точкам сети не включены.")}})
 		elapsed += t
 		walkTime += t
 		walkDistance += d
@@ -228,20 +220,65 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 		if err := appendLeg(a.Point, ref("stop", stopID)); err != nil {
 			return c.TripView{}, err
 		}
+		arrivalElapsed := elapsed
 		stop := c.Stop{StopID: stopID, PlaceID: a.PlaceID, ActivityID: a.ID, Title: a.Title, Category: "landmark", Location: a.Point, Mandatory: mandatory[a.ID], Progress: "planned", Duration: c.DurationEstimate{DurationSec: a.DurationSec, Source: "estimated", EvidenceIDS: []c.ID{}}, Reasons: []c.Reason{}, Warnings: []c.Warning{Warning("DEMO_CATALOG", "Тестовая остановка, не проверенный объект.")}}
-		if plan.Presentation == "clock" {
-			arrival := c.Instant(clock.Add(time.Duration(elapsed * float64(time.Second))).Format(time.RFC3339))
+		if candidate, ok := p.metadata[a.ID]; ok {
+			stop.Duration = candidate.Activity.Duration
+			stop.Reasons = candidate.Reasons
+			stop.Warnings = append([]c.Warning{}, candidate.Warnings...)
+			stop.BalanceCredit = candidate.BalanceCredit
+			if len(candidate.Place.Categories) > 0 {
+				stop.Category = candidate.Place.Categories[0]
+			}
+			var selection c.Selection
+			for _, s := range selections {
+				if s.ActivityID == a.ID {
+					selection = s
+					break
+				}
+			}
+			wait, occurrence, ok := schedule(candidate, day, clock, elapsed, selection.OccurrenceID)
+			if !ok {
+				plan.Feasibility = "infeasible"
+				plan.Warnings = append(plan.Warnings, Warning("AVAILABILITY_CONFLICT", "Посещение не помещается в часы работы или сеанс."))
+			}
+			elapsed += wait
+			plan.Totals.WaitDurationSec = add(plan.Totals.WaitDurationSec, wait)
+			stop.OccurrenceID = occurrence
+			if occurrence != nil {
+				for _, availability := range candidate.Availability {
+					if availability.Date != day.Date {
+						continue
+					}
+					for _, occ := range availability.Occurrences {
+						if occ.OccurrenceID == *occurrence {
+							interval := occ.Interval
+							stop.Timing.FixedEventInterval = &interval
+							start, _ := time.Parse(time.RFC3339, string(interval.StartAt))
+							end, _ := time.Parse(time.RFC3339, string(interval.EndAt))
+							a.DurationSec = end.Sub(start).Seconds()
+							stop.Duration.DurationSec = a.DurationSec
+						}
+					}
+				}
+			}
+		}
+		if plan.Presentation == "clock" || stop.OccurrenceID != nil {
+			arrival := c.Instant(clock.Add(time.Duration(arrivalElapsed * float64(time.Second))).Format(time.RFC3339))
+			visitStart := c.Instant(clock.Add(time.Duration(elapsed * float64(time.Second))).Format(time.RFC3339))
 			departure := c.Instant(clock.Add(time.Duration((elapsed + a.DurationSec) * float64(time.Second))).Format(time.RFC3339))
 			stop.Timing.EstimatedArrivalAt = &arrival
-			stop.Timing.EstimatedVisitStartAt = &arrival
+			stop.Timing.EstimatedVisitStartAt = &visitStart
 			stop.Timing.EstimatedDepartureAt = &departure
 		}
 		credits := []map[string]any{}
 		for _, child := range input.Family.Children {
 			credits = append(credits, map[string]any{"child_id": child.ChildID, "value": 1 / float64(len(input.Family.Children))})
 		}
-		raw, _ := json.Marshal(credits)
-		_ = json.Unmarshal(raw, &stop.BalanceCredit)
+		if _, ok := p.metadata[a.ID]; !ok {
+			raw, _ := json.Marshal(credits)
+			_ = json.Unmarshal(raw, &stop.BalanceCredit)
+		}
 		elapsed += a.DurationSec
 		plan.Totals.VisitDurationSec += a.DurationSec
 		plan.Stops = append(plan.Stops, stop)
@@ -255,7 +292,9 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 	plan.Totals.WalkDistanceM = &walkDistance
 	plan.Totals.WalkDurationSec = &walkTime
 	zero := 0.0
-	plan.Totals.WaitDurationSec = &zero
+	if plan.Totals.WaitDurationSec == nil {
+		plan.Totals.WaitDurationSec = &zero
+	}
 	plan.Totals.ElapsedDurationSec = &elapsed
 	budget := day.DurationBudgetSec
 	if day.AvailableWindow != nil {

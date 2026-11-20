@@ -60,7 +60,7 @@ func TripHandler(store *tripstore.Store, p planner.Planner) http.Handler {
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { writeJSON(w, 200, map[string]string{"status": "alive"}) })
 	mux.HandleFunc("GET /api/v1/session", api.session)
 	mux.HandleFunc("GET /api/v1/reference-data", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, 200, map[string]any{"interest_options": []map[string]string{{"id": "history", "label": "История"}, {"id": "science", "label": "Наука"}, {"id": "play", "label": "Игры"}}, "categories": []map[string]string{{"id": "landmark", "label": "Тестовые остановки"}}, "supported_city_ids": []string{"nizhny_novgorod"}, "supported_child_age": map[string]int{"min": 3, "max": 11}, "capabilities": map[string]bool{"taxi_suggestions": false, "weather_automation": false, "free_text": false}, "default_family_policy": planner.NewDraft("", c.TripInput{}, api.now()).Policy, "demo_activities": p.Activities, "implementation_stage": "one_day_demo"})
+		writeJSON(w, 200, map[string]any{"interest_options": []map[string]string{{"id": "history", "label": "История"}, {"id": "science", "label": "Наука"}, {"id": "play", "label": "Игры"}}, "categories": []map[string]string{{"id": "landmark", "label": "Тестовые остановки"}}, "supported_city_ids": []string{"nizhny_novgorod"}, "supported_child_age": map[string]int{"min": 3, "max": 11}, "capabilities": map[string]bool{"taxi_suggestions": false, "weather_automation": false, "free_text": p.Source != nil}, "default_family_policy": planner.NewDraft("", c.TripInput{}, api.now()).Policy, "demo_activities": p.Activities, "implementation_stage": "multi_day_pool"})
 	})
 	mux.HandleFunc("POST /api/v1/trips", api.post)
 	mux.HandleFunc("GET /api/v1/trips/{trip_id}", api.getTrip)
@@ -79,6 +79,12 @@ func (a *tripAPI) respondError(w http.ResponseWriter, r *http.Request, err error
 		switch {
 		case errors.Is(err, planner.ErrValidation):
 			e = &tripError{422, "VALIDATION_ERROR", err.Error(), nil}
+		case errors.Is(err, planner.ErrMLContract):
+			e = &tripError{502, "ML_CONTRACT_ERROR", "Некорректный ответ рекомендательной системы.", nil}
+		case errors.Is(err, planner.ErrMLUnavailable):
+			e = &tripError{503, "ML_UNAVAILABLE", "Рекомендательная система недоступна.", nil}
+		case errors.Is(err, context.DeadlineExceeded), errors.Is(err, context.Canceled):
+			e = &tripError{503, "PLANNING_TIMEOUT", "Расчёт прерван или превысил доступное время.", nil}
 		case errors.Is(err, routing.ErrNoRoute):
 			e = &tripError{422, "NO_ROUTE", "Нет подходящего пути.", nil}
 		case errors.Is(err, routing.ErrUnavailable):
@@ -283,7 +289,7 @@ func (a *tripAPI) post(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.PathValue("trip_id") == "":
 			id := newID()
-			view := planner.NewDraft(c.ID(id), create, a.now())
+			view := a.planner.Draft(c.ID(id), create, a.now())
 			s.Trips[id] = tripstore.Trip{Owner: owner, View: view}
 			reply, err = jsonReply(201, view, "/api/v1/trips/"+id)
 		case prepared != nil:
@@ -360,23 +366,65 @@ func (a *tripAPI) prepare(r *http.Request, owner string, raw []byte) (*c.PlanPre
 	if err != nil {
 		return nil, err
 	}
-	preview := &c.PlanPreview{PreviewID: c.ID(newID()), TripID: view.TripID, BaseVersion: view.Version, CatalogVersion: view.CatalogVersion, CreatedAt: c.Instant(a.now().Format(time.RFC3339Nano)), ExpiresAt: c.Instant(a.now().Add(10 * time.Minute).Format(time.RFC3339Nano)), CanApply: proposed.Days[0].Feasibility != "infeasible", RequiredAcknowledgementCodes: []string{"DEMO_CATALOG", "SNAPPED_ENDPOINTS", "OPENING_HOURS_UNKNOWN"}, ProposedTrip: proposed, Warnings: proposed.Days[0].Warnings}
+	preview := &c.PlanPreview{PreviewID: c.ID(newID()), TripID: view.TripID, BaseVersion: view.Version, CatalogVersion: view.CatalogVersion, CreatedAt: c.Instant(a.now().Format(time.RFC3339Nano)), ExpiresAt: c.Instant(a.now().Add(10 * time.Minute).Format(time.RFC3339Nano)), CanApply: true, RequiredAcknowledgementCodes: []string{}, ProposedTrip: proposed, Warnings: proposed.Warnings}
+	stopCount := 0
+	for _, day := range proposed.Days {
+		if day.Feasibility == "infeasible" {
+			preview.CanApply = false
+		}
+		stopCount += len(day.Stops)
+	}
+	if stopCount == 0 {
+		preview.CanApply = false
+	}
+	for _, warning := range proposed.Warnings {
+		critical := slices.Contains([]string{"DEMO_CATALOG", "SNAPPED_ENDPOINTS", "OPENING_HOURS_UNKNOWN", "ELIGIBILITY_UNKNOWN", "BOOKING_UNKNOWN", "START_TIME_UNKNOWN"}, warning.Code)
+		if critical && !slices.Contains(preview.RequiredAcknowledgementCodes, warning.Code) {
+			preview.RequiredAcknowledgementCodes = append(preview.RequiredAcknowledgementCodes, warning.Code)
+		}
+	}
 	preview.Diff.AddedStopIDS = []c.ID{}
 	preview.Diff.RemovedStopIDS = []c.ID{}
 	preview.Diff.MovedStopIDS = []c.ID{}
-	preview.Diff.ChangedDates = []c.ISODate{proposed.Days[0].Date}
-	preview.Diff.Explanations = []string{"Сборка одного дня по тестовому каталогу; часы работы не подтверждены."}
+	preview.Diff.ChangedDates = []c.ISODate{}
+	for _, day := range proposed.Days {
+		preview.Diff.ChangedDates = append(preview.Diff.ChangedDates, day.Date)
+	}
+	preview.Diff.Explanations = []string{"Backend распределил пул ML по дням и проверил пешие переходы через OSM; порядок эвристический."}
 	old := map[c.ID]bool{}
+	oldPositions := map[c.ID]string{}
 	for _, day := range view.Days {
-		for _, stop := range day.Stops {
+		for i, stop := range day.Stops {
 			old[stop.StopID] = true
+			oldPositions[stop.StopID] = string(day.Date) + "/" + string(stop.ActivityID)
+			if i > 0 {
+				oldPositions[stop.StopID] += "/" + string(day.Stops[i-1].StopID)
+			}
 		}
 	}
-	for _, stop := range proposed.Days[0].Stops {
-		if !old[stop.StopID] {
-			preview.Diff.AddedStopIDS = append(preview.Diff.AddedStopIDS, stop.StopID)
+	newStops := map[c.ID]bool{}
+	for _, day := range proposed.Days {
+		for i, stop := range day.Stops {
+			newStops[stop.StopID] = true
+			if !old[stop.StopID] {
+				preview.Diff.AddedStopIDS = append(preview.Diff.AddedStopIDS, stop.StopID)
+			} else {
+				position := string(day.Date) + "/" + string(stop.ActivityID)
+				if i > 0 {
+					position += "/" + string(day.Stops[i-1].StopID)
+				}
+				if oldPositions[stop.StopID] != position {
+					preview.Diff.MovedStopIDS = append(preview.Diff.MovedStopIDS, stop.StopID)
+				}
+			}
 		}
 	}
+	for id := range old {
+		if !newStops[id] {
+			preview.Diff.RemovedStopIDS = append(preview.Diff.RemovedStopIDS, id)
+		}
+	}
+	slices.Sort(preview.Diff.RemovedStopIDS)
 	return preview, nil
 }
 func (a *tripAPI) apply(s *tripstore.State, r *http.Request, owner string, request c.ApplyRequest) (tripReply, error) {
@@ -406,11 +454,12 @@ func (a *tripAPI) apply(s *tripstore.State, r *http.Request, owner string, reque
 			return tripReply{}, failure(422, "ACKNOWLEDGEMENT_REQUIRED", "Подтвердите предупреждения о тестовых данных и подходах к сети.")
 		}
 	}
-	day := preview.View.ProposedTrip.Days[0]
-	if day.Presentation == "clock" && len(day.Stops) > 0 && day.Stops[0].Timing.EstimatedArrivalAt != nil {
-		arrival, _ := time.Parse(time.RFC3339, string(*day.Stops[0].Timing.EstimatedArrivalAt))
-		if arrival.Before(a.now()) {
-			return tripReply{}, failure(409, "PREVIEW_STALE", "Расчётное время первого посещения уже прошло.")
+	for _, day := range preview.View.ProposedTrip.Days {
+		if day.Presentation == "clock" && len(day.Stops) > 0 && day.Stops[0].Timing.EstimatedArrivalAt != nil {
+			arrival, _ := time.Parse(time.RFC3339, string(*day.Stops[0].Timing.EstimatedArrivalAt))
+			if arrival.Before(a.now()) {
+				return tripReply{}, failure(409, "PREVIEW_STALE", "Расчётное время первого посещения уже прошло.")
+			}
 		}
 	}
 	trip.View = preview.View.ProposedTrip

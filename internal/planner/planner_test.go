@@ -41,13 +41,13 @@ func TestPlanTimingLimitsAndNoHiddenMutation(t *testing.T) {
 	now := time.Now().UTC()
 	draft := NewDraft("trip", input, now)
 	router := &testRouter{}
-	p := Planner{router, DemoActivities()}
+	p := Planner{Router: router, Activities: DemoActivities()}
 	view, err := p.Build(context.Background(), draft, now)
 	if err != nil {
 		t.Fatal(err)
 	}
 	day := view.Days[0]
-	if len(day.Stops) != 3 || len(day.Legs) != 4 || router.calls != 4 {
+	if len(day.Stops) != 3 || len(day.Legs) != 4 {
 		t.Fatal("incomplete path")
 	}
 	if *day.Totals.ElapsedDurationSec != 2340 || *day.Totals.WalkDistanceM != 400 {
@@ -71,6 +71,9 @@ func TestPlanTimingLimitsAndNoHiddenMutation(t *testing.T) {
 		t.Fatal("missing clock timing")
 	}
 	input.Days[0].DurationBudgetSec = 100
+	for _, a := range DemoActivities() {
+		input.Selections = append(input.Selections, c.Selection{PlaceID: a.PlaceID, ActivityID: a.ID, Mandatory: true})
+	}
 	limited, err := p.Build(context.Background(), NewDraft("limited", input, now), now)
 	if err != nil {
 		t.Fatal(err)
@@ -89,14 +92,14 @@ func TestAgeValidationAndRoutingFailure(t *testing.T) {
 	activities := DemoActivities()
 	activities[0].MinAge = 8
 	router := &testRouter{}
-	p := Planner{router, activities}
+	p := Planner{Router: router, Activities: activities}
 	if _, err := p.Build(context.Background(), NewDraft("trip", input, time.Now()), time.Now()); !errors.Is(err, ErrValidation) {
 		t.Fatal(err)
 	}
 	if router.calls != 0 {
 		t.Fatal("routed before checking age")
 	}
-	p = Planner{&testRouter{err: routing.ErrUnavailable}, DemoActivities()}
+	p = Planner{Router: &testRouter{err: routing.ErrUnavailable}, Activities: DemoActivities()}
 	if _, err := p.Build(context.Background(), NewDraft("trip", input, time.Now()), time.Now()); !errors.Is(err, routing.ErrUnavailable) {
 		t.Fatal("routing outage was hidden")
 	}

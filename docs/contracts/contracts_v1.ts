@@ -79,7 +79,7 @@ export interface TripInput {
   city_id: 'nizhny_novgorod'; timezone: TimeZone;
   planning_context: 'before_arrival' | 'in_city';
   family: FamilyProfile; load_limits: LoadLimits;
-  days: DayInput[]; selections: Selection[];
+  days: DayInput[]; selections: Selection[]; // 1..14 дней.
   request_text: string | null; // Уточняет интересы, не hard constraints.
 }
 
@@ -154,14 +154,14 @@ export interface RecommendationRequest {
     route: { type: 'LineString'; coordinates: Position[] } | null;
     corridor_width_m: number | null;
   } | null;
-  limit: number;
+  limit: number; // 1..50; initial=50 на всю поездку, без плана и маршрутов.
 }
 export interface RecommendationResponse {
   contract_version: '1.0'; request_id: ID;
   trip_id: ID; trip_version: number; catalog_version: string;
   model_version: string; generated_at: Instant;
   status: 'complete' | 'partial' | 'no_candidates';
-  candidates: Candidate[];
+  candidates: Candidate[]; // <=limit, разные place_id, по убыванию релевантности.
   rejected: { activity_id: ID; reasons: Reason[] }[];
   evidence: Evidence[]; warnings: Warning[];
 }
