@@ -34,6 +34,13 @@ func sample(t *testing.T) c.TripInput {
 	if err := json.Unmarshal(raw, &input); err != nil {
 		t.Fatal(err)
 	}
+	// Existing routing/timing tests isolate venue time from new meal defaults.
+	limit := 10000.0
+	input.LoadLimits.MaxWalkDistanceMPerDay = &limit
+	zero := 0.0
+	for i := range input.Days {
+		input.Days[i].MealDurationSec = &zero
+	}
 	return input
 }
 func TestPlanTimingLimitsAndNoHiddenMutation(t *testing.T) {

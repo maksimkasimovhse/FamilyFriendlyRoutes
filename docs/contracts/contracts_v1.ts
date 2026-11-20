@@ -62,6 +62,8 @@ export interface FamilyPolicy {
 export interface LoadLimits {
   pace: 'relaxed' | 'standard' | 'intensive';
   max_walk_distance_m_per_day: number | null;
+  // null => минимальный возрастной дефолт детей. Резерв P: метры, не длительность еды.
+  restaurant_walk_reserve_m_per_day?: number; // По умолчанию 0; 0 <= p <= m.
   max_continuous_walk_duration_sec: number | null;
 }
 export interface DayInput {
@@ -69,6 +71,9 @@ export interface DayInput {
   available_window: Interval | null;
   duration_budget_sec: number;
   meal_window: Interval | null; rest_budget_sec: number;
+  meal_count?: number; // По умолчанию 1; 0 отключает резерв при отсутствии override.
+  meal_format?: 'quick_service' | 'table_service' | 'meal_with_play';
+  meal_duration_sec?: number; // Суммарно за день; override выше count × format.
 }
 export interface Selection {
   place_id: ID; activity_id: ID;
@@ -202,6 +207,13 @@ export interface DayPlan {
     visit_duration_sec: number; wait_duration_sec: number | null;
     rest_duration_sec: number; meal_duration_sec: number;
     elapsed_duration_sec: number | null;
+    walk_budget_m?: number;
+    restaurant_walk_reserve_m?: number;
+    primary_walk_budget_m?: number;
+    walking_time_budget_sec?: number;
+    time_limited_walk_budget_m?: number;
+    walking_speed_kph?: number;
+    budget_policy_version?: string;
   };
   warnings: Warning[];
 }

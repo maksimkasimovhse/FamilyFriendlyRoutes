@@ -81,6 +81,7 @@ type LoadLimits struct {
 	Pace                         string   `json:"pace"`
 	MaxWalkDistanceMPerDay       *float64 `json:"max_walk_distance_m_per_day"`
 	MaxContinuousWalkDurationSec *float64 `json:"max_continuous_walk_duration_sec"`
+	RestaurantWalkReserveMPerDay *float64 `json:"restaurant_walk_reserve_m_per_day,omitempty"`
 }
 
 type DayInput struct {
@@ -91,6 +92,9 @@ type DayInput struct {
 	DurationBudgetSec float64   `json:"duration_budget_sec"`
 	MealWindow        *Interval `json:"meal_window"`
 	RestBudgetSec     float64   `json:"rest_budget_sec"`
+	MealCount         *int      `json:"meal_count,omitempty"`
+	MealFormat        *string   `json:"meal_format,omitempty"`
+	MealDurationSec   *float64  `json:"meal_duration_sec,omitempty"`
 }
 
 type Selection struct {
@@ -302,13 +306,20 @@ type DayPlan struct {
 	Stops           []Stop    `json:"stops"`
 	Legs            []Leg     `json:"legs"`
 	Totals          struct {
-		WalkDistanceM      *float64 `json:"walk_distance_m"`
-		WalkDurationSec    *float64 `json:"walk_duration_sec"`
-		VisitDurationSec   float64  `json:"visit_duration_sec"`
-		WaitDurationSec    *float64 `json:"wait_duration_sec"`
-		RestDurationSec    float64  `json:"rest_duration_sec"`
-		MealDurationSec    float64  `json:"meal_duration_sec"`
-		ElapsedDurationSec *float64 `json:"elapsed_duration_sec"`
+		WalkDistanceM          *float64 `json:"walk_distance_m"`
+		WalkDurationSec        *float64 `json:"walk_duration_sec"`
+		VisitDurationSec       float64  `json:"visit_duration_sec"`
+		WaitDurationSec        *float64 `json:"wait_duration_sec"`
+		RestDurationSec        float64  `json:"rest_duration_sec"`
+		MealDurationSec        float64  `json:"meal_duration_sec"`
+		ElapsedDurationSec     *float64 `json:"elapsed_duration_sec"`
+		WalkBudgetM            *float64 `json:"walk_budget_m,omitempty"`
+		RestaurantWalkReserveM *float64 `json:"restaurant_walk_reserve_m,omitempty"`
+		PrimaryWalkBudgetM     *float64 `json:"primary_walk_budget_m,omitempty"`
+		WalkingTimeBudgetSec   *float64 `json:"walking_time_budget_sec,omitempty"`
+		TimeLimitedWalkBudgetM *float64 `json:"time_limited_walk_budget_m,omitempty"`
+		WalkingSpeedKPH        *float64 `json:"walking_speed_kph,omitempty"`
+		BudgetPolicyVersion    *string  `json:"budget_policy_version,omitempty"`
 	} `json:"totals"`
 	Warnings []Warning `json:"warnings"`
 }

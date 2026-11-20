@@ -1826,12 +1826,14 @@
           "max_walk_distance_m_per_day": {
             "oneOf": [
               {
-                "type": "number"
+                "type": "number",
+                "minimum": 0
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Daily family walking limit M, meters. Null selects the minimum configured age default among children; explicit value overrides the default."
           },
           "max_continuous_walk_duration_sec": {
             "oneOf": [
@@ -1843,6 +1845,12 @@
                 "type": "null"
               }
             ]
+          },
+          "restaurant_walk_reserve_m_per_day": {
+            "type": "number",
+            "minimum": 0,
+            "default": 0,
+            "description": "Daily reserve p in meters for future restaurant detours. Must not exceed m. Primary route budget is m-p, including start and end legs. Omitted means zero. This is not meal duration or walked distance."
           }
         },
         "required": [
@@ -1890,7 +1898,29 @@
           },
           "rest_budget_sec": {
             "type": "number",
-            "minimum": 0
+            "minimum": 0,
+            "description": "Daily rest time reserve. Existing rest stops cover the reserve; only the unallocated remainder is added."
+          },
+          "meal_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "default": 1
+          },
+          "meal_format": {
+            "type": "string",
+            "enum": [
+              "quick_service",
+              "table_service",
+              "meal_with_play"
+            ],
+            "default": "table_service"
+          },
+          "meal_duration_sec": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 86400,
+            "description": "Total daily meal time, seconds. When omitted, meal_count times the configured duration for meal_format. Explicit zero disables the meal time reserve."
           }
         },
         "required": [
@@ -3923,11 +3953,13 @@
               },
               "rest_duration_sec": {
                 "type": "number",
-                "minimum": 0
+                "minimum": 0,
+                "description": "Maximum of rest_budget_sec and scheduled rest-stop duration, without double counting."
               },
               "meal_duration_sec": {
                 "type": "number",
-                "minimum": 0
+                "minimum": 0,
+                "description": "Maximum of the daily meal time reserve and scheduled meal-stop duration, without double counting."
               },
               "elapsed_duration_sec": {
                 "oneOf": [
@@ -3938,7 +3970,39 @@
                   {
                     "type": "null"
                   }
-                ]
+                ],
+                "description": "Total travel, visits, waiting, meals and rest, including unallocated break reserves. UNSCHEDULED_BREAKS means break locations/times are not yet scheduled."
+              },
+              "walk_budget_m": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Total daily walking limit m."
+              },
+              "restaurant_walk_reserve_m": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Reserved walking distance p, not part of actual walked distance."
+              },
+              "primary_walk_budget_m": {
+                "type": "number",
+                "minimum": 0,
+                "description": "max(0, min(M, V*T_walk) - P), meters. Recalculated for candidate visits and waits."
+              },
+              "walking_time_budget_sec": {
+                "type": "number",
+                "minimum": 0
+              },
+              "time_limited_walk_budget_m": {
+                "type": "number",
+                "minimum": 0
+              },
+              "walking_speed_kph": {
+                "type": "number",
+                "minimum": 0.5,
+                "maximum": 8
+              },
+              "budget_policy_version": {
+                "type": "string"
               }
             },
             "required": [

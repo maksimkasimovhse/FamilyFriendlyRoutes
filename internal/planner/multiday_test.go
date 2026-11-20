@@ -24,6 +24,8 @@ func secondDay(input c.TripInput) c.TripInput {
 
 func TestMultiDayCapacityPreferredDateAndNoDuplicates(t *testing.T) {
 	input := secondDay(sample(t))
+	limit := 250.0
+	input.LoadLimits.MaxWalkDistanceMPerDay = &limit
 	input.Days[0].DurationBudgetSec = 1200
 	input.Days[1].DurationBudgetSec = 1200
 	date := input.Days[1].Date
@@ -63,12 +65,15 @@ func (r *directionalRouter) Route(ctx context.Context, req routing.Request) (rou
 	// A cheap outbound path with an expensive directed return.
 	if req.From.Coordinates[0] > 44.006 && req.To.Coordinates[0] < 44.006 {
 		result.TravelDurationSec = 3000
+		result.DistanceM = 3000
 	}
 	return result, err
 }
 func TestReturnPathAndMandatoryInfeasibility(t *testing.T) {
 	input := sample(t)
 	input.Days[0].DurationBudgetSec = 1500
+	limit := 1500.0
+	input.LoadLimits.MaxWalkDistanceMPerDay = &limit
 	p := Planner{Router: &directionalRouter{}, Activities: DemoActivities()[:1]}
 	result, err := p.Build(context.Background(), NewDraft("trip", input, time.Now()), time.Now())
 	if err != nil {
@@ -199,6 +204,8 @@ func (s fixedSource) Recommend(context.Context, c.TripView) (c.RecommendationRes
 
 func TestFiftyCandidatesArePoolNotFiftyVisits(t *testing.T) {
 	input := secondDay(sample(t))
+	limit := 250.0
+	input.LoadLimits.MaxWalkDistanceMPerDay = &limit
 	for i := range input.Days {
 		input.Days[i].DurationBudgetSec = 1000
 	}

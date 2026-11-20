@@ -4,22 +4,60 @@
   "planning_context": "before_arrival",
   "family": {
     "children": [
-      {"child_id": "child-1", "age_years": 4, "height_cm": null, "interest_ids": ["play"]},
-      {"child_id": "child-2", "age_years": 10, "height_cm": null, "interest_ids": ["science"]}
+      {
+        "child_id": "child-1",
+        "age_years": 4,
+        "height_cm": null,
+        "interest_ids": [
+          "play"
+        ]
+      },
+      {
+        "child_id": "child-2",
+        "age_years": 10,
+        "height_cm": null,
+        "interest_ids": [
+          "science"
+        ]
+      }
     ],
     "adult_count": 2,
-    "adult_interest_ids": ["history"]
+    "adult_interest_ids": [
+      "history"
+    ]
   },
-  "load_limits": {"pace": "relaxed", "max_walk_distance_m_per_day": 10000, "max_continuous_walk_duration_sec": 3600},
-  "days": [{
-    "date": "2030-06-15",
-    "start_point": {"coordinates": [44.0059, 56.3269], "label": "Тестовый старт"},
-    "end_point": {"coordinates": [44.0059, 56.3269], "label": "Тестовый финиш"},
-    "available_window": {"start_at": "2030-06-15T10:00:00+03:00", "end_at": "2030-06-15T17:00:00+03:00"},
-    "duration_budget_sec": 21600,
-    "meal_window": null,
-    "rest_budget_sec": 0
-  }],
+  "load_limits": {
+    "pace": "relaxed",
+    "max_walk_distance_m_per_day": null,
+    "max_continuous_walk_duration_sec": 3600,
+    "restaurant_walk_reserve_m_per_day": 0
+  },
+  "days": [
+    {
+      "date": "2030-06-15",
+      "start_point": {
+        "coordinates": [
+          44.0059,
+          56.3269
+        ],
+        "label": "Тестовый старт"
+      },
+      "end_point": {
+        "coordinates": [
+          44.0059,
+          56.3269
+        ],
+        "label": "Тестовый финиш"
+      },
+      "available_window": {
+        "start_at": "2030-06-15T10:00:00+03:00",
+        "end_at": "2030-06-15T17:00:00+03:00"
+      },
+      "duration_budget_sec": 21600,
+      "meal_window": null,
+      "rest_budget_sec": 0
+    }
+  ],
   "selections": [],
   "request_text": null
 }

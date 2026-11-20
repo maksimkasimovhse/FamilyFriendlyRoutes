@@ -61,10 +61,63 @@ func proximity(a, b routing.Point) float64 {
 	return math.Hypot((a.Coordinates[0]-b.Coordinates[0])*math.Cos(lat), a.Coordinates[1]-b.Coordinates[1])
 }
 
+func walkingBudget(limits c.LoadLimits) (budget, reserve float64) {
+	if limits.RestaurantWalkReserveMPerDay != nil {
+		reserve = *limits.RestaurantWalkReserveMPerDay
+	}
+	return *limits.MaxWalkDistanceMPerDay - reserve, reserve
+}
+
+// Actual directed walking distance; timeline costs are handled by buildDay.
+func (p Planner) clusterDistance(ctx context.Context, day c.DayInput, choices []c.Selection, activities map[c.ID]Activity, speed float64) (float64, error) {
+	from := day.StartPoint
+	distance := 0.0
+	points := make([]routing.Point, 0, len(choices)+1)
+	for _, s := range choices {
+		points = append(points, activities[s.ActivityID].Point)
+	}
+	points = append(points, day.EndPoint)
+	for _, to := range points {
+		result, err := p.Router.Route(ctx, routing.Request{From: from, To: to, Mode: "walk", WalkingSpeedKPH: &speed})
+		if err != nil {
+			return 0, err
+		}
+		distance += result.DistanceM
+		from = to
+	}
+	return distance, nil
+}
+
+func (p Planner) candidateOpenOnDate(id c.ID, date c.ISODate, occurrence *c.ID) bool {
+	candidate, ok := p.metadata[id]
+	if !ok {
+		return true
+	}
+	for _, availability := range candidate.Availability {
+		if availability.Date != date {
+			continue
+		}
+		if availability.State == "closed" {
+			return false
+		}
+		if occurrence != nil || candidate.Activity.Kind == "session" {
+			for _, session := range availability.Occurrences {
+				if (occurrence == nil || *occurrence == session.OccurrenceID) && session.BookingStatus != "sold_out" {
+					return true
+				}
+			}
+			return false
+		}
+		return true
+	}
+	return false
+}
+
 func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.TripView, error) {
 	if err := Validate(view.Input); err != nil {
 		return c.TripView{}, err
 	}
+	view.Input = resolveBudgetDefaults(view.Input)
 	if p.Router == nil {
 		return c.TripView{}, routing.ErrUnavailable
 	}
@@ -133,6 +186,8 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 	sort.Slice(days, func(i, j int) bool { return days[i].Date < days[j].Date })
 	plans := make([]c.DayPlan, len(days))
 	assignments := make([][]c.Selection, len(days))
+	distances := make([]float64, len(days))
+	speed := budgetDefaults.WalkingSpeedKPHByPace[view.Input.LoadLimits.Pace]
 	build := func(i int, choices []c.Selection) (c.DayPlan, error) {
 		trial := view
 		trial.Input = view.Input
@@ -158,11 +213,11 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 		return plan, nil
 	}
 	for i := range days {
-		plan, err := build(i, []c.Selection{})
+		distance, err := p.clusterDistance(ctx, days[i], nil, available, speed)
 		if err != nil {
 			return c.TripView{}, err
 		}
-		plans[i] = plan
+		distances[i] = distance
 		assignments[i] = []c.Selection{}
 	}
 	for _, s := range selections {
@@ -173,10 +228,17 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 		type option struct {
 			day, position int
 			distance      float64
+			totalDistance float64
+			budget        float64
+			feasible      bool
+			choices       []c.Selection
 		}
 		options := []option{}
 		for i, day := range days {
 			if s.PreferredDate != nil && day.Date != *s.PreferredDate {
+				continue
+			}
+			if !s.Mandatory && !p.candidateOpenOnDate(s.ActivityID, day.Date, s.OccurrenceID) {
 				continue
 			}
 			best := option{day: i, distance: math.Inf(1)}
@@ -194,50 +256,56 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 					best.distance = delta
 				}
 			}
-			options = append(options, best)
-		}
-		sort.SliceStable(options, func(i, j int) bool { return options[i].distance < options[j].distance })
-		accepted := false
-		var fallback *c.DayPlan
-		var fallbackChoices []c.Selection
-		fallbackDay := 0
-		for _, o := range options {
-			choices := append([]c.Selection{}, assignments[o.day][:o.position]...)
+			choices := append([]c.Selection{}, assignments[i][:best.position]...)
 			choices = append(choices, s)
-			choices = append(choices, assignments[o.day][o.position:]...)
-			plan, err := build(o.day, choices)
+			choices = append(choices, assignments[i][best.position:]...)
+			plan, err := build(i, choices)
 			if errors.Is(err, routing.ErrNoRoute) {
 				continue
 			}
 			if err != nil {
 				return c.TripView{}, err
 			}
-			if fallback == nil {
-				fallback = &plan
-				fallbackChoices = choices
-				fallbackDay = o.day
-			}
-			if plan.Feasibility != "infeasible" {
-				assignments[o.day] = choices
-				plans[o.day] = plan
+			distance := *plan.Totals.WalkDistanceM
+			best.choices = choices
+			best.totalDistance = distance
+			best.budget = *plan.Totals.PrimaryWalkBudgetM
+			best.feasible = plan.Feasibility != "infeasible"
+			best.distance = distance - distances[i]
+			options = append(options, best)
+		}
+		sort.SliceStable(options, func(i, j int) bool { return options[i].distance < options[j].distance })
+		accepted := false
+		for _, o := range options {
+			if o.totalDistance <= o.budget && o.feasible {
+				assignments[o.day] = o.choices
+				distances[o.day] = o.totalDistance
 				accepted = true
 				break
 			}
 		}
 		if !accepted {
 			if s.Mandatory {
-				if fallback == nil {
+				if len(options) == 0 {
 					return c.TripView{}, routing.ErrNoRoute
 				}
-				assignments[fallbackDay] = fallbackChoices
-				plans[fallbackDay] = *fallback
+				o := options[0]
+				assignments[o.day] = o.choices
+				distances[o.day] = o.totalDistance
 			} else {
-				w := Warning("CANDIDATE_NOT_SCHEDULED", "Место не включено: не найден выполнимый вариант вставки в дни поездки.")
+				w := Warning("CANDIDATE_NOT_SCHEDULED", "Место не включено: не найден вариант в пределах max(0, min(M, V×T_ходьбы) − P) и условий посещения.")
 				id := s.ActivityID
 				w.ActivityID = &id
 				warnings = append(warnings, w)
 			}
 		}
+	}
+	for i := range days {
+		plan, err := build(i, assignments[i])
+		if err != nil {
+			return c.TripView{}, err
+		}
+		plans[i] = plan
 	}
 	view.Days = plans
 	totalStops := 0

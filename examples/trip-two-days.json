@@ -28,8 +28,9 @@
   },
   "load_limits": {
     "pace": "relaxed",
-    "max_walk_distance_m_per_day": 10000,
-    "max_continuous_walk_duration_sec": 7200
+    "max_walk_distance_m_per_day": null,
+    "max_continuous_walk_duration_sec": 7200,
+    "restaurant_walk_reserve_m_per_day": 0
   },
   "days": [
     {
@@ -52,7 +53,7 @@
         "start_at": "2030-06-15T10:00:00+03:00",
         "end_at": "2030-06-15T17:00:00+03:00"
       },
-      "duration_budget_sec": 5400,
+      "duration_budget_sec": 21600,
       "meal_window": null,
       "rest_budget_sec": 0
     },

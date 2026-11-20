@@ -73,6 +73,13 @@ func Validate(input c.TripInput) error {
 			return invalid("invalid height")
 		}
 	}
+	input = resolveBudgetDefaults(input)
+	if input.LoadLimits.MaxWalkDistanceMPerDay == nil {
+		return invalid("cannot resolve family walking limit")
+	}
+	if reserve := input.LoadLimits.RestaurantWalkReserveMPerDay; !finite(*reserve) || *reserve < 0 || *reserve > *input.LoadLimits.MaxWalkDistanceMPerDay {
+		return invalid("restaurant walking reserve must be finite and between 0 and the daily walking limit")
+	}
 	dates := map[c.ISODate]bool{}
 	for _, day := range input.Days {
 		if dates[day.Date] {
@@ -88,6 +95,15 @@ func Validate(input c.TripInput) error {
 		}
 		if day.MealWindow != nil {
 			return invalid("MEAL_WINDOW_NOT_IMPLEMENTED: demo day planner does not schedule meals yet")
+		}
+		if *day.MealCount < 0 || *day.MealCount > 10 {
+			return invalid("meal_count must be between 0 and 10")
+		}
+		if _, ok := budgetDefaults.MealDurationSecByFormat[*day.MealFormat]; !ok {
+			return invalid("invalid meal_format")
+		}
+		if !finite(*day.MealDurationSec) || *day.MealDurationSec < 0 || *day.MealDurationSec > 86400 {
+			return invalid("invalid meal_duration_sec")
 		}
 		if day.RestBudgetSec > day.DurationBudgetSec {
 			return invalid("rest budget exceeds day budget")
@@ -133,6 +149,7 @@ func Warning(code, message string) c.Warning {
 	return c.Warning{Code: code, Severity: "warning", Message: message, EvidenceIDS: []c.ID{}}
 }
 func NewDraft(id c.ID, input c.TripInput, now time.Time) c.TripView {
+	input = resolveBudgetDefaults(input)
 	view := c.TripView{TripID: id, Version: 1, UpdatedAt: c.Instant(now.Format(time.RFC3339Nano)), Status: "draft", Input: input, CatalogVersion: "demo-v1", Days: []c.DayPlan{}, Evidence: []c.Evidence{}, Warnings: []c.Warning{Warning("DEMO_CATALOG", "Тестовый каталог: названия, длительности и допуски не являются проверенными данными мест.")}}
 	weights := []map[string]any{}
 	for _, child := range input.Family.Children {
@@ -185,7 +202,7 @@ func (p Planner) buildDay(ctx context.Context, view c.TripView, now time.Time) (
 	elapsed, walkDistance, walkTime := 0.0, 0.0, 0.0
 	current := day.StartPoint
 	previous := ref("day_start", "")
-	speed := map[string]float64{"relaxed": 3, "standard": 3.5, "intensive": 4}[input.LoadLimits.Pace]
+	speed := budgetDefaults.WalkingSpeedKPHByPace[input.LoadLimits.Pace]
 	plan.Assumptions = append(plan.Assumptions, fmt.Sprintf("Тестовая скорость %.1f км/ч по темпу; не возрастная норма.", speed))
 	plan.Warnings = append(plan.Warnings, Warning("SNAPPED_ENDPOINTS", "Подходы от исходных точек до сети не включены."), Warning("OPENING_HOURS_UNKNOWN", "В тестовом каталоге нет подтверждённых часов работы."))
 	exceeds := func(leg routing.Result) {
@@ -280,34 +297,59 @@ func (p Planner) buildDay(ctx context.Context, view c.TripView, now time.Time) (
 			_ = json.Unmarshal(raw, &stop.BalanceCredit)
 		}
 		elapsed += a.DurationSec
-		plan.Totals.VisitDurationSec += a.DurationSec
+		kind := p.metadata[a.ID].Activity.Kind
+		switch kind {
+		case "meal":
+			plan.Totals.MealDurationSec += a.DurationSec
+		case "rest":
+			plan.Totals.RestDurationSec += a.DurationSec
+		default:
+			plan.Totals.VisitDurationSec += a.DurationSec
+		}
 		plan.Stops = append(plan.Stops, stop)
-	}
-	if day.RestBudgetSec > 0 {
-		return c.TripView{}, invalid("REST_STOPS_NOT_IMPLEMENTED: set rest_budget_sec=0 for this integration stage")
 	}
 	if err := appendLeg(day.EndPoint, ref("day_end", "")); err != nil {
 		return c.TripView{}, err
 	}
 	plan.Totals.WalkDistanceM = &walkDistance
+	_, reserveM := walkingBudget(input.LoadLimits)
+	totalM := *input.LoadLimits.MaxWalkDistanceMPerDay
+	unscheduledMeals := math.Max(0, *day.MealDurationSec-plan.Totals.MealDurationSec)
+	unscheduledRest := math.Max(0, day.RestBudgetSec-plan.Totals.RestDurationSec)
+	plan.Totals.MealDurationSec += unscheduledMeals
+	plan.Totals.RestDurationSec += unscheduledRest
+	elapsed += unscheduledMeals + unscheduledRest
+	if unscheduledMeals+unscheduledRest > 0 {
+		plan.Warnings = append(plan.Warnings, Warning("UNSCHEDULED_BREAKS", "Время на еду/отдых учтено в бюджете; конкретные места и интервалы перерывов ещё не выбраны."))
+	}
+	waitSec := 0.0
+	if plan.Totals.WaitDurationSec != nil {
+		waitSec = *plan.Totals.WaitDurationSec
+	}
+	budget := dailyTimeBudget(day)
+	budgetM, walkingSec, timeLimitedM := primaryWalkingBudget(totalM, speed, budget, plan.Totals.VisitDurationSec, plan.Totals.MealDurationSec, plan.Totals.RestDurationSec, waitSec, reserveM)
+	plan.Totals.WalkBudgetM = &totalM
+	plan.Totals.RestaurantWalkReserveM = &reserveM
+	plan.Totals.PrimaryWalkBudgetM = &budgetM
+	plan.Totals.WalkingTimeBudgetSec = &walkingSec
+	plan.Totals.TimeLimitedWalkBudgetM = &timeLimitedM
+	plan.Totals.WalkingSpeedKPH = &speed
+	version := budgetDefaults.PolicyVersion
+	plan.Totals.BudgetPolicyVersion = &version
+	plan.Assumptions = append(plan.Assumptions, fmt.Sprintf("Бюджет max(0, min(M, V×T_ходьбы) − P) = %.0f м; M=%.0f м, P=%.0f м, V=%.1f км/ч. Параметры %s — продуктовые гипотезы, не возрастная медицинская норма.", budgetM, totalM, reserveM, speed, version))
 	plan.Totals.WalkDurationSec = &walkTime
 	zero := 0.0
 	if plan.Totals.WaitDurationSec == nil {
 		plan.Totals.WaitDurationSec = &zero
 	}
 	plan.Totals.ElapsedDurationSec = &elapsed
-	budget := day.DurationBudgetSec
-	if day.AvailableWindow != nil {
-		end, _ := time.Parse(time.RFC3339, string(day.AvailableWindow.EndAt))
-		budget = math.Min(budget, end.Sub(clock).Seconds())
-	}
 	if elapsed > budget {
 		plan.Feasibility = "infeasible"
 		plan.Warnings = append(plan.Warnings, Warning("DAY_BUDGET_EXCEEDED", "План не помещается в доступное время; обязательные точки не удалены."))
 	}
-	if max := input.LoadLimits.MaxWalkDistanceMPerDay; max != nil && walkDistance > *max {
+	if walkDistance > budgetM {
 		plan.Feasibility = "infeasible"
-		plan.Warnings = append(plan.Warnings, Warning("WALK_DISTANCE_LIMIT", "Превышен лимит пешего расстояния."))
+		plan.Warnings = append(plan.Warnings, Warning("WALK_DISTANCE_LIMIT", "Маршрут превышает бюджет max(0, min(M, V×T_ходьбы) − P)."))
 	}
 	// Recreate slices so preview does not mutate the original snapshot.
 	view.Days = []c.DayPlan{plan}

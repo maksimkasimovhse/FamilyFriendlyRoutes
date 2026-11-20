@@ -109,8 +109,15 @@ func TestLiveFiftyCandidatePlanning(t *testing.T) {
 	if err = json.Unmarshal(raw, &input); err != nil {
 		t.Fatal(err)
 	}
-	input.Days[0].DurationBudgetSec = 7200
-	input.Days[1].DurationBudgetSec = 10800
+	input.Days[0].DurationBudgetSec = 21600
+	input.Days[1].DurationBudgetSec = 21600
+	limit, reserve := 650.0, 150.0
+	input.LoadLimits.MaxWalkDistanceMPerDay = &limit
+	input.LoadLimits.RestaurantWalkReserveMPerDay = &reserve
+	// An explicit first-day anchor exercises date constraints alongside distance
+	// clustering; nearby places need not otherwise occupy every requested day.
+	firstDate := input.Days[0].Date
+	input.Selections = []c.Selection{{ActivityID: "fixture-01", PlaceID: "fixture-01", Mandatory: true, PreferredDate: &firstDate}}
 	report := map[string]any{"checked_at": time.Now().UTC().Format(time.RFC3339), "catalog": "synthetic-50-v1", "candidates": 50, "routing_data_version": manifest.RoutingDataVersion}
 	scenario := func(t *testing.T, name string, tripInput c.TripInput, expected int) c.PlanPreview {
 		t.Helper()
@@ -149,6 +156,9 @@ func TestLiveFiftyCandidatePlanning(t *testing.T) {
 		seen := map[c.ID]bool{}
 		days := []any{}
 		for i, day := range preview.ProposedTrip.Days {
+			if preview.CanApply && (*day.Totals.WalkDistanceM > limit-reserve || *day.Totals.PrimaryWalkBudgetM != limit-reserve || *day.Totals.RestaurantWalkReserveM != reserve) {
+				t.Fatal("violated distance budget after restaurant reserve")
+			}
 			for _, stop := range day.Stops {
 				if seen[stop.PlaceID] {
 					t.Fatal("duplicate visit")
@@ -167,7 +177,7 @@ func TestLiveFiftyCandidatePlanning(t *testing.T) {
 			if preview.CanApply && (day.Feasibility == "infeasible" || *day.Totals.ElapsedDurationSec > tripInput.Days[i].DurationBudgetSec) {
 				t.Fatal("allowed overloaded day")
 			}
-			days = append(days, map[string]any{"date": day.Date, "stops": len(day.Stops), "walk_distance_m": day.Totals.WalkDistanceM, "wait_sec": day.Totals.WaitDurationSec, "elapsed_sec": day.Totals.ElapsedDurationSec, "feasibility": day.Feasibility})
+			days = append(days, map[string]any{"date": day.Date, "stops": len(day.Stops), "walk_distance_m": day.Totals.WalkDistanceM, "walk_budget_m": day.Totals.WalkBudgetM, "restaurant_walk_reserve_m": day.Totals.RestaurantWalkReserveM, "primary_walk_budget_m": day.Totals.PrimaryWalkBudgetM, "wait_sec": day.Totals.WaitDurationSec, "elapsed_sec": day.Totals.ElapsedDurationSec, "feasibility": day.Feasibility})
 		}
 		for _, warning := range preview.Warnings {
 			if warning.Code == "CANDIDATE_NOT_SCHEDULED" {
@@ -214,7 +224,13 @@ func TestLiveFiftyCandidatePlanning(t *testing.T) {
 		date := limited.Days[1].Date
 		limited.Selections = []c.Selection{{ActivityID: "fixture-00", PlaceID: "fixture-00", Mandatory: true, PreferredDate: &date}}
 		preview := scenario(t, "mandatory_overflow", limited, 201)
-		if preview.CanApply || len(preview.ProposedTrip.Days[1].Stops) != 1 || !preview.ProposedTrip.Days[1].Stops[0].Mandatory {
+		found := false
+		for _, stop := range preview.ProposedTrip.Days[1].Stops {
+			if stop.ActivityID == "fixture-00" && stop.Mandatory {
+				found = true
+			}
+		}
+		if preview.CanApply || !found {
 			t.Fatal("mandatory visit was lost")
 		}
 	})
