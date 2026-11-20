@@ -13,14 +13,20 @@ import argparse
 import csv
 import json
 import re
+import time
 from collections import defaultdict
 from pathlib import Path
 from urllib.parse import urlparse
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT = ROOT / "data/enriched/osm_nizhny_1000/parsing_queue.csv"
 DEFAULT_OUTPUT = ROOT / "data/enriched/osm_nizhny_1000"
+DEFAULT_CATALOG = ROOT / "data/enriched/osm_nizhny_1000/catalog.jsonl"
+WIKIDATA_API = "https://www.wikidata.org/w/api.php"
+WIKIDATA_BATCH_SIZE = 50
 
 # These are the concrete examples in docs/data_enrichment_ml_task.md.  A source
 # can be authoritative for one fact and only a discovery lead for another, so
@@ -108,13 +114,102 @@ def brief_candidates() -> list[dict[str, str]]:
     return rows
 
 
+def wikidata_claim_urls(entity: dict[str, object]) -> list[str]:
+    claims = entity.get("claims")
+    if not isinstance(claims, dict):
+        return []
+    urls: list[str] = []
+    for claim in claims.get("P856", []):
+        if not isinstance(claim, dict):
+            continue
+        mainsnak = claim.get("mainsnak")
+        if not isinstance(mainsnak, dict):
+            continue
+        datavalue = mainsnak.get("datavalue")
+        value = datavalue.get("value") if isinstance(datavalue, dict) else None
+        if isinstance(value, str):
+            url = canonical_url(value)
+            if url:
+                urls.append(url)
+    return sorted(set(urls))
+
+
+def select_local_wikidata_urls(urls: list[str]) -> list[str]:
+    """Avoid turning a global brand's every country page into local candidates."""
+    russian = [url for url in urls if host_for(url).endswith((".ru", ".рф"))]
+    if russian:
+        return russian[:1]
+    return urls[:1]
+
+
+def fetch_wikidata_websites(ids: set[str]) -> dict[str, list[str]]:
+    """Fetch official-website (P856) claims in documented, small API batches."""
+    results: dict[str, list[str]] = {}
+    for start in range(0, len(ids), WIKIDATA_BATCH_SIZE):
+        batch = sorted(ids)[start:start + WIKIDATA_BATCH_SIZE]
+        query = urlencode({"action": "wbgetentities", "ids": "|".join(batch), "props": "claims", "format": "json"})
+        request = Request(f"{WIKIDATA_API}?{query}", headers={"User-Agent": "FamilyFriendlyRoutesCatalogBot/0.1 (source discovery)"})
+        with urlopen(request, timeout=30) as response:  # nosec B310: fixed HTTPS endpoint
+            payload = json.load(response)
+        entities = payload.get("entities", {}) if isinstance(payload, dict) else {}
+        if not isinstance(entities, dict):
+            raise ValueError("unexpected Wikidata API response")
+        for qid, entity in entities.items():
+            if isinstance(qid, str) and isinstance(entity, dict):
+                results[qid] = wikidata_claim_urls(entity)
+        if start + WIKIDATA_BATCH_SIZE < len(ids):
+            time.sleep(0.1)
+    return results
+
+
+def read_catalog(path: Path) -> list[dict[str, object]]:
+    with path.open(encoding="utf-8") as stream:
+        return [json.loads(line) for line in stream if line.strip()]
+
+
+def wikidata_candidates(records: list[dict[str, object]], cache: dict[str, list[str]]) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    eligible_categories = {"museum", "event", "restaurant", "other", "park", "playground"}
+    for record in records:
+        place = record.get("place", {})
+        provenance = record.get("provenance", {})
+        tags = provenance.get("raw_tags", {}) if isinstance(provenance, dict) else {}
+        if not isinstance(place, dict) or not isinstance(tags, dict):
+            continue
+        categories = place.get("categories", [])
+        category = categories[0] if isinstance(categories, list) and categories else ""
+        if category not in eligible_categories or place.get("website"):
+            continue
+        for key, kind in (("wikidata", "wikidata_p856"), ("brand:wikidata", "brand_wikidata_p856")):
+            qid = tags.get(key)
+            if not isinstance(qid, str):
+                continue
+            for url in select_local_wikidata_urls(cache.get(qid, [])):
+                rows.append(
+                    {
+                        "priority": "high" if category in {"museum", "event", "restaurant", "playground"} else "medium",
+                        "place_id": str(place.get("place_id", "")),
+                        "title": str(place.get("name", "")),
+                        "category": str(category),
+                        "candidate_url": url,
+                        "candidate_host": host_for(url),
+                        "source_kind": kind,
+                        "authority_status": "unverified_official_candidate",
+                        "discovery_status": "needs_domain_review",
+                        "parse_status": "blocked_until_source_enabled",
+                        "notes": f"Wikidata {qid} P856 claim; verify that the site applies to this local place.",
+                    }
+                )
+    return rows
+
+
 def write_csv(rows: list[dict[str, str]], path: Path) -> None:
     fields = (
         "priority", "place_id", "title", "category", "candidate_url", "candidate_host", "source_kind",
         "authority_status", "discovery_status", "parse_status", "notes",
     )
     with path.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=fields)
+        writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
@@ -144,13 +239,33 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", type=Path, default=DEFAULT_INPUT)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
+    parser.add_argument("--refresh-wikidata", action="store_true", help="Refresh P856 official-website claims from Wikidata API")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     osm_rows = read_osm_candidates(args.input)
-    all_rows = sorted(osm_rows + brief_candidates(), key=lambda row: (row["priority"] != "high", row["title"].casefold(), row["candidate_url"]))
+    records = read_catalog(args.catalog)
+    wikidata_ids = {
+        str(tags[key])
+        for record in records
+        for tags in [record.get("provenance", {}).get("raw_tags", {})]
+        if isinstance(tags, dict)
+        for key in ("wikidata", "brand:wikidata")
+        if isinstance(tags.get(key), str)
+    }
+    cache_path = args.output / "wikidata_p856_cache.json"
+    if args.refresh_wikidata:
+        cache = fetch_wikidata_websites(wikidata_ids)
+        cache_path.write_text(json.dumps(cache, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    elif cache_path.exists():
+        cache = json.loads(cache_path.read_text(encoding="utf-8"))
+    else:
+        cache = {}
+    wikidata_rows = wikidata_candidates(records, cache)
+    all_rows = sorted(osm_rows + wikidata_rows + brief_candidates(), key=lambda row: (row["priority"] != "high", row["title"].casefold(), row["candidate_url"]))
     write_csv(all_rows, args.output / "source_discovery_queue.csv")
     write_registry(all_rows, args.output / "source_registry_candidates.json")
-    print(json.dumps({"osm_url_candidates": len(osm_rows), "brief_seeds": len(BRIEF_SEEDS), "registry_candidates": len({row['candidate_host'] for row in all_rows if row['source_kind'] != 'discovery_only'})}, ensure_ascii=False))
+    print(json.dumps({"osm_url_candidates": len(osm_rows), "wikidata_url_candidates": len(wikidata_rows), "brief_seeds": len(BRIEF_SEEDS), "registry_candidates": len({row['candidate_host'] for row in all_rows if row['source_kind'] != 'discovery_only'})}, ensure_ascii=False))
 
 
 if __name__ == "__main__":
