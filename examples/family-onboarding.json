@@ -1,0 +1,17 @@
+{
+  "expected_version": 0,
+  "family": {
+    "children": [
+      { "child_id": "child-1", "age_years": 6, "height_cm": null, "interest_ids": ["science", "play"] }
+    ],
+    "adult_count": 2,
+    "adult_interest_ids": ["history"]
+  },
+  "load_limits": {
+    "pace": "relaxed",
+    "max_walk_distance_m_per_day": null,
+    "max_continuous_walk_duration_sec": null,
+    "restaurant_walk_reserve_m_per_day": 0
+  },
+  "wishes": null
+}

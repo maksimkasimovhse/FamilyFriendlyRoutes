@@ -1,7 +1,14 @@
 data/raw/
 data/processed/
+data/routing/
 __pycache__/
 *.pyc
 models/checkpoints/
 .env
 data/source_registry.json
+/work/
+/bin/
+*.test
+coverage.out
+/infra/docker/certs/
+/compose.override.yaml

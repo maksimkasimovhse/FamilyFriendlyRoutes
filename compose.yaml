@@ -1,3 +1,4 @@
+name: family-friendly-routes
 services:
   parser-service:
     restart: unless-stopped
@@ -38,3 +39,107 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+
+  valhalla:
+    image: ghcr.io/valhalla/valhalla-scripted@sha256:693617873d42f24d9023eaa9aa002dccd832c9629c9ce8b60eb4ff30547215e1
+    ports:
+      - "127.0.0.1:8002:8002"
+    volumes:
+      - valhalla-data:/custom_files
+      - type: bind
+        source: ./data/routing/nizhny-novgorod.osm.pbf
+        target: /custom_files/nizhny-novgorod.osm.pbf
+        read_only: true
+        bind:
+          create_host_path: false
+    environment:
+      server_threads: "2"
+      build_admins: "False"
+      build_time_zones: "False"
+      build_elevation: "False"
+      build_transit: "False"
+      use_default_speeds_config: "False"
+      use_tiles_ignore_pbf: "False"
+      force_rebuild: "False"
+      serve_tiles: "True"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8002/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 900s
+    restart: unless-stopped
+  postgres:
+    build: ./infra/postgres
+    image: family-friendly-routes/postgres:16
+    environment:
+      POSTGRES_DB: familyroutes
+      POSTGRES_USER: familyroutes
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U familyroutes -d familyroutes"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    restart: unless-stopped
+  migrate:
+    build: ./infra/goose
+    image: family-friendly-routes/goose:3
+    profiles: ["tools"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      GOOSE_DRIVER: postgres
+      GOOSE_DBSTRING: postgres://familyroutes:${POSTGRES_PASSWORD:-}@postgres:5432/familyroutes?sslmode=disable
+      GOOSE_MIGRATION_DIR: /migrations
+    volumes:
+      - ./db/migrations:/migrations:ro
+    command: ["up"]
+
+  # Go-бекенд. network_mode: host — потому что бекенд слушает только 127.0.0.1:8080
+  # и ищет Valhalla на 127.0.0.1:8002 (так написан cmd/backend). Работает на Linux;
+  # на Docker Desktop (Windows/macOS) нужно включить host networking в настройках.
+  backend:
+    build:
+      context: .
+      dockerfile: infra/docker/backend.Dockerfile
+    network_mode: host
+    # Места для маршрута берёт у ML по контракту /internal/v1/recommendations.
+    # Пока у Вильдана нет сервиса — у мока (mock-api). Вернуть синтетику: command: ["-demo-catalog"]
+    command: ["-ml-url", "http://127.0.0.1:8090/internal/v1/recommendations", "-catalog-version", "mock-ml-v1"]
+    volumes:
+      - ./data:/app/data
+      # Картинки карточек: backend отдаёт их под /media/ и без папки не стартует (-images-dir)
+      - ./assets/images:/app/assets/images:ro
+    depends_on:
+      valhalla:
+        condition: service_healthy
+      mock-api:
+        condition: service_started
+    restart: unless-stopped
+
+  # МОК по контрактам для демо: рекомендации ML + /api/v1/map/places. Только 127.0.0.1:8090.
+  mock-api:
+    build: ./infra/mock-api
+    network_mode: host
+    restart: unless-stopped
+
+  # Фронтенд (обычные HTML/CSS/JS из ./frontend) + прокси /api на бекенд.
+  # Открывать: http://localhost:8000
+  web:
+    image: nginx:1.27-alpine
+    network_mode: host
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./assets/images:/usr/share/nginx/card-images:ro
+      - ./infra/docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped
+
+volumes:
+  valhalla-data:
+  pg-data:

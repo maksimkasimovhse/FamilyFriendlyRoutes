@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Окно в прошлое</title>
+<!-- Всё своё, без внешних CDN: на защите интернет может быть нестабильным -->
+<link href="css/fonts.css" rel="stylesheet">
+<link href="vendor/maplibre-gl-4.7.1/maplibre-gl.css" rel="stylesheet">
+<link href="css/app.css" rel="stylesheet">
+<link href="css/kid.css" rel="stylesheet">
+<link href="css/pick.css" rel="stylesheet">
+<script src="vendor/maplibre-gl-4.7.1/maplibre-gl.js"></script>
+<script type="module" src="js/app.js"></script>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== Экран «Карта» ===== -->
+  <section class="screen" id="screen-map" data-tab="map">
+    <header class="top">
+      <h1>Карта</h1>
+      <button class="pick-open" id="open-pick">Подбор мест</button>
+      <div class="days" role="tablist" aria-label="День поездки">
+        <button class="on" role="tab" aria-selected="true">Сб</button>
+        <button role="tab" aria-selected="false" disabled title="Второй день появится, когда бекенд научится планировать 2 дня">Вс</button>
+      </div>
+    </header>
+
+    <div class="map-wrap">
+      <div id="map" aria-label="Карта маршрута"></div>
+
+      <div class="map-buttons">
+        <button id="btn-3d" class="round" aria-label="Переключить 3D" title="2D / 3D">3D</button>
+        <button id="btn-locate" class="round" aria-label="Где я" title="Где я">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3" stroke="currentColor" stroke-width="2"/></svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Нижняя карточка: сводка дня или выбранная остановка -->
+    <div class="sheet">
+      <!-- Удобства: как на макете — под картой, «Всё семейное» включает всё -->
+      <div class="chips" aria-label="Показать на карте">
+        <button class="chip" data-layer="all" aria-pressed="true">Всё семейное</button>
+        <button class="chip" data-layer="toilets" aria-pressed="true"><i class="dot toilets"></i>Туалеты</button>
+        <button class="chip" data-layer="cafe" aria-pressed="true"><i class="dot cafe"></i>Еда</button>
+        <button class="chip" data-layer="playground" aria-pressed="true"><i class="dot playground"></i>Площадки</button>
+      </div>
+      <div id="sheet-body" aria-live="polite"><p class="muted">Строим маршрут…</p></div>
+    </div>
+  </section>
+
+  <!-- ===== Экран «Подбор мест»: карточки как в Tinder ===== -->
+  <section class="screen pick" id="screen-pick" data-tab="pick" hidden>
+    <header class="pick-top">
+      <button class="pick-back" id="pick-back" aria-label="Назад к карте">‹</button>
+      <h1>Подбор мест</h1>
+      <span class="pick-count" id="pick-count" aria-live="polite"></span>
+    </header>
+
+    <div class="deck" id="deck">
+      <div class="deck-empty" id="deck-empty" hidden>
+        <p>Карточки закончились</p>
+        <button class="btn alt" id="pick-restart">Начать заново</button>
+      </div>
+    </div>
+
+    <div class="pick-actions">
+      <button class="act no" id="pick-no" aria-label="Не нравится">✕</button>
+      <button class="act info" id="pick-info" aria-label="Читать описание">i</button>
+      <button class="act yes" id="pick-yes" aria-label="Добавить в маршрут">♥</button>
+    </div>
+    <div class="pick-finish">
+      <button class="btn main" id="pick-finish" disabled>Завершить подбор мест</button>
+      <p class="pick-hint" id="pick-hint">Смахните карточку вправо — место попадёт в маршрут, влево — не нравится</p>
+    </div>
+
+    <!-- Описание целиком: открывается нажатием на карточку -->
+    <div class="pick-sheet" id="pick-sheet" hidden>
+      <div class="sheet-panel" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <button class="sheet-close" id="sheet-close" aria-label="Закрыть">✕</button>
+        <div class="sheet-scroll">
+          <img id="sheet-img" alt="">
+          <div class="sheet-text">
+            <span class="pcard-cat inline" id="sheet-cat"></span>
+            <h2 id="sheet-title"></h2>
+            <p class="pcard-addr" id="sheet-addr"></p>
+            <div id="sheet-text"></div>
+          </div>
+        </div>
+        <div class="row sheet-actions">
+          <button class="btn alt" id="sheet-no">✕ Не нравится</button>
+          <button class="btn main" id="sheet-yes">♥ В маршрут</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Остальные вкладки — пока заглушки ===== -->
+  <!-- ===== Экран «Сегодня»: что сейчас, что дальше, что пройдено ===== -->
+  <section class="screen today" data-tab="today" hidden>
+    <header class="today-top">
+      <p class="today-sub" id="today-sub"></p>
+      <h1>Сегодня</h1>
+      <div class="beads" id="today-stats"></div>
+    </header>
+    <div class="today-scroll">
+      <div id="today-now"></div>
+      <ol class="timeline" id="today-list"></ol>
+      <p class="source" id="today-source"></p>
+    </div>
+    <div class="today-bottom">
+      <button class="btn need" id="need-now">＋ Нужно сейчас</button>
+    </div>
+
+    <!-- Подтверждение «Пропустить»: что изменится в маршруте -->
+    <div class="confirm" id="skip-confirm" hidden>
+      <div class="confirm-card">
+        <h2 id="skip-title"></h2>
+        <ul id="skip-diff"></ul>
+        <div class="row">
+          <button class="btn alt" id="skip-cancel">Оставить</button>
+          <button class="btn main" id="skip-ok">Пропустить</button>
+        </div>
+      </div>
+    </div>
+    <p class="toast" id="today-toast" hidden></p>
+  </section>
+  <!-- ===== Детский режим: «Тропа Маши» — поверх приложения, без нижнего меню ===== -->
+  <section class="kid-mode" id="kid-mode" hidden>
+    <header class="kid-bar">
+      <b id="kid-title">Тропа Маши</b>
+      <span class="kid-chip" id="kid-progress">0 из 4 окон</span>
+      <button class="kid-exit" id="kid-exit" aria-label="Выйти из детского режима">
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>выход
+      </button>
+    </header>
+
+    <!-- Тропа дня: иллюстрированная карта, точки рисует kid.js -->
+    <div class="trail-scroll" id="trail-scroll">
+      <div class="trail-map" id="trail-map"></div>
+    </div>
+
+    <div class="kid-bottom">
+      <button class="btn kid-main" id="kid-go">Начать</button>
+    </div>
+
+    <!-- Оленёнок — маленький персонаж сбоку. Нажатие — реплика -->
+    <button class="fawn-buddy" id="fawn-buddy" aria-label="Оленёнок: что он говорит">
+      <img id="fawn-img" src="media/fawn/fawn-base.svg" alt="">
+    </button>
+    <p class="fawn-bubble" id="fawn-bubble" hidden></p>
+
+    <!-- ===== Задание: оленёнок читает вслух, ответ — одна большая кнопка ===== -->
+    <section class="kid-page" id="task-page" hidden>
+      <header class="kid-bar">
+        <b id="task-title"></b><span class="kid-chip" id="task-count"></span>
+        <button class="kid-exit" data-back aria-label="Назад к тропе">✕</button>
+      </header>
+      <div class="kid-center">
+        <img class="fawn-big" id="task-fawn" alt="">
+        <p class="kid-say" id="task-text"></p>
+        <p class="kid-fact" id="task-intro"></p>
+      </div>
+      <div class="kid-bottom col">
+        <button class="btn kid-main big" id="task-done">Сделали!</button>
+        <button class="btn kid-ghost" id="task-speak">▶ Ещё раз</button>
+      </div>
+    </section>
+
+    <!-- ===== Штамп за пройденную точку ===== -->
+    <section class="kid-page" id="stamp-page" hidden>
+      <div class="kid-center">
+        <div class="stamp" id="stamp-icon"></div>
+        <p class="kid-say" id="stamp-text"></p>
+        <div class="stamp-row" id="stamp-row"></div>
+      </div>
+      <div class="kid-bottom col">
+        <button class="btn kid-main big" id="stamp-next">Дальше по тропе</button>
+        <button class="btn kid-dark" id="stamp-return">Вернуть телефон маме</button>
+      </div>
+    </section>
+
+    <!-- ===== Окно в прошлое, шаг 1: старое фото и «где стоял фотограф» ===== -->
+    <section class="kid-page" id="window-page" hidden>
+      <header class="kid-bar">
+        <b id="win-title"></b><span class="kid-chip" id="win-years"></span>
+        <button class="kid-exit" data-back aria-label="Назад к тропе">✕</button>
+      </header>
+      <div class="kid-center top">
+        <figure class="old-card">
+          <img id="win-old" alt="">
+          <figcaption id="win-attrib"></figcaption>
+        </figure>
+        <p class="kid-say small" id="win-say">Встаньте туда, где стоял фотограф, и сфотографируйтесь вместе!</p>
+        <p class="place-chip" id="win-place">Ищем вас по GPS…</p>
+      </div>
+      <div class="kid-bottom">
+        <button class="btn kid-main big" id="win-camera">Открыть камеру</button>
+      </div>
+    </section>
+
+    <!-- ===== Шаг 2: камера на весь экран ===== -->
+    <section class="kid-page cam" id="cam-page" hidden>
+      <video id="cam-video" autoplay muted playsinline></video>
+      <img id="cam-ghost" alt="">
+      <button class="cam-close" data-back aria-label="Закрыть камеру">✕</button>
+      <p class="cam-tip" id="cam-tip">Совместите старое фото с тем, что видите</p>
+      <div class="cam-panel">
+        <input type="range" id="cam-opacity" min="0" max="100" value="50" aria-label="Прозрачность старого фото">
+        <div class="cam-buttons">
+          <label class="cam-side" title="Фото из галереи">
+            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 16l5-5 4 4 3-3 6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            <input type="file" accept="image/*" id="cam-file" hidden>
+          </label>
+          <button class="shutter" id="cam-shot" aria-label="Сфотографировать"><span></span></button>
+          <span class="cam-side ghost-label">Тогда</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Шаг 3: окно открыто — тогда / сейчас ===== -->
+    <section class="kid-page result" id="result-page" hidden>
+      <header class="kid-bar">
+        <b id="res-title"></b><span class="kid-chip" id="res-years"></span>
+        <button class="kid-exit" data-back aria-label="Назад к тропе">✕</button>
+      </header>
+      <div class="result-scroll">
+        <div class="tn" id="res-tn">
+          <img class="now" id="res-now" alt="Сейчас: ваше фото">
+          <img class="old" id="res-old" alt="">
+          <span class="tag then">Тогда</span><span class="tag now-tag">Сейчас</span>
+          <div class="tn-handle" aria-hidden="true"></div>
+          <input type="range" id="res-range" min="0" max="100" value="50" aria-label="Тогда / сейчас">
+        </div>
+        <p class="res-attrib" id="res-attrib"></p>
+        <p class="kid-say left" id="res-kid"></p>
+        <details class="adult">
+          <summary>Для взрослых: история места</summary>
+          <p id="res-adult"></p>
+          <p class="source" id="res-source"></p>
+        </details>
+      </div>
+      <div class="kid-bottom row">
+        <button class="btn kid-ghost" id="res-save">Сохранить сторис</button>
+        <button class="btn kid-main" id="res-next">Дальше</button>
+      </div>
+    </section>
+
+    <!-- Новый наряд оленёнка -->
+    <div class="reward" id="reward" hidden>
+      <div class="reward-card">
+        <img id="reward-img" alt="">
+        <h2>Новый наряд!</h2>
+        <p id="reward-text"></p>
+        <button class="btn kid-main big" id="reward-ok">Ура!</button>
+      </div>
+    </div>
+  </section>
+  <!-- ===== Помощник: ИИ-чат, перестраивает маршрут под семью ===== -->
+  <section class="screen helper" data-tab="helper" hidden>
+    <header class="today-top chat-top">
+      <p class="today-sub">Перестрою маршрут под вас</p>
+      <h1>Помощник</h1>
+      <span class="demo-flag" id="chat-mode" hidden>демо: ответы по правилам</span>
+    </header>
+    <div class="chat" id="chat" aria-live="polite"></div>
+    <div class="chat-suggest" id="chat-suggest"></div>
+    <form class="chat-input" id="chat-form">
+      <input id="chat-text" type="text" autocomplete="off" placeholder="Например: ребёнок устал" aria-label="Сообщение помощнику">
+      <button class="send" aria-label="Отправить">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 12l16-8-6 16-2-6z" fill="currentColor"/></svg>
+      </button>
+    </form>
+  </section>
+  <section class="screen placeholder" data-tab="album" hidden><h1>Альбом</h1><p>Скоро.</p></section>
+
+  <!-- ===== Нижнее меню ===== -->
+  <nav class="tabbar" aria-label="Разделы">
+    <button data-tab="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c3-1 4-5 7-7s5-1 7-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="5" cy="19" r="2" fill="currentColor"/><circle cx="19" cy="6" r="2" fill="currentColor"/></svg>Сегодня</button>
+    <button data-tab="helper"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 7.5l1 2.2 2.2 1-2.2 1-1 2.2-1-2.2-2.2-1 2.2-1z" fill="currentColor"/></svg>Помощник</button>
+    <button data-tab="map" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Карта</button>
+    <button data-tab="kid" class="kid"><span class="kid-badge">М</span>Маша</button>
+    <button data-tab="album"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 16l5-5 4 4 3-3 4 4" fill="none" stroke="currentColor" stroke-width="2"/></svg>Альбом</button>
+  </nav>
+</div>
+</body>
+</html>

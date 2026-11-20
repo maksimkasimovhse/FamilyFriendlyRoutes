@@ -5,7 +5,33 @@
  * Числовые ограничения и обязательные инварианты описаны в integration_contracts_v1.md.
  */
 export type ID = string;
-export interface SessionResponse { csrf_token: string }
+export interface AuthUser { user_id: ID; email: string; created_at: Instant }
+export interface AuthCredentials { email: string; password: string }
+export interface SessionResponse {
+  csrf_token: string; authenticated: boolean; user: AuthUser | null; onboarding_completed: boolean;
+}
+export interface FamilyOnboardingInput {
+  expected_version: number; family: FamilyProfile; load_limits: LoadLimits; wishes: string | null;
+}
+export interface FamilyOnboardingView {
+  version: number; updated_at: Instant; family: FamilyProfile; load_limits: LoadLimits; wishes: string | null;
+}
+export type TripFromProfileRequest = Omit<TripInput, 'family' | 'load_limits'> & { expected_profile_version: number };
+export interface TripSummary { trip_id: ID; version: number; updated_at: Instant; status: string; city_id: string }
+export interface TripList { items: TripSummary[] }
+/** Первый реализованный внутренний этап: Go adapter -> Valhalla. */
+export interface RoutingRequest {
+  from: Point; to: Point; mode: Mode;
+  walking_speed_kph?: number;
+}
+export interface RoutingResult {
+  mode: Mode; status: 'calculated'; distance_m: number; travel_duration_sec: number;
+  geometry: { type: 'LineString'; coordinates: Position[] };
+  routing_data_version: string; engine_version: string;
+  snapped_from: Position; snapped_to: Position;
+  walking_speed_kph: number | null;
+  warnings: { code: string; message: string }[];
+}
 export type ISODate = string; // YYYY-MM-DD
 export type Instant = string; // RFC3339 с обязательным UTC offset
 export type TimeZone = 'Europe/Moscow';
@@ -50,6 +76,8 @@ export interface FamilyPolicy {
 export interface LoadLimits {
   pace: 'relaxed' | 'standard' | 'intensive';
   max_walk_distance_m_per_day: number | null;
+  // null => минимальный возрастной дефолт детей. Резерв P: метры, не длительность еды.
+  restaurant_walk_reserve_m_per_day?: number; // По умолчанию 0; 0 <= p <= m.
   max_continuous_walk_duration_sec: number | null;
 }
 export interface DayInput {
@@ -57,6 +85,9 @@ export interface DayInput {
   available_window: Interval | null;
   duration_budget_sec: number;
   meal_window: Interval | null; rest_budget_sec: number;
+  meal_count?: number; // По умолчанию 1; 0 отключает резерв при отсутствии override.
+  meal_format?: 'quick_service' | 'table_service' | 'meal_with_play';
+  meal_duration_sec?: number; // Суммарно за день; override выше count × format.
 }
 export interface Selection {
   place_id: ID; activity_id: ID;
@@ -67,7 +98,7 @@ export interface TripInput {
   city_id: 'nizhny_novgorod'; timezone: TimeZone;
   planning_context: 'before_arrival' | 'in_city';
   family: FamilyProfile; load_limits: LoadLimits;
-  days: DayInput[]; selections: Selection[];
+  days: DayInput[]; selections: Selection[]; // 1..14 дней.
   request_text: string | null; // Уточняет интересы, не hard constraints.
 }
 
@@ -147,14 +178,14 @@ export interface RecommendationRequest {
     route: { type: 'LineString'; coordinates: Position[] } | null;
     corridor_width_m: number | null;
   } | null;
-  limit: number;
+  limit: number; // 1..50; initial=50 на всю поездку, без плана и маршрутов.
 }
 export interface RecommendationResponse {
   contract_version: '1.0'; request_id: ID;
   trip_id: ID; trip_version: number; catalog_version: string;
   model_version: string; generated_at: Instant;
   status: 'complete' | 'partial' | 'no_candidates';
-  candidates: Candidate[];
+  candidates: Candidate[]; // <=limit, разные place_id, по убыванию релевантности.
   rejected: { activity_id: ID; reasons: Reason[] }[];
   evidence: Evidence[]; warnings: Warning[];
 }
@@ -166,6 +197,9 @@ export interface Stop {
   title: string; category: Category; location: Point;
   mandatory: boolean; progress: 'planned' | 'visited' | 'skipped';
   duration: DurationEstimate;
+  activity_kind?: Activity['kind'];
+  availability?: AvailabilityDay[];
+  progress_observed_at?: Instant;
   timing: {
     estimated_arrival_at: Instant | null;
     estimated_visit_start_at: Instant | null;
@@ -182,6 +216,14 @@ export interface Leg {
   geometry: { type: 'LineString'; coordinates: Position[] } | null;
   routing_data_version: string | null; warnings: Warning[];
 }
+export interface DayExecution {
+  started_at: Instant; observed_at: Instant; current_point: Point;
+  completed_leg_ids: ID[]; needs_replan: boolean;
+  consumed_walk_distance_m: number; consumed_walk_duration_sec: number;
+  consumed_visit_duration_sec: number; consumed_meal_duration_sec: number;
+  consumed_rest_duration_sec: number; consumed_wait_duration_sec: number;
+  elapsed_duration_sec: number;
+}
 export interface DayPlan {
   date: ISODate;
   presentation: 'relative' | 'clock';
@@ -195,8 +237,18 @@ export interface DayPlan {
     visit_duration_sec: number; wait_duration_sec: number | null;
     rest_duration_sec: number; meal_duration_sec: number;
     elapsed_duration_sec: number | null;
+    walk_budget_m?: number;
+    restaurant_walk_reserve_m?: number;
+    primary_walk_budget_m?: number;
+    walking_time_budget_sec?: number;
+    time_limited_walk_budget_m?: number;
+    walking_speed_kph?: number;
+    budget_policy_version?: string;
+    remaining_walk_distance_m?: number;
+    remaining_duration_sec?: number;
   };
   warnings: Warning[];
+  execution?: DayExecution;
 }
 export interface TripView {
   trip_id: ID; version: number; updated_at: Instant;
@@ -220,7 +272,8 @@ export type PlanCommand =
   | { kind: 'reorder_stops'; date: ISODate; stop_ids: ID[] }
   | { kind: 'shorten_day'; date: ISODate; target_remaining_duration_sec: number }
   | { kind: 'return_to_hotel'; date: ISODate; hotel_point: Point }
-  | { kind: 'start_day'; date: ISODate; point: Point; start_at: Instant };
+  | { kind: 'start_day'; date: ISODate; point: Point; start_at: Instant }
+  | { kind: 'replan_day'; date: ISODate };
 export interface PreviewRequest {
   expected_version: number; command: PlanCommand;
   current_position: Point | null; observed_at: Instant | null;

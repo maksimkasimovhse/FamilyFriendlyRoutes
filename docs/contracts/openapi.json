@@ -19,13 +19,17 @@
     {
       "name": "Internal ML",
       "description": "Backend -> ML, закрытый сервис"
+    },
+    {
+      "name": "Internal Routing",
+      "description": "Backend -> Go adapter -> Valhalla; реализован первый инфраструктурный этап, без Trip API."
     }
   ],
   "paths": {
     "/api/v1/session": {
       "get": {
         "operationId": "getSession",
-        "summary": "Получить или создать гостевую сессию",
+        "summary": "Получить или создать сессию, статус аккаунта и анкеты",
         "tags": [
           "Public Backend"
         ],
@@ -222,6 +226,75 @@
                 "$ref": "#/components/schemas/TripInput"
               }
             }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listTrips",
+        "summary": "Список своих поездок (также доступен гостю)",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripList"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "description": "Ошибка",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
           }
         }
       }
@@ -517,7 +590,8 @@
               }
             }
           }
-        }
+        },
+        "description": "Implemented commands: generate_plan, start_day, remove_stop, replan_day. Active previews expire 30 seconds after observed_at and preserve confirmed history. Other command variants are target API and may return COMMAND_NOT_IMPLEMENTED."
       }
     },
     "/api/v1/trips/{trip_id}/previews/{preview_id}": {
@@ -1339,6 +1413,723 @@
           }
         }
       }
+    },
+    "/internal/v1/routing/route": {
+      "post": {
+        "operationId": "calculateRoute",
+        "tags": [
+          "Internal Routing"
+        ],
+        "summary": "Рассчитать реальный пеший или автомобильный путь OSM",
+        "description": "Внутренний сервис Go на отдельном loopback-порту 8081. Bearer token обязателен по умолчанию. Явный -allow-local-anonymous допускается только на loopback при локальной разработке. Подходы от исходных точек до snapped endpoints не включены. car не вызывает такси, не учитывает live traffic или подачу.",
+        "security": [
+          {
+            "ServiceBearer": []
+          }
+        ],
+        "servers": [
+          {
+            "url": "http://127.0.0.1:8081",
+            "description": "Локальный Go routing adapter; не внешний адрес ML/основного backend"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoutingRequest"
+              },
+              "example": {
+                "from": {
+                  "coordinates": [
+                    44.0059,
+                    56.3269
+                  ],
+                  "label": null
+                },
+                "to": {
+                  "coordinates": [
+                    44.0095,
+                    56.3286
+                  ],
+                  "label": null
+                },
+                "mode": "walk",
+                "walking_speed_kph": 3.5
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Рассчитанный путь; X-Request-ID генерируется сервером",
+            "headers": {
+              "X-Request-ID": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutingResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "415": {
+            "description": "UNSUPPORTED_MEDIA_TYPE",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "502": {
+            "$ref": "#/components/responses/Error502"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "operationId": "register",
+        "summary": "Зарегистрироваться и войти",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Токен сессии; backend также проверяет Origin."
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Успешный результат",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            },
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "New opaque family_session; HttpOnly; SameSite=Lax; Secure over HTTPS"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "description": "Ошибка",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthCredentials"
+              }
+            }
+          }
+        },
+        "description": "Сначала GET /session. Нужны cookie и CSRF. Успех заменяет cookie и CSRF и переносит гостевые поездки. Уже авторизованная сессия — 409. Email не подтверждается."
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "login",
+        "summary": "Войти в аккаунт",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Токен сессии; backend также проверяет Origin."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            },
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "New opaque family_session; HttpOnly; SameSite=Lax; Secure over HTTPS"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "description": "Ошибка",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthCredentials"
+              }
+            }
+          }
+        },
+        "description": "Сначала GET /session. Нужны cookie и CSRF. Успех заменяет cookie и CSRF и переносит гостевые поездки. Уже авторизованная сессия — 409. Email не подтверждается."
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "logout",
+        "summary": "Выйти, заменив сессию гостевой",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Токен сессии; backend также проверяет Origin."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "description": "Ошибка",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "operationId": "getCurrentUser",
+        "summary": "Аккаунт текущей сессии; гостю 401",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "description": "Ошибка",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      }
+    },
+    "/api/v1/profile/family": {
+      "get": {
+        "operationId": "getFamilyProfile",
+        "summary": "Получить сохранённую анкету; до заполнения 404",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyOnboardingView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "description": "Ошибка",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        }
+      },
+      "put": {
+        "operationId": "saveFamilyProfile",
+        "summary": "Создать или обновить анкету семьи",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Токен сессии; backend также проверяет Origin."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успешный результат",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyOnboardingView"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Успешный результат",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FamilyOnboardingView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "description": "Ошибка",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FamilyOnboardingInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trips/from-profile": {
+      "post": {
+        "operationId": "createTripFromProfile",
+        "summary": "Создать draft из снимка сохранённой анкеты",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Повтор с тем же телом возвращает исходный результат; другой payload — 409."
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Токен сессии; backend также проверяет Origin."
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Успешный результат",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TripView"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "415": {
+            "description": "Ошибка",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TripFromProfileRequest"
+              }
+            }
+          }
+        },
+        "description": "Требует аккаунт и заполненную анкету. Изменение профиля не меняет созданные поездки. request_text=null использует wishes из профиля; пустая строка очищает пожелания для этой поездки."
+      }
     }
   },
   "components": {
@@ -1639,7 +2430,8 @@
                 "interest_ids"
               ]
             },
-            "minItems": 1
+            "minItems": 1,
+            "maxItems": 2
           },
           "adult_count": {
             "type": "integer",
@@ -1736,7 +2528,8 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Daily family walking limit M, meters. Null selects the minimum configured age default among children; explicit value overrides the default."
           },
           "max_continuous_walk_duration_sec": {
             "oneOf": [
@@ -1748,6 +2541,12 @@
                 "type": "null"
               }
             ]
+          },
+          "restaurant_walk_reserve_m_per_day": {
+            "type": "number",
+            "minimum": 0,
+            "default": 0,
+            "description": "Daily reserve p in meters for future restaurant detours. Must not exceed m. Primary route budget is m-p, including start and end legs. Omitted means zero. This is not meal duration or walked distance."
           }
         },
         "required": [
@@ -1795,7 +2594,29 @@
           },
           "rest_budget_sec": {
             "type": "number",
-            "minimum": 0
+            "minimum": 0,
+            "description": "Daily rest time reserve. Existing rest stops cover the reserve; only the unallocated remainder is added."
+          },
+          "meal_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "default": 1
+          },
+          "meal_format": {
+            "type": "string",
+            "enum": [
+              "quick_service",
+              "table_service",
+              "meal_with_play"
+            ],
+            "default": "table_service"
+          },
+          "meal_duration_sec": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 86400,
+            "description": "Total daily meal time, seconds. When omitted, meal_count times the configured duration for meal_format. Explicit zero disables the meal time reserve."
           }
         },
         "required": [
@@ -1877,7 +2698,8 @@
             "items": {
               "$ref": "#/components/schemas/DayInput"
             },
-            "minItems": 1
+            "minItems": 1,
+            "maxItems": 14
           },
           "selections": {
             "type": "array",
@@ -3355,7 +4177,9 @@
           },
           "limit": {
             "type": "integer",
-            "minimum": 1
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Initial planning requests 50 ranked distinct places for the entire trip. ML does not assign days or compute routes."
           }
         },
         "required": [
@@ -3417,7 +4241,9 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Candidate"
-            }
+            },
+            "maxItems": 50,
+            "description": "At most limit distinct place_id values, ordered by relevance; fewer valid places are allowed. No day assignment or geometry."
           },
           "rejected": {
             "type": "array",
@@ -3637,6 +4463,26 @@
             "items": {
               "$ref": "#/components/schemas/Warning"
             }
+          },
+          "activity_kind": {
+            "type": "string",
+            "enum": [
+              "visit",
+              "session",
+              "meal",
+              "rest",
+              "utility"
+            ]
+          },
+          "availability": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityDay"
+            },
+            "description": "Availability snapshot used for re-planning existing stops without fetching a new ML ranking."
+          },
+          "progress_observed_at": {
+            "$ref": "#/components/schemas/Instant"
           }
         },
         "required": [
@@ -3854,11 +4700,13 @@
               },
               "rest_duration_sec": {
                 "type": "number",
-                "minimum": 0
+                "minimum": 0,
+                "description": "Maximum of rest_budget_sec and scheduled rest-stop duration, without double counting."
               },
               "meal_duration_sec": {
                 "type": "number",
-                "minimum": 0
+                "minimum": 0,
+                "description": "Maximum of the daily meal time reserve and scheduled meal-stop duration, without double counting."
               },
               "elapsed_duration_sec": {
                 "oneOf": [
@@ -3869,7 +4717,49 @@
                   {
                     "type": "null"
                   }
-                ]
+                ],
+                "description": "Before start: estimated travel, visits, waits and break reserves. After active replan: observed elapsed wall-clock time plus estimated remaining duration; historical category estimates can differ from observed time."
+              },
+              "walk_budget_m": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Total daily walking limit m."
+              },
+              "restaurant_walk_reserve_m": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Reserved walking distance p, not part of actual walked distance."
+              },
+              "primary_walk_budget_m": {
+                "type": "number",
+                "minimum": 0,
+                "description": "max(0, min(M, V*T_walk) - P), meters. Recalculated for candidate visits and waits."
+              },
+              "walking_time_budget_sec": {
+                "type": "number",
+                "minimum": 0
+              },
+              "time_limited_walk_budget_m": {
+                "type": "number",
+                "minimum": 0
+              },
+              "walking_speed_kph": {
+                "type": "number",
+                "minimum": 0.5,
+                "maximum": 8
+              },
+              "budget_policy_version": {
+                "type": "string"
+              },
+              "remaining_walk_distance_m": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Original daily M minus confirmed estimated walked distance, before planning the remaining stops."
+              },
+              "remaining_duration_sec": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Original available day time minus observed elapsed time, before planning remaining stops."
               }
             },
             "required": [
@@ -3887,6 +4777,10 @@
             "items": {
               "$ref": "#/components/schemas/Warning"
             }
+          },
+          "execution": {
+            "$ref": "#/components/schemas/DayExecution",
+            "description": "Present after start_day apply. The most recently started date is the active day; previous confirmed history is immutable."
           }
         },
         "required": [
@@ -4197,6 +5091,22 @@
               "point",
               "start_at"
             ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "replan_day"
+              },
+              "date": {
+                "$ref": "#/components/schemas/ISODate"
+              }
+            },
+            "required": [
+              "kind",
+              "date"
+            ]
           }
         ]
       },
@@ -4418,7 +5328,8 @@
           "stop_id",
           "status",
           "observed_at"
-        ]
+        ],
+        "description": "Only the next planned stop of the active day can be confirmed. Terminal progress is immutable. Skipping requires an explicit replan preview before continuing."
       },
       "NeedRequest": {
         "type": "object",
@@ -4746,7 +5657,8 @@
           },
           "limit": {
             "type": "integer",
-            "minimum": 1
+            "minimum": 1,
+            "maximum": 50
           }
         },
         "required": [
@@ -4775,7 +5687,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Candidate"
-            }
+            },
+            "maxItems": 50
           },
           "evidence": {
             "type": "array",
@@ -4970,14 +5883,439 @@
       },
       "SessionResponse": {
         "type": "object",
+        "additionalProperties": false,
         "properties": {
           "csrf_token": {
             "type": "string",
             "minLength": 1
+          },
+          "authenticated": {
+            "type": "boolean"
+          },
+          "user": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AuthUser"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "onboarding_completed": {
+            "type": "boolean"
           }
         },
         "required": [
-          "csrf_token"
+          "csrf_token",
+          "authenticated",
+          "user",
+          "onboarding_completed"
+        ]
+      },
+      "RoutingRequest": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "to": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/Mode"
+          },
+          "walking_speed_kph": {
+            "type": "number",
+            "minimum": 0.5,
+            "maximum": 8,
+            "description": "Только для walk; без параметра используется скорость движка, не семейная норма."
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "mode"
+        ],
+        "additionalProperties": false,
+        "description": "Координаты в bbox пилота [43.5,56.05,44.4,56.6]. Привязка к сети до 100 м. Обязательность полей и режим проверяются сервером."
+      },
+      "RoutingWarning": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "RoutingResult": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "$ref": "#/components/schemas/Mode"
+          },
+          "status": {
+            "type": "string",
+            "const": "calculated"
+          },
+          "distance_m": {
+            "type": "number",
+            "minimum": 0
+          },
+          "travel_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "geometry": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "LineString"
+              },
+              "coordinates": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Position"
+                },
+                "minItems": 2
+              }
+            },
+            "required": [
+              "type",
+              "coordinates"
+            ]
+          },
+          "routing_data_version": {
+            "type": "string"
+          },
+          "engine_version": {
+            "type": "string"
+          },
+          "snapped_from": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "snapped_to": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "walking_speed_kph": {
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 0.5,
+                "maximum": 8
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoutingWarning"
+            }
+          }
+        },
+        "required": [
+          "mode",
+          "status",
+          "distance_m",
+          "travel_duration_sec",
+          "geometry",
+          "routing_data_version",
+          "engine_version",
+          "snapped_from",
+          "snapped_to",
+          "walking_speed_kph",
+          "warnings"
+        ]
+      },
+      "DayExecution": {
+        "type": "object",
+        "description": "Confirmed progress. Distance and category durations are estimates from confirmed planned legs/stops; elapsed is observed wall-clock time. Not GPS tracking.",
+        "properties": {
+          "started_at": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "observed_at": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "current_point": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "completed_leg_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ID"
+            }
+          },
+          "needs_replan": {
+            "type": "boolean"
+          },
+          "consumed_walk_distance_m": {
+            "type": "number",
+            "minimum": 0
+          },
+          "consumed_walk_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "consumed_visit_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "consumed_meal_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "consumed_rest_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "consumed_wait_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "elapsed_duration_sec": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "started_at",
+          "observed_at",
+          "current_point",
+          "completed_leg_ids",
+          "needs_replan",
+          "consumed_walk_distance_m",
+          "consumed_walk_duration_sec",
+          "consumed_visit_duration_sec",
+          "consumed_meal_duration_sec",
+          "consumed_rest_duration_sec",
+          "consumed_wait_duration_sec",
+          "elapsed_duration_sec"
+        ]
+      },
+      "AuthUser": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "user_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/Instant"
+          }
+        },
+        "required": [
+          "user_id",
+          "email",
+          "created_at"
+        ]
+      },
+      "AuthCredentials": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          },
+          "password": {
+            "type": "string",
+            "minLength": 15,
+            "maxLength": 128,
+            "writeOnly": true,
+            "description": "15–128 Unicode code points, up to 1024 UTF-8 bytes; spaces are preserved."
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "FamilyOnboardingInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "0 for first save; then the current profile version."
+          },
+          "family": {
+            "$ref": "#/components/schemas/FamilyProfile"
+          },
+          "load_limits": {
+            "$ref": "#/components/schemas/LoadLimits"
+          },
+          "wishes": {
+            "oneOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "expected_version",
+          "family",
+          "load_limits",
+          "wishes"
+        ]
+      },
+      "FamilyOnboardingView": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "updated_at": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "family": {
+            "$ref": "#/components/schemas/FamilyProfile"
+          },
+          "load_limits": {
+            "$ref": "#/components/schemas/LoadLimits"
+          },
+          "wishes": {
+            "oneOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "version",
+          "updated_at",
+          "family",
+          "load_limits",
+          "wishes"
+        ]
+      },
+      "TripFromProfileRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "expected_profile_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "city_id": {
+            "type": "string",
+            "const": "nizhny_novgorod"
+          },
+          "timezone": {
+            "$ref": "#/components/schemas/TimeZone"
+          },
+          "planning_context": {
+            "type": "string",
+            "enum": [
+              "before_arrival",
+              "in_city"
+            ]
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayInput"
+            },
+            "minItems": 1,
+            "maxItems": 14
+          },
+          "selections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Selection"
+            }
+          },
+          "request_text": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "expected_profile_version",
+          "city_id",
+          "timezone",
+          "planning_context",
+          "days",
+          "selections",
+          "request_text"
+        ]
+      },
+      "TripSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "trip_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "updated_at": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "status": {
+            "type": "string"
+          },
+          "city_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "trip_id",
+          "version",
+          "updated_at",
+          "status",
+          "city_id"
+        ]
+      },
+      "TripList": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TripSummary"
+            }
+          }
+        },
+        "required": [
+          "items"
         ]
       }
     },
@@ -4986,7 +6324,7 @@
         "type": "apiKey",
         "in": "cookie",
         "name": "family_session",
-        "description": "Гостевая сессия; права проверяются для каждого ресурса. Bootstrap GET /api/v1/session."
+        "description": "Opaque family_session cookie for a guest or authenticated account; bootstrap through GET /api/v1/session."
       },
       "ServiceBearer": {
         "type": "http",
@@ -5014,7 +6352,7 @@
         }
       },
       "Error401": {
-        "description": "SESSION_REQUIRED или неверный сервисный токен",
+        "description": "SESSION_REQUIRED или неверный сервисный токен / SERVICE_AUTH_REQUIRED",
         "headers": {
           "X-Request-ID": {
             "description": "Идентификатор трассировки",
@@ -5104,7 +6442,7 @@
         }
       },
       "Error422": {
-        "description": "VALIDATION_ERROR / UNKNOWN_ACTIVITY / HARD_CONSTRAINT_VIOLATION / LOCATION_REQUIRED / ACKNOWLEDGEMENT_REQUIRED / PREVIEW_NOT_APPLICABLE",
+        "description": "VALIDATION_ERROR / UNKNOWN_ACTIVITY / HARD_CONSTRAINT_VIOLATION / LOCATION_REQUIRED / ACKNOWLEDGEMENT_REQUIRED / PREVIEW_NOT_APPLICABLE / NO_ROUTE",
         "headers": {
           "X-Request-ID": {
             "description": "Идентификатор трассировки",
@@ -5164,7 +6502,7 @@
         }
       },
       "Error502": {
-        "description": "ML_CONTRACT_ERROR",
+        "description": "ML_CONTRACT_ERROR / ROUTING_CONTRACT_ERROR",
         "headers": {
           "X-Request-ID": {
             "description": "Идентификатор трассировки",

@@ -1,0 +1,288 @@
+/* ===== Цвета и шрифты (как на макетах design/pages/legacy-ekrany-semeyny-nizhny.html) ===== */
+:root {
+  --bg: #F3F6FA;
+  --surface: #FFFFFF;
+  --ink: #0F1628;
+  --ink-2: #5A6478;
+  --line: #E6EAF0;
+  --now: #2463D6;         /* взрослый слой, маршрут, «сейчас» */
+  --now-soft: #E2ECFD;
+  --kid: #E8641F;         /* детский слой */
+  --kid-soft: #FFEADC;
+  --ok: #1F8A4F;          /* туалеты, «есть» */
+  --sun: #FFC94A;         /* еда, выбранное */
+  --brick: #C4553A;       /* кремль */
+  --sepia: #8A5A2B;       /* всё «прошлое» (детский режим) */
+  --font-ui: Nunito, system-ui, sans-serif;
+  --font-title: Prata, Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { background: #DDE3EC; color: var(--ink); font-family: var(--font-ui); }
+button { font: inherit; color: inherit; cursor: pointer; }
+h1 { margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -.01em; }
+
+/* Приложение — колонка телефона; на десктопе по центру */
+.app {
+  height: 100dvh; max-width: 480px; margin: 0 auto; background: var(--surface);
+  display: flex; flex-direction: column; position: relative; overflow: hidden;
+}
+.screen { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
+.screen[hidden] { display: none; }
+.placeholder { padding: 20px 16px; }
+.placeholder p { color: var(--ink-2); }
+
+/* ===== Шапка ===== */
+.top { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 12px; background: var(--surface); }
+.days { display: flex; background: var(--bg); border-radius: 999px; padding: 3px; }
+.days button { border: 0; background: none; border-radius: 999px; padding: 8px 16px; font-weight: 800; min-height: 40px; }
+.days button.on { background: var(--now); color: #fff; }
+.days button:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ===== Карта ===== */
+.map-wrap { flex: 1; position: relative; min-height: 0; }
+#map { position: absolute; inset: 0; }
+.map-buttons { position: absolute; right: 12px; top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.round {
+  width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--surface); color: var(--ink);
+  box-shadow: 0 2px 10px rgba(15,22,40,.18); font-weight: 800; display: grid; place-items: center;
+}
+.round.on { background: var(--now); color: #fff; }
+
+/* Метки на карте */
+.stop-pin {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--now); color: #fff; padding: 0;
+  border: 3px solid #fff; display: grid; place-items: center; font-weight: 800; font-size: 15px;
+  box-shadow: 0 0 0 6px rgba(36,99,214,.18), 0 3px 8px rgba(15,22,40,.3); cursor: pointer; transition: transform .15s;
+}
+.stop-pin.sel { background: var(--sun); color: var(--ink); transform: scale(1.2); }
+.start-pin {
+  padding: 3px 8px; border-radius: 10px 10px 10px 2px; background: var(--ink); color: #fff;
+  font-size: 11px; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+}
+.me-pin { width: 18px; height: 18px; border-radius: 50%; background: var(--now); border: 3px solid #fff; box-shadow: 0 0 0 8px rgba(36,99,214,.2); }
+
+/* ===== Нижняя часть: удобства + карточка ===== */
+.sheet {
+  background: var(--surface); padding: 14px 16px 16px; position: relative; z-index: 2;
+  border-radius: 22px 22px 0 0; margin-top: -22px; box-shadow: 0 -6px 20px rgba(15,22,40,.08);
+}
+.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px 12px; padding: 0 16px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex: none; display: flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 12px;
+  border: 0; border-radius: 999px; background: var(--bg); color: var(--ink-2); font-weight: 700; font-size: 14px;
+}
+.chip[aria-pressed="true"] { background: var(--now-soft); color: var(--now); }
+.chip[data-layer="all"][aria-pressed="true"] { background: var(--now); color: #fff; }
+.dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; flex: none; }
+.dot.toilets { background: var(--ok); border-radius: 4px; }
+.dot.cafe { background: var(--sun); }
+.dot.playground { background: var(--kid); }
+
+.card { border-radius: 18px; padding: 14px 16px; margin-bottom: 12px; }
+.card.now { background: var(--now-soft); }
+.card.plain { background: var(--bg); }
+/* Карточка-кнопка: вся карточка нажимается, справа стрелка */
+.card-btn { width: 100%; border: 0; text-align: left; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.card-btn .go { width: 40px; height: 40px; flex: none; border-radius: 50%; background: var(--now); color: #fff; display: grid; place-items: center; font-size: 24px; font-weight: 800; }
+.card .kicker { display: block; font-size: 12px; font-weight: 800; color: var(--now); text-transform: uppercase; letter-spacing: .05em; }
+.card h2 { margin: 4px 0 4px; font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.card p { margin: 0; color: var(--ink-2); font-weight: 600; }
+.card p.small { font-size: 12px; margin-top: 6px; font-weight: 400; }
+
+.row { display: flex; gap: 8px; }
+.btn { flex: 1; min-height: 50px; border-radius: 16px; border: 0; font-weight: 800; font-size: 16px; width: 100%; }
+.btn.main { background: var(--ink); color: #fff; }
+.btn.alt { background: var(--bg); color: var(--ink); }
+.btn.icon { flex: none; width: 50px; font-size: 22px; }
+.btn.link { background: none; color: var(--now); min-height: 44px; margin-top: 4px; }
+.btn:disabled { opacity: .35; cursor: default; }
+.muted { color: var(--ink-2); margin: 0; }
+.source { font-size: 11px; color: var(--ink-2); margin: 10px 0 0; }
+.source.warn { color: var(--brick); }
+details.notes { margin-top: 8px; font-size: 13px; color: var(--ink-2); }
+details.notes summary { cursor: pointer; font-weight: 700; min-height: 36px; display: flex; align-items: center; }
+details.notes ul { margin: 4px 0 0; padding-left: 18px; }
+
+/* ===== Нижнее меню: «М» приподнята, как на макете ===== */
+.tabbar {
+  display: flex; background: var(--surface); border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom); z-index: 3; position: relative;
+}
+.tabbar button {
+  flex: 1; border: 0; background: none; min-height: 62px; display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end; padding-bottom: 8px; gap: 3px; font-size: 11px; font-weight: 700; color: var(--ink-2);
+}
+.tabbar svg { width: 24px; height: 24px; }
+.tabbar button.on { color: var(--now); }
+.tabbar .kid { color: var(--kid); }
+.kid-badge {
+  width: 54px; height: 54px; border-radius: 50%; background: var(--kid); color: #fff; margin-top: -30px;
+  display: grid; place-items: center; font-weight: 800; font-size: 20px;
+  border: 4px solid var(--surface); box-shadow: 0 4px 12px rgba(232,100,31,.35);
+}
+.tabbar .kid.on .kid-badge { box-shadow: 0 0 0 4px var(--kid-soft), 0 4px 12px rgba(232,100,31,.35); }
+
+/* hidden всегда прячет, даже если у элемента задан display */
+[hidden] { display: none !important; }
+
+/* ===== Экран «Сегодня» (макет: «Сегодня — главный экран») ===== */
+.today { background: var(--surface); }
+.today-top { padding: 18px 20px 6px; }
+.today-sub { margin: 0 0 2px; color: var(--ink-2); font-weight: 700; font-size: 15px; }
+.today-scroll { flex: 1; overflow-y: auto; padding: 8px 16px 16px; }
+.now-card { background: var(--now-soft); border-radius: 24px; padding: 18px; }
+.now-card .kicker { font-size: 13px; font-weight: 800; color: var(--now); text-transform: uppercase; letter-spacing: .05em; }
+.now-card h2 { margin: 6px 0 6px; font-size: 24px; font-weight: 800; line-height: 1.2; }
+.now-card p { margin: 0 0 14px; color: var(--ink-2); font-weight: 600; }
+.now-card .btn { min-height: 52px; }
+.now-card.done { background: #DDF3E6; }
+.now-card.done .kicker { color: var(--ok); }
+.kid-card {
+  width: 100%; margin-top: 12px; border: 0; text-align: left; border-radius: 20px; padding: 14px 16px;
+  background: var(--kid-soft); display: flex; flex-direction: column; gap: 2px;
+}
+.kid-card b { font-size: 17px; }
+.kid-card span { color: #9A4A1C; font-weight: 700; font-size: 14px; }
+.today-stats { display: flex; gap: 8px; margin: 14px 0 4px; flex-wrap: wrap; }
+.today-stats:empty { display: none; }
+.today-stats span { background: var(--bg); border-radius: 14px; padding: 8px 12px; font-size: 13px; color: var(--ink-2); font-weight: 600; }
+.today-stats b { color: var(--ink); font-weight: 800; }
+
+.timeline { list-style: none; margin: 14px 0 0; padding: 0; }
+.timeline li { display: flex; gap: 14px; padding: 14px 4px; border-bottom: 1px solid var(--line); }
+.timeline .t { width: 50px; flex: none; font-weight: 800; color: var(--ink-2); font-size: 16px; }
+.timeline .what b { display: block; font-size: 17px; }
+.timeline .what small { color: var(--ink-2); font-size: 14px; font-weight: 600; }
+.timeline li.next .t, .timeline li.next b { color: var(--now); }
+.timeline li.done { opacity: .5; }
+.timeline li.skipped b { text-decoration: line-through; }
+.timeline li.skipped { opacity: .5; }
+.today .source { padding: 0 4px; }
+
+.today-bottom { padding: 10px 16px 14px; }
+.btn.need { background: var(--ink); color: #fff; min-height: 56px; border-radius: 20px; font-size: 17px; }
+
+.confirm { position: absolute; inset: 0; z-index: 8; background: rgba(15,22,40,.45); display: flex; align-items: flex-end; }
+.confirm-card { background: var(--surface); width: 100%; border-radius: 24px 24px 0 0; padding: 20px 16px 18px; }
+.confirm-card h2 { margin: 0 0 8px; font-size: 20px; font-weight: 800; }
+.confirm-card ul { margin: 0 0 16px; padding-left: 20px; color: var(--ink-2); line-height: 1.5; }
+.toast {
+  position: absolute; left: 16px; right: 16px; bottom: 88px; z-index: 9; margin: 0; padding: 12px 16px;
+  border-radius: 16px; background: var(--ink); color: #fff; font-weight: 700; text-align: center;
+}
+.toast.error { background: var(--brick); }
+
+/* Пройденная остановка на карте */
+.stop-pin.done { background: #9AA6BA; box-shadow: 0 3px 8px rgba(15,22,40,.25); }
+
+/* ===== «Сегодня» v2: прогресс, карточка «Сейчас», плашки ===== */
+.today-progress { height: 6px; border-radius: 3px; background: var(--bg); margin-top: 10px; overflow: hidden; }
+.today-progress i { display: block; height: 100%; background: var(--now); border-radius: 3px; transition: width .4s; }
+.now-head { display: flex; justify-content: space-between; align-items: center; }
+.now-card .more { border: 0; background: rgba(36,99,214,.12); color: var(--now); width: 36px; height: 36px; border-radius: 50%; font-weight: 800; font-size: 18px; }
+.now-card h2 .at { color: var(--now); white-space: nowrap; }
+.now-card p { margin-bottom: 10px; }
+.chips-s { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.chips-s:empty { display: none; }
+.chip-s { font-size: 13px; font-weight: 800; padding: 5px 10px; border-radius: 999px; }
+.chip-s.kid { background: var(--kid-soft); color: #A8480F; }
+.chip-s.ok { background: #DDF3E6; color: var(--ok); }
+.chip-s.sun { background: #FFF3D1; color: #7A5200; }
+.btn.slim { min-height: 46px; font-size: 15px; }
+.timeline li .what small { display: block; }
+
+/* ===== Помощник ===== */
+.needs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.needs button {
+  border: 2px solid transparent; background: var(--bg); border-radius: 20px; min-height: 96px;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; padding: 14px; font-weight: 800; font-size: 16px;
+}
+.needs button.on { border-color: var(--now); background: var(--now-soft); }
+.needs .ico { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; font-size: 18px; color: #fff; font-weight: 800; }
+.needs .ico.ok { background: var(--ok); font-size: 13px; }
+.needs .ico.sun { background: var(--sun); }
+.needs .ico.kid { background: var(--kid); }
+.needs .ico.now { background: var(--now); }
+.need-list { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.need-list li { background: var(--bg); border-radius: 18px; padding: 14px; }
+.need-list li.empty { color: var(--ink-2); font-weight: 600; }
+.need-head { display: flex; justify-content: space-between; gap: 8px; }
+.need-head b { font-size: 17px; }
+.need-head .mins { color: var(--now); font-weight: 800; white-space: nowrap; }
+.need-list small { color: var(--ink-2); font-weight: 600; }
+.need-list .btn { margin-top: 10px; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.badge { font-size: 12px; font-weight: 800; padding: 4px 9px; border-radius: 999px; }
+.badge.yes { background: #DDF3E6; color: var(--ok); }
+.badge.no { background: #F1F3F6; color: #8A93A3; text-decoration: line-through; }
+.badge.unknown { background: #F1F3F6; color: #8A93A3; }
+.badge.demo { background: #FFF3D1; color: #7A5200; }
+
+/* «Маша» — больше не по центру: оранжевый кружок в строке меню, без подъёма */
+.kid-badge { width: 28px; height: 28px; margin-top: 0; font-size: 14px; border-width: 0; box-shadow: none; }
+
+/* ===== «Сегодня» v3: шаги, фото в карточке, лента с узлами ===== */
+.beads { margin-top: 12px; }
+.bead-row { display: flex; align-items: center; }
+.bead-row i { flex: 1; height: 3px; background: var(--line); border-radius: 2px; }
+.bead { width: 30px; height: 30px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--bg); color: #8A93A3; border: 2px solid var(--line); }
+.bead svg { width: 15px; height: 15px; }
+.bead.done { background: var(--ok); border-color: var(--ok); color: #fff; }
+.bead.now { background: var(--now); border-color: var(--now); color: #fff; box-shadow: 0 0 0 5px var(--now-soft); }
+.bead.skip { opacity: .4; }
+.bead-text { margin: 8px 0 0; font-size: 13px; color: var(--ink-2); font-weight: 700; }
+
+.now-card { padding: 0; overflow: hidden; }
+.now-body { padding: 16px 18px 18px; }
+.now-photo { position: relative; height: 150px; }
+.now-photo img { width: 100%; height: 100%; object-fit: cover; display: block; filter: sepia(.15); }
+.now-photo .era { position: absolute; left: 12px; bottom: 10px; background: var(--sepia); color: #fff; font-weight: 800; font-size: 12px; padding: 4px 10px; border-radius: 999px; }
+.now-card h2 { margin: 4px 0 8px; }
+.now-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; color: var(--ink-2); font-weight: 600; font-size: 14px; line-height: 1.35; }
+.big-time { font-size: 30px; font-weight: 800; color: var(--now); letter-spacing: -.02em; }
+.now-card.done .now-body { padding: 18px; }
+
+.timeline { position: relative; margin-top: 18px; }
+.timeline::before { content: ""; position: absolute; left: 15px; top: 20px; bottom: 26px; width: 3px; background: var(--line); border-radius: 2px; }
+.timeline li { position: relative; display: grid; grid-template-columns: 32px 48px 1fr auto; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 0; }
+.timeline .node { width: 32px; height: 32px; border-radius: 50%; background: var(--surface); border: 2px solid var(--line); color: var(--ink-2); display: grid; place-items: center; z-index: 1; }
+.timeline .node svg { width: 16px; height: 16px; }
+.timeline li.done .node { background: var(--ok); border-color: var(--ok); color: #fff; }
+.timeline li.done { opacity: .6; }
+.timeline li.finish .node { background: var(--ink); border-color: var(--ink); color: #fff; }
+.timeline .t { width: auto; font-size: 15px; }
+.timeline .thumb { width: 52px; height: 52px; border-radius: 12px; object-fit: cover; filter: sepia(.2); }
+
+/* ===== Помощник: чат ===== */
+.helper { background: var(--bg); }
+.chat-top { background: var(--surface); position: relative; padding-bottom: 12px; }
+.demo-flag { position: absolute; right: 16px; top: 20px; font-size: 11px; font-weight: 800; color: #7A5200; background: #FFF3D1; padding: 4px 8px; border-radius: 999px; }
+.chat { flex: 1; overflow-y: auto; padding: 14px 14px 6px; display: flex; flex-direction: column; gap: 8px; }
+.msg { max-width: 84%; padding: 10px 14px; border-radius: 18px; font-size: 15px; line-height: 1.4; font-weight: 600; }
+.msg.bot { align-self: flex-start; background: var(--surface); border-bottom-left-radius: 6px; box-shadow: 0 1px 3px rgba(15,22,40,.06); }
+.msg.me { align-self: flex-end; background: var(--now); color: #fff; border-bottom-right-radius: 6px; }
+.msg.card { max-width: 92%; width: 92%; padding: 12px 14px; }
+.plan-card .kicker { font-size: 12px; font-weight: 800; color: var(--now); text-transform: uppercase; letter-spacing: .05em; }
+.plan-card ul { margin: 6px 0 12px; padding-left: 18px; color: var(--ink); }
+.ok-text { color: var(--ok); font-weight: 800; }
+.err-text { color: var(--brick); font-weight: 700; }
+.place-row { display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 6px 0; }
+.place-row + .place-row { border-top: 1px solid var(--line); }
+.place-row b { display: block; }
+.place-row small { color: var(--ink-2); }
+.place-row .btn { width: auto; flex: none; padding: 0 14px; min-height: 40px; }
+.typing { display: inline-flex; gap: 4px; }
+.typing i { width: 7px; height: 7px; border-radius: 50%; background: #A9B2C2; animation: blink 1s infinite; }
+.typing i:nth-child(2) { animation-delay: .2s; } .typing i:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 50% { opacity: .3; } }
+.chat-suggest { display: flex; gap: 8px; overflow-x: auto; padding: 4px 14px 8px; scrollbar-width: none; flex: none; }
+.chat-suggest:empty { display: none; }
+.chat-suggest button { flex: none; border: 1.5px solid var(--now); background: var(--surface); color: var(--now); font-weight: 800; font-size: 14px; border-radius: 999px; padding: 8px 14px; }
+.chat-input { display: flex; gap: 8px; padding: 8px 12px 12px; background: var(--surface); border-top: 1px solid var(--line); flex: none; }
+.chat-input input { flex: 1; min-height: 46px; border-radius: 999px; border: 1.5px solid var(--line); padding: 0 16px; font: 600 15px var(--font-ui); background: var(--bg); }
+.chat-input input:focus { outline: none; border-color: var(--now); }
+.chat-input .send { width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--now); color: #fff; display: grid; place-items: center; }
+.demo-flag { top: auto; bottom: 18px; }
