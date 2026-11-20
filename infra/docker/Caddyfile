@@ -1,0 +1,26 @@
+{
+	auto_https disable_redirects
+	skip_install_trust
+	# Browsers connecting to an IP may omit TLS SNI; Docker hides the LAN IP.
+	default_sni {$CADDY_HOST:localhost}
+}
+
+https://{$CADDY_HOST:localhost} {
+	tls internal
+	header Permissions-Policy "geolocation=(self)"
+	reverse_proxy web:8001
+}
+
+# Only the PUBLIC root certificate is available on this bootstrap HTTP port.
+# The private key and all other files under /data are never served.
+http://:80 {
+	handle /root.crt {
+		root * /data/caddy/pki/authorities/local
+		header Content-Type application/x-x509-ca-cert
+		header Content-Disposition "attachment; filename=family-routes-root.crt"
+		file_server
+	}
+	handle {
+		respond "Install /root.crt on your phone, then open the HTTPS address shown by scripts/start-phone-https.ps1."
+	}
+}
