@@ -1,0 +1,20 @@
+{
+  "taxonomy_version": "1.0",
+  "claims": [
+    {
+      "kind": "interest",
+      "value": "animals",
+      "polarity": "prefer",
+      "evidence": "Хотим животных"
+    },
+    {
+      "kind": "category",
+      "value": "museum",
+      "polarity": "avoid",
+      "evidence": "без музеев"
+    }
+  ],
+  "needs_clarification": false,
+  "clarification_question": null,
+  "unsupported_requests": []
+}

@@ -39,6 +39,7 @@ export interface FamilyProfile {
   adult_count: number; adult_interest_ids: string[];
 }
 export interface FamilyPolicy {
+  // Сумма весов детей = 1; интересы детей имеют равный вклад.
   child_interest_weights: { child_id: ID; weight: number }[];
   activity_balance: {
     mode: 'equal_count_target'; scope: 'trip';
@@ -118,7 +119,12 @@ export interface Candidate extends CatalogItem {
     reasons: Reason[];
   }[];
   scores: {
+    // Интерес ребёнка и взрослых: неотрицательное число без верхней границы.
+    // Пригодность этой активности возрастной группе ребёнка: [0,1] или null.
+    // Это значение из профиля активности, а не глобальный вес возраста.
+    // popularity и final_relevance остаются нормированными в [0, 1].
     child_interest: { child_id: ID; value: number }[];
+    child_age_fit: { child_id: ID; value: number | null }[];
     adult_interest: number; popularity: number; final_relevance: number;
   };
   balance_credit: { child_id: ID; value: number }[];

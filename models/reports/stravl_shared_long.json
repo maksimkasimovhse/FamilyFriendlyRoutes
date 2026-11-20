@@ -1,0 +1,214 @@
+{
+  "model": "shared_survey_destination_embeddings_v1",
+  "age_band_weights_trained": false,
+  "reason": "Stravl form_a only distinguishes ages 0-19; no 3-5, 6-8, 9-11 labels.",
+  "source_interactions_sha256": "27842cc1a89c77a26123cb72294443746e541a3e6e180cd758162ce8871a6baf",
+  "seed": 17,
+  "device": "cuda",
+  "max_epochs": 30,
+  "initial_learning_rate": 0.003,
+  "early_stopping_patience": 8,
+  "scheduler_patience": 2,
+  "scheduler_factor": 0.5,
+  "best_epoch": 10,
+  "features": 46,
+  "destination_count": 1486,
+  "baseline_popularity": {
+    "validation": {
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5953970344442431,
+      "roc_auc": 0.7054374677965022,
+      "observed_ndcg_at_10": 0.8426761668959075
+    },
+    "test": {
+      "rows": 77094,
+      "positive_rate": 0.37668299674987793,
+      "log_loss": 0.599142742469704,
+      "roc_auc": 0.7056048150204298,
+      "observed_ndcg_at_10": 0.840352973765693
+    }
+  },
+  "trained_model": {
+    "validation": {
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5746172070503235,
+      "roc_auc": 0.7371981181141913,
+      "observed_ndcg_at_10": 0.8585411035628839
+    },
+    "test": {
+      "rows": 77094,
+      "positive_rate": 0.37668299674987793,
+      "log_loss": 0.5770761966705322,
+      "roc_auc": 0.7387954312704452,
+      "observed_ndcg_at_10": 0.8583710139131318
+    }
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "learning_rate": 0.003,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5925219058990479,
+      "roc_auc": 0.7118717515583742,
+      "observed_ndcg_at_10": 0.8400864916897232
+    },
+    {
+      "epoch": 2,
+      "learning_rate": 0.003,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5884657502174377,
+      "roc_auc": 0.7178783233858439,
+      "observed_ndcg_at_10": 0.841869854299886
+    },
+    {
+      "epoch": 3,
+      "learning_rate": 0.003,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5857741832733154,
+      "roc_auc": 0.7217563886164159,
+      "observed_ndcg_at_10": 0.844390517396763
+    },
+    {
+      "epoch": 4,
+      "learning_rate": 0.003,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5825002193450928,
+      "roc_auc": 0.7263411626690998,
+      "observed_ndcg_at_10": 0.8482288034972131
+    },
+    {
+      "epoch": 5,
+      "learning_rate": 0.003,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5797279477119446,
+      "roc_auc": 0.7303241995208211,
+      "observed_ndcg_at_10": 0.8502239439998146
+    },
+    {
+      "epoch": 6,
+      "learning_rate": 0.003,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5775110721588135,
+      "roc_auc": 0.7333708472602829,
+      "observed_ndcg_at_10": 0.8546859237065388
+    },
+    {
+      "epoch": 7,
+      "learning_rate": 0.003,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.576145589351654,
+      "roc_auc": 0.7353102217575042,
+      "observed_ndcg_at_10": 0.8572751849129058
+    },
+    {
+      "epoch": 8,
+      "learning_rate": 0.003,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5751731395721436,
+      "roc_auc": 0.7365454732036452,
+      "observed_ndcg_at_10": 0.8597994380746671
+    },
+    {
+      "epoch": 9,
+      "learning_rate": 0.003,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5750729441642761,
+      "roc_auc": 0.7367054499816683,
+      "observed_ndcg_at_10": 0.858746828736769
+    },
+    {
+      "epoch": 10,
+      "learning_rate": 0.003,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5746172070503235,
+      "roc_auc": 0.7371981181141913,
+      "observed_ndcg_at_10": 0.8585411035628839
+    },
+    {
+      "epoch": 11,
+      "learning_rate": 0.003,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5748209357261658,
+      "roc_auc": 0.7370452254996545,
+      "observed_ndcg_at_10": 0.8593412956865156
+    },
+    {
+      "epoch": 12,
+      "learning_rate": 0.003,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5751397609710693,
+      "roc_auc": 0.7368188051573346,
+      "observed_ndcg_at_10": 0.8578263593307254
+    },
+    {
+      "epoch": 13,
+      "learning_rate": 0.003,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5751502513885498,
+      "roc_auc": 0.7368688712587088,
+      "observed_ndcg_at_10": 0.8578293549384896
+    },
+    {
+      "epoch": 14,
+      "learning_rate": 0.0015,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5751574039459229,
+      "roc_auc": 0.7370552837107017,
+      "observed_ndcg_at_10": 0.8576626906466019
+    },
+    {
+      "epoch": 15,
+      "learning_rate": 0.0015,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5754945278167725,
+      "roc_auc": 0.7367257054163475,
+      "observed_ndcg_at_10": 0.8571667109801904
+    },
+    {
+      "epoch": 16,
+      "learning_rate": 0.0015,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5755314230918884,
+      "roc_auc": 0.7368536154835378,
+      "observed_ndcg_at_10": 0.857187292107209
+    },
+    {
+      "epoch": 17,
+      "learning_rate": 0.00075,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.575676679611206,
+      "roc_auc": 0.7367276837777116,
+      "observed_ndcg_at_10": 0.8579964336342366
+    },
+    {
+      "epoch": 18,
+      "learning_rate": 0.00075,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.575819194316864,
+      "roc_auc": 0.7365935753242675,
+      "observed_ndcg_at_10": 0.8575814255954896
+    }
+  ],
+  "checkpoint": "models/checkpoints/stravl_shared_long.pt",
+  "checkpoint_sha256": "0fc6e129b6aeeb5fb331f4df25d73089df2c6c3ca763de3b51210d76e70fd257"
+}

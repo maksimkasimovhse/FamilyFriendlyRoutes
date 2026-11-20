@@ -1,0 +1,95 @@
+{
+  "model": "shared_survey_destination_embeddings_v1",
+  "age_band_weights_trained": false,
+  "reason": "Stravl form_a only distinguishes ages 0-19; no 3-5, 6-8, 9-11 labels.",
+  "source_interactions_sha256": "27842cc1a89c77a26123cb72294443746e541a3e6e180cd758162ce8871a6baf",
+  "seed": 17,
+  "device": "cuda",
+  "best_epoch": 4,
+  "features": 46,
+  "destination_count": 1486,
+  "baseline_popularity": {
+    "validation": {
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5953970344442431,
+      "roc_auc": 0.7054374677965022,
+      "observed_ndcg_at_10": 0.8426761668959075
+    },
+    "test": {
+      "rows": 77094,
+      "positive_rate": 0.37668299674987793,
+      "log_loss": 0.599142742469704,
+      "roc_auc": 0.7056048150204298,
+      "observed_ndcg_at_10": 0.840352973765693
+    }
+  },
+  "trained_model": {
+    "validation": {
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5752308368682861,
+      "roc_auc": 0.7366279566288735,
+      "observed_ndcg_at_10": 0.8581487201317182
+    },
+    "test": {
+      "rows": 77094,
+      "positive_rate": 0.37668299674987793,
+      "log_loss": 0.5776337385177612,
+      "roc_auc": 0.7384668935492795,
+      "observed_ndcg_at_10": 0.8566816969404288
+    }
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5879570841789246,
+      "roc_auc": 0.7186221115893269,
+      "observed_ndcg_at_10": 0.8428419805175826
+    },
+    {
+      "epoch": 2,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5782132744789124,
+      "roc_auc": 0.7327287296426581,
+      "observed_ndcg_at_10": 0.8542547370468946
+    },
+    {
+      "epoch": 3,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5754647254943848,
+      "roc_auc": 0.7360773678415508,
+      "observed_ndcg_at_10": 0.8588135505385964
+    },
+    {
+      "epoch": 4,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5752308368682861,
+      "roc_auc": 0.7366279566288735,
+      "observed_ndcg_at_10": 0.8581487201317182
+    },
+    {
+      "epoch": 5,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5758679509162903,
+      "roc_auc": 0.7365720903472452,
+      "observed_ndcg_at_10": 0.8565745862422328
+    },
+    {
+      "epoch": 6,
+      "rows": 79201,
+      "positive_rate": 0.3688463568687439,
+      "log_loss": 0.5778510570526123,
+      "roc_auc": 0.7340571914235421,
+      "observed_ndcg_at_10": 0.8552525248577943
+    }
+  ],
+  "checkpoint": "models/checkpoints/stravl_shared.pt",
+  "checkpoint_sha256": "14030d5ed24b4584f18d19dc774e037da9f4bd37612f778aa1c5080ec7f0e1c8"
+}

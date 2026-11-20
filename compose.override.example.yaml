@@ -1,0 +1,7 @@
+services:
+  parser-service:
+    volumes:
+      - ./data/source_registry.json:/app/config/source_registry.json:ro
+      - ${GIGACHAT_CA_FILE}:/run/secrets/gigachat-ca.pem:ro
+    environment:
+      GIGACHAT_CA_BUNDLE: /run/secrets/gigachat-ca.pem

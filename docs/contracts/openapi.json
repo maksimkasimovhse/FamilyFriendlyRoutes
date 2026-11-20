@@ -1663,6 +1663,7 @@
         "properties": {
           "child_interest_weights": {
             "type": "array",
+            "description": "Равные нормированные веса интересов детей: сумма равна 1; для справочника без семьи массив пуст. Возрастная пригодность оценивается отдельно.",
             "items": {
               "type": "object",
               "properties": {
@@ -1729,7 +1730,8 @@
           "max_walk_distance_m_per_day": {
             "oneOf": [
               {
-                "type": "number"
+                "type": "number",
+                "minimum": 0
               },
               {
                 "type": "null"
@@ -3071,7 +3073,36 @@
                       "$ref": "#/components/schemas/ID"
                     },
                     "value": {
-                      "type": "number"
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  },
+                  "required": [
+                    "child_id",
+                    "value"
+                  ]
+                }
+              },
+              "child_age_fit": {
+                "type": "array",
+                "description": "По одной оценке пригодности конкретной активности возрастной группе каждого child_id; null означает отсутствие подтверждённой оценки. Это не глобальный вес возраста. Известный возрастной запрет отражается отдельно в eligibility и не компенсируется score.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "child_id": {
+                      "$ref": "#/components/schemas/ID"
+                    },
+                    "value": {
+                      "oneOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
                     }
                   },
                   "required": [
@@ -3082,8 +3113,7 @@
               },
               "adult_interest": {
                 "type": "number",
-                "minimum": 0,
-                "maximum": 1
+                "minimum": 0
               },
               "popularity": {
                 "type": "number",
@@ -3098,6 +3128,7 @@
             },
             "required": [
               "child_interest",
+              "child_age_fit",
               "adult_interest",
               "popularity",
               "final_relevance"
@@ -3112,7 +3143,9 @@
                   "$ref": "#/components/schemas/ID"
                 },
                 "value": {
-                  "type": "number"
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
                 }
               },
               "required": [

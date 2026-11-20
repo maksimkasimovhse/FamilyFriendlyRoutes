@@ -1,0 +1,32 @@
+[
+  {
+    "activity_id": "activity:zoo:visit",
+    "eligibility": {"child-1": "eligible"},
+    "child_interest": {"child-1": 2.0},
+    "child_age_fit": {"child-1": 0.9},
+    "adult_interest": 0.6,
+    "popularity": 0.8,
+    "query_match": 1.0,
+    "tags": ["category:park", "interest:animals", "format:active"]
+  },
+  {
+    "activity_id": "activity:history:exhibition",
+    "eligibility": {"child-1": "eligible"},
+    "child_interest": {"child-1": 0.5},
+    "child_age_fit": {"child-1": 0.6},
+    "adult_interest": 1.5,
+    "popularity": 0.7,
+    "query_match": 0.0,
+    "tags": ["category:museum", "interest:history", "format:educational"]
+  },
+  {
+    "activity_id": "activity:unknown:session",
+    "eligibility": {"child-1": "unknown"},
+    "child_interest": {"child-1": 4.0},
+    "child_age_fit": {"child-1": null},
+    "adult_interest": 1.0,
+    "popularity": 0.9,
+    "query_match": 0.8,
+    "tags": ["category:event", "format:spectacular"]
+  }
+]

@@ -1,0 +1,85 @@
+{
+  "geo_reviews_2023": {
+    "columns": [
+      "address",
+      "name_ru",
+      "rating",
+      "rubrics",
+      "text"
+    ],
+    "file": {
+      "bytes": 170880716,
+      "sha256": "10dee53b12dd9dc99b499f9d3fdc0617fd46ac3ebd594654fa5e89e0314a040f"
+    },
+    "nizhny_address_matches": 8645,
+    "rows": 500000
+  },
+  "osm_volga_2026_11_17": {
+    "file": {
+      "bytes": 778773891,
+      "sha256": "01920cdf81aeafb8e4907e0a56911b984a9985044f2c8a3d3f7469480a17e1d4"
+    }
+  },
+  "stravl": {
+    "columns": [
+      "id",
+      "form_a",
+      "form_b",
+      "form_c",
+      "form_f",
+      "form_g",
+      "form_h",
+      "form_i",
+      "form_j",
+      "form_k",
+      "form_r",
+      "form_rr",
+      "yes_swipes",
+      "no_swipes",
+      "maybe_swipes",
+      "Model",
+      "Retrieval",
+      "DynaMatch",
+      "Rating_0",
+      "Rating_1",
+      "Rating_2",
+      "Rating_3",
+      "Rating_4",
+      "Rating_5",
+      "Rating_6",
+      "Rating_7",
+      "Rating_8",
+      "Rating_9",
+      "Rec_0",
+      "Rec_1",
+      "Rec_2",
+      "Rec_3",
+      "Rec_4",
+      "Rec_5",
+      "Rec_6",
+      "Rec_7",
+      "Rec_8",
+      "Rec_9"
+    ],
+    "counts": {
+      "maybe_swipes": 28258,
+      "no_swipes": 518820,
+      "out_of_range_swipes": 0,
+      "rows": 80301,
+      "users_with_conflicting_swipes": 318,
+      "users_without_swipes": 19161,
+      "yes_swipes": 304055
+    },
+    "destination_count": 1486,
+    "files": {
+      "Stravl_Travel_Preference_Data.csv": {
+        "bytes": 22315913,
+        "sha256": "16dd0d5e83c4c2952f073c4bbdd94f25678f5a537753cee4994bb2d6f0484792"
+      },
+      "destination_ids.txt": {
+        "bytes": 38443,
+        "sha256": "42ff5e887f0b582d1bd55bafa91ad26adc476b029308798b83cf4731ff778dbf"
+      }
+    }
+  }
+}

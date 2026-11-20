@@ -1,0 +1,10 @@
+{
+  "conflicting_user_destination_pairs_removed": 1331,
+  "interactions_test": 79689,
+  "interactions_train": 652092,
+  "interactions_validation": 82021,
+  "users_test": 7950,
+  "users_train": 64292,
+  "users_validation": 8059,
+  "users_without_valid_interactions": 19171
+}

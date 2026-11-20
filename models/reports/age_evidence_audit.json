@@ -1,0 +1,13 @@
+{
+  "screening_only": true,
+  "note": "Regex matches are possible review candidates, not age-fit labels or unique activities.",
+  "counts": {
+    "local_reviews": 8645,
+    "age_mention_reviews": 119,
+    "child_word_reviews": 1546,
+    "age_and_child_word_reviews": 74,
+    "candidate_mentions_9-11": 21,
+    "candidate_mentions_3-5": 29,
+    "candidate_mentions_6-8": 29
+  }
+}
