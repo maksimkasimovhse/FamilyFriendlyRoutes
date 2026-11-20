@@ -44,28 +44,29 @@ type Planner struct {
 var ErrValidation = errors.New("trip validation failed")
 
 func invalid(message string) error { return fmt.Errorf("%w: %s", ErrValidation, message) }
-func Validate(input c.TripInput) error {
-	if input.Selections == nil || input.Family.AdultInterestIDS == nil {
-		return invalid("selections and adult_interest_ids must be arrays, not null")
+func ValidateFamily(family c.FamilyProfile, limits c.LoadLimits) error {
+	input := c.TripInput{Family: family, LoadLimits: limits}
+	if input.Family.AdultInterestIDS == nil {
+		return invalid("adult_interest_ids must be an array")
 	}
-	if input.CityID != "nizhny_novgorod" || input.Timezone != "Europe/Moscow" {
-		return invalid("city/timezone must be nizhny_novgorod / Europe/Moscow")
+	if len(family.AdultInterestIDS) > 20 {
+		return invalid("too many adult interests")
 	}
-	if input.PlanningContext != "before_arrival" && input.PlanningContext != "in_city" {
-		return invalid("invalid planning_context")
+	if err := validateInterests(family.AdultInterestIDS); err != nil {
+		return err
 	}
-	if len(input.Days) < 1 || len(input.Days) > 14 {
-		return invalid("trip must contain 1..14 days")
-	}
-	if len(input.Family.Children) < 1 || len(input.Family.Children) > 2 || input.Family.AdultCount < 1 {
-		return invalid("demo supports 1..2 children and at least one adult")
+	if len(input.Family.Children) < 1 || len(input.Family.Children) > 2 || input.Family.AdultCount < 1 || input.Family.AdultCount > 10 {
+		return invalid("supports 1..2 children and 1..10 adults")
 	}
 	ids := map[c.ID]bool{}
 	for _, child := range input.Family.Children {
 		if child.InterestIDS == nil {
 			return invalid("interest_ids must be an array")
 		}
-		if child.ChildID == "" || ids[child.ChildID] || child.AgeYears < 3 || child.AgeYears > 11 {
+		if err := validateInterests(child.InterestIDS); err != nil {
+			return err
+		}
+		if child.ChildID == "" || len(child.ChildID) > 100 || ids[child.ChildID] || child.AgeYears < 3 || child.AgeYears > 11 {
 			return invalid("child IDs must be unique; age 3..11")
 		}
 		ids[child.ChildID] = true
@@ -80,6 +81,46 @@ func Validate(input c.TripInput) error {
 	if reserve := input.LoadLimits.RestaurantWalkReserveMPerDay; !finite(*reserve) || *reserve < 0 || *reserve > *input.LoadLimits.MaxWalkDistanceMPerDay {
 		return invalid("restaurant walking reserve must be finite and between 0 and the daily walking limit")
 	}
+	if limits.Pace != "relaxed" && limits.Pace != "standard" && limits.Pace != "intensive" {
+		return invalid("invalid pace")
+	}
+	for _, v := range []*float64{limits.MaxWalkDistanceMPerDay, limits.MaxContinuousWalkDurationSec} {
+		if v != nil && (!finite(*v) || *v < 0) {
+			return invalid("invalid walking limit")
+		}
+	}
+	return nil
+}
+func validateInterests(ids []string) error {
+	if len(ids) > 20 {
+		return invalid("too many interests")
+	}
+	seen := map[string]bool{}
+	for _, id := range ids {
+		if len(id) == 0 || len(id) > 100 || seen[id] {
+			return invalid("invalid or duplicate interest ID")
+		}
+		seen[id] = true
+	}
+	return nil
+}
+func Validate(input c.TripInput) error {
+	if err := ValidateFamily(input.Family, input.LoadLimits); err != nil {
+		return err
+	}
+	if input.Selections == nil {
+		return invalid("selections must be an array, not null")
+	}
+	if input.CityID != "nizhny_novgorod" || input.Timezone != "Europe/Moscow" {
+		return invalid("city/timezone must be nizhny_novgorod / Europe/Moscow")
+	}
+	if input.PlanningContext != "before_arrival" && input.PlanningContext != "in_city" {
+		return invalid("invalid planning_context")
+	}
+	if len(input.Days) < 1 || len(input.Days) > 14 {
+		return invalid("trip must contain 1..14 days")
+	}
+	input = resolveBudgetDefaults(input)
 	dates := map[c.ISODate]bool{}
 	for _, day := range input.Days {
 		if dates[day.Date] {
@@ -107,14 +148,6 @@ func Validate(input c.TripInput) error {
 		}
 		if day.RestBudgetSec > day.DurationBudgetSec {
 			return invalid("rest budget exceeds day budget")
-		}
-		if input.LoadLimits.Pace != "relaxed" && input.LoadLimits.Pace != "standard" && input.LoadLimits.Pace != "intensive" {
-			return invalid("invalid pace")
-		}
-		for _, v := range []*float64{input.LoadLimits.MaxWalkDistanceMPerDay, input.LoadLimits.MaxContinuousWalkDurationSec} {
-			if v != nil && (!finite(*v) || *v < 0) {
-				return invalid("invalid walking limit")
-			}
 		}
 		probe := routing.Request{From: day.StartPoint, To: day.EndPoint, Mode: "walk"}
 		if err := probe.Validate(); err != nil {

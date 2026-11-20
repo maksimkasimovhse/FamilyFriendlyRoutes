@@ -5,7 +5,20 @@
  * Числовые ограничения и обязательные инварианты описаны в integration_contracts_v1.md.
  */
 export type ID = string;
-export interface SessionResponse { csrf_token: string }
+export interface AuthUser { user_id: ID; email: string; created_at: Instant }
+export interface AuthCredentials { email: string; password: string }
+export interface SessionResponse {
+  csrf_token: string; authenticated: boolean; user: AuthUser | null; onboarding_completed: boolean;
+}
+export interface FamilyOnboardingInput {
+  expected_version: number; family: FamilyProfile; load_limits: LoadLimits; wishes: string | null;
+}
+export interface FamilyOnboardingView {
+  version: number; updated_at: Instant; family: FamilyProfile; load_limits: LoadLimits; wishes: string | null;
+}
+export type TripFromProfileRequest = Omit<TripInput, 'family' | 'load_limits'> & { expected_profile_version: number };
+export interface TripSummary { trip_id: ID; version: number; updated_at: Instant; status: string; city_id: string }
+export interface TripList { items: TripSummary[] }
 /** Первый реализованный внутренний этап: Go adapter -> Valhalla. */
 export interface RoutingRequest {
   from: Point; to: Point; mode: Mode;
