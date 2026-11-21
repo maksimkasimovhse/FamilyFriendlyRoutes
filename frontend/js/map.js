@@ -1,4 +1,4 @@
-import { routeDurationHtml, routeDurationParts } from './route-duration.js';
+import { routeDurationParts } from './route-duration.js';
 // Экран «Карта» для родителя: маршрут дня по улицам, остановки, удобства рядом.
 
 import { emojiAsset, placeEmojiHtml, createPlaceEmoji, thinBenches } from './place-display.js';
@@ -213,7 +213,6 @@ function showSummary({ fit = true } = {}) {
       </span>
       <span class="go" aria-hidden="true">›</span>
     </button>
-    ${routeDurationHtml(day,fmtDuration)}
     ${source === 'backend' ? '' : '<p class="source warn">Нет связи с сервером — показан сохранённый маршрут</p>'}`;
   // К следующей непройденной остановке
   sheetBody.querySelector('[data-act="first"]').onclick = () => showStop(Math.max(0, day.stops.findIndex(st => st.progress === 'planned')));

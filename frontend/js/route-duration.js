@@ -7,6 +7,6 @@ export function routeDurationParts(day) {
  return {parts,finishSeconds:finish?.travel_duration_sec??null};
 }
 export function routeDurationHtml(day,format) {
- const {parts,finishSeconds}=routeDurationParts(day);
- return '<div class="route-duration" aria-label="Из чего складывается время маршрута"><dl>'+parts.map(part=>'<div><dt>'+part.label+'</dt><dd>'+format(part.seconds)+'</dd></div>').join('')+'</dl>'+(finishSeconds>0?'<p>В переходы входит путь до финиша: '+format(finishSeconds)+'.</p>':'')+'</div>';
+ const {parts}=routeDurationParts(day);
+ return '<div class="route-duration" aria-label="Из чего складывается время маршрута"><dl>'+parts.map(part=>'<div><dt>'+part.label+'</dt><dd>'+format(part.seconds)+'</dd></div>').join('')+'</dl>'+'</div>';
 }

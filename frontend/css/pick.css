@@ -18,7 +18,7 @@
 .pick-count { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--ink-2); white-space: nowrap; }
 .pick-top { flex-wrap: wrap; row-gap: 4px; }
 .pick-top h1 { flex: 1; min-width: 0; white-space: normal; }
-.pick-count { flex-basis: 100%; margin-left: 48px; white-space: normal; }
+.pick-count { flex-basis: 100%; margin-left: 0; white-space: normal; }
 .pcard-no-photo { display: grid; height: 100%; place-content: center; color: var(--ink-2); font-size: 14px; }
 
 /* Стопка карточек */
@@ -83,22 +83,24 @@
 .pick-finish .btn:disabled { background: #B9C2D3; opacity: 1; }
 .pick-hint { margin: 8px 0 0; text-align: center; font-size: 12px; color: var(--ink-2); font-weight: 600; }
 
-/* Описание целиком */
-.pick-sheet { position: absolute; inset: 0; z-index: 10; background: rgba(15,22,40,.5); display: flex; align-items: flex-end; }
+/* Описание целиком: карточка «разворачивается» на весь экран (clip-path от рамки карточки до края экрана, pick.js) */
+.pick-sheet { position: absolute; inset: 0; z-index: 10; }
+.pick-sheet[hidden] { display: none; }
 .sheet-panel {
-  position: relative; width: 100%; max-height: 92%; display: flex; flex-direction: column;
-  background: var(--surface); border-radius: 24px 24px 0 0; overflow: hidden;
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  background: var(--surface); overflow: hidden; will-change: clip-path;
 }
 .sheet-scroll { overflow-y: auto; flex: 1; min-height: 0; overscroll-behavior: contain; }
-.sheet-scroll img { width: 100%; max-height: 38vh; object-fit: cover; display: block; background: #DDE3EC; }
-.sheet-text { padding: 14px 18px 8px; }
-.sheet-text h2 { margin: 8px 0 4px; font-size: 24px; line-height: 1.15; font-weight: 800; }
-.sheet-text #sheet-text p { margin: 10px 0 0; font-size: 15px; line-height: 1.5; }
+.sheet-scroll img { width: 100%; height: 44vh; object-fit: cover; display: block; background: #DDE3EC; transform-origin: 50% 0; }
+.sheet-scroll img[hidden] { display: none; }
+.sheet-text { padding: 16px 20px 12px; }
+.sheet-text h2 { margin: 8px 0 4px; font-size: 26px; line-height: 1.15; font-weight: 800; }
+.sheet-text #sheet-text p { margin: 12px 0 0; font-size: 16px; line-height: 1.55; }
 .sheet-close {
-  position: absolute; right: 12px; top: 12px; z-index: 2; width: 38px; height: 38px; border: 0; border-radius: 50%;
-  background: rgba(15,22,40,.7); color: #fff; font-size: 16px; font-weight: 800;
+  position: absolute; right: 14px; top: calc(14px + env(safe-area-inset-top)); z-index: 3; width: 42px; height: 42px; border: 0; border-radius: 50%;
+  background: rgba(15,22,40,.7); color: #fff; font-size: 17px; font-weight: 800; backdrop-filter: blur(6px); cursor: pointer;
 }
-.sheet-actions { padding: 10px 16px 14px; border-top: 1px solid var(--line); }
+.sheet-actions { padding: 10px 16px calc(14px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: var(--surface); }
 
 /* ===== Маршрут из выбранных мест (панель под картой) ===== */
 .sheet.picked .chips { display: none; }
@@ -112,3 +114,16 @@
 .picked-list .t { flex: 1; min-width: 0; font-weight: 800; font-size: 14px; line-height: 1.2; }
 .picked-list .d { font-size: 12px; color: var(--ink-2); font-weight: 600; }
 .picked-photo { width: 100%; height: 120px; object-fit: cover; border-radius: 14px; margin-bottom: 8px; display: block; background: #DDE3EC; }
+
+/* Подсказка свайпа: стрелки под колодой, пока человек не смахнул первые карточки */
+.swipe-hint { flex: none; display: flex; justify-content: space-between; align-items: center; padding: 2px 16px 6px; pointer-events: none; font-weight: 800; font-size: 14px; }
+.swipe-hint[hidden] { display: none; }
+.swipe-hint span { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; background: #fff; box-shadow: 0 1px 4px rgba(15,22,40,.14); }
+.swipe-hint .no { color: #B3261E; }
+.swipe-hint .yes { color: var(--ok); }
+.swipe-hint i { font-style: normal; font-size: 20px; line-height: 1; }
+.swipe-hint .no i { animation: nudge-l 1.3s ease-in-out infinite; }
+.swipe-hint .yes i { animation: nudge-r 1.3s ease-in-out infinite; }
+@keyframes nudge-l { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-7px); } }
+@keyframes nudge-r { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(7px); } }
+@media (prefers-reduced-motion: reduce) { .swipe-hint i { animation: none; } }

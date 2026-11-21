@@ -117,6 +117,14 @@ func lastActivity(plan c.DayPlan) *routing.Point {
 	}
 	return nil
 }
+
+// Pre-filter only visits that exceed the entire user time budget on their own.
+// OSM travel time and opening windows are checked by the actual planner; do not
+// convert time to a straight-line distance or resurrect legacy age/distance caps.
+func reachableAlone(day c.DayInput, stayDurationSec float64) bool {
+	return stayDurationSec <= dailyTimeBudget(day)
+}
+
 func withinSupplementRadius(anchor *routing.Point, point routing.Point) bool {
 	if anchor == nil {
 		return true
@@ -217,6 +225,11 @@ func (p Planner) PlanningOptions(ctx context.Context, view c.TripView, now time.
 			for _, candidate := range result.Candidates {
 				id := candidate.Activity.ActivityID
 				if used[candidate.Place.PlaceID] || !p.candidateOpenOnDate(id, inputDay.Date, nil) || !withinSupplementRadius(row.Anchor, points[id]) {
+					continue
+				}
+				// Ещё нет плана: места, до которых заведомо не дойти за день, в подбор не предлагаем,
+				// иначе выбранное молча выпадет из маршрута и он окажется пустым.
+				if index < 0 && !reachableAlone(inputDay, candidate.Activity.Duration.DurationSec) {
 					continue
 				}
 				if index >= 0 {

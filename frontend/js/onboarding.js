@@ -12,19 +12,27 @@ const NAMES_KEY = 'child-names-v1';
 // Чья анкета и имена лежат на устройстве: 'guest' или почта аккаунта. Чужое не переносим и не показываем.
 const OWNER_KEY = 'family-owner-v1';
 const AGES = [3, 4, 5, 6, 7, 8, 9, 10, 11];
+// Счётчик «− N +», как у взрослых: самый привычный способ выбрать количество. Верхняя граница — 10 (больше — уже группа).
+const MAX_KIDS = 10;
 
 // Интересы из макета. id для истории/науки/игр совпадают со справочником backend (history, science, play);
 // остальные — [Предложение] до согласования словаря с ML (Вильдан) и reference-data (Максим).
 // Backend принимает любые id (проверяет только длину/повторы), но смысл им придаёт только ML.
 const CHILD_INTERESTS = [
-  { id: 'animals', label: 'Животные' }, { id: 'science', label: 'Эксперименты' }, { id: 'history', label: 'История' },
+  { id: 'animals', label: 'Животные' }, { id: 'history', label: 'История' },
   { id: 'art', label: 'Творчество' }, { id: 'tech', label: 'Техника' }, { id: 'play', label: 'Активные игры' },
   { id: 'nature', label: 'Природа' },
 ];
 const ADULT_INTERESTS = [
   { id: 'history', label: 'История' }, { id: 'architecture', label: 'Архитектура' }, { id: 'museums', label: 'Музеи' },
   { id: 'walks', label: 'Прогулки' }, { id: 'nature', label: 'Природа' }, { id: 'local_food', label: 'Местная кухня' },
+  { id: 'art', label: 'Искусство' }, { id: 'theatre', label: 'Театр' }, { id: 'music', label: 'Музыка' },
+  { id: 'literature', label: 'Литература' }, { id: 'crafts', label: 'Ремёсла' }, { id: 'photo', label: 'Фотография' },
+  { id: 'plants', label: 'Сады и парки' }, { id: 'sport', label: 'Спорт' }, { id: 'tech', label: 'Техника' },
+  { id: 'cafes', label: 'Кафе и кофейни' }, { id: 'shopping', label: 'Сувениры и шопинг' },
 ];
+// Интересы, которых нет в анкете, даже если их отдаёт справочник backend (у старых анкет id сохраняются)
+const HIDDEN_CHILD_INTERESTS = new Set(['science']);
 
 // ---------- Хранение ----------
 const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
@@ -155,7 +163,7 @@ const err = (id, text) => { $(id).textContent = text || ''; $(id).hidden = !text
 async function loadInterests() {
   try {
     const ref = await referenceData();
-    const extra = (ref.interest_options || []).filter(o => !CHILD_INTERESTS.some(c => c.id === o.id));
+    const extra = (ref.interest_options || []).filter(o => !CHILD_INTERESTS.some(c => c.id === o.id) && !HIDDEN_CHILD_INTERESTS.has(o.id));
     interestOptions = { child: [...CHILD_INTERESTS, ...extra], adult: ADULT_INTERESTS };
   } catch { /* backend недоступен — список из макета */ }
 }
@@ -166,7 +174,9 @@ function renderFamily() {
   $('adults-count').textContent = f.adult_count;
   $('adults-minus').disabled = f.adult_count <= 1;
   $('adults-plus').disabled = f.adult_count >= 10;
-  document.querySelectorAll('#kids-count button').forEach(b => b.setAttribute('aria-checked', Number(b.dataset.n) === f.children.length));
+  $('kids-count').textContent = f.children.length;
+  $('kids-minus').disabled = f.children.length <= 1;
+  $('kids-plus').disabled = f.children.length >= MAX_KIDS;
   $('kids-cards').innerHTML = '';
   f.children.forEach((child, i) => {
     const card = document.createElement('div');
@@ -204,16 +214,13 @@ function renderFamily() {
 function bindFamily() {
   $('adults-minus').onclick = () => { draft.family.adult_count = Math.max(1, draft.family.adult_count - 1); renderFamily(); };
   $('adults-plus').onclick = () => { draft.family.adult_count = Math.min(10, draft.family.adult_count + 1); renderFamily(); };
-  document.querySelectorAll('#kids-count button').forEach(b => {
-    b.onclick = () => {
-      const n = Number(b.dataset.n);
-      const kids = draft.family.children;
-      // child_id стабилен: второй ребёнок — всегда child-2
-      if (n === 2 && kids.length === 1) kids.push({ child_id: 'child-2', age_years: 6, height_cm: null, interest_ids: [] });
-      if (n === 1 && kids.length === 2) kids.pop();
-      renderFamily();
-    };
-  });
+  // child_id стабилен: ребёнок N — всегда child-N, лишний убираем с конца
+  $('kids-plus').onclick = () => {
+    const kids = draft.family.children;
+    if (kids.length < MAX_KIDS) kids.push({ child_id: `child-${kids.length + 1}`, age_years: 6, height_cm: null, interest_ids: [] });
+    renderFamily();
+  };
+  $('kids-minus').onclick = () => { if (draft.family.children.length > 1) draft.family.children.pop(); renderFamily(); };
   $('family-next').onclick = () => {
     const missing = draft.family.children.findIndex(c => !AGES.includes(c.age_years));
     if (missing !== -1) return err('family-error', `Выберите возраст ребёнка ${missing + 1}`);
@@ -274,29 +281,13 @@ function renderAdults() {
     };
     $('adult-interests').append(b);
   });
-  document.querySelectorAll('#pace button').forEach(b => b.setAttribute('aria-checked', b.dataset.pace === draft.load_limits.pace));
-  $('wishes').value = draft.wishes || '';
 }
 
 function bindAdults() {
-  document.querySelectorAll('#pace button').forEach(b => {
-    b.onclick = () => { draft.load_limits.pace = b.dataset.pace; renderAdults(); };
-  });
-  document.querySelectorAll('#wish-chips button').forEach(b => {
-    b.onclick = () => {
-      const t = $('wishes');
-      if (t.value.includes(b.textContent)) return;
-      t.value = (t.value.trim() ? t.value.trim().replace(/[.,;]$/, '') + ', ' : '') + b.textContent;
-      t.dispatchEvent(new Event('input'));
-    };
-  });
   $('profile-save').onclick = save;
 }
 
 async function save() {
-  const wishes = $('wishes').value.trim();
-  if (wishes.length > 2000) return err('adults-error', 'Пожелания — не длиннее 2000 символов');
-  draft.wishes = wishes || null;
   const btn = $('profile-save');
   btn.disabled = true;
   err('adults-error');

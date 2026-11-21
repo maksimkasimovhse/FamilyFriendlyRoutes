@@ -47,13 +47,13 @@ func (cmd ChangeCommand) Validate() error {
 		"insert_infrastructure_stop": {"kind", "date", "place_id"},
 		"append_manual_choices":      {"kind", "date", "choices", "base_preview_id"},
 		"generate_plan":              {"kind"}, "start_day": {"kind", "date", "point", "start_at"},
-		"remove_stop": {"kind", "date", "stop_id"}, "replan_day": {"kind", "date"},
+		"remove_stop": {"kind", "date", "stop_id", "base_preview_id"}, "replan_day": {"kind", "date"},
 		"shorten_day":     {"kind", "date", "target_remaining_duration_sec", "target_remaining_walk_distance_m"},
 		"return_to_hotel": {"kind", "date", "hotel_point", "target_remaining_duration_sec", "target_remaining_walk_distance_m"},
-		"add_activity":    {"kind", "date", "selection", "after_stop_id"},
-		"replace_stop":    {"kind", "date", "stop_id", "selection"},
-		"move_stop":       {"kind", "date", "stop_id", "target_date"},
-		"reorder_stops":   {"kind", "date", "stop_ids"}, "update_trip_input": {"kind", "input"},
+		"add_activity":    {"kind", "date", "selection", "after_stop_id", "base_preview_id"},
+		"replace_stop":    {"kind", "date", "stop_id", "selection", "base_preview_id"},
+		"move_stop":       {"kind", "date", "stop_id", "target_date", "base_preview_id"},
+		"reorder_stops":   {"kind", "date", "stop_ids", "base_preview_id"}, "update_trip_input": {"kind", "input"},
 	}
 	fields, ok := allowed[cmd.Kind]
 	if !ok {

@@ -58,8 +58,8 @@ func ValidateFamily(family c.FamilyProfile, limits c.LoadLimits) error {
 	if err := validateInterests(family.AdultInterestIDS); err != nil {
 		return err
 	}
-	if len(input.Family.Children) < 1 || len(input.Family.Children) > 2 || input.Family.AdultCount < 1 || input.Family.AdultCount > 10 {
-		return invalid("supports 1..2 children and 1..10 adults")
+	if len(input.Family.Children) < 1 || len(input.Family.Children) > 10 || input.Family.AdultCount < 1 || input.Family.AdultCount > 10 {
+		return invalid("supports 1..10 children and 1..10 adults")
 	}
 	ids := map[c.ID]bool{}
 	for _, child := range input.Family.Children {
