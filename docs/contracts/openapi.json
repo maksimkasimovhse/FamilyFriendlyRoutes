@@ -2412,7 +2412,7 @@
             }
           }
         },
-        "description": "Loads a validated recommendation snapshot, shared by manual choices and route calculation. Preview options are scoped to its owner/version/expiry. Short day: <70% of effective time; suggestions within 2000 m of the last activity, or globally for an empty day. At most two manual choices per day, including supplements. Excludes all places already scheduled in the trip; checks real OSM paths, time and availability for supplemental candidates. Active trips cannot be supplemented yet."
+        "description": "Loads a validated recommendation snapshot, shared by manual choices and route calculation. Preview options are scoped to its owner/version/expiry. Short day: <70% of effective time; suggestions within 2000 m of the last activity, or globally for an empty day. No manual card count limit. Excludes all places already scheduled in the trip; checks real OSM paths, time and availability for supplemental candidates. Active trips cannot be supplemented yet."
       }
     },
     "/api/v1/trips/{trip_id}/assistant/messages": {
@@ -3011,13 +3011,14 @@
           "rest_budget_sec": {
             "type": "number",
             "minimum": 0,
-            "description": "Daily rest time reserve. Existing rest stops cover the reserve; only the unallocated remainder is added."
+            "description": "Legacy compatibility field; no automatic rest time is reserved. Only selected stops consume time."
           },
           "meal_count": {
             "type": "integer",
             "minimum": 0,
             "maximum": 10,
-            "default": 1
+            "default": 0,
+            "description": "Legacy compatibility field; no automatic meal time is reserved."
           },
           "meal_format": {
             "type": "string",
@@ -3032,7 +3033,7 @@
             "type": "number",
             "minimum": 0,
             "maximum": 86400,
-            "description": "Total daily meal time, seconds. When omitted, meal_count times the configured duration for meal_format. Explicit zero disables the meal time reserve."
+            "description": "Legacy compatibility field; no unscheduled meal time is added. Selected meal stops use their activity duration."
           },
           "max_walk_distance_m": {
             "oneOf": [
@@ -3152,7 +3153,7 @@
               "ranked_prefix",
               "manual_choices"
             ],
-            "description": "manual_choices: route only explicitly selected places, with additional cards offered for short days. ranked_prefix: automatic ranked filling only when explicitly requested. Both enforce two manual choices per day. Omission preserves legacy behaviour."
+            "description": "manual_choices: route only explicitly selected places, with additional cards offered for short days. ranked_prefix: automatic ranked filling only when explicitly requested. No manual card count limit; feasibility uses time and walking budgets. Omission preserves legacy behaviour."
           }
         },
         "required": [
@@ -5247,12 +5248,12 @@
               "rest_duration_sec": {
                 "type": "number",
                 "minimum": 0,
-                "description": "Maximum of rest_budget_sec and scheduled rest-stop duration, without double counting."
+                "description": "Duration of explicitly scheduled rest stops only. No automatic rest reserve."
               },
               "meal_duration_sec": {
                 "type": "number",
                 "minimum": 0,
-                "description": "Maximum of the daily meal time reserve and scheduled meal-stop duration, without double counting."
+                "description": "Duration of explicitly scheduled meal stops only. No automatic meal reserve."
               },
               "elapsed_duration_sec": {
                 "oneOf": [
@@ -7031,7 +7032,7 @@
               "ranked_prefix",
               "manual_choices"
             ],
-            "description": "manual_choices: route only explicitly selected places, with additional cards offered for short days. ranked_prefix: automatic ranked filling only when explicitly requested. Both enforce two manual choices per day. Omission preserves legacy behaviour."
+            "description": "manual_choices: route only explicitly selected places, with additional cards offered for short days. ranked_prefix: automatic ranked filling only when explicitly requested. No manual card count limit; feasibility uses time and walking budgets. Omission preserves legacy behaviour."
           }
         },
         "required": [
@@ -7092,7 +7093,8 @@
         "additionalProperties": false,
         "properties": {
           "manual_limit_per_day": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Deprecated compatibility field. 0 means no manual card count limit; feasibility is checked by walking/time budgets."
           },
           "short_day_ratio": {
             "type": "number"

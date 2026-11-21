@@ -56,7 +56,7 @@ func TestPlanningOptionsPreviewSupplementApplyAndAccess(t *testing.T) {
 	input.Days = input.Days[:1]
 	input.Days[0].DurationBudgetSec = 1800
 	input.Selections = []c.Selection{}
-	policy := "ranked_prefix"
+	policy := "manual_choices"
 	input.PlanningPolicy = &policy
 	source := &optionSource{}
 	h.handler = tripHandler(h.store, planner.Planner{Router: dayRouter{}, Source: source}, func() time.Time { return h.now })
@@ -73,7 +73,7 @@ func TestPlanningOptionsPreviewSupplementApplyAndAccess(t *testing.T) {
 	}
 	var cards c.PlanningOptions
 	_ = json.Unmarshal(options.Body.Bytes(), &cards)
-	if len(cards.Candidates) != 3 || cards.Policy.ManualLimitPerDay < 2 || cards.Days[0].Anchor != nil || !cards.Days[0].IsShort {
+	if len(cards.Candidates) != 3 || cards.Policy.ManualLimitPerDay != 0 || cards.Days[0].Anchor != nil || !cards.Days[0].IsShort {
 		t.Fatal("wrong initial cards/policy")
 	}
 	outsider := bootstrap(t, h.handler)
@@ -87,7 +87,7 @@ func TestPlanningOptionsPreviewSupplementApplyAndAccess(t *testing.T) {
 	}
 	initial := h.preview(t, trip, map[string]any{"kind": "generate_plan"}, 201)
 	if len(initial.ProposedTrip.Days[0].Stops) != 0 || initial.CanApply {
-		t.Fatal("oversized first ranked card should leave empty preview")
+		t.Fatal("manual mode with no selected cards must remain empty until the user adds cards")
 	}
 	options = request(h.handler, h.browser, "POST", h.path+"/planning-options", body(t, c.PlanningOptionsRequest{ExpectedVersion: 1, PreviewID: &initial.PreviewID}), "")
 	if options.Code != 200 {
@@ -116,6 +116,6 @@ func TestPlanningOptionsPreviewSupplementApplyAndAccess(t *testing.T) {
 	}
 	input.Selections = append(choices, choices[0], choices[0])
 	if w := request(h.handler, h.browser, "POST", "/api/v1/trips", body(t, input), "too-many-manual"); w.Code != 422 {
-		t.Fatal("HTTP accepted >2 manual choices")
+		t.Fatal("HTTP accepted duplicate manual choices")
 	}
 }

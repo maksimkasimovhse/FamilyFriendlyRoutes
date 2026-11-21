@@ -32,7 +32,6 @@ let busy = false;
 let configuration = null;
 let currentDate = null;
 const choicesToday = () => configuration?.tripLimit != null ? liked.length : liked.filter(c => c.preferred_date === currentDate).length;
-const dayLimit = () => configuration?.tripLimit ?? configuration?.days.find(d => d.date === currentDate)?.limit ?? Infinity;
 function renderDayTabs() {
   let tabs = $('pick-day-tabs');
   if (!tabs) { tabs = el('div', 'day-tabs'); tabs.id = 'pick-day-tabs'; $('deck').before(tabs); }
@@ -183,7 +182,6 @@ function reset(card) {
 function decide(choice, dy = 0, fromCard = null) {
   const top = fromCard || $('deck').querySelector('.pcard:not(.gone)');
   if (!top || top.classList.contains('gone') || pos >= deck.length) return;
-  if (choice === 'yes' && choicesToday() >= dayLimit()) { reset(top); return; }
   closeDetails(true);
   const card = deck[pos];
   const dir = choice === 'yes' ? 1 : -1;

@@ -16,7 +16,7 @@ function open(title='Что нужно сейчас?') {
  if(!$('urgent-dialog').open)$('urgent-dialog').showModal();
 }
 function close(){revision++;$('urgent-dialog').close();$('urgent-toggle').setAttribute('aria-expanded','false');hooks.onCancel?.();}
-export function openUrgentWidget(){open();$('urgent-kinds').hidden=false;$('urgent-kinds').querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed','false'));status('Выберите действие. Найдём три ближайших места от вашей геопозиции.');}
+export function openUrgentWidget(){open();$('urgent-kinds').hidden=false;$('urgent-kinds').querySelectorAll('button').forEach(button=>button.setAttribute('aria-pressed','false'));content('');}
 function error(err){status(err.message || 'Не удалось рассчитать изменение. Попробуйте ещё раз.');}
 function showPreview(preview,label='Изменение маршрута') {
  $('urgent-title').textContent=label;
@@ -51,7 +51,7 @@ async function choosePlace(place){
  }catch(err){if(ticket===revision)error(err);}
 }
 function showPlaces(answer){
- content(`<p class="urgent-results-hint">Нажмите на место — рассчитаем маршрут через него.</p><div class="urgent-results">${answer.places.map((p,i)=>`<button type="button" class="urgent-place" data-place="${i}"><span><b>${esc(p.name)}</b><small>${distance(p.urgent_distance_m)} от вас · по прямой</small></span><span class="urgent-place-action">Зайти сюда <span aria-hidden="true">→</span></span></button>`).join('')}</div><p class="urgent-footnote">Маршрут изменится после подтверждения. Часы работы и доступность места сейчас не подтверждены.</p>`);
+ content(`<div class="urgent-results">${answer.places.map((p,i)=>`<button type="button" class="urgent-place" data-place="${i}"><span class="urgent-place-number" aria-hidden="true">${i+1}</span><span class="urgent-place-info"><b>${esc(p.name)}</b>${p.address?`<small>${esc(p.address)}</small>`:''}<small>${distance(p.urgent_distance_m)} от вас · по прямой</small></span><span class="urgent-place-action">Зайти сюда <span aria-hidden="true">→</span></span></button>`).join('')}</div>`);
  $('urgent-content').querySelectorAll('[data-place]').forEach(button=>{button.onclick=()=>choosePlace(answer.places[Number(button.dataset.place)]);});
 }
 async function search(kind){
@@ -66,7 +66,7 @@ async function search(kind){
 }
 export function initMapActions(options={}) {
  hooks=options;
- $('urgent-kinds').innerHTML=actions.map(([kind,label,icon])=>`<button type="button" data-kind="${kind}" aria-pressed="false">${placeEmojiHtml(icon)}${label}</button>`).join('');
+ $('urgent-kinds').innerHTML=actions.map(([kind,label,icon])=>`<button type="button" data-kind="${kind}" aria-pressed="false">${kind==='rain'?'<span class="urgent-weather-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M8 19h16a5 5 0 0 0 0-10 8 8 0 0 0-15-1 6 6 0 0 0-1 11Z" fill="currentColor"/><path d="m10 23-2 4m9-4-2 4m9-4-2 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span>':placeEmojiHtml(icon)}${label}</button>`).join('');
  $('urgent-kinds').querySelectorAll('button').forEach(button=>button.onclick=()=>search(button.dataset.kind));
  $('urgent-toggle').onclick=openUrgentWidget;$('urgent-close').onclick=close;
  $('urgent-dialog').addEventListener('cancel',event=>{event.preventDefault();close();});

@@ -1,5 +1,5 @@
 {
-  "policy_version": "family-budget-v1",
+  "policy_version": "family-budget-v2",
   "note": "Editable product hypotheses for planning, not measured age-specific medical limits. Units: meters, seconds, kilometers per hour. Rebuild/restart to apply changes.",
   "daily_walk_limit_m_by_age": {
     "3": 2000,
@@ -17,7 +17,8 @@
     "standard": 3.0,
     "intensive": 3.5
   },
-  "default_meal_count": 1,
+  "min_auto_stops_per_day": 2,
+  "default_meal_count": 0,
   "default_meal_format": "table_service",
   "meal_duration_sec_by_format": {
     "quick_service": 3600,
@@ -26,7 +27,7 @@
   },
   "restaurant_walk_reserve_m_per_day": 0,
   "completion_policy": {
-    "manual_limit_per_day": 50,
+    "manual_limit_per_day": 0,
     "short_day_ratio": 0.7,
     "supplement_radius_m": 2000
   }

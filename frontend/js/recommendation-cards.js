@@ -27,7 +27,7 @@ export function pickConfiguration(options, { supplemental = false, selected = []
   }
   const days = options.days.filter(d => !supplemental || d.is_short && d.remaining_manual_choices > 0 && d.candidates.length);
   return {
-    days: days.map(d => ({date:d.date,limit:d.remaining_manual_choices,anchorOnFirstPick:d.anchor===null,radiusM:options.policy.supplement_radius_m})),
+    days: days.map(d => ({date:d.date,limit:Infinity,anchorOnFirstPick:d.anchor===null,radiusM:options.policy.supplement_radius_m})),
     cardsByDay: Object.fromEntries(days.map(d => [d.date,d.candidates.map(c => candidateCard(c,d.date))])),
     selected,
   };

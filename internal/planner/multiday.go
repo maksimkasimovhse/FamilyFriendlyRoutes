@@ -3,6 +3,7 @@ package planner
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 	"sort"
 	"strings"
@@ -202,8 +203,6 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 	plans := make([]c.DayPlan, len(days))
 	assignments := make([][]c.Selection, len(days))
 	distances := make([]float64, len(days))
-	closedPrefix := make([]bool, len(days))
-	manualCounts := make([]int, len(days))
 	prefix := view.Input.PlanningPolicy != nil
 	speed := budgetDefaults.WalkingSpeedKPHByPace[view.Input.LoadLimits.Pace]
 	build := func(i int, choices []c.Selection) (c.DayPlan, error) {
@@ -253,9 +252,6 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 		}
 		options := []option{}
 		for i, day := range days {
-			if prefix && ((!selected[s.ActivityID] && closedPrefix[i]) || (selected[s.ActivityID] && manualCounts[i] >= budgetDefaults.CompletionPolicy.ManualLimitPerDay)) {
-				continue
-			}
 			if s.PreferredDate != nil && day.Date != *s.PreferredDate {
 				continue
 			}
@@ -297,6 +293,15 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 		}
 		sort.SliceStable(options, func(i, j int) bool {
 			if prefix && !selected[s.ActivityID] {
+				// Cover every day with its minimum before adding extra stops.
+				left, right := len(assignments[options[i].day]), len(assignments[options[j].day])
+				minimum := budgetDefaults.MinAutoStopsPerDay
+				if (left < minimum) != (right < minimum) {
+					return left < minimum
+				}
+				if left < minimum && left != right {
+					return left < right
+				}
 				return options[i].day < options[j].day
 			}
 			// Equal round-trip insertion costs can hide opposite directions from
@@ -319,13 +324,7 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 				assignments[o.day] = o.choices
 				distances[o.day] = o.totalDistance
 				accepted = true
-				if selected[s.ActivityID] {
-					manualCounts[o.day]++
-				}
 				break
-			}
-			if prefix && !selected[s.ActivityID] {
-				closedPrefix[o.day] = true
 			}
 		}
 		if !accepted {
@@ -348,6 +347,10 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 		plan, err := build(i, assignments[i])
 		if err != nil {
 			return c.TripView{}, err
+		}
+		if view.Input.PlanningPolicy != nil && *view.Input.PlanningPolicy == "ranked_prefix" && len(plan.Stops) < budgetDefaults.MinAutoStopsPerDay {
+			plan.Feasibility = "infeasible"
+			plan.Warnings = append(plan.Warnings, Warning("AUTO_DAY_BELOW_MINIMUM", fmt.Sprintf("%s: для автоподбора нужно минимум %d места; удалось подобрать %d в пределах времени, ходьбы и доступности. Измените точку старта, даты или доступное время.", plan.Date, budgetDefaults.MinAutoStopsPerDay, len(plan.Stops))))
 		}
 		plans[i] = plan
 	}

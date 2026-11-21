@@ -1,3 +1,5 @@
+import { routeDurationHtml } from './route-duration.js';
+import { selectionReview } from './selection-review.js';
 // Новая поездка: экраны 5, 7, 8 (+ шаг 2 — подбор мест из pick.js) — docs/tz-onboarding.md.
 // Гость: POST /trips с полным TripInput из локальной анкеты.
 // Аккаунт: POST /trips/from-profile с expected_profile_version.
@@ -290,6 +292,9 @@ function renderPreview() {
   const day = days[previewDay];
   const t = day.totals;
   $('preview-line').textContent = `${cap(fmtDay(day.date, { weekday: 'long', day: 'numeric', month: 'long' }))} · около ${fmtDuration(t.elapsed_duration_sec || 0)} · ${fmtDistance(t.walk_distance_m || 0)} пешком`;
+  let durationPanel=$('preview-duration');
+  if(!durationPanel){durationPanel=document.createElement('div');durationPanel.id='preview-duration';$('preview-line').after(durationPanel);}
+  durationPanel.innerHTML=routeDurationHtml(day,fmtDuration);
   const stops = day.stops.map((s, i) => {
     const time = fmtTime(s.timing?.estimated_arrival_at);
     return `<li><span class="n">${i + 1}</span><span><b>${esc(s.title)}</b><small>${time ? time + ' · ' : ''}на месте ~${fmtDuration(s.duration.duration_sec)}</small></span></li>`;
@@ -298,12 +303,11 @@ function renderPreview() {
     <li><span class="n end">▶</span><span><b>Старт</b><small>${esc(day.start_point.label || 'точка старта')}</small></span></li>
     ${stops || '<li><span><small>На этот день мест не нашлось — попробуйте больше часов или другие даты</small></span></li>'}
     <li><span class="n end">■</span><span><b>Финиш</b><small>${esc(day.end_point.label || 'точка финиша')}</small></span></li>`;
-  let excluded = $('preview-excluded');
-  if (!excluded) { excluded = document.createElement('p'); excluded.id='preview-excluded'; excluded.className='small'; $('preview-list').after(excluded); }
-  const missing=trip.input.selections.filter(s=>!userRemoved.has(s.activity_id) && (s.preferred_date===day.date || (s.preferred_date==null && day===days[0])) && !days.some(d=>d.stops.some(stop=>stop.activity_id===s.activity_id)));
-  const names=new Map((trip.recommendation_snapshot?.candidates || []).map(c=>[c.activity.activity_id,c.activity.title]));
-  excluded.hidden=!missing.length;
-  excluded.textContent=missing.length ? `Не удалось включить выбранные места: ${missing.map(s=>names.get(s.activity_id)||s.activity_id).join(', ')}. Проверьте доступное время, лимит ходьбы и даты.` : '';
+  renderSelectionReview();
+  let minimumPanel=$('preview-auto-minimum');
+  if(!minimumPanel){minimumPanel=document.createElement('p');minimumPanel.id='preview-auto-minimum';minimumPanel.className='selection-overflow';minimumPanel.setAttribute('role','alert');$('preview-line').after(minimumPanel);}
+  const minimumWarnings=trip.warnings.filter(w=>w.code==='AUTO_DAY_BELOW_MINIMUM');
+  minimumPanel.hidden=!minimumWarnings.length;minimumPanel.textContent=minimumWarnings.map(w=>w.message).join(' ');
 
   // Предупреждения бекенда о данных пользователю не показываем (подтверждаем при сохранении). Перегрузку и пустые дни — показываем.
   const overloaded = days.filter(d => d.feasibility === 'infeasible');
@@ -326,7 +330,45 @@ function renderPreview() {
   $('preview-error').hidden = true;
   renderCompletionOffer();
 }
-// «Изменить план»: окно с днями — перетаскивание между днями, удаление и добавление мест (plan-editor.js)
+
+// Выбранные места, которые не вошли в план. То, что человек убрал сам в «Изменить план», сюда не попадает.
+function reviewOf(trip) {
+  const cards = selectionReview(trip).cards.filter(card => !userRemoved.has(card.activityId));
+  return { cards, excludedCount: cards.filter(card => card.missing).length };
+}
+let selectionBusy=false;
+function renderSelectionReview() {
+ let panel=$('preview-selection-review');
+ if(!panel){panel=document.createElement('section');panel.id='preview-selection-review';panel.className='selection-review';$('preview-list').after(panel);}
+ const {cards,excludedCount}=reviewOf(preview.proposed_trip);
+ panel.hidden=!cards.length;
+ panel.innerHTML=(excludedCount ? '<p class="selection-overflow" role="alert"><b>Вы не успеете пройти маршрут со всеми выбранными местами.</b> Рекомендуем исключить '+plural(excludedCount,'карточку','карточки','карточек')+'.</p><p class="small">Отмечены места, которые не вошли в текущий расчёт. Можно убрать любые карточки — после удаления пересчитаем маршрут. Также можно увеличить время или изменить даты.</p>' : '')+
+ '<h3>Выбранные места ('+cards.length+')</h3><ul class="selection-review-list">'+cards.map(card=>'<li class="'+(card.missing?'is-excluded':'')+'"><span><b>'+esc(card.title)+'</b>'+(card.missing?'<small>Не помещается или недоступно в выбранные даты</small>':'')+'</span><button type="button" data-remove-choice="'+esc(card.activityId)+'" aria-label="Убрать '+esc(card.title)+'" title="Убрать место">×</button></li>').join('')+'</ul>';
+ panel.querySelectorAll('[data-remove-choice]').forEach(button=>button.onclick=()=>removePreviewChoice(button.dataset.removeChoice));
+}
+async function removePreviewChoice(activityId) {
+ if(selectionBusy)return;
+ selectionBusy=true;
+ $('trip-preview').querySelectorAll('button').forEach(button=>button.disabled=true);
+ $('preview-selection-review').insertAdjacentHTML('afterbegin','<p class="small" role="status">Пересчитываем маршрут…</p>');
+ $('preview-error').hidden=true;
+ try {
+  const input=structuredClone(preview.proposed_trip.input);
+  input.selections=input.selections.filter(choice=>choice.activity_id!==activityId);
+  const nextDraft=await createTrip(input);
+  const nextPreview=await planDraft(nextDraft);
+  draftTrip=nextDraft;preview=nextPreview;
+  st.picked=st.picked.filter(card=>card.activity_id!==activityId);persist();
+  renderPreview();
+ }catch(error){
+  renderPreview();$('preview-error').textContent=humanError(error);$('preview-error').hidden=false;
+ }finally{
+  selectionBusy=false;
+  $('trip-preview').querySelectorAll('button').forEach(button=>button.disabled=false);
+  renderPreviewSaveButton();
+ }
+}
+
 function renderCompletionOffer() {
   let panel = $('preview-completion');
   if (!panel) { panel = document.createElement('div'); panel.id = 'preview-completion'; $('preview-list').after(panel); }
@@ -366,10 +408,11 @@ function renderCompletionOffer() {
 function renderPreviewSaveButton() {
   const overloaded = preview?.proposed_trip.days.some(d => d.feasibility === 'infeasible');
   $('preview-save').textContent = overloaded && preview.can_apply ? 'Сохранить всё равно' : 'Сохранить маршрут';
-  $('preview-save').disabled = !preview?.can_apply;
+  $('preview-save').disabled = selectionBusy || !preview?.can_apply;
 }
 
 async function savePreview() {
+  if (selectionBusy) return;
   const btn = $('preview-save');
   btn.disabled = true;
   btn.textContent = 'Сохраняем…';

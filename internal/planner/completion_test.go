@@ -3,6 +3,7 @@ package planner
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 	"testing"
 	"time"
@@ -58,7 +59,7 @@ func TestTripChoicesClusterGeographicallyWithoutPreferredDates(t *testing.T) {
 func completionFixture(t *testing.T) (Planner, c.TripView) {
 	t.Helper()
 	input := sample(t)
-	policy := "ranked_prefix"
+	policy := "manual_choices"
 	input.PlanningPolicy = &policy
 	input.Days[0].DurationBudgetSec = 1800
 	date := input.Days[0].Date
@@ -74,19 +75,27 @@ func completionFixture(t *testing.T) (Planner, c.TripView) {
 	response.Candidates[2].Activity.Duration.DurationSec = 300
 	return Planner{Router: &testRouter{}, Source: fixedSource{response: response}}, view
 }
-func TestRankedPrefixAndManyManualChoices(t *testing.T) {
+func TestRankedPrefixAndUnlimitedManualChoices(t *testing.T) {
 	p, view := completionFixture(t)
+	view.Input.Days[0].DurationBudgetSec = 2400
+	policy := "ranked_prefix"
+	view.Input.PlanningPolicy = &policy
 	result, err := p.Build(context.Background(), view, time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(result.Days[0].Stops) != 1 || result.Days[0].Stops[0].ActivityID != "activity-0" {
-		t.Fatal("lower rank filled a day after ranked prefix exceeded capacity")
+	if len(result.Days[0].Stops) < 3 {
+		t.Fatal("auto selection stopped after an oversized candidate or at two stops")
+	}
+	for _, stop := range result.Days[0].Stops {
+		if stop.ActivityID == "activity-1" {
+			t.Fatal("oversized candidate exceeded day budget")
+		}
 	}
 	date := view.Input.Days[0].Date
 	view.Input.Selections = append(view.Input.Selections, c.Selection{ActivityID: "activity-2", PlaceID: "place-2", PreferredDate: &date}, c.Selection{ActivityID: "activity-3", PlaceID: "place-3", PreferredDate: &date})
 	if err := Validate(view.Input); err != nil {
-		t.Fatalf("верхнего ограничения на места за день больше нет: %v", err)
+		t.Fatalf("rejected three manual choices: %v", err)
 	}
 }
 func TestManualChoicesNeverSilentlyFillOtherStopsOrDays(t *testing.T) {
@@ -126,7 +135,7 @@ func TestShortDaySupplementRadiusQuotaAndPreservedChoices(t *testing.T) {
 		t.Fatal(err)
 	}
 	row := options.Days[0]
-	if !row.IsShort || row.FillRatio >= .7 || row.ManualCount != 1 || row.RemainingManualChoices != budgetDefaults.CompletionPolicy.ManualLimitPerDay-1 || row.Anchor == nil {
+	if !row.IsShort || row.FillRatio >= .7 || row.ManualCount != 1 || row.RemainingManualChoices != 1 || row.Anchor == nil {
 		t.Fatalf("wrong short-day policy: %+v", row)
 	}
 	ids := map[c.ID]bool{}
@@ -146,7 +155,7 @@ func TestShortDaySupplementRadiusQuotaAndPreservedChoices(t *testing.T) {
 		t.Fatal("append reordered or mutated the existing route")
 	}
 	if _, err := p.AppendManualChoices(ctx, updated, date, []c.Selection{{ActivityID: "activity-3", PlaceID: "place-3", PreferredDate: &date}}, now); err == nil {
-		t.Fatal("supplement bypassed two-choice limit")
+		t.Fatal("supplement bypassed 2km radius")
 	}
 	if _, err := p.AppendManualChoices(ctx, result, date, []c.Selection{{ActivityID: "activity-4", PlaceID: "place-4", PreferredDate: &date}}, now); err == nil {
 		t.Fatal("supplement bypassed 2km radius")
@@ -210,5 +219,127 @@ func TestDemoPlanningOptionsAndRouterOutage(t *testing.T) {
 	p.Router = &testRouter{err: routing.ErrUnavailable}
 	if _, err := p.PlanningOptions(ctx, result, now); !errors.Is(err, routing.ErrUnavailable) {
 		t.Fatal("routing outage presented as no suitable cards", err)
+	}
+}
+
+func TestManualChoicesBeyondTwoUseActualDayBudget(t *testing.T) {
+	input := sample(t)
+	policy := "manual_choices"
+	input.PlanningPolicy = &policy
+	input.Days[0].DurationBudgetSec = 14400
+	date := input.Days[0].Date
+	input.Selections = []c.Selection{}
+	for i := 0; i < 5; i++ {
+		input.Selections = append(input.Selections, c.Selection{ActivityID: c.ID(fmt.Sprintf("activity-%d", i)), PlaceID: c.ID(fmt.Sprintf("place-%d", i)), PreferredDate: &date})
+	}
+	view := NewDraft("unlimited-five", input, time.Now())
+	response := mlResponse(t, view, 5)
+	for i := range response.Candidates {
+		response.Candidates[i].Activity.Duration.DurationSec = 300
+	}
+	p := Planner{Router: &testRouter{}, Source: fixedSource{response: response}}
+	result, err := p.Build(context.Background(), view, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Days[0].Stops) != 5 {
+		t.Fatalf("expected all five fitting choices, got %d", len(result.Days[0].Stops))
+	}
+	view.Input.Days[0].DurationBudgetSec = 600
+	result, err = p.Build(context.Background(), view, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Days[0].Stops) >= 5 {
+		t.Fatal("time budget did not exclude overflowing choices")
+	}
+	if len(result.Input.Selections) != 5 {
+		t.Fatal("overflow silently deleted user's choices")
+	}
+}
+
+func TestRankedPrefixSkipsUnfitCandidateOnEmptyDays(t *testing.T) {
+	input := secondDay(sample(t))
+	policy := "ranked_prefix"
+	input.PlanningPolicy = &policy
+	input.Selections = []c.Selection{}
+	for i := range input.Days {
+		input.Days[i].DurationBudgetSec = 1200
+	}
+	view := NewDraft("ranked-empty-days", input, time.Now())
+	response := mlResponse(t, view, 6)
+	// The top candidate cannot fit even by itself. Lower-ranked candidates can.
+	response.Candidates[0].Activity.Duration.DurationSec = 12000
+	for i := 1; i < len(response.Candidates); i++ {
+		response.Candidates[i].Activity.Duration.DurationSec = 300
+	}
+	p := Planner{Router: &testRouter{}, Source: fixedSource{response: response}}
+	result, err := p.Build(context.Background(), view, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	seen := map[c.ID]bool{}
+	for _, day := range result.Days {
+		if len(day.Stops) == 0 {
+			t.Fatal("unfit candidate closed an empty day")
+		}
+		if day.Feasibility == "infeasible" || *day.Totals.ElapsedDurationSec > 1200 {
+			t.Fatal("ignored day budget")
+		}
+		for _, stop := range day.Stops {
+			if stop.ActivityID == "activity-0" || seen[stop.ActivityID] {
+				t.Fatal("scheduled impossible or duplicate activity")
+			}
+			seen[stop.ActivityID] = true
+		}
+	}
+}
+
+func TestAutoMinimumCoversEveryDayBeforeExtraStops(t *testing.T) {
+	input := secondDay(sample(t))
+	third := input.Days[1]
+	third.Date = "2030-06-17"
+	third.AvailableWindow = nil
+	input.Days = append(input.Days, third)
+	policy := "ranked_prefix"
+	input.PlanningPolicy = &policy
+	input.Selections = []c.Selection{}
+	for i := range input.Days {
+		input.Days[i].DurationBudgetSec = 7200
+	}
+	view := NewDraft("auto-minimum", input, time.Now())
+	response := mlResponse(t, view, 8)
+	p := Planner{Router: &testRouter{}, Source: fixedSource{response: response}}
+	result, err := p.Build(context.Background(), view, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	moreThanTwo := false
+	for _, day := range result.Days {
+		if len(day.Stops) < 2 || day.Feasibility == "infeasible" {
+			t.Fatal("did not cover all days")
+		}
+		moreThanTwo = moreThanTwo || len(day.Stops) > 2
+	}
+	if !moreThanTwo {
+		t.Fatal("minimum became a maximum")
+	}
+	response.Candidates = response.Candidates[:3]
+	p.Source = fixedSource{response: response}
+	result, err = p.Build(context.Background(), view, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, day := range result.Days {
+		if len(day.Stops) < 2 && day.Feasibility != "infeasible" {
+			t.Fatal("silently accepted below-minimum auto day")
+		}
+	}
+	found := false
+	for _, w := range result.Warnings {
+		found = found || w.Code == "AUTO_DAY_BELOW_MINIMUM"
+	}
+	if !found {
+		t.Fatal("missing explanation for unmet auto minimum")
 	}
 }

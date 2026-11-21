@@ -12,7 +12,9 @@ services:
       GIGACHAT_SCOPE: ${GIGACHAT_SCOPE:-GIGACHAT_API_B2B}
       GIGACHAT_MODEL: ${GIGACHAT_MODEL:-GigaChat-3-Pro}
       GIGACHAT_BASE_URL: ${GIGACHAT_BASE_URL:-https://api.giga.chat}
-      GIGACHAT_CA_BUNDLE: ${GIGACHAT_CA_BUNDLE:-}
+      # GigaChat OAuth presents a chain rooted in the Russian Trusted Root CA.
+      # An explicit value remains available for installations with their own CA.
+      GIGACHAT_CA_BUNDLE: ${GIGACHAT_CA_BUNDLE:-/app/certs/russian_trusted_root_ca_pem.crt}
     ports:
       - "127.0.0.1:8081:8080"
     read_only: true

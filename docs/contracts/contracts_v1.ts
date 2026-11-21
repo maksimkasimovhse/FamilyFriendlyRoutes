@@ -306,7 +306,7 @@ export type PlanCommand =
   | { kind: 'move_stop'; date: ISODate; stop_id: ID; target_date: ISODate }
   | { kind: 'start_day'; date: ISODate; point: Point; start_at: Instant }
   | { kind: 'replan_day'; date: ISODate };
-export interface CompletionPolicy { manual_limit_per_day: number; short_day_ratio: number; supplement_radius_m: number }
+export interface CompletionPolicy { manual_limit_per_day: number; /* 0 = unlimited; compatibility field */ short_day_ratio: number; supplement_radius_m: number }
 export interface PlanningOptionsRequest { expected_version: number; preview_id?: ID }
 export interface DayPlanningOptions {
   date: ISODate; available_duration_sec: number; planned_duration_sec: number; fill_ratio: number;

@@ -78,6 +78,21 @@ class AssistantTests(unittest.TestCase):
         result, _ = parse_assistant("Давай первый", context, FakeClient(data))
         self.assertEqual(result.place_id, "cafe-1")
 
+    def test_simple_kremlin_request_never_requires_visit_format(self):
+        data = intent("clarify")
+        data.update(question="Что именно вы хотите увидеть в кремле?", needs=[])
+        data["preferences"].update(needs_clarification=True, clarification_question=data["question"])
+        result, _ = parse_assistant("Хочу посмотреть кремль", CONTEXT, FakeClient(data))
+        self.assertEqual(result.action, "find_places")
+        self.assertIsNone(result.question)
+        self.assertFalse(result.preferences.needs_clarification)
+        self.assertEqual([claim.value for claim in result.preferences.claims], ["landmark", "history", "architecture"])
+
+        data = intent("find_places")
+        data["needs"] = [dict(kind="shelter", child_id=None, urgency="now", evidence="Хочу посмотреть кремль")]
+        result, _ = parse_assistant("Хочу посмотреть кремль", CONTEXT, FakeClient(data))
+        self.assertEqual(result.needs, [])
+
     def test_closed_schema_and_unsupported_action(self):
         schema = strict_intent_schema()
         self.assertFalse(schema["additionalProperties"])

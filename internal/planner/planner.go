@@ -112,19 +112,7 @@ func Validate(input c.TripInput) error {
 		if *input.PlanningPolicy != "ranked_prefix" && *input.PlanningPolicy != "manual_choices" {
 			return invalid("invalid planning_policy")
 		}
-		if len(input.Selections) > len(input.Days)*budgetDefaults.CompletionPolicy.ManualLimitPerDay {
-			return invalid("MANUAL_LIMIT: too many manual choices")
-		}
-		counts := map[c.ISODate]int{}
-		for _, s := range input.Selections {
-			if s.PreferredDate == nil {
-				continue // Days are assigned by geographic clustering, not by the picker.
-			}
-			counts[*s.PreferredDate]++
-			if counts[*s.PreferredDate] > budgetDefaults.CompletionPolicy.ManualLimitPerDay {
-				return invalid("MANUAL_LIMIT: too many manual choices")
-			}
-		}
+
 	}
 	if err := ValidateFamily(input.Family, input.LoadLimits); err != nil {
 		return err
@@ -389,14 +377,8 @@ func (p Planner) buildDay(ctx context.Context, view c.TripView, now time.Time) (
 	plan.Totals.WalkDistanceM = &walkDistance
 	_, reserveM := walkingBudget(input.LoadLimits)
 	totalM := *input.LoadLimits.MaxWalkDistanceMPerDay
-	unscheduledMeals := math.Max(0, *day.MealDurationSec-plan.Totals.MealDurationSec)
-	unscheduledRest := math.Max(0, day.RestBudgetSec-plan.Totals.RestDurationSec)
-	plan.Totals.MealDurationSec += unscheduledMeals
-	plan.Totals.RestDurationSec += unscheduledRest
-	elapsed += unscheduledMeals + unscheduledRest
-	if unscheduledMeals+unscheduledRest > 0 {
-		plan.Warnings = append(plan.Warnings, Warning("UNSCHEDULED_BREAKS", "Время на еду/отдых учтено в бюджете; конкретные места и интервалы перерывов ещё не выбраны."))
-	}
+	// Only explicitly scheduled stops consume time. Legacy meal/rest budgets
+	// never create an invisible reserve or reduce route capacity.
 	waitSec := 0.0
 	if plan.Totals.WaitDurationSec != nil {
 		waitSec = *plan.Totals.WaitDurationSec
