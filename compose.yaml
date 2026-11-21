@@ -159,6 +159,16 @@ services:
       - ./infra/docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     restart: unless-stopped
 
+  # Temporary public HTTPS URL; no phone certificate or Cloudflare account needed.
+  cloudflared:
+    image: cloudflare/cloudflared:2026.10.7
+    profiles: ["tunnel"]
+    command: ["tunnel", "--no-autoupdate", "--protocol", "http2", "--region", "us", "--edge-ip-version", "4", "--url", "http://web:8001"]
+    depends_on:
+      - web
+      - backend
+    restart: unless-stopped
+
   # Optional trusted local HTTPS for a phone on the same Wi-Fi.
   caddy:
     image: caddy:2

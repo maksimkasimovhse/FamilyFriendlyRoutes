@@ -251,3 +251,5 @@ go vet ./...
 ## HTTPS и геолокация с телефона
 
 Запуск в одной Wi-Fi-сети через Caddy: `powershell -ExecutionPolicy Bypass -File .\scripts\start-phone-https.ps1`. Сертификат нужно один раз установить и включить доверие на телефоне. [Подробная инструкция](docs/phone_https.md).
+
+Без установки сертификата на телефон: `powershell -ExecutionPolicy Bypass -File .\scripts\start-phone-tunnel.ps1` — временная публичная HTTPS-ссылка через Cloudflare. [Запуск, остановка и проверка](docs/phone_tunnel.md).
