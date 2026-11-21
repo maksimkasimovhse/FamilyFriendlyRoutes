@@ -41,6 +41,9 @@ class JourneyFixTests(unittest.TestCase):
         self.assertEqual(result.needs[0].kind, 'rest')
         result, _ = parse_rules('Нужна безглютеновая еда', context)
         self.assertEqual(result.action, 'clarify')
+        result, _ = parse_rules('Добавь Кремль в маршрут', CONTEXT)
+        self.assertEqual(result.action, 'find_places')
+        self.assertIsNone(result.question)
 
     def test_offline_needs_and_followup_still_produce_only_intents(self):
         for message, action in [('Ребёнок устал', 'shorten_day'), ('Хотим поесть по пути', 'find_places'), ('Пошёл дождь', 'find_places'), ('Убери следующую точку', 'remove_stop'), ('Добавь первый вариант', 'add_activity')]:

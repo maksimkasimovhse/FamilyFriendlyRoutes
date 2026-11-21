@@ -88,6 +88,16 @@ class AssistantTests(unittest.TestCase):
         self.assertFalse(result.preferences.needs_clarification)
         self.assertEqual([claim.value for claim in result.preferences.claims], ["landmark", "history", "architecture"])
 
+        # Adding a named landmark must first find real catalog cards.  It must
+        # not ask the user to define a visit format or choose a made-up venue.
+        data = intent("clarify")
+        data.update(question="Какой кремль вы хотите добавить в маршрут?", needs=[])
+        data["preferences"].update(needs_clarification=True, clarification_question=data["question"])
+        result, _ = parse_assistant("Добавь Кремль в маршрут", CONTEXT, FakeClient(data))
+        self.assertEqual(result.action, "find_places")
+        self.assertIsNone(result.question)
+        self.assertFalse(result.preferences.needs_clarification)
+
         data = intent("find_places")
         data["needs"] = [dict(kind="shelter", child_id=None, urgency="now", evidence="Хочу посмотреть кремль")]
         result, _ = parse_assistant("Хочу посмотреть кремль", CONTEXT, FakeClient(data))

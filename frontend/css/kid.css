@@ -88,3 +88,6 @@
 .reward-card h2 { margin: 4px 0; font-size: 26px; font-weight: 800; }
 .reward-card p { margin: 0 0 16px; color: var(--ink-2); font-weight: 700; }
 @keyframes pop { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* Место без нашей картинки: на странице задания только оленёнок и кнопка «Мы здесь!» */
+.visit-fawn { display: block; width: 170px; margin: 28px auto; filter: drop-shadow(0 8px 14px rgba(15,22,40,.18)); }

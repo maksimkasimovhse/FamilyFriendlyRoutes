@@ -169,3 +169,8 @@
 .trip-card.done .tc-bar { background: rgba(255,255,255,.3); }
 .trip-card.done .tc-bar i { background: #fff; }
 .trip-card.done small u { color: #fff; }
+
+/* Пустая динамическая ячейка: пока нет ни одной поездки */
+.trip-card.empty { align-items: center; justify-content: center; text-align: center; gap: 6px; background: transparent; box-shadow: none; border: 2px dashed #BFC8D8; color: var(--ink-2); }
+.trip-card.empty .tc-plus { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--now); color: #fff; font-size: 28px; line-height: 1; font-weight: 700; }
+.trip-card.empty .tc-range { color: var(--ink); font-size: 18px; }
