@@ -34,39 +34,52 @@ function downscale(file) {
 }
 
 // ---------- Статистика поездки ----------
-// Считаем по сохранённой поездке: что пройдено, а если прогулка ещё не началась — что в плане.
+// Альбом наполняется только тем, что реально случилось: открытые окна, пройденные км, штампы, фото.
+// План поездки нужен лишь для «закрытых окон» и обратного отсчёта.
+const DAY = 864e5;
+const localDate = iso => { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d); };
 function tripStats() {
   const trip = getTrip();
   const days = trip?.days || [];
-  const stops = days.flatMap(d => d.stops.filter(s => s.progress !== 'removed'));
-  const visited = stops.filter(s => s.progress === 'visited');
-  const walked = days.reduce((m, d) => m + (d.execution?.consumed_walk_distance_m || 0), 0);
-  const planned = days.reduce((m, d) => m + (d.totals?.walk_distance_m || 0), 0);
-  const started = walked > 0 || visited.length > 0;
+  const stops = days.flatMap(d => d.stops.filter(s => s.progress !== 'removed').map(s => ({ ...s, date: d.date })));
+  const opened = stops.filter(s => s.progress === 'visited');
+  const walkedKm = days.reduce((m, d) => m + (d.execution?.consumed_walk_distance_m || 0), 0) / 1000;
   const kid = kidProgress();
+  const photos = readPhotos().length;
+  const stamps = kid?.stamps || 0;
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  const first = days[0] ? localDate(days[0].date) : null;
+  const last = days.length ? localDate(days[days.length - 1].date) : null;
+  const daysWithWalk = days.filter(d => d.stops.some(s => s.progress === 'visited') || d.execution?.consumed_walk_distance_m > 0).length;
   return {
-    started, days: days.length,
-    km: (started ? walked : planned) / 1000,
-    kmLabel: started ? 'км пройдено' : 'км в планах',
-    places: started ? visited.length : stops.length,
-    placesLabel: started ? 'мест увидели' : 'мест в планах',
-    seenTitles: (started ? visited : stops).map(s => s.title),
-    seenLabel: started ? 'Что увидели' : 'Что в планах',
-    stamps: kid?.stamps || 0, fawn: kid?.outfitImg || 'media/fawn/fawn-base.svg',
-    photos: readPhotos().length,
+    hasTrip: !!trip, stops, opened, walkedKm, stamps, photos, days: days.length, daysWithWalk,
+    started: opened.length > 0 || walkedKm > 0.05 || stamps > 0 || photos > 0,
+    untilStart: first ? Math.round((first - now) / DAY) : null,
+    finished: last ? now > last : false,
+    range: first ? dateRange(first, last) : '',
+    fawn: kid?.outfitImg || 'media/fawn/fawn-base.svg',
   };
 }
+function dateRange(a, b) {
+  const m = d => d.toLocaleDateString('ru-RU', { month: 'long' }).replace(/^./, '');
+  const dm = d => d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+  if (+a === +b) return dm(a);
+  return a.getMonth() === b.getMonth() ? `${a.getDate()}–${dm(b)}` : `${dm(a)} – ${dm(b)}`;
+}
 const fmtKm = km => (km >= 10 ? Math.round(km) : Math.round(km * 10) / 10).toString().replace('.', ',');
+const plural = (n, one, few, many) => { const a = n % 10, b = n % 100; return a === 1 && b !== 11 ? one : a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many; };
+const daysWord = n => `${n} ${plural(n, 'день', 'дня', 'дней')}`;
 
 // ---------- Достижения (часть — из детского режима) ----------
 function achievements(st) {
+  const total = st.stops.length;
   return [
-    { id: 'step',   icon: '👣', title: 'Первый шаг',       got: st.started },
-    { id: 'km2',    icon: '🧭', title: 'Исследователь',    got: st.started && st.km >= 2 },
-    { id: 'stamp1', icon: '⭐', title: 'Первый штамп',     got: st.stamps >= 1 },
-    { id: 'stamp3', icon: '🏅', title: 'Знаток города',    got: st.stamps >= 3 },
-    { id: 'photo',  icon: '📷', title: 'Фотограф',         got: st.photos >= 1 },
-    { id: 'days',   icon: '🗺️', title: 'Путешественник',   got: st.days >= 2 },
+    { id: 'step',   icon: '👣', title: 'Первое окно',     got: st.opened.length >= 1 },
+    { id: 'stamp1', icon: '⭐', title: 'Первый штамп',    got: st.stamps >= 1 },
+    { id: 'photo',  icon: '📷', title: 'Фотограф',        got: st.photos >= 1 },
+    { id: 'km3',    icon: '🧭', title: '3 км пешком',     got: st.walkedKm >= 3 },
+    { id: 'stamp3', icon: '🏅', title: 'Знаток города',   got: st.stamps >= 3 },
+    { id: 'all',    icon: '🏆', title: 'Все окна',        got: total > 0 && st.opened.length >= total },
   ];
 }
 
@@ -74,29 +87,24 @@ function achievements(st) {
 export async function renderProfile() {
   const p = currentProfile();
   const email = userEmail();
-  $('pf-ava').textContent = (email || 'Г').charAt(0).toUpperCase();
-  $('pf-name').textContent = email || 'Гость';
-  $('pf-sub').textContent = isAuthenticated() ? 'Аккаунт' : 'Без входа · поездка хранится сутки на этом устройстве';
+  $('pf-sub').textContent = isAuthenticated() ? email || 'Вы вошли' : 'Гость · поездка хранится сутки на этом устройстве';
   $('prof-auth').textContent = isAuthenticated() ? 'Выйти' : 'Войти';
 
-  // Дети: имя, возраст, интересы
-  $('pf-kids').innerHTML = '';
-  (p?.family.children || []).forEach((c, i) => {
+  // Семья: дети и взрослые — одинаковые строки
+  const row = (ava, avaCls, name, meta, tags) => `
+    <div class="pf-member">
+      <span class="pf-m-ava ${avaCls}">${esc(ava)}</span>
+      <div class="pf-m-main">
+        <div class="pf-m-top"><b>${esc(name)}</b>${meta ? `<span>${esc(meta)}</span>` : ''}</div>
+        <div class="pf-tags">${tags.length ? tags.map(t => `<span>${esc(t)}</span>`).join('') : '<span class="muted-tag">интересы не выбраны</span>'}</div>
+      </div>
+    </div>`;
+  const kids = (p?.family.children || []).map((c, i) => {
     const name = childName(i);
-    const card = document.createElement('div');
-    card.className = 'pf-kid';
-    card.innerHTML = `
-      <span class="pf-kid-ava"></span>
-      <div class="pf-kid-main">
-        <div class="pf-kid-top"><b></b><span class="pf-age">${esc(ageText(c.age_years))}</span></div>
-        <div class="pf-tags">${c.interest_ids.length ? c.interest_ids.map(id => `<span>${esc(interestLabel(id))}</span>`).join('') : '<span class="muted-tag">пока не выбрали</span>'}</div>
-      </div>`;
-    card.querySelector('b').textContent = name;
-    card.querySelector('.pf-kid-ava').textContent = name.replace(/^Ребёнок\s*/, '').charAt(0).toUpperCase() || name.charAt(0).toUpperCase();
-    $('pf-kids').append(card);
+    return row(name.replace(/^Ребёнок\s*/, '').charAt(0).toUpperCase() || name.charAt(0), 'kid', name, ageText(c.age_years), c.interest_ids.map(interestLabel));
   });
-  const adults = p ? adultInterestLabels(p.family.adult_interest_ids) : [];
-  $('pf-adults').textContent = p ? `Взрослых: ${p.family.adult_count}${adults.length ? ' · ' + adults.join(', ') : ''}` : '';
+  const adults = p ? row(String(p.family.adult_count), 'adult', 'Взрослые', '', adultInterestLabels(p.family.adult_interest_ids)) : '';
+  $('pf-kids').innerHTML = kids.join('') + adults || '<p class="muted">Анкета ещё не заполнена</p>';
 
   renderMemory();
   renderTrips();
@@ -104,24 +112,51 @@ export async function renderProfile() {
 
 function renderMemory() {
   const st = tripStats();
-  $('pf-stats').innerHTML = `
-    <div class="pf-stat big"><b>${fmtKm(st.km)}</b><span>${st.kmLabel}</span></div>
-    <div class="pf-stat"><b>${st.places}</b><span>${st.placesLabel}</span></div>
-    <div class="pf-stat"><b>${st.stamps}</b><span>штампов</span></div>`;
-  $('pf-seen').innerHTML = st.seenTitles.length
-    ? `<small>${st.seenLabel}</small><div class="pf-chips">${st.seenTitles.slice(0, 4).map(t => `<span>${esc(t)}</span>`).join('')}${st.seenTitles.length > 4 ? `<span>+${st.seenTitles.length - 4}</span>` : ''}</div>` : '';
+  const total = st.stops.length, opened = st.opened.length;
+  const kid = childName(0);
+
+  // Кольцо прогресса: сколько окон открыто
+  $('pf-ring').style.setProperty('--p', total ? opened / total : 0);
+  $('pf-ring').innerHTML = `<b>${opened}<i>/${total}</i></b><small>${plural(total, 'окно', 'окна', 'окон')}</small>`;
+  $('pf-ring').hidden = !total;
+
+  if (!st.started) {
+    $('pf-memory').classList.add('empty');
+    $('pf-mem-h').textContent = 'Альбом ждёт прогулки';
+    const when = st.untilStart == null ? '' : st.untilStart > 0 ? `До прогулки ${daysWord(st.untilStart)}. ` : st.untilStart === 0 ? 'Прогулка уже сегодня! ' : '';
+    $('pf-lead').innerHTML = `${esc(when)}Альбом соберётся сам: открывайте окна на точках маршрута, фотографируйте, а ${esc(kid)} будет собирать штампы.`;
+    $('pf-stats').innerHTML = '';
+  } else {
+    $('pf-memory').classList.remove('empty');
+    $('pf-mem-h').textContent = 'Наш Нижний';
+    $('pf-lead').textContent = `${st.range}${st.days ? ` · гуляли ${daysWord(st.daysWithWalk)} из ${st.days}` : ''}`;
+    $('pf-stats').innerHTML = `
+      <div class="pf-stat big"><b>${fmtKm(st.walkedKm)}</b><span>км пешком</span></div>
+      <div class="pf-stat"><b>${st.stamps}</b><span>${plural(st.stamps, 'штамп', 'штампа', 'штампов')}</span></div>
+      <div class="pf-stat"><b>${st.photos}</b><span>фото</span></div>`;
+  }
+
+  // Окна маршрута: открытые — цветные, остальные — закрыты до прихода на место
+  $('pf-windows').innerHTML = st.stops.length ? `<small class="pf-sub-h">Окна маршрута</small><div class="pf-win-row">${st.stops.map((s, i) => {
+    const on = s.progress === 'visited';
+    return `<div class="pf-win${on ? ' on' : ''}"><span class="pf-win-ico" aria-hidden="true">${on ? '✓' : i + 1}</span><b>${esc(s.title)}</b><small>${on ? 'открыто' : 'откроется на месте'}</small></div>`;
+  }).join('')}</div>` : '';
 
   // Фото: полароиды + плитка «добавить»
   const photos = readPhotos();
   $('pf-photos').innerHTML = photos.map((src, i) =>
     `<figure class="pf-photo" style="--r:${[-4, 3, -2, 4, -3, 2, -5, 3][i % 8]}deg"><img src="${src}" alt="Фото на память ${i + 1}"><button type="button" data-del="${i}" aria-label="Убрать фото">×</button></figure>`).join('')
-    + (photos.length < MAX_PHOTOS ? `<button type="button" class="pf-add" id="pf-add"><span>+</span>Фото</button>` : '');
+    + (photos.length < MAX_PHOTOS ? `<button type="button" class="pf-add" id="pf-add"><span>+</span>${photos.length ? 'Ещё фото' : 'Первое фото'}</button>` : '');
   $('pf-photos').querySelectorAll('[data-del]').forEach(b => { b.onclick = () => { const l = readPhotos(); l.splice(+b.dataset.del, 1); writePhotos(l); renderMemory(); }; });
   const add = $('pf-add'); if (add) add.onclick = () => $('pf-file').click();
 
   // Достижения
   $('pf-ach').innerHTML = achievements(st).map(a =>
-    `<div class="pf-badge${a.got ? ' got' : ''}" title="${esc(a.title)}"><span aria-hidden="true">${a.icon}</span><small>${esc(a.title)}</small></div>`).join('');
+    `<div class="pf-badge${a.got ? ' got' : ''}" title="${esc(a.title)}"><span aria-hidden="true">${a.got ? a.icon : '🔒'}</span><small>${esc(a.title)}</small></div>`).join('');
+
+  // Сторис — только когда есть чем хвастаться
+  $('pf-share').disabled = !st.started;
+  $('pf-share').textContent = st.started ? '✦ Выложить в сторис' : 'Сторис откроется после первого окна';
 }
 
 async function renderTrips() {
@@ -174,20 +209,22 @@ async function buildStory() {
   // Верх: метка и заголовок
   g.fillStyle = 'rgba(255,255,255,.14)'; g.beginPath(); g.roundRect(72, 90, 560, 76, 38); g.fill();
   g.fillStyle = '#fff'; g.font = font(800, 34); g.fillText('ОКНО В ПРОШЛОЕ · НИЖНИЙ', 106, 140);
-  g.fillStyle = '#fff'; g.font = font(800, 104); g.fillText(st.started ? 'Мы прошли' : 'Мы пройдём', 72, 330);
+  if (st.range) { g.fillStyle = '#C9D2E3'; g.font = font(700, 34); g.fillText(st.range, 664, 140); }
+  g.fillStyle = '#fff'; g.font = font(800, 104); const byKm = st.walkedKm >= 0.1;
+  g.fillText(byKm ? 'Мы прошли' : 'Мы открыли', 72, 330);
 
   // Гигантское число с градиентом
-  const km = fmtKm(st.km);
+  const km = byKm ? fmtKm(st.walkedKm) : String(st.opened.length);
   g.font = font(800, 400);
   const numW = g.measureText(km).width;
   const ng = g.createLinearGradient(72, 380, 72 + numW, 700);
   ng.addColorStop(0, '#FFC94A'); ng.addColorStop(1, '#E8641F');
   g.fillStyle = ng; g.fillText(km, 66, 700);
-  g.fillStyle = '#fff'; g.font = font(800, 130); g.fillText('км', 90 + numW, 700);
-  g.fillStyle = '#C9D2E3'; g.font = font(700, 58); g.fillText(st.started ? 'вместе по Нижнему' : 'ждут нас в Нижнем', 76, 790);
+  g.fillStyle = '#fff'; g.font = font(800, 130); g.fillText(byKm ? 'км' : plural(st.opened.length, 'окно', 'окна', 'окон'), 90 + numW, 700);
+  g.fillStyle = '#C9D2E3'; g.font = font(700, 58); g.fillText(byKm ? 'вместе по Нижнему' : 'в прошлое Нижнего', 76, 790);
 
   // Три плашки статистики
-  const tiles = [[st.places, st.placesLabel.replace('мест ', '')], [st.stamps, 'штампов'], [st.days, st.days === 1 ? 'день' : 'дня']];
+  const tiles = [[st.opened.length, plural(st.opened.length, 'окно', 'окна', 'окон')], [st.stamps, plural(st.stamps, 'штамп', 'штампа', 'штампов')], [st.daysWithWalk || 1, plural(st.daysWithWalk || 1, 'день', 'дня', 'дней')]];
   tiles.forEach(([n, label], i) => {
     const x = 72 + i * 322;
     g.fillStyle = 'rgba(255,255,255,.14)'; g.beginPath(); g.roundRect(x, 850, 300, 200, 40); g.fill();
@@ -197,7 +234,7 @@ async function buildStory() {
 
   // Полароиды: свои фото, а если их нет — старые снимки города («тогда»)
   const own = readPhotos().slice(0, 3);
-  const polaroids = own.length ? own.map(src => ({ src, tag: null })) : FALLBACK_OLD.map(src => ({ src, tag: 'ТОГДА' }));
+  const polaroids = [...own.map(src => ({ src, tag: null })), ...FALLBACK_OLD.map(src => ({ src, tag: 'ТОГДА' }))].slice(0, 3);
   const rot = [-7, 4, -3];
   for (let i = 0; i < polaroids.length; i++) {
     const { src, tag } = polaroids[i];
@@ -217,7 +254,7 @@ async function buildStory() {
 
   // Оленёнок в наряде — наклейка
   const fawn = await loadImg(st.fawn).catch(() => null);
-  if (fawn) { g.save(); g.translate(880, 1480); g.rotate(6 * Math.PI / 180); g.shadowColor = 'rgba(0,0,0,.4)'; g.shadowBlur = 30; g.drawImage(fawn, -150, -165, 300, 330); g.restore(); }
+  if (fawn) { g.save(); g.translate(915, 1690); g.rotate(6 * Math.PI / 180); g.shadowColor = 'rgba(0,0,0,.4)'; g.shadowBlur = 30; g.drawImage(fawn, -120, -132, 240, 264); g.restore(); }
 
   // Достижения
   const got = achievements(st).filter(a => a.got).slice(0, 5);
@@ -238,7 +275,7 @@ async function buildStory() {
 async function shareStory() {
   const btn = $('pf-share');
   btn.disabled = true;
-  const old = btn.innerHTML;
+  const old = btn.textContent;
   btn.textContent = 'Рисуем сторис…';
   try {
     const blob = await buildStory();
@@ -249,7 +286,7 @@ async function shareStory() {
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = file.name; a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   } catch (err) { alert('Не получилось нарисовать сторис: ' + err.message); }
-  finally { btn.disabled = false; btn.innerHTML = old; }
+  finally { btn.disabled = false; btn.textContent = old; }
 }
 
 // hooks: { onEditProfile, onNewTrip, onSignOut, onSignIn, onOpenTrip }

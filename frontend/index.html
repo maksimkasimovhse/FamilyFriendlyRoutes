@@ -348,35 +348,35 @@
   <!-- ===== Профиль: дети, память о поездке (статистика, фото, достижения), мои поездки ===== -->
   <section class="screen profile" data-tab="profile" hidden>
     <div class="pf-scroll">
-      <header class="pf-hero">
-        <span class="pf-ava" id="pf-ava">·</span>
-        <div class="pf-who"><b id="pf-name">Профиль</b><small id="pf-sub"></small></div>
-        <button class="pf-out" id="prof-auth" type="button">Выйти</button>
-      </header>
+      <h1 class="pf-title">Профиль</h1>
 
-      <section class="pf-card" aria-labelledby="pf-kids-h">
-        <div class="pf-head"><h2 id="pf-kids-h">Дети</h2><button class="pf-link" id="prof-edit" type="button">Изменить</button></div>
+      <section class="pf-card pf-family" aria-labelledby="pf-fam-h">
+        <div class="pf-head"><h2 id="pf-fam-h">Наша семья</h2><button class="pf-link" id="prof-edit" type="button">Изменить</button></div>
         <div id="pf-kids"></div>
-        <p class="pf-adults" id="pf-adults"></p>
+        <div class="pf-acc">
+          <span id="pf-sub"></span>
+          <button class="pf-link" id="prof-auth" type="button">Войти</button>
+        </div>
       </section>
 
-      <!-- Память о поездке: можно показать на память и выложить в сторис -->
       <section class="pf-memory" id="pf-memory" aria-labelledby="pf-mem-h">
         <div class="pf-mem-top">
-          <span class="pf-kicker">Память о поездке</span>
-          <h2 id="pf-mem-h">Наша прогулка по&nbsp;Нижнему</h2>
+          <div><span class="pf-kicker" id="pf-kicker">Альбом прогулки</span><h2 id="pf-mem-h"></h2></div>
+          <div class="pf-ring" id="pf-ring"></div>
         </div>
+        <p class="pf-mem-lead" id="pf-lead"></p>
         <div class="pf-stats" id="pf-stats"></div>
-        <div class="pf-seen" id="pf-seen"></div>
+        <div class="pf-windows" id="pf-windows"></div>
         <div class="pf-photos" id="pf-photos"></div>
         <input type="file" id="pf-file" accept="image/*" multiple hidden>
+        <small class="pf-sub-h">Достижения</small>
         <div class="pf-ach" id="pf-ach"></div>
-        <button class="pf-share" id="pf-share" type="button"><span aria-hidden="true">✦</span> Выложить в сторис</button>
+        <button class="pf-share" id="pf-share" type="button">✦ Выложить в сторис</button>
       </section>
 
       <section class="pf-card" aria-labelledby="pf-trips-h">
         <div class="pf-head"><h2 id="pf-trips-h">Мои поездки</h2><button class="pf-link" id="prof-newtrip" type="button">Новая</button></div>
-        <ul class="trip-list" id="prof-trips"><li class="muted">Загружаем…</li></ul>
+        <ul class="trip-list" id="prof-trips"></ul>
       </section>
     </div>
   </section>
