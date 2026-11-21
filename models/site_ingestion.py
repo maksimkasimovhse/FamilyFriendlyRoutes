@@ -8,6 +8,7 @@ import json
 import re
 import socket
 from dataclasses import dataclass
+from pathlib import Path
 from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
 
@@ -66,7 +67,7 @@ def _robots_allows(client: httpx.Client, url: str) -> bool:
     return parser.can_fetch(USER_AGENT, url)
 
 
-def fetch_page(url: str, policy: SourcePolicy, *, timeout_seconds: float = 20) -> NormalizedPage:
+def fetch_page(url: str, policy: SourcePolicy, *, timeout_seconds: float = 20, raw_output: Path | None = None) -> NormalizedPage:
     if not policy.enabled:
         raise ValueError(f"source {policy.source_id!r} is disabled")
     _validate_url(url, policy)
@@ -99,6 +100,9 @@ def fetch_page(url: str, policy: SourcePolicy, *, timeout_seconds: float = 20) -
                 break
         else:
             raise ValueError("too many redirects")
+    if raw_output is not None:
+        raw_output.parent.mkdir(parents=True, exist_ok=True)
+        raw_output.write_bytes(raw)
     return normalize_html(raw, final_url=final_url, source_url=url)
 
 

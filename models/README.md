@@ -1,4 +1,13 @@
-# Первый эксперимент по рекомендациям
+# ML-сервисы и эксперименты по рекомендациям
+
+API, границы ответственности и примеры запросов описаны в
+[ML-сервисах](../docs/ml_services.md). Контекстный LLM-парсер определяет потребности
+семьи и намерения изменить маршрут; `/internal/v1/recommendations` подбирает
+активности по анкете и каталогу из 281 объекта. Подключение этих возможностей
+не меняет Go, frontend, Compose или публичный OpenAPI.
+Stravl checkpoint в городском baseline не используется; неизвестные возрастные
+свойства сохраняются, длительности отмечены как оценки. Локальные проверки:
+`PYTHONPATH=models python -m unittest discover -s models -p 'test_*.py'`.
 
 `train_stravl.py` обучает **одну** модель интереса к направлениям Stravl по анкете без `form_b` (денежный бюджет) и ID направления. Входы — `data/processed/stravl/{interactions,profiles}.parquet` и `destinations.csv`; для подготовки запустите `python scripts/prepare_stravl.py`. Нужны PyTorch, NumPy и PyArrow.
 
@@ -29,9 +38,11 @@ python -m unittest discover -s models -p 'test_*.py'
 python scripts/parse_request_text.py 'Хотим животных и активную прогулку, без музеев'
 ```
 
-API-вызов сейчас не выполнен: в окружении нет `OPENAI_API_KEY`. Локальные схема, разбор ответа и проверки покрыты тестами.
+Это отдельный экспериментальный CLI. Онлайн API Python-сервиса использует
+GigaChat; для его проверки: `python scripts/check_assistant_llm.py --live`
+(реальный запрос с синтетическими сообщениями, нужны настроенные credentials).
 
-Для offline-извлечения каталога из сайтов добавлен отдельный GigaChat pipeline: безопасное получение и очистка HTML в `site_ingestion.py`, OAuth/Structured Output клиент в `gigachat_client.py`, схема результата в `site_schema.py`, оркестрация в `site_extractor.py`. Архитектура, временные поля и пример JSON описаны в [`docs/site_parser.md`](../docs/site_parser.md). Вызов GigaChat не выполнялся без credentials; HTML-нормализация, schema и evidence validation проверяются локальными тестами.
+Для offline-извлечения каталога из сайтов есть отдельный GigaChat pipeline: получение и очистка HTML в `site_ingestion.py`, OAuth/Structured Output клиент в `gigachat_client.py`, схема результата в `site_schema.py`, оркестрация в `site_extractor.py`. Архитектура, временные поля и пример JSON описаны в [`docs/site_parser.md`](../docs/site_parser.md). HTML-нормализация, schema и evidence validation проверяются локальными тестами.
 
 Parser и ranker упакованы в разные FastAPI-контейнеры. Endpoint’ы, DTO, Compose и smoke-test описаны в [`docs/microservices.md`](../docs/microservices.md). Model image не содержит GigaChat/HTML-код, parser image не содержит ranker.
 

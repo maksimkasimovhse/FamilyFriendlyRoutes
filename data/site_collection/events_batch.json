@@ -1,0 +1,9 @@
+{
+  "schema_version": "reviewed-site-jobs-v1",
+  "jobs": [
+    {"source_id": "nizhny-planetarium", "url": "https://planetarium-nn.ru/", "purpose": "Датированные сеансы и длительность из официальной афиши"},
+    {"source_id": "culture-ru", "url": "https://www.culture.ru/events/6673877/master-klassy-v-muzee-mikula?institute=39218", "purpose": "Пример из ТЗ: проверить, опубликованы ли конкретные сеансы"},
+    {"source_id": "nizhny-art-museum", "url": "https://artmuseumnn.ru/ngvk/10_11_2026/", "purpose": "Детский клуб: опубликованные даты и возрастные рекомендации"},
+    {"source_id": "nizhny-art-museum", "url": "https://artmuseumnn.ru/programmy/ngkhm-detyam-kursy/", "purpose": "Программы 2026–2027: расписание, длительность и условия записи"}
+  ]
+}

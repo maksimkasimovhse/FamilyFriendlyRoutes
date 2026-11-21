@@ -1,0 +1,37 @@
+{
+  "sources": [
+    {
+      "source_id": "nizhny-art-museum",
+      "allowed_hosts": [
+        "artmuseumnn.ru",
+        "www.artmuseumnn.ru"
+      ],
+      "enabled": true,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Official Nizhny Novgorod State Art Museum site; manually reviewed for the first extraction smoke test."
+    },
+    {
+      "source_id": "granat",
+      "allowed_hosts": [
+        "granatnn.ru",
+        "www.granatnn.ru"
+      ],
+      "enabled": true,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Official GRANAT restaurant pages identify the Nizhny Novgorod address and legal entity. robots.txt reviewed; no Disallow rules."
+    },
+    {
+      "source_id": "solbirza",
+      "allowed_hosts": [
+        "solbirza.ru",
+        "www.solbirza.ru"
+      ],
+      "enabled": true,
+      "respect_robots": true,
+      "max_response_bytes": 2000000,
+      "note": "Official restaurant page identifies Sibirskaya 3, Nizhny Novgorod. robots.txt reviewed; root page is allowed."
+    }
+  ]
+}

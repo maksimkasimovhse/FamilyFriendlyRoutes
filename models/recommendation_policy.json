@@ -1,0 +1,12 @@
+{
+  "policy_version": "visit-estimates-v2",
+  "duration_estimates_sec": {
+    "landmark": 1200,
+    "museum": 3600,
+    "park": 2700,
+    "playground": 1800,
+    "event": 3600,
+    "other": 1800
+  },
+  "note": "Editorial starting estimates for an independent visit, not official durations or event sessions. Unknown opening hours and admission stay unknown."
+}

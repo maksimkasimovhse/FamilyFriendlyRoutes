@@ -1,0 +1,11 @@
+{
+  "schema_version": "reviewed-site-jobs-v1",
+  "jobs": [
+    {"source_id": "granat", "url": "https://granatnn.ru/restoran", "purpose": "Детское меню, кухня и игровая комната"},
+    {"source_id": "granat", "url": "https://granatnn.ru/detyam/", "purpose": "Возраст, сопровождение, оборудование игровой комнаты"},
+    {"source_id": "solbirza", "url": "https://solbirza.ru/", "purpose": "Семейные свойства, адрес и часы ресторана"},
+    {"source_id": "nizhny-art-museum", "url": "https://artmuseumnn.ru/posetitelyam/pravila-posescheniya/", "purpose": "Условия посещения и последний вход"},
+    {"source_id": "nizhny-art-museum", "url": "https://artmuseumnn.ru/posetitelyam/stoimost-lgoty/", "purpose": "Цены и категории билетов"},
+    {"source_id": "nizhny-art-museum", "url": "https://artmuseumnn.ru/programmy/ngkhm-detyam-kursy/", "purpose": "Возраст и условия конкретных детских программ"}
+  ]
+}
