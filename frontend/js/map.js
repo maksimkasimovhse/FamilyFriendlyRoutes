@@ -234,7 +234,6 @@ function showStop(i, { fly = true } = {}) {
       <h2>${escapeHtml(stop.title)}</h2>
       <p>${leg ? `${fmtDuration(leg.travel_duration_sec)} пешком · ${fmtDistance(leg.distance_m)} · ` : ''}на месте ~${fmtDuration(stop.duration.duration_sec)}</p>
     </div>
-    ${i===day.stops.length-1 && routeDurationParts(day).finishSeconds>0 ? `<p class="route-finish">После этой точки до финиша ещё ${fmtDuration(routeDurationParts(day).finishSeconds)} пешком. Это время входит в итог маршрута.</p>` : ''}
     <div class="row">
       <button class="btn icon alt" data-act="prev" aria-label="Предыдущая остановка" ${i === 0 ? 'disabled' : ''}>‹</button>
       <button class="btn main" data-act="all">Весь маршрут</button>
