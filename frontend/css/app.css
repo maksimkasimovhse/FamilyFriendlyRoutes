@@ -21,6 +21,10 @@
 html, body { margin: 0; height: 100%; }
 body { background: #DDE3EC; color: var(--ink); font-family: var(--font-ui); }
 button { font: inherit; color: inherit; cursor: pointer; }
+/* Ощущение приложения: без серой подсветки нажатий, зума по двойному тапу, «резинки» и выделения текста на кнопках */
+html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
+body { overscroll-behavior: none; }
+button, a, summary, .tabbar { touch-action: manipulation; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
 h1 { margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -.01em; }
 
 /* Приложение — колонка телефона; на десктопе по центру */
@@ -120,13 +124,6 @@ details.notes ul { margin: 4px 0 0; padding-left: 18px; }
 }
 .tabbar svg { width: 24px; height: 24px; }
 .tabbar button.on { color: var(--now); }
-.tabbar .kid { color: var(--kid); }
-.kid-badge {
-  width: 54px; height: 54px; border-radius: 50%; background: var(--kid); color: #fff; margin-top: -30px;
-  display: grid; place-items: center; font-weight: 800; font-size: 20px;
-  border: 4px solid var(--surface); box-shadow: 0 4px 12px rgba(232,100,31,.35);
-}
-.tabbar .kid.on .kid-badge { box-shadow: 0 0 0 4px var(--kid-soft), 0 4px 12px rgba(232,100,31,.35); }
 
 /* hidden всегда прячет, даже если у элемента задан display */
 [hidden] { display: none !important; }
@@ -223,9 +220,6 @@ details.notes ul { margin: 4px 0 0; padding-left: 18px; }
 .badge.no { background: #F1F3F6; color: #8A93A3; text-decoration: line-through; }
 .badge.unknown { background: #F1F3F6; color: #8A93A3; }
 .badge.demo { background: #FFF3D1; color: #7A5200; }
-
-/* «Маша» — больше не по центру: оранжевый кружок в строке меню, без подъёма */
-.kid-badge { width: 28px; height: 28px; margin-top: 0; font-size: 14px; border-width: 0; box-shadow: none; }
 
 /* ===== «Сегодня» v3: шаги, фото в карточке, лента с узлами ===== */
 .beads { margin-top: 12px; }

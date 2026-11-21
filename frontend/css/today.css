@@ -1,0 +1,79 @@
+/* ===== Экран «Сегодня»: компактно и по одному принципу — карточки одной ширины, один ритм отступов ===== */
+.today { background: var(--surface); position: relative; }
+
+/* Шапка: дата + заголовок слева, погода справа */
+.td-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; padding: 16px 16px 6px 20px; }
+.td-title { min-width: 0; }
+.td-title p { margin: 0 0 2px; color: var(--ink-2); font-weight: 700; font-size: 14px; }
+.td-title h1 { margin: 0; font-size: 30px; line-height: 1.1; }
+
+/* Погода — одна компактная плашка; подробности по нажатию */
+.wx { position: relative; flex: none; }
+.wx[hidden] { display: none; }
+.wx-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 4px; border: 0; border-radius: 12px; background: none; color: var(--ink); font: 800 17px var(--font-ui); cursor: pointer; position: relative; }
+.wx-btn:hover { background: var(--bg); }
+.wx-ico { display: inline-grid; place-items: center; color: var(--ink-2); }
+.wx-ico svg { width: 26px; height: 26px; }
+.wx-ico.big svg { width: 34px; height: 34px; }
+.wx-dot { position: absolute; top: 8px; right: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--kid); }
+.wx-pop { position: absolute; right: 0; top: calc(100% + 8px); z-index: 7; width: min(320px, calc(100vw - 32px)); padding: 14px; border-radius: 18px; background: #fff; box-shadow: 0 10px 30px rgba(15,22,40,.22); }
+.wx-pop[hidden] { display: none; }
+.wx-sum { display: flex; gap: 10px; align-items: center; }
+.wx-sum b { display: block; font-size: 16px; }
+.wx-sum small { color: var(--ink-2); font-size: 13px; font-weight: 600; }
+.wx-tips { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.wx-tips li { display: flex; gap: 10px; font-size: 14px; font-weight: 700; line-height: 1.35; }
+.wx-tips li.warn { color: #7A3B00; }
+.wx-tips li span { font-size: 18px; line-height: 1.2; }
+.wx-ok { margin: 10px 0 0; font-size: 14px; font-weight: 700; color: var(--ok); }
+
+/* Дни поездки */
+.td-days { display: flex; gap: 8px; overflow-x: auto; padding: 10px 16px 4px; scrollbar-width: none; }
+.td-days::-webkit-scrollbar { display: none; }
+.td-days[hidden] { display: none; }
+.td-day { flex: none; width: 56px; height: 62px; border: 0; border-radius: 16px; background: var(--bg); color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; position: relative; }
+.td-day small { font-size: 11px; font-weight: 800; letter-spacing: .04em; color: var(--ink-2); }
+.td-day b { font-size: 20px; font-weight: 800; line-height: 1; }
+.td-day[aria-selected="true"] { background: var(--now); color: #fff; }
+.td-day[aria-selected="true"] small { color: rgba(255,255,255,.8); }
+.td-day.now::after { content: ""; position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--kid); }
+
+.td-scroll { padding: 10px 16px 16px; }
+
+/* Сводка дня */
+.td-sum { margin-bottom: 12px; }
+.td-sum-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 14px; }
+.td-sum-row b { font-size: 17px; font-weight: 800; }
+.td-sum-row span { color: var(--ink-2); font-size: 15px; font-weight: 700; }
+.td-prog { height: 6px; border-radius: 3px; background: var(--bg); margin-top: 8px; overflow: hidden; }
+.td-prog i { display: block; height: 100%; background: var(--now); border-radius: 3px; transition: width .4s; }
+
+/* Карточка «Сейчас» */
+.td-now { background: var(--now-soft); border-radius: 22px; padding: 14px; margin-bottom: 14px; }
+.td-now.done { background: #DDF3E6; }
+.td-now-top { display: flex; gap: 12px; align-items: flex-start; }
+.td-now-img { width: 72px; height: 72px; flex: none; border-radius: 16px; object-fit: cover; filter: sepia(.2); }
+.td-now-main { flex: 1; min-width: 0; }
+.td-kicker { display: block; font-size: 12px; font-weight: 800; color: var(--now); text-transform: uppercase; letter-spacing: .05em; }
+.td-now.done .td-kicker { color: var(--ok); }
+.td-now h2 { margin: 3px 0 4px; font-size: 19px; font-weight: 800; line-height: 1.2; }
+.td-now p { margin: 0; color: var(--ink-2); font-size: 14px; font-weight: 700; }
+.td-more { flex: none; width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(36,99,214,.12); color: var(--now); font-size: 18px; font-weight: 800; cursor: pointer; }
+.td-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.td-now .btn { margin-top: 12px; min-height: 48px; }
+.td-now.done p { margin-top: 2px; }
+
+/* Лента */
+.td-line { list-style: none; margin: 0; padding: 0; position: relative; }
+.td-line::before { content: ""; position: absolute; left: 15px; top: 18px; bottom: 22px; width: 3px; background: var(--line); border-radius: 2px; }
+.td-line li { position: relative; display: grid; grid-template-columns: 32px 1fr auto; align-items: center; gap: 10px; padding: 9px 0; }
+.td-node { width: 32px; height: 32px; border-radius: 50%; background: var(--surface); border: 2px solid var(--line); color: var(--ink-2); display: grid; place-items: center; z-index: 1; }
+.td-node svg { width: 16px; height: 16px; }
+.td-what b { display: block; font-size: 16px; line-height: 1.25; }
+.td-what small { display: block; color: var(--ink-2); font-size: 14px; font-weight: 600; margin-top: 1px; }
+.td-thumb { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; filter: sepia(.2); }
+.td-line li.done { opacity: .6; }
+.td-line li.done .td-node { background: var(--ok); border-color: var(--ok); color: #fff; }
+.td-line li.skipped { opacity: .5; }
+.td-line li.skipped b { text-decoration: line-through; }
+.td-line li.finish .td-node { background: var(--ink); border-color: var(--ink); color: #fff; }

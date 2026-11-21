@@ -55,6 +55,14 @@ class JourneyFixTests(unittest.TestCase):
             self.assertEqual(response.json()['parser']['provider'], 'rules')
             self.assertFalse(response.json()['route_changed'])
 
+    def test_invalid_structured_llm_response_uses_rules_instead_of_502(self):
+        body = {'contract_version': '1.0', 'request_id': 'invalid-llm', 'message': 'Ребёнок устал', 'context': CONTEXT}
+        with patch.dict('os.environ', {'ML_API_TOKEN': '', 'ASSISTANT_RULES_FALLBACK': 'true'}), TestClient(app) as client, patch('services.parser_service.app.online_client', return_value=object()), patch('services.parser_service.app.parse_assistant', side_effect=ValueError('invalid schema')):
+            response = client.post('/internal/v1/assistant-intents', json=body)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['parser']['provider'], 'rules')
+        self.assertEqual(response.json()['intent']['action'], 'shorten_day')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -4,15 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Окно в прошлое</title>
+<!-- Установка на экран «Домой»: без адресной строки и панелей Safari, как банковское приложение -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Окно в прошлое">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" type="image/png" sizes="192x192" href="media/pwa/icon-192.png">
+<link rel="apple-touch-icon" href="media/pwa/apple-touch-icon.png">
 <!-- Всё своё, без внешних CDN: на защите интернет может быть нестабильным -->
 <link href="css/fonts.css" rel="stylesheet">
 <link href="vendor/maplibre-gl-4.7.1/maplibre-gl.css" rel="stylesheet">
 <link href="css/app.css" rel="stylesheet">
 <link href="css/kid.css" rel="stylesheet">
+<link href="css/window.css" rel="stylesheet">
 <link href="css/pick.css" rel="stylesheet">
 <link href="css/games.css" rel="stylesheet">
 <link href="css/chat.css" rel="stylesheet">
 <link href="css/onboarding.css" rel="stylesheet">
+<link href="css/today.css" rel="stylesheet">
+<link href="css/profile.css" rel="stylesheet">
 <link href="css/landing.css" rel="stylesheet">
 <script src="vendor/maplibre-gl-4.7.1/maplibre-gl.js"></script>
 <script type="module" src="js/app.js"></script>
@@ -179,18 +192,15 @@
   <!-- ===== Остальные вкладки — пока заглушки ===== -->
   <!-- ===== Экран «Сегодня»: что сейчас, что дальше, что пройдено ===== -->
   <section class="screen today" data-tab="today" hidden>
-    <header class="today-top">
-      <p class="today-sub" id="today-sub"></p>
-      <h1>Сегодня</h1>
-      <div class="beads" id="today-stats"></div>
+    <header class="td-head">
+      <div class="td-title"><p id="today-sub"></p><h1 id="today-h1">Сегодня</h1></div>
     </header>
-    <div class="today-scroll">
+    <div class="td-days" id="today-days" role="tablist" aria-label="Дни поездки" hidden></div>
+    <div class="today-scroll td-scroll">
+      <div class="td-sum" id="today-stats"></div>
       <div id="today-now"></div>
-      <ol class="timeline" id="today-list"></ol>
+      <ol class="td-line" id="today-list"></ol>
       <p class="source" id="today-source"></p>
-    </div>
-    <div class="today-bottom">
-      <button class="btn need" id="need-now">＋ Нужно сейчас</button>
     </div>
 
     <!-- Подтверждение «Пропустить»: что изменится в маршруте -->
@@ -261,69 +271,85 @@
       </div>
     </section>
 
-    <!-- ===== Окно в прошлое, шаг 1: старое фото и «где стоял фотограф» ===== -->
-    <section class="kid-page" id="window-page" hidden>
-      <header class="kid-bar">
-        <b id="win-title"></b><span class="kid-chip" id="win-years"></span>
-        <button class="kid-exit" data-back aria-label="Назад к тропе">✕</button>
+    <!-- ===== Окно в прошлое, шаг 1: старый кадр и задание ===== -->
+    <section class="kid-page past" id="window-page" hidden>
+      <header class="past-bar">
+        <button class="past-x" data-back aria-label="Назад к тропе">✕</button>
+        <span class="past-kicker">Окно в прошлое</span>
       </header>
-      <div class="kid-center top">
-        <figure class="old-card">
-          <img id="win-old" alt="">
-          <figcaption id="win-attrib"></figcaption>
-        </figure>
-        <p class="kid-say small" id="win-say">Встаньте туда, где стоял фотограф, и сфотографируйтесь вместе!</p>
-        <p class="place-chip" id="win-place">Ищем вас по GPS…</p>
+      <div class="past-scroll">
+        <figure class="past-frame"><img id="win-old" alt=""></figure>
+        <p class="past-attrib" id="win-attrib"></p>
+        <p class="past-year" id="win-years"></p>
+        <h1 class="past-title" id="win-title"></h1>
+        <p class="past-ago" id="win-ago"></p>
+        <ol class="past-steps">
+          <li><span>1</span><b>Найди место</b><small>где стоял фотограф</small></li>
+          <li><span>2</span><b>Совмести</b><small>контур старого кадра</small></li>
+          <li><span>3</span><b>Сними</b><small>и окно откроется</small></li>
+        </ol>
+        <p class="past-gps" id="win-place">Ищем вас по GPS…</p>
       </div>
-      <div class="kid-bottom">
-        <button class="btn kid-main big" id="win-camera">Открыть камеру</button>
-      </div>
+      <div class="past-bottom"><button class="btn past-go" id="win-camera">Открыть окно</button></div>
     </section>
 
-    <!-- ===== Шаг 2: камера на весь экран ===== -->
+    <!-- ===== Шаг 2: камера. Горизонтальное «окно» в пропорциях старого кадра, вокруг — затемнение ===== -->
     <section class="kid-page cam" id="cam-page" hidden>
       <video id="cam-video" autoplay muted playsinline></video>
-      <img id="cam-ghost" alt="">
-      <button class="cam-close" data-back aria-label="Закрыть камеру">✕</button>
-      <p class="cam-tip" id="cam-tip">Совместите старое фото с тем, что видите</p>
+      <div class="cam-window" id="cam-window">
+        <img id="cam-ghost" alt="">
+        <i class="cw tl"></i><i class="cw tr"></i><i class="cw bl"></i><i class="cw br"></i>
+      </div>
+      <div class="cam-flash" id="cam-flash"></div>
+      <header class="cam-top">
+        <button class="cam-close" data-back aria-label="Закрыть камеру">✕</button>
+        <p class="cam-tip" id="cam-tip">Совместите контур с тем, что видите</p>
+      </header>
       <div class="cam-panel">
-        <input type="range" id="cam-opacity" min="0" max="100" value="50" aria-label="Прозрачность старого фото">
+        <div class="cam-modes" role="group" aria-label="Подсказка на кадре">
+          <button type="button" data-mode="edges" class="on">Контур</button>
+          <button type="button" data-mode="photo">Старое фото</button>
+        </div>
+        <input type="range" id="cam-opacity" min="15" max="95" value="70" aria-label="Насколько видна подсказка">
         <div class="cam-buttons">
-          <label class="cam-side" title="Фото из галереи">
+          <label class="cam-side" title="Фото из галереи" aria-label="Фото из галереи">
             <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 16l5-5 4 4 3-3 6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
             <input type="file" accept="image/*" id="cam-file" hidden>
           </label>
           <button class="shutter" id="cam-shot" aria-label="Сфотографировать"><span></span></button>
-          <span class="cam-side ghost-label">Тогда</span>
+          <button type="button" class="cam-side peek" id="cam-peek" aria-label="Удерживайте, чтобы увидеть старый кадр">Тогда</button>
         </div>
       </div>
     </section>
 
     <!-- ===== Шаг 3: окно открыто — тогда / сейчас ===== -->
-    <section class="kid-page result" id="result-page" hidden>
-      <header class="kid-bar">
-        <b id="res-title"></b><span class="kid-chip" id="res-years"></span>
-        <button class="kid-exit" data-back aria-label="Назад к тропе">✕</button>
+    <section class="kid-page past result" id="result-page" hidden>
+      <header class="past-bar">
+        <button class="past-x" data-back aria-label="Назад к тропе">✕</button>
+        <span class="past-kicker open">Окно открыто</span>
       </header>
-      <div class="result-scroll">
+      <div class="past-scroll">
+        <h1 class="past-title small" id="res-title"></h1>
         <div class="tn" id="res-tn">
           <img class="now" id="res-now" alt="Сейчас: ваше фото">
           <img class="old" id="res-old" alt="">
-          <span class="tag then">Тогда</span><span class="tag now-tag">Сейчас</span>
+          <span class="tag then" id="res-years"></span><span class="tag now-tag" id="res-now-year"></span>
           <div class="tn-handle" aria-hidden="true"></div>
           <input type="range" id="res-range" min="0" max="100" value="50" aria-label="Тогда / сейчас">
         </div>
-        <p class="res-attrib" id="res-attrib"></p>
-        <p class="kid-say left" id="res-kid"></p>
-        <details class="adult">
+        <p class="past-hint">Двигай шторку — путешествуй во времени</p>
+        <p class="past-attrib" id="res-attrib"></p>
+        <div class="past-gap" id="res-gap"></div>
+        <p class="past-kid" id="res-kid"></p>
+        <details class="adult past-adult">
           <summary>Для взрослых: история места</summary>
           <p id="res-adult"></p>
           <p class="source" id="res-source"></p>
         </details>
       </div>
-      <div class="kid-bottom row">
-        <button class="btn kid-ghost" id="res-save">Сохранить сторис</button>
-        <button class="btn kid-main" id="res-next">Дальше</button>
+      <div class="past-bottom row">
+        <button class="btn past-ghost" id="res-save">Сторис</button>
+        <button class="btn past-go" id="res-next">Дальше</button>
       </div>
     </section>
 
@@ -339,24 +365,50 @@
   </section>
   <dialog id="nap-start-dialog" class="urgent-dialog"><header><h2>Начать день с дневным сном</h2></header><div class="urgent-content" id="nap-start-content"></div><div class="urgent-preview-actions"><button type="button" class="btn alt" id="nap-start-cancel">Отмена</button><button type="button" class="btn main" id="nap-start-apply">Начать с этим планом</button></div></dialog>
   <dialog id="urgent-dialog" class="urgent-dialog" aria-labelledby="urgent-title"><header><div><h2 id="urgent-title">Что нужно сейчас?</h2></div><button type="button" id="urgent-close" aria-label="Закрыть срочные действия">×</button></header><div id="urgent-kinds" class="urgent-kinds"></div><div id="urgent-content" class="urgent-content" aria-live="polite"></div></dialog>
-  <!-- ===== Альбом и профиль: анкета, мои поездки, выход ===== -->
-  <section class="screen profile" data-tab="album" hidden>
-    <header class="today-top"><p class="today-sub" id="prof-who"></p><h1>Профиль</h1></header>
-    <div class="today-scroll">
-      <div class="card-w">
-        <b>Семья</b>
-        <p class="muted" id="prof-family"></p>
-        <div class="row">
-          <button class="btn alt slim" id="prof-edit">Изменить анкету</button>
-          <button class="btn main slim" id="prof-newtrip">Новая поездка</button>
+  <!-- ===== Профиль: дети, память о поездке (статистика, фото, достижения), мои поездки ===== -->
+  <section class="screen profile" data-tab="profile" hidden>
+    <div class="pf-scroll">
+      <h1 class="pf-title">Профиль</h1>
+
+      <section class="pf-card pf-family" aria-labelledby="pf-fam-h">
+        <div class="pf-head"><h2 id="pf-fam-h">Наша семья</h2><button class="pf-link" id="prof-edit" type="button">Изменить</button></div>
+        <div id="pf-kids"></div>
+        <div class="pf-acc">
+          <span id="pf-sub"></span>
+          <button class="pf-link" id="prof-auth" type="button">Войти</button>
         </div>
+      </section>
+
+      <section class="pf-card" aria-labelledby="pf-trips-h">
+        <div class="pf-head"><h2 id="pf-trips-h">Мои поездки</h2><button class="pf-link" id="prof-newtrip" type="button">Новая</button></div>
+        <div class="trip-rail" id="prof-trips" role="list" aria-label="Мои поездки"></div>
+      </section>
+    </div>
+
+    <!-- Альбом поездки: открывается нажатием на поездку в «Моих поездках» -->
+    <div class="pf-album" id="pf-album" hidden>
+      <header class="pf-album-top">
+        <button type="button" class="pf-album-back" id="pf-album-back" aria-label="Назад к поездкам">‹</button>
+        <b id="pf-album-title">Альбом поездки</b>
+      </header>
+      <div class="pf-album-scroll">
+        <section class="pf-memory" id="pf-memory" aria-labelledby="pf-mem-h">
+        <div class="pf-mem-top">
+          <div><span class="pf-kicker" id="pf-kicker">Альбом прогулки</span><h2 id="pf-mem-h"></h2></div>
+          <div class="pf-ring" id="pf-ring"></div>
+        </div>
+        <p class="pf-mem-lead" id="pf-lead"></p>
+        <div class="pf-stats" id="pf-stats"></div>
+        <div class="pf-windows" id="pf-windows"></div>
+        <div class="pf-photos" id="pf-photos"></div>
+        <input type="file" id="pf-file" accept="image/*" multiple hidden>
+        <small class="pf-sub-h">Достижения</small>
+        <div class="pf-ach" id="pf-ach"></div>
+        <button class="pf-share" id="pf-share" type="button">✦ Выложить в сторис</button>
+      </section>
+
+        <button class="btn alt pf-album-open" id="pf-album-open" type="button" hidden>Открыть маршрут</button>
       </div>
-      <div class="card-w">
-        <b>Мои поездки</b>
-        <ul class="trip-list" id="prof-trips"><li class="muted">Загружаем…</li></ul>
-      </div>
-      <button class="btn alt" id="prof-auth">Выйти</button>
-      <p class="fine center">Альбом «тогда и сейчас» появится здесь.</p>
     </div>
   </section>
 
@@ -587,11 +639,18 @@
 
   <!-- ===== Нижнее меню ===== -->
   <nav class="tabbar" aria-label="Разделы">
-    <button data-tab="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c3-1 4-5 7-7s5-1 7-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="5" cy="19" r="2" fill="currentColor"/><circle cx="19" cy="6" r="2" fill="currentColor"/></svg>Сегодня</button>
-    <button data-tab="map" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Карта</button>
-    <button data-tab="kid" class="kid"><span class="kid-badge">М</span>Маша</button>
-    <button data-tab="album"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 16l5-5 4 4 3-3 4 4" fill="none" stroke="currentColor" stroke-width="2"/></svg>Альбом</button>
+    <button data-tab="today"><span class="tab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5l1.6 1.6L8.5 5M4 12.5l1.6 1.6 2.9-3.1M4 18.5l1.6 1.6 2.9-3.1M12 7h8M12 13h8M12 19h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>План</button>
+    <button data-tab="map" class="on">
+      <span class="tab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Карта
+    </button>
+    <button data-tab="profile"><span class="tab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Профиль</button>
   </nav>
 </div>
+<script>
+  // Service worker только по HTTPS (или localhost) — иначе браузер его не разрешит
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+</script>
 </body>
 </html>
