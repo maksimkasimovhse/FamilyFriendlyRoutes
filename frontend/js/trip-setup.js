@@ -4,6 +4,7 @@
 // Дальше: preview generate_plan → предпросмотр → apply («Сохранить маршрут»).
 
 import { createTrip, createTripFromProfile, planDraft, applyPreview, referenceData, planningOptions, previewManualChoices, ApiError } from './api.js';
+import { openChat, resetChat, chatText } from './trip-chat.js';
 import { manualSelection, pickConfiguration, planningPolicyForSelections } from './recommendation-cards.js';
 import { currentProfile, profileVersion, familySummary, childName } from './onboarding.js';
 
@@ -154,7 +155,7 @@ function bindWhen() {
       $('start-note').textContent = 'Не получилось: ' + e.message + (location.protocol !== 'https:' && location.hostname !== 'localhost' ? ' (нужен HTTPS)' : '');
     }, { enableHighAccuracy: true, timeout: 10000 });
   };
-  $('when-next').onclick = () => { $('trip-when').hidden = true; hooks.onPick(); };
+  $('when-next').onclick = () => { $('trip-when').hidden = true; backToChat(); };
   $('trip-when').querySelector('[data-back]').onclick = () => { $('trip-when').hidden = true; hooks.onBack(); };
 }
 
@@ -209,7 +210,7 @@ export async function prepareInitialChoices() {
 function renderWishes() {
   step = 'wishes';
   const p = currentProfile();
-  if (st.request === null) st.request = p?.wishes || '';
+  if (st.request === null) st.request = [p?.wishes, chatText()].filter(Boolean).join('\n');   // пожелания анкеты + то, что написали в чате
   $('trip-request').value = st.request;
   $('request-hint').textContent = capabilities.free_text
     ? 'Пожелания из анкеты уже здесь. Допишите, что нужно именно сейчас — анкета не изменится.'
@@ -230,7 +231,7 @@ function renderWishes() {
       st.request = $('trip-request').value;
       $('trip-wishes').hidden = true;
       if (b.dataset.to === 'when') { renderWhen(); $('trip-when').hidden = false; }
-      else if (b.dataset.to === 'pick') hooks.onPick();
+      else if (b.dataset.to === 'pick') goPick();
       else hooks.onEditProfile();
     };
   });
@@ -378,19 +379,20 @@ export async function openTripSetup(h, { keep = false, resume = false } = {}) {
     // Даты в прошлом (вчерашняя вкладка) не оставляем
     if (st.from < firstAllowed(st.context)) { st.from = st.to = firstAllowed(st.context); st.month = st.from.slice(0, 7); }
     step = saved.step;
-  } else if (!st || !keep) { st = freshState(); pickingEnd = false; step = 'when'; }
+  } else if (!st || !keep) { st = freshState(); pickingEnd = false; step = 'when'; resetChat(); }
   if (!bound) {
     bound = true;
     bindWhen();
     $('trip-build').onclick = build;
-    $('trip-wishes').querySelector('[data-back]').onclick = () => { st.request = $('trip-request').value; $('trip-wishes').hidden = true; hooks.onPick(); };
+    $('trip-wishes').querySelector('[data-back]').onclick = () => { st.request = $('trip-request').value; $('trip-wishes').hidden = true; goPick(); };
     $('trip-preview').querySelector('[data-back]').onclick = () => { $('trip-preview').hidden = true; renderWishes(); $('trip-wishes').hidden = false; };
     $('preview-ack-box').onchange = e => { $('preview-save').disabled = !preview?.can_apply || !e.target.checked; };
     $('preview-save').onclick = savePreview;
     $('preview-login').onclick = () => hooks.onLogin();
   }
   // Вернуться туда, где остановились до обновления страницы
-  if (saved?.st && step === 'pick') { hooks.onPick(); return; }
+  if (saved?.st && step === 'chat') { backToChat(); return; }
+  if (saved?.st && step === 'pick') { goPick(); return; }
   if (saved?.st && step === 'wishes') { renderWishes(); $('trip-wishes').hidden = false; return; }
   renderWhen();
   $('trip-when').hidden = false;
@@ -402,10 +404,27 @@ export function afterPick(places) {
   renderWishes();
   $('trip-wishes').hidden = false;
 }
+// Шаг 2 — ИИ-чат: пожелания словами → подобранные карточки для шага 3
+export function backToChat() {
+  step = 'chat'; persist();
+  openChat({
+    onBack: () => { renderWhen(); $('trip-when').hidden = false; },
+    onDone: ids => {
+      st.chatIds = ids;
+      // Пожелания из чата уходят в запрос поездки вместе с анкетой: их учтёт ML, когда принимает свободный текст
+      const p = currentProfile();
+      st.request = [p?.wishes, chatText()].filter(Boolean).join('\n');
+      $('trip-request').value = st.request;
+      goPick();
+    },
+  });
+}
+// Шаг 3: подбор мест; порядок карточек подсказывает чат
+const goPick = () => hooks.onPick(st.chatIds || null);
 // Вернуться к шагу 1 из подбора мест («‹» на экране карточек)
 export function backToWhen() { renderWhen(); $('trip-when').hidden = false; }
 // Вернуться на шаг 3 после правки анкеты
 export function backToWishes() { renderWishes(); $('trip-wishes').hidden = false; }
 // Вернуться к предпросмотру (после входа гостя)
 export function backToPreview() { if (preview) { hooks.authenticated = true; renderPreview(); $('trip-preview').hidden = false; } }
-export function closeTripSetup() { ['trip-when', 'trip-wishes', 'trip-preview'].forEach(s => { $(s).hidden = true; }); }
+export function closeTripSetup() { ['trip-when', 'trip-chat', 'trip-wishes', 'trip-preview'].forEach(s => { $(s).hidden = true; }); }

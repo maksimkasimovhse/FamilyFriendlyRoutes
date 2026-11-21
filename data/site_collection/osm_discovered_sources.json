@@ -1,0 +1,8 @@
+{
+  "sources": [
+    {"place_id": "place:osm:node:12104690801", "url": "https://muzeybumagi.art/", "discovery_method": "name_search_municipal_tourism_directory", "discovery_source": "https://admgor.nnov.ru/Gorod/Napravleniya-raboty/Turizm"},
+    {"place_id": "place:osm:node:13468095300", "url": "https://gallery52.ru/", "discovery_method": "name_search_official_page"},
+    {"place_id": "place:osm:node:4462100932", "url": "https://futurogallery.ru/", "discovery_method": "name_search_official_page", "note": "NN branch temporarily closed; do not copy Moscow hours."},
+    {"place_id": "place:osm:node:11042381496", "url": "https://terminal-nn.site/", "discovery_method": "name_search_official_page", "note": "Current address Krasnaya Sloboda 9A, not old TSUM location."}
+  ]
+}

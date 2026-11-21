@@ -1,3 +1,4 @@
+import { requestId } from './request-id.js';
 // Поездка семьи и работа с бекендом Максима (docs/contracts/openapi.json, docs/active_day.md).
 // Одна сохранённая поездка на весь интерфейс: карта и «Сегодня» читают её отсюда
 // и перерисовываются, когда она меняется (начали день, отметили остановку, пропустили).
@@ -40,7 +41,7 @@ export async function openSession() {
 async function call(method, path, body, idempotent = false) {
   const headers = { 'Content-Type': 'application/json' };
   if (method !== 'GET') headers['X-CSRF-Token'] = csrfToken;
-  if (idempotent) headers['Idempotency-Key'] = crypto.randomUUID();
+  if (idempotent) headers['Idempotency-Key'] = requestId();
   let res;
   try { res = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : undefined }); }
   catch { throw new ApiError('NETWORK', 'Нет связи с сервером'); }

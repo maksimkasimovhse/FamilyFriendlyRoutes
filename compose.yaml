@@ -7,6 +7,9 @@ services:
       dockerfile: services/parser_service/Dockerfile
     environment:
       SOURCE_REGISTRY_PATH: /app/config/source_registry.json
+      ML_API_TOKEN: ${ML_API_TOKEN:-}
+      ML_REQUIRE_LEGACY_AUTH: ${ML_REQUIRE_LEGACY_AUTH:-false}
+      ASSISTANT_RULES_FALLBACK: ${ASSISTANT_RULES_FALLBACK:-true}
       GIGACHAT_CREDENTIALS: ${GIGACHAT_CREDENTIALS:-}
       GIGACHAT_ACCESS_TOKEN: ${GIGACHAT_ACCESS_TOKEN:-}
       GIGACHAT_SCOPE: ${GIGACHAT_SCOPE:-GIGACHAT_API_B2B}
@@ -29,6 +32,10 @@ services:
     build:
       context: .
       dockerfile: services/model_service/Dockerfile
+    environment:
+      MODEL_CATALOG_VERSION: city-enriched-v3
+      ML_API_TOKEN: ${ML_API_TOKEN:-}
+      ML_REQUIRE_LEGACY_AUTH: ${ML_REQUIRE_LEGACY_AUTH:-false}
     ports:
       - "127.0.0.1:8082:8080"
     read_only: true
@@ -108,9 +115,14 @@ services:
       dockerfile: infra/docker/backend.Dockerfile
     environment:
       DATABASE_URL: ${DOCKER_DATABASE_URL:-postgres://familyroutes:${POSTGRES_PASSWORD:-}@postgres:5432/familyroutes?sslmode=disable}
+      ML_API_TOKEN: ${ML_API_TOKEN:-}
+      ASSISTANT_URL: http://parser-service:8080/internal/v1/assistant-intents
+      INITIAL_LLM_ENABLED: "true"
+      LEGACY_ML_URL: http://mock-api:8090/internal/v1/recommendations
+      CITY_ML_URL: http://model-service:8080/internal/v1/recommendations
     # Места для маршрута берёт у ML по контракту /internal/v1/recommendations.
-    # Пока у Вильдана нет сервиса — у мока (mock-api). Вернуть синтетику: command: ["-demo-catalog"]
-    command: ["-listen", "0.0.0.0:8080", "-allow-network-listen", "-trust-proxy-headers", "-routing-url", "http://valhalla:8002", "-ml-url", "http://mock-api:8090/internal/v1/recommendations", "-catalog-version", "mock-ml-v1"]
+    # New trips use ML; stored trips retain their original catalog provider.
+    command: ["-listen", "0.0.0.0:8080", "-allow-network-listen", "-trust-proxy-headers", "-routing-url", "http://valhalla:8002", "-ml-url", "http://model-service:8080/internal/v1/recommendations", "-catalog-version", "city-enriched-v3", "-parser-url", "http://parser-service:8080", "-model-url", "http://model-service:8080"]
     volumes:
       - ./data:/app/data
       # Картинки карточек: backend отдаёт их под /media/ и без папки не стартует (-images-dir)
@@ -151,6 +163,14 @@ services:
   # Открывать: http://localhost:8000
   web:
     image: nginx:1.27-alpine
+    depends_on:
+      backend:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8000/api/v1/reference-data"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
     ports:
       - "127.0.0.1:8000:8000"
     volumes:

@@ -1,0 +1,1003 @@
+{
+"10": [
+"category:park",
+"format:calm",
+"interest:nature",
+"interest:sport"
+],
+"100": [
+"category:landmark",
+"interest:architecture",
+"interest:history"
+],
+"101": [
+"category:landmark",
+"interest:architecture"
+],
+"102": [
+"category:landmark",
+"format:active",
+"interest:nature",
+"interest:theatre"
+],
+"103": [
+"category:landmark",
+"format:calm",
+"interest:architecture"
+],
+"104": [
+"category:landmark",
+"interest:architecture",
+"interest:transport"
+],
+"105": [
+"category:landmark",
+"interest:architecture",
+"interest:music"
+],
+"106": [
+"category:landmark",
+"interest:architecture",
+"interest:plants",
+"interest:sport"
+],
+"107": [
+"category:landmark",
+"interest:architecture"
+],
+"108": [
+"category:landmark",
+"interest:architecture"
+],
+"109": [
+"category:museum",
+"format:educational",
+"interest:architecture",
+"interest:art",
+"interest:history"
+],
+"11": [
+"category:park",
+"format:calm",
+"interest:architecture",
+"interest:nature"
+],
+"110": [
+"category:museum",
+"format:educational",
+"format:playful",
+"interest:architecture",
+"interest:art",
+"interest:history"
+],
+"111": [
+"category:museum",
+"format:educational",
+"interest:history",
+"interest:literature"
+],
+"112": [
+"category:museum",
+"format:educational",
+"interest:architecture",
+"interest:art",
+"interest:history"
+],
+"113": [
+"category:museum",
+"format:calm",
+"format:educational",
+"interest:history",
+"interest:technology",
+"interest:transport"
+],
+"114": [
+"category:museum",
+"format:educational",
+"interest:architecture",
+"interest:history",
+"interest:nature"
+],
+"115": [
+"category:museum",
+"format:educational",
+"interest:history",
+"interest:nature",
+"interest:transport"
+],
+"116": [
+"category:museum",
+"format:educational",
+"interest:architecture",
+"interest:history"
+],
+"117": [
+"category:museum",
+"format:educational",
+"interest:art",
+"interest:history"
+],
+"118": [
+"category:museum",
+"format:educational",
+"interest:art",
+"interest:history"
+],
+"119": [
+"category:museum",
+"format:educational",
+"interest:art",
+"interest:crafts",
+"interest:history"
+],
+"12": [
+"category:park",
+"format:calm",
+"interest:art",
+"interest:nature",
+"interest:transport"
+],
+"120": [
+"category:museum",
+"format:educational",
+"interest:architecture",
+"interest:history",
+"interest:literature"
+],
+"121": [
+"category:museum",
+"format:educational",
+"interest:history",
+"interest:literature"
+],
+"122": [
+"category:landmark",
+"interest:art",
+"interest:history"
+],
+"123": [
+"category:landmark",
+"format:playful",
+"interest:history"
+],
+"124": [
+"category:landmark",
+"interest:history"
+],
+"125": [
+"category:landmark",
+"interest:history",
+"interest:theatre"
+],
+"126": [
+"category:landmark",
+"interest:history"
+],
+"127": [
+"category:landmark",
+"interest:history"
+],
+"128": [
+"category:landmark",
+"interest:history"
+],
+"129": [
+"category:landmark",
+"interest:history",
+"interest:transport"
+],
+"13": [
+"category:park",
+"format:calm",
+"interest:nature",
+"interest:plants"
+],
+"130": [
+"category:landmark",
+"interest:art",
+"interest:history",
+"interest:transport"
+],
+"131": [
+"category:landmark",
+"interest:history",
+"interest:nature"
+],
+"14": [
+"category:park",
+"format:calm",
+"format:educational",
+"interest:architecture",
+"interest:nature"
+],
+"15": [
+"category:park",
+"format:active",
+"format:calm",
+"interest:history",
+"interest:nature",
+"interest:transport"
+],
+"16": [
+"category:park",
+"format:calm",
+"interest:nature"
+],
+"17": [
+"category:landmark",
+"format:spectacular",
+"interest:architecture",
+"interest:art",
+"interest:history",
+"interest:nature"
+],
+"18": [
+"category:landmark",
+"format:educational",
+"interest:architecture",
+"interest:history",
+"interest:theatre",
+"interest:transport"
+],
+"19": [
+"category:landmark"
+],
+"20": [
+"category:landmark",
+"format:calm",
+"interest:architecture",
+"interest:history"
+],
+"21": [
+"category:landmark",
+"interest:history"
+],
+"217": [
+"category:museum",
+"format:educational",
+"interest:history"
+],
+"218": [
+"category:museum",
+"format:educational",
+"interest:architecture",
+"interest:history",
+"interest:nature"
+],
+"219": [
+"category:event",
+"interest:architecture"
+],
+"22": [
+"category:landmark",
+"interest:architecture",
+"interest:transport"
+],
+"220": [
+"category:museum",
+"format:creative",
+"format:educational",
+"interest:art",
+"interest:history"
+],
+"221": [
+"category:event",
+"format:spectacular",
+"interest:music",
+"interest:science",
+"interest:theatre"
+],
+"222": [
+"category:event",
+"format:creative",
+"interest:theatre"
+],
+"223": [
+"category:event",
+"format:active",
+"format:calm",
+"format:creative",
+"interest:history",
+"interest:music",
+"interest:theatre"
+],
+"224": [
+"category:event",
+"interest:art",
+"interest:theatre"
+],
+"225": [
+"category:park",
+"format:calm",
+"interest:nature",
+"interest:plants"
+],
+"226": [
+"category:park",
+"format:calm",
+"interest:nature",
+"interest:sport"
+],
+"227": [
+"category:park",
+"format:calm",
+"interest:nature",
+"interest:technology"
+],
+"228": [
+"category:park",
+"format:calm",
+"interest:history",
+"interest:nature",
+"interest:plants",
+"interest:sport"
+],
+"229": [
+"category:park",
+"format:calm",
+"format:playful",
+"interest:nature"
+],
+"23": [
+"category:landmark",
+"format:educational",
+"interest:architecture",
+"interest:history"
+],
+"230": [
+"category:event",
+"interest:architecture",
+"interest:nature",
+"interest:science",
+"interest:space"
+],
+"231": [
+"category:event",
+"format:spectacular",
+"interest:music",
+"interest:theatre"
+],
+"232": [
+"category:event",
+"interest:theatre"
+],
+"233": [
+"category:event",
+"interest:history",
+"interest:music",
+"interest:theatre"
+],
+"234": [
+"category:event",
+"interest:music"
+],
+"235": [
+"category:event",
+"format:creative",
+"format:playful",
+"interest:art",
+"interest:literature",
+"interest:technology"
+],
+"236": [
+"category:event",
+"interest:architecture",
+"interest:history",
+"interest:literature"
+],
+"237": [
+"category:event",
+"interest:literature"
+],
+"238": [
+"category:event",
+"interest:art",
+"interest:literature"
+],
+"239": [
+"category:event",
+"interest:music"
+],
+"24": [
+"category:landmark",
+"format:educational",
+"interest:architecture",
+"interest:history",
+"interest:plants"
+],
+"240": [
+"category:event",
+"interest:crafts",
+"interest:literature"
+],
+"241": [
+"category:event",
+"interest:literature"
+],
+"242": [
+"category:event",
+"format:calm",
+"interest:literature",
+"interest:music"
+],
+"243": [
+"category:event",
+"format:active",
+"interest:literature"
+],
+"244": [
+"category:event",
+"interest:literature"
+],
+"245": [
+"category:event",
+"format:active",
+"format:creative",
+"format:educational",
+"format:playful",
+"format:spectacular",
+"interest:literature",
+"interest:sport",
+"interest:theatre"
+],
+"246": [
+"category:event",
+"interest:literature"
+],
+"247": [
+"category:event",
+"format:calm",
+"format:playful",
+"interest:literature",
+"interest:theatre"
+],
+"248": [
+"category:event",
+"format:playful",
+"interest:literature"
+],
+"249": [
+"category:event",
+"interest:literature"
+],
+"25": [
+"category:landmark",
+"format:educational",
+"interest:architecture",
+"interest:history",
+"interest:plants"
+],
+"250": [
+"category:event",
+"interest:literature",
+"interest:technology"
+],
+"251": [
+"category:event"
+],
+"252": [
+"category:event",
+"format:creative",
+"format:educational",
+"format:playful",
+"interest:art",
+"interest:cooking",
+"interest:history",
+"interest:music",
+"interest:theatre"
+],
+"253": [
+"category:event",
+"interest:literature",
+"interest:technology"
+],
+"254": [
+"category:event",
+"interest:art"
+],
+"255": [
+"category:event",
+"interest:literature"
+],
+"256": [
+"category:event",
+"interest:literature"
+],
+"257": [
+"category:event",
+"interest:history",
+"interest:literature",
+"interest:music"
+],
+"258": [
+"category:event",
+"interest:art",
+"interest:cooking",
+"interest:music"
+],
+"259": [
+"category:event",
+"format:creative",
+"interest:art",
+"interest:cooking",
+"interest:music"
+],
+"26": [
+"category:landmark",
+"interest:architecture"
+],
+"260": [
+"category:event",
+"interest:cooking",
+"interest:literature"
+],
+"261": [
+"category:event",
+"interest:literature"
+],
+"262": [
+"category:event",
+"interest:literature"
+],
+"263": [
+"category:event",
+"interest:literature"
+],
+"264": [
+"category:event",
+"format:active",
+"interest:music",
+"interest:nature",
+"interest:sport",
+"interest:technology"
+],
+"265": [
+"category:event",
+"interest:art",
+"interest:history",
+"interest:literature",
+"interest:music"
+],
+"27": [
+"category:landmark",
+"format:educational",
+"interest:architecture",
+"interest:history"
+],
+"28": [
+"category:landmark",
+"interest:architecture",
+"interest:history"
+],
+"29": [
+"category:park",
+"format:calm",
+"interest:architecture",
+"interest:history",
+"interest:nature",
+"interest:plants"
+],
+"30": [
+"category:landmark",
+"interest:music",
+"interest:nature",
+"interest:plants",
+"interest:theatre"
+],
+"31": [
+"category:landmark",
+"interest:architecture",
+"interest:technology"
+],
+"32": [
+"category:landmark",
+"interest:history",
+"interest:technology",
+"interest:transport"
+],
+"33": [
+"category:museum",
+"format:calm",
+"format:educational",
+"interest:history",
+"interest:nature",
+"interest:technology",
+"interest:transport"
+],
+"34": [
+"category:landmark",
+"interest:history",
+"interest:nature",
+"interest:space",
+"interest:technology",
+"interest:transport"
+],
+"35": [
+"category:museum",
+"format:educational",
+"interest:history",
+"interest:technology"
+],
+"36": [
+"category:landmark",
+"format:educational",
+"interest:architecture",
+"interest:history",
+"interest:literature",
+"interest:nature"
+],
+"37": [
+"category:landmark",
+"format:educational",
+"interest:architecture",
+"interest:history"
+],
+"38": [
+"category:landmark",
+"interest:literature",
+"interest:nature",
+"interest:transport"
+],
+"39": [
+"category:landmark",
+"interest:architecture"
+],
+"40": [
+"category:landmark",
+"interest:architecture",
+"interest:history",
+"interest:nature"
+],
+"41": [
+"category:landmark",
+"interest:history",
+"interest:nature"
+],
+"42": [
+"category:landmark",
+"interest:architecture",
+"interest:history"
+],
+"43": [
+"category:landmark",
+"interest:architecture",
+"interest:history",
+"interest:plants"
+],
+"44": [
+"category:landmark",
+"interest:architecture",
+"interest:nature"
+],
+"45": [
+"category:landmark",
+"interest:architecture",
+"interest:history"
+],
+"46": [
+"category:landmark",
+"interest:architecture"
+],
+"47": [
+"category:landmark",
+"interest:architecture",
+"interest:history"
+],
+"48": [
+"category:landmark",
+"interest:architecture",
+"interest:history",
+"interest:nature"
+],
+"49": [
+"category:landmark",
+"interest:architecture",
+"interest:history",
+"interest:nature"
+],
+"5": [
+"category:landmark",
+"format:active",
+"interest:history",
+"interest:nature"
+],
+"50": [
+"category:landmark",
+"interest:architecture",
+"interest:history"
+],
+"51": [
+"category:landmark",
+"format:calm",
+"interest:history",
+"interest:literature",
+"interest:nature"
+],
+"52": [
+"category:landmark",
+"interest:nature"
+],
+"53": [
+"category:landmark",
+"interest:history"
+],
+"54": [
+"category:landmark",
+"format:calm",
+"format:educational",
+"interest:art",
+"interest:history",
+"interest:music"
+],
+"55": [
+"category:landmark",
+"interest:architecture",
+"interest:cooking",
+"interest:history"
+],
+"56": [
+"category:park",
+"format:calm",
+"format:educational",
+"interest:history",
+"interest:nature",
+"interest:technology"
+],
+"57": [
+"category:landmark",
+"interest:architecture",
+"interest:history"
+],
+"58": [
+"category:landmark",
+"interest:architecture",
+"interest:history",
+"interest:nature",
+"interest:theatre"
+],
+"59": [
+"category:landmark",
+"interest:architecture"
+],
+"60": [
+"category:landmark",
+"format:active",
+"interest:sport"
+],
+"61": [
+"category:landmark",
+"interest:architecture",
+"interest:nature",
+"interest:transport"
+],
+"62": [
+"category:landmark",
+"interest:architecture",
+"interest:art",
+"interest:crafts"
+],
+"63": [
+"category:landmark",
+"interest:architecture",
+"interest:art",
+"interest:crafts"
+],
+"64": [
+"category:event",
+"format:spectacular",
+"interest:architecture",
+"interest:history",
+"interest:theatre"
+],
+"65": [
+"category:landmark",
+"format:educational",
+"interest:architecture",
+"interest:history"
+],
+"66": [
+"category:landmark",
+"interest:architecture",
+"interest:cooking",
+"interest:plants"
+],
+"67": [
+"category:park",
+"format:calm",
+"format:spectacular",
+"interest:history",
+"interest:nature",
+"interest:plants"
+],
+"68": [
+"category:landmark",
+"interest:architecture",
+"interest:history",
+"interest:nature",
+"interest:transport"
+],
+"69": [
+"category:park",
+"format:calm",
+"interest:nature"
+],
+"70": [
+"category:park",
+"format:calm",
+"format:playful",
+"interest:nature",
+"interest:sport"
+],
+"71": [
+"category:park",
+"format:calm",
+"format:educational",
+"format:spectacular",
+"interest:history",
+"interest:nature",
+"interest:technology"
+],
+"72": [
+"category:park",
+"format:calm",
+"interest:nature"
+],
+"73": [
+"category:event",
+"format:spectacular",
+"interest:history",
+"interest:theatre"
+],
+"74": [
+"category:event",
+"format:spectacular",
+"interest:theatre"
+],
+"75": [
+"category:event",
+"format:spectacular",
+"interest:history",
+"interest:theatre"
+],
+"76": [
+"category:event",
+"format:spectacular",
+"interest:art",
+"interest:music",
+"interest:theatre"
+],
+"77": [
+"category:event",
+"format:spectacular",
+"interest:theatre"
+],
+"78": [
+"category:event",
+"format:spectacular",
+"interest:music",
+"interest:theatre"
+],
+"79": [
+"category:event",
+"format:spectacular",
+"interest:theatre"
+],
+"8": [
+"category:landmark",
+"format:active",
+"interest:nature",
+"interest:plants",
+"interest:sport"
+],
+"80": [
+"category:park",
+"format:active",
+"format:calm",
+"interest:art",
+"interest:nature"
+],
+"81": [
+"category:park",
+"format:calm",
+"interest:nature",
+"interest:plants"
+],
+"82": [
+"category:park",
+"format:calm",
+"interest:nature"
+],
+"83": [
+"category:park",
+"format:calm",
+"format:educational",
+"interest:history",
+"interest:nature"
+],
+"84": [
+"category:park",
+"format:calm",
+"interest:nature",
+"interest:plants"
+],
+"85": [
+"category:park",
+"format:calm",
+"interest:nature",
+"interest:sport"
+],
+"86": [
+"category:park",
+"format:calm",
+"interest:nature"
+],
+"87": [
+"category:park",
+"format:calm",
+"interest:nature"
+],
+"88": [
+"category:park",
+"format:calm",
+"interest:literature",
+"interest:nature",
+"interest:plants",
+"interest:science"
+],
+"89": [
+"category:park",
+"format:calm",
+"interest:nature",
+"interest:plants",
+"interest:transport"
+],
+"9": [
+"category:landmark",
+"interest:architecture",
+"interest:history",
+"interest:literature"
+],
+"90": [
+"category:landmark"
+],
+"91": [
+"category:landmark",
+"interest:transport"
+],
+"92": [
+"category:landmark",
+"interest:theatre"
+],
+"93": [
+"category:landmark"
+],
+"94": [
+"category:park",
+"format:calm",
+"format:spectacular",
+"interest:nature",
+"interest:technology"
+],
+"95": [
+"category:landmark"
+],
+"96": [
+"category:landmark",
+"interest:architecture",
+"interest:history",
+"interest:nature",
+"interest:transport"
+],
+"97": [
+"category:landmark",
+"interest:transport"
+],
+"98": [
+"category:landmark",
+"interest:architecture"
+],
+"99": [
+"category:landmark",
+"interest:architecture"
+]
+}

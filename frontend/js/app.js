@@ -11,7 +11,7 @@
 import { onTripChange, loadSavedTrip, loadCachedTrip, listTrips, openTrip, forget, getTrip, getSource, today, planningOptions, previewManualChoices, applyPreview } from './api.js';
 import { startSession, isAuthenticated, isGuest, enterGuest, leaveGuest, userEmail, signOut, initAuthScreen, openAuth } from './session.js';
 import { loadFamily, syncLocalProfile, seedDemoNames, clearDeviceData, openOnboarding, closeOnboarding, currentProfile, childName, genitive, familySummary } from './onboarding.js';
-import { openTripSetup, markStep, clearResume, afterPick, backToWhen, backToWishes, backToPreview, closeTripSetup, prepareInitialChoices } from './trip-setup.js';
+import { openTripSetup, markStep, clearResume, afterPick, backToWhen, backToChat, backToWishes, backToPreview, closeTripSetup, prepareInitialChoices } from './trip-setup.js';
 import { manualSelection, pickConfiguration } from './recommendation-cards.js';
 import { loadRoutePlaces, clearRoutePlaces, onPlacesChange, loadPlaceTypes } from './places.js';
 import { initMap, resizeMap, focusPlace, showRoutePreview, clearRoutePreview, showPicked, refreshMap } from './map.js';
@@ -92,12 +92,13 @@ function startMain() {
 // ---------- Подбор мест: шаг 2 «Новой поездки» или отдельно с карты ----------
 let pickInFlow = false;
 let customPickFinish = null, customPickCancel = null;
-async function enterPickStep() {
+async function enterPickStep(chatIds) {
   let configuration;
   loading('Подбираем карточки…');
   try { configuration = await prepareInitialChoices(); }
   catch(err) { loading('');backToWhen();$('when-error').textContent=err.message;$('when-error').hidden=false;return; }
   loading('');customPickFinish=null;customPickCancel=null;
+  configuration.rankHint = chatIds || null;     // порядок от ИИ-чата: подходящие по пожеланию места — первыми
   pickInFlow = true;
   markStep('pick');
   app.classList.add('flow-mode');
@@ -125,7 +126,7 @@ initPick({
   },
   onClose: () => {
     if (customPickCancel) { const cancel=customPickCancel;customPickFinish=null;customPickCancel=null;$('screen-pick').hidden=true;cancel();return; }
-    if (pickInFlow) { leavePickStep(); backToWhen(); return; }
+    if (pickInFlow) { leavePickStep(); backToChat(); return; }
     openTab('map');
   },
 });

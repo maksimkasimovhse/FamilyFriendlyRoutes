@@ -28,11 +28,14 @@ type Interval struct {
 }
 
 type Evidence struct {
-	EvidenceID ID       `json:"evidence_id"`
-	SourceURL  *string  `json:"source_url"`
-	SourceKind string   `json:"source_kind"`
-	CheckedAt  Instant  `json:"checked_at"`
-	ValidUntil *Instant `json:"valid_until"`
+	EvidenceID         ID       `json:"evidence_id"`
+	SourceURL          *string  `json:"source_url"`
+	SourceKind         string   `json:"source_kind"`
+	CheckedAt          Instant  `json:"checked_at"`
+	ValidUntil         *Instant `json:"valid_until"`
+	Quote              *string  `json:"quote,omitempty"`
+	ContentSha256      *string  `json:"content_sha256,omitempty"`
+	VerificationStatus *string  `json:"verification_status,omitempty"`
 }
 
 type Warning struct {
@@ -95,6 +98,7 @@ type DayInput struct {
 	MealCount         *int      `json:"meal_count,omitempty"`
 	MealFormat        *string   `json:"meal_format,omitempty"`
 	MealDurationSec   *float64  `json:"meal_duration_sec,omitempty"`
+	MaxWalkDistanceM  *float64  `json:"max_walk_distance_m,omitempty"`
 }
 
 type Selection struct {
@@ -129,12 +133,15 @@ type Place struct {
 	Shelter      json.RawMessage `json:"shelter"`
 	Seating      json.RawMessage `json:"seating"`
 	Restaurant   *struct {
-		ChildrenMenu        json.RawMessage `json:"children_menu"`
-		SmallPortions       json.RawMessage `json:"small_portions"`
-		PlayArea            json.RawMessage `json:"play_area"`
-		PlayAreaMinAge      json.RawMessage `json:"play_area_min_age"`
-		PlayAreaMaxAge      json.RawMessage `json:"play_area_max_age"`
-		PlayAreaSupervision json.RawMessage `json:"play_area_supervision"`
+		ChildrenMenu          json.RawMessage  `json:"children_menu"`
+		SmallPortions         json.RawMessage  `json:"small_portions"`
+		PlayArea              json.RawMessage  `json:"play_area"`
+		PlayAreaMinAge        json.RawMessage  `json:"play_area_min_age"`
+		PlayAreaMaxAge        json.RawMessage  `json:"play_area_max_age"`
+		PlayAreaSupervision   json.RawMessage  `json:"play_area_supervision"`
+		Cuisine               *[]string        `json:"cuisine,omitempty"`
+		MenuUrls              *[]string        `json:"menu_urls,omitempty"`
+		PlayAreaStaffHoursRaw *json.RawMessage `json:"play_area_staff_hours_raw,omitempty"`
 	} `json:"restaurant"`
 	Address          *string  `json:"address,omitempty"`
 	OpeningHoursRaw  *string  `json:"opening_hours_raw,omitempty"`
@@ -142,6 +149,9 @@ type Place struct {
 	FeeRaw           *string  `json:"fee_raw,omitempty"`
 	DistanceM        *float64 `json:"distance_m,omitempty"`
 	DistanceToRouteM *float64 `json:"distance_to_route_m,omitempty"`
+	Description      *string  `json:"description,omitempty"`
+	Website          *string  `json:"website,omitempty"`
+	Phone            *string  `json:"phone,omitempty"`
 }
 
 type DurationEstimate struct {
@@ -164,6 +174,9 @@ type Activity struct {
 	AdmissionRule          json.RawMessage  `json:"admission_rule"`
 	BookingRequired        json.RawMessage  `json:"booking_required"`
 	EvidenceIDS            []ID             `json:"evidence_ids"`
+	Description            *string          `json:"description,omitempty"`
+	ContentLabelMin        *float64         `json:"content_label_min,omitempty"`
+	ParticipationRulesRaw  *[]string        `json:"participation_rules_raw,omitempty"`
 }
 
 type AvailabilityDay struct {
@@ -217,32 +230,26 @@ type Candidate struct {
 }
 
 type RecommendationRequest struct {
-	ContractVersion     string        `json:"contract_version"`
-	RequestID           ID            `json:"request_id"`
-	TripID              ID            `json:"trip_id"`
-	TripVersion         int           `json:"trip_version"`
-	CatalogVersion      string        `json:"catalog_version"`
-	Purpose             string        `json:"purpose"`
-	Profile             FamilyProfile `json:"profile"`
-	Policy              FamilyPolicy  `json:"policy"`
-	LoadLimits          LoadLimits    `json:"load_limits"`
-	Days                []DayInput    `json:"days"`
-	Selections          []Selection   `json:"selections"`
-	CurrentDayDate      *ISODate      `json:"current_day_date"`
-	CurrentPoint        *Point        `json:"current_point"`
-	VisitedActivityIDS  []ID          `json:"visited_activity_ids"`
-	ExcludedActivityIDS []ID          `json:"excluded_activity_ids"`
-	RequestText         *string       `json:"request_text"`
-	SpatialScope        *struct {
-		Center  *Point   `json:"center"`
-		RadiusM *float64 `json:"radius_m"`
-		Route   *struct {
-			Type        string     `json:"type"`
-			Coordinates []Position `json:"coordinates"`
-		} `json:"route"`
-		CorridorWidthM *float64 `json:"corridor_width_m"`
-	} `json:"spatial_scope"`
-	Limit int `json:"limit"`
+	ContractVersion     string             `json:"contract_version"`
+	RequestID           ID                 `json:"request_id"`
+	TripID              ID                 `json:"trip_id"`
+	TripVersion         int                `json:"trip_version"`
+	CatalogVersion      string             `json:"catalog_version"`
+	Purpose             string             `json:"purpose"`
+	Profile             FamilyProfile      `json:"profile"`
+	Policy              FamilyPolicy       `json:"policy"`
+	LoadLimits          LoadLimits         `json:"load_limits"`
+	Days                []DayInput         `json:"days"`
+	Selections          []Selection        `json:"selections"`
+	CurrentDayDate      *ISODate           `json:"current_day_date"`
+	CurrentPoint        *Point             `json:"current_point"`
+	VisitedActivityIDS  []ID               `json:"visited_activity_ids"`
+	ExcludedActivityIDS []ID               `json:"excluded_activity_ids"`
+	RequestText         *string            `json:"request_text"`
+	SpatialScope        *SpatialScope      `json:"spatial_scope"`
+	Limit               int                `json:"limit"`
+	ParsedRequest       *ParsedRequest     `json:"parsed_request,omitempty"`
+	RestaurantFilters   *RestaurantFilters `json:"restaurant_filters,omitempty"`
 }
 
 type RecommendationResponse struct {
@@ -412,6 +419,7 @@ type NeedRequest struct {
 	Need            string   `json:"need"`
 	CurrentPosition *Point   `json:"current_position"`
 	ObservedAt      *Instant `json:"observed_at"`
+	HotelPoint      *Point   `json:"hotel_point,omitempty"`
 }
 
 type NeedOption = json.RawMessage
@@ -448,20 +456,26 @@ type ReferenceData struct {
 		Max float64 `json:"max"`
 	} `json:"supported_child_age"`
 	Capabilities struct {
-		TaxiSuggestions   bool `json:"taxi_suggestions"`
-		WeatherAutomation bool `json:"weather_automation"`
-		FreeText          bool `json:"free_text"`
+		TaxiSuggestions   bool  `json:"taxi_suggestions"`
+		WeatherAutomation bool  `json:"weather_automation"`
+		FreeText          bool  `json:"free_text"`
+		Assistant         *bool `json:"assistant,omitempty"`
+		LlmUnderstanding  *bool `json:"llm_understanding,omitempty"`
+		Recommendations   *bool `json:"recommendations,omitempty"`
+		Needs             *bool `json:"needs,omitempty"`
+		FixedSessions     *bool `json:"fixed_sessions,omitempty"`
 	} `json:"capabilities"`
 	DefaultFamilyPolicy FamilyPolicy `json:"default_family_policy"`
 }
 
 type PublicRecommendationRequest struct {
-	ExpectedVersion    int      `json:"expected_version"`
-	Purpose            string   `json:"purpose"`
-	Date               *ISODate `json:"date"`
-	RequestText        *string  `json:"request_text"`
-	ExcludeActivityIDS []ID     `json:"exclude_activity_ids"`
-	Limit              int      `json:"limit"`
+	ExpectedVersion    int                `json:"expected_version"`
+	Purpose            string             `json:"purpose"`
+	Date               *ISODate           `json:"date"`
+	RequestText        *string            `json:"request_text"`
+	ExcludeActivityIDS []ID               `json:"exclude_activity_ids"`
+	Limit              int                `json:"limit"`
+	RestaurantFilters  *RestaurantFilters `json:"restaurant_filters,omitempty"`
 }
 
 type PublicRecommendationResponse struct {
@@ -638,4 +652,85 @@ type PlanningOptions struct {
 	Candidates  []Candidate          `json:"candidates"`
 	Days        []DayPlanningOptions `json:"days"`
 	Evidence    []Evidence           `json:"evidence"`
+}
+
+type RequestCategoryClaim struct {
+	Polarity string `json:"polarity"`
+	Evidence string `json:"evidence"`
+	Kind     string `json:"kind"`
+	Value    string `json:"value"`
+}
+
+type RequestFormatClaim struct {
+	Polarity string `json:"polarity"`
+	Evidence string `json:"evidence"`
+	Kind     string `json:"kind"`
+	Value    string `json:"value"`
+}
+
+type RequestInterestClaim struct {
+	Polarity string `json:"polarity"`
+	Evidence string `json:"evidence"`
+	Kind     string `json:"kind"`
+	Value    string `json:"value"`
+}
+
+type ParsedRequest struct {
+	TaxonomyVersion       string            `json:"taxonomy_version"`
+	Claims                []json.RawMessage `json:"claims"`
+	NeedsClarification    bool              `json:"needs_clarification"`
+	ClarificationQuestion *string           `json:"clarification_question"`
+	UnsupportedRequests   []string          `json:"unsupported_requests"`
+}
+
+type AssistantMessageRequest struct {
+	ExpectedVersion int      `json:"expected_version"`
+	Message         string   `json:"message"`
+	Date            *ISODate `json:"date,omitempty"`
+	CurrentPosition *Point   `json:"current_position"`
+	ObservedAt      *Instant `json:"observed_at"`
+	HotelPoint      *Point   `json:"hotel_point,omitempty"`
+}
+
+type AssistantNeed struct {
+	Kind     string `json:"kind"`
+	ChildID  *ID    `json:"child_id"`
+	Urgency  string `json:"urgency"`
+	Evidence string `json:"evidence"`
+}
+
+type AssistantPlaceOption struct {
+	PlaceID           ID      `json:"place_id"`
+	WalkDurationSec   float64 `json:"walk_duration_sec"`
+	DetourDurationSec float64 `json:"detour_duration_sec"`
+}
+
+type AssistantMessageResponse struct {
+	Reply       string                 `json:"reply"`
+	Preview     *PlanPreview           `json:"preview"`
+	Places      []Place                `json:"places"`
+	Options     []AssistantPlaceOption `json:"options"`
+	Suggestions []string               `json:"suggestions"`
+	Needs       []AssistantNeed        `json:"needs"`
+	Mode        string                 `json:"mode"`
+}
+
+type SpatialScope struct {
+	Center         *Point       `json:"center"`
+	RadiusM        *float64     `json:"radius_m"`
+	Route          *RouteLine   `json:"route"`
+	CorridorWidthM *float64     `json:"corridor_width_m"`
+	Routes         *[]RouteLine `json:"routes,omitempty"`
+}
+
+type RestaurantFilters struct {
+	ChildrenMenu        *bool `json:"children_menu,omitempty"`
+	SmallPortions       *bool `json:"small_portions,omitempty"`
+	PlayArea            *bool `json:"play_area,omitempty"`
+	PlayAreaSupervision *bool `json:"play_area_supervision,omitempty"`
+}
+
+type RouteLine struct {
+	Type        string     `json:"type"`
+	Coordinates []Position `json:"coordinates"`
 }

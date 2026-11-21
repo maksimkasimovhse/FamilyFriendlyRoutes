@@ -15,6 +15,11 @@ import (
 // Hydrate validates and snapshots the same ranked pool used by both the cards
 // and route calculation. It never interprets a static frontend card ID as an ML ID.
 func (p Planner) Hydrate(ctx context.Context, view c.TripView) (Planner, c.TripView, error) {
+	selected, sourceErr := p.ForCatalog(view.CatalogVersion)
+	if sourceErr != nil {
+		return p, view, sourceErr
+	}
+	p = selected
 	if p.Source != nil && view.CatalogVersion != p.Source.CatalogVersion() {
 		return p, view, ErrMLContract
 	}

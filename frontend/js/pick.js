@@ -250,6 +250,11 @@ export async function openPick(options = null) {
         if(presentation) { card.presentation_id=presentation.id;card.image=presentation.image; if(!card.address)card.address=presentation.address; card.text=[...presentation.text,...card.text]; }
       }
     } catch { /* No presentation data: keep the ranked backend cards without photos. */ }
+    // Подсказка ИИ-чата: места, подходящие по пожеланию, показываем первыми (состав карточек решает backend/ML)
+    if (options.rankHint && options.tripLimit != null) {
+      const rank = new Map(options.rankHint.map((id, i) => [String(id), i]));
+      options.cards = [...options.cards].sort((a, b) => (rank.get(String(a.presentation_id)) ?? 1e9) - (rank.get(String(b.presentation_id)) ?? 1e9));
+    }
     configuration = options; currentDate = options.days[0]?.date || null;
     liked = [...(options.selected || [])].filter(c=>options.tripLimit != null ? options.cards.some(x=>x.activity_id===c.activity_id) : options.days.some(d=>d.date===c.preferred_date) && options.cardsByDay[c.preferred_date]?.some(x=>x.activity_id===c.activity_id));
     const note=document.querySelector('.pick-flow-sub');
@@ -265,7 +270,12 @@ export async function openPick(options = null) {
     $('deck-empty').querySelector('p').textContent = 'Не удалось загрузить карточки: ' + err.message;
     return;
   }
-  if (!deck.length) startDeck();
+  const key = ids === undefined ? orderKey : ids ? ids.join(',') : '';
+  if (!deck.length || key !== orderKey) {
+    orderKey = key;
+    order = ids === undefined ? order : ids;
+    startDeck();
+  }
 }
 
 export const pickedPlaces = () => [...liked];

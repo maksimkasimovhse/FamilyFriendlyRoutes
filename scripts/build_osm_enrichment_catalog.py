@@ -14,6 +14,7 @@ import html
 import json
 import math
 import re
+import sys
 from collections import Counter, defaultdict, deque
 from datetime import UTC, datetime
 from pathlib import Path
@@ -23,6 +24,8 @@ import osmium
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "models"))
+from source_matching import source_match_candidates  # noqa: E402
 DEFAULT_PBF = ROOT / "data/raw/osm_nizhny/volga-fed-district-261117.osm.pbf"
 DEFAULT_SEED = ROOT / "db/seed/main.csv"
 DEFAULT_OUTPUT = ROOT / "data/enriched/osm_nizhny_1000"
@@ -232,7 +235,7 @@ def record(item: dict[str, Any], retrieved_at: str) -> dict[str, Any]:
 
 def parse_seed(path: Path) -> list[dict[str, str]]:
     with path.open(encoding="utf-8-sig", newline="") as source:
-        return list(csv.DictReader(source))
+        return [{**row, "source_dataset": path.stem} for row in csv.DictReader(source)]
 
 
 def parse_point(value: str) -> tuple[float, float]:
@@ -243,22 +246,7 @@ def parse_point(value: str) -> tuple[float, float]:
 
 
 def source_matches(records: list[dict[str, Any]], seed_rows: list[dict[str, str]]) -> list[dict[str, Any]]:
-    matches: list[dict[str, Any]] = []
-    for row in seed_rows:
-        lon, lat = parse_point(row["coordinate"])
-        normalized = re.sub(r"\W+", "", row["title"].casefold())
-        best: tuple[float, dict[str, Any]] | None = None
-        for record_item in records:
-            place = record_item["place"]
-            location = place["location"]
-            distance = point_distance_km(lon, lat, location["longitude"], location["latitude"])
-            same_name = normalized and normalized == re.sub(r"\W+", "", place["name"].casefold())
-            if same_name or distance <= 0.08:
-                candidate = (distance, record_item)
-                if best is None or candidate[0] < best[0]:
-                    best = candidate
-        matches.append({"source_dataset": "tourism_csv", "source_id": row["id"], "source_title": row["title"], "source_address": row["address"], "matched_place_id": best[1]["place"]["place_id"] if best else None, "match_distance_km": round(best[0], 4) if best else None, "match_method": "name_or_80m" if best else "unmatched"})
-    return matches
+    return source_match_candidates(records, seed_rows)
 
 
 def report(records: list[dict[str, Any]], seed_matches: list[dict[str, Any]], pbf: Path, target: int) -> dict[str, Any]:

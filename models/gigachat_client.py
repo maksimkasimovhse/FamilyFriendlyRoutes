@@ -7,6 +7,7 @@ import os
 import ssl
 import time
 import uuid
+import threading
 from dataclasses import dataclass
 
 import httpx
@@ -52,8 +53,13 @@ class GigaChatStructuredClient:
             self.ssl_context.load_verify_locations(cafile=bundle)
         self.timeout_seconds = timeout_seconds
         self._token_valid_until = time.monotonic() + 25 * 60 if self.access_token else 0.0
+        self._token_lock = threading.Lock()
 
     def _get_token(self) -> str:
+        with self._token_lock:
+            return self._get_token_locked()
+
+    def _get_token_locked(self) -> str:
         if self.access_token and time.monotonic() < self._token_valid_until:
             return self.access_token
         authorization = self.credentials or ""

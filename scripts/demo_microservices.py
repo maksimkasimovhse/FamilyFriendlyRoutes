@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import uuid
 from pathlib import Path
 
@@ -26,6 +27,7 @@ def main() -> None:
         else:
             response = client.post(
                 f"{args.parser_url}/internal/v1/request-parses",
+                headers={"Authorization": "Bearer " + os.environ["ML_API_TOKEN"]} if os.environ.get("ML_API_TOKEN") else {},
                 json={"contract_version": "1.0", "request_id": request_id, "text": args.text},
             )
             response.raise_for_status()
@@ -33,6 +35,7 @@ def main() -> None:
         candidates = json.loads(args.candidates.read_text(encoding="utf-8"))
         response = client.post(
             f"{args.model_url}/internal/v1/rankings",
+            headers={"Authorization": "Bearer " + os.environ["ML_API_TOKEN"]} if os.environ.get("ML_API_TOKEN") else {},
             json={
                 "contract_version": "1.0",
                 "request_id": request_id,
