@@ -730,10 +730,12 @@ type SpatialScope struct {
 }
 
 type RestaurantFilters struct {
+	HighChairs          *bool `json:"high_chairs,omitempty"`
 	ChildrenMenu        *bool `json:"children_menu,omitempty"`
 	SmallPortions       *bool `json:"small_portions,omitempty"`
 	PlayArea            *bool `json:"play_area,omitempty"`
 	PlayAreaSupervision *bool `json:"play_area_supervision,omitempty"`
+	Toilet              *bool `json:"toilet,omitempty"`
 }
 
 type RouteLine struct {

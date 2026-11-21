@@ -7786,6 +7786,12 @@
       "RestaurantFilters": {
         "type": "object",
         "properties": {
+          "high_chairs": {
+            "oneOf": [
+              { "type": "boolean" },
+              { "type": "null" }
+            ]
+          },
           "children_menu": {
             "oneOf": [
               {
@@ -7824,6 +7830,12 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "toilet": {
+            "oneOf": [
+              { "type": "boolean" },
+              { "type": "null" }
             ]
           }
         },

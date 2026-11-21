@@ -155,10 +155,12 @@
     </header>
     <div class="restaurants-days" id="restaurants-days" role="tablist" aria-label="День поездки"></div>
     <div class="restaurants-filters" id="restaurants-filters" aria-label="Фильтры ресторанов">
+      <button type="button" data-filter="high_chairs" aria-pressed="false">Детский стульчик</button>
       <button type="button" data-filter="children_menu" aria-pressed="false">Детское меню</button>
       <button type="button" data-filter="play_area" aria-pressed="false">Игровая зона</button>
       <button type="button" data-filter="small_portions" aria-pressed="false">Маленькие порции</button>
       <button type="button" data-filter="play_area_supervision" aria-pressed="false">Есть присмотр</button>
+      <button type="button" data-filter="toilet" aria-pressed="false">Туалет</button>
     </div>
     <div class="restaurants-status" id="restaurants-status" aria-live="polite"></div>
     <div class="restaurants-list" id="restaurants-list"></div>
@@ -386,6 +388,16 @@
   </section>
   <dialog id="nap-start-dialog" class="urgent-dialog"><header><h2>Начать день с дневным сном</h2></header><div class="urgent-content" id="nap-start-content"></div><div class="urgent-preview-actions"><button type="button" class="btn alt" id="nap-start-cancel">Отмена</button><button type="button" class="btn main" id="nap-start-apply">Начать с этим планом</button></div></dialog>
   <dialog id="urgent-dialog" class="urgent-dialog" aria-labelledby="urgent-title"><header><div><h2 id="urgent-title">Что нужно сейчас?</h2></div><button type="button" id="urgent-close" aria-label="Закрыть срочные действия">×</button></header><div id="urgent-kinds" class="urgent-kinds"></div><div id="urgent-content" class="urgent-content" aria-live="polite"></div></dialog>
+  <dialog id="restaurant-confirm-dialog" class="restaurant-confirm-dialog" aria-labelledby="restaurant-confirm-title">
+    <div class="restaurant-confirm-icon"><img src="/assets/category-icons/food.svg" alt="" aria-hidden="true"></div>
+    <p class="restaurant-confirm-kicker">ИЗМЕНЕНИЕ МАРШРУТА</p>
+    <h2 id="restaurant-confirm-title">Добавить ресторан?</h2>
+    <div id="restaurant-confirm-body"></div>
+    <div class="restaurant-confirm-actions">
+      <button type="button" id="restaurant-confirm-cancel">Не сейчас</button>
+      <button type="button" id="restaurant-confirm-apply">Добавить</button>
+    </div>
+  </dialog>
   <!-- ===== Профиль: дети, память о поездке (статистика, фото, достижения), мои поездки ===== -->
   <section class="screen profile" data-tab="profile" hidden>
     <div class="pf-scroll">

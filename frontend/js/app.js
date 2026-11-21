@@ -41,6 +41,7 @@ function openTab(name) {
   if (name === 'profile') renderProfile();
 }
 tabs.forEach(t => t.addEventListener('click', () => openTab(t.dataset.tab)));
+document.addEventListener('restaurants:open', () => openTab('restaurants'));
 
 // ---------- Загрузка ----------
 function loading(text) {

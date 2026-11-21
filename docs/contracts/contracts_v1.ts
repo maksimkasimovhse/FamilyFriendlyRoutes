@@ -399,6 +399,7 @@ export interface PublicRecommendationRequest {
   restaurant_filters?: RestaurantFilters | null;
 }
 export interface RestaurantFilters {
+  high_chairs?: boolean | null; toilet?: boolean | null;
   children_menu?: boolean | null; small_portions?: boolean | null;
   play_area?: boolean | null; play_area_supervision?: boolean | null;
 }

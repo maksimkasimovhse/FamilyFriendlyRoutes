@@ -1,6 +1,6 @@
 import unittest
 
-from recommendation_context import confirmed_restaurant_facilities, restaurant_rank_features
+from recommendation_context import confirmed_restaurant_facilities, matches_restaurant, restaurant_rank_features
 
 
 def fact(value=None):
@@ -36,6 +36,10 @@ class RestaurantRankingTests(unittest.TestCase):
         self.assertEqual(confirmed_restaurant_facilities(place(
             high_chairs=True, children_menu=True, play_area=False)),
             ["детские стульчики", "детское меню"])
+
+    def test_toilet_filter_uses_place_facility(self):
+        self.assertTrue(matches_restaurant(place(toilet=True), {"toilet": True}))
+        self.assertFalse(matches_restaurant(place(toilet=True), {"toilet": False}))
 
 
 if __name__ == "__main__":

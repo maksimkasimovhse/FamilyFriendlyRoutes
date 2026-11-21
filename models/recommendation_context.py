@@ -133,7 +133,7 @@ def matches_restaurant(place, filters):
     for key, value in filters.items():
         if value is None:
             continue
-        fact = (place.get("restaurant") or {}).get(key)
+        fact = place.get("toilet") if key == "toilet" else (place.get("restaurant") or {}).get(key)
         if not fact or fact["state"] != "known" or fact["value"] is not value:
             return False
     return True
