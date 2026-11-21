@@ -434,29 +434,39 @@ func (a *tripAPI) prepareWithPlanner(r *http.Request, owner string, raw []byte, 
 	ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
 	defer cancel()
 	var proposed c.TripView
-	if command.Kind == "append_manual_choices" {
+	// Редактирование черновика («Изменить план»): команды применяются не к сохранённой поездке, а к уже
+	// рассчитанному варианту (base_preview_id), так что варианты можно менять цепочкой до сохранения.
+	loadBase := func() (c.TripView, error) {
 		base := view
-		if command.BasePreviewID != nil {
-			err = a.store.Read(func(s tripstore.State) error {
-				previous, ok := s.Previews[string(*command.BasePreviewID)]
-				if !ok || previous.Owner != owner || previous.View.TripID != view.TripID {
-					return failure(404, "PREVIEW_NOT_FOUND", "Вариант не найден.")
-				}
-				if previous.View.BaseVersion != view.Version {
-					return conflict(view.Version)
-				}
-				expiry, _ := time.Parse(time.RFC3339Nano, string(previous.View.ExpiresAt))
-				if !expiry.After(a.now()) {
-					return failure(410, "PREVIEW_EXPIRED", "Вариант устарел.")
-				}
-				base = previous.View.ProposedTrip
-				return nil
-			})
-			if err != nil {
-				return nil, err
+		if command.BasePreviewID == nil {
+			return base, nil
+		}
+		err := a.store.Read(func(s tripstore.State) error {
+			previous, ok := s.Previews[string(*command.BasePreviewID)]
+			if !ok || previous.Owner != owner || previous.View.TripID != view.TripID {
+				return failure(404, "PREVIEW_NOT_FOUND", "Вариант не найден.")
 			}
+			if previous.View.BaseVersion != view.Version {
+				return conflict(view.Version)
+			}
+			expiry, _ := time.Parse(time.RFC3339Nano, string(previous.View.ExpiresAt))
+			if !expiry.After(a.now()) {
+				return failure(410, "PREVIEW_EXPIRED", "Вариант устарел.")
+			}
+			base = previous.View.ProposedTrip
+			return nil
+		})
+		return base, err
+	}
+	if command.Kind == "append_manual_choices" {
+		base, err := loadBase()
+		if err != nil {
+			return nil, err
 		}
 		proposed, err = p.AppendManualChoices(ctx, base, *command.Date, command.Choices, a.now())
+		if err != nil {
+			return nil, err
+		}
 		proposed.Version = view.Version + 1
 	} else if command.Kind == "generate_plan" {
 		if request.CurrentPosition != nil || request.ObservedAt != nil {
@@ -464,7 +474,14 @@ func (a *tripAPI) prepareWithPlanner(r *http.Request, owner string, raw []byte, 
 		}
 		proposed, err = p.Build(ctx, view, a.now())
 	} else {
-		proposed, err = p.Change(ctx, view, command, request.CurrentPosition, request.ObservedAt, a.now())
+		source, err2 := loadBase()
+		if err2 != nil {
+			return nil, err2
+		}
+		proposed, err = p.Change(ctx, source, command, request.CurrentPosition, request.ObservedAt, a.now())
+		if err == nil && command.BasePreviewID != nil {
+			proposed.Version = view.Version + 1
+		}
 	}
 	if err != nil {
 		return nil, err
@@ -481,7 +498,20 @@ func (a *tripAPI) prepareWithPlanner(r *http.Request, owner string, raw []byte, 
 	stopCount := 0
 	for _, day := range proposed.Days {
 		if day.Feasibility == "infeasible" {
-			preview.CanApply = false
+			// Перегруженный день (не хватает времени или лимита ходьбы) сохранить можно, если человек это
+			// подтвердил: он сам выбрал столько мест. Остальные причины невыполнимости по-прежнему запрещают сохранение.
+			overload := false
+			for _, w := range day.Warnings {
+				if w.Code == "DAY_BUDGET_EXCEEDED" || w.Code == "WALK_DISTANCE_LIMIT" {
+					overload = true
+					if !slices.Contains(preview.RequiredAcknowledgementCodes, w.Code) {
+						preview.RequiredAcknowledgementCodes = append(preview.RequiredAcknowledgementCodes, w.Code)
+					}
+				}
+			}
+			if !overload || day.Execution != nil {
+				preview.CanApply = false
+			}
 		}
 		stopCount += len(day.Stops)
 	}

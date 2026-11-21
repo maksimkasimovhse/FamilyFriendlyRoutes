@@ -14,11 +14,13 @@ export function candidateCard(candidate, date) {
 export function manualSelection(card) {
   return { activity_id: card.activity_id, place_id: card.place_id, occurrence_id: card.occurrence_id || null, mandatory: false, preferred_date: card.preferred_date };
 }
+export const MIN_PER_DAY = 2;
 export const planningPolicyForSelections = selections => selections.length ? 'manual_choices' : 'ranked_prefix';
 export function pickConfiguration(options, { supplemental = false, selected = [] } = {}) {
   if (!supplemental) {
     const available=new Set(options.days.flatMap(d=>d.candidates.map(c=>c.activity.activity_id)));
-    return { days:[], tripLimit:options.policy.manual_limit_per_day*options.days.length,
+    // Сверху мест не ограничено; снизу — не меньше двух на каждый день (minTotal), иначе маршрут получится пустым
+    return { days:[], tripLimit:Infinity, minPerDay:MIN_PER_DAY, minTotal:MIN_PER_DAY*options.days.length,
       cards:options.candidates.filter(c=>available.has(c.activity.activity_id)).map(c=>candidateCard(c,null)),
       selected:selected.map(c=>({...c,preferred_date:null,occurrence_id:null})),
     };

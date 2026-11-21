@@ -117,6 +117,34 @@ func lastActivity(plan c.DayPlan) *routing.Point {
 	}
 	return nil
 }
+
+// crowFlightM — расстояние по прямой, м: нижняя граница пешего пути, поэтому по ней можно только отсеивать заведомо недостижимое.
+func crowFlightM(a, b routing.Point) float64 {
+	lat1, lat2 := a.Coordinates[1]*math.Pi/180, b.Coordinates[1]*math.Pi/180
+	x := math.Sin((lat2 - lat1) / 2)
+	y := math.Sin((b.Coordinates[0] - a.Coordinates[0]) * math.Pi / 360)
+	h := x*x + math.Cos(lat1)*math.Cos(lat2)*y*y
+	return 6371008.8 * 2 * math.Asin(math.Sqrt(math.Min(1, h)))
+}
+
+// reachableAlone: помещается ли место в день, если в дне больше ничего нет. Берётся прямая «старт → место → финиш»
+// против лимита ходьбы (по возрасту детей или заданного) и времени (скорость × время дня за вычетом посещения).
+// Прямая короче любого реального пути, поэтому отсеиваются только места, которые точно не поместятся.
+func reachableAlone(input c.TripInput, day c.DayInput, point routing.Point, stayDurationSec float64) bool {
+	if input.LoadLimits.MaxWalkDistanceMPerDay == nil {
+		return true
+	}
+	limit, _ := walkingBudget(input.LoadLimits)
+	if speed := budgetDefaults.WalkingSpeedKPHByPace[input.LoadLimits.Pace]; speed > 0 {
+		left := dailyTimeBudget(day) - stayDurationSec
+		if left <= 0 {
+			return false
+		}
+		limit = math.Min(limit, speed*1000/3600*left)
+	}
+	return crowFlightM(day.StartPoint, point)+crowFlightM(point, day.EndPoint) <= limit
+}
+
 func withinSupplementRadius(anchor *routing.Point, point routing.Point) bool {
 	if anchor == nil {
 		return true
@@ -220,6 +248,11 @@ func (p Planner) PlanningOptions(ctx context.Context, view c.TripView, now time.
 				if used[candidate.Place.PlaceID] || !p.candidateOpenOnDate(id, inputDay.Date, nil) || !withinSupplementRadius(row.Anchor, points[id]) {
 					continue
 				}
+				// Ещё нет плана: места, до которых заведомо не дойти за день, в подбор не предлагаем,
+				// иначе выбранное молча выпадет из маршрута и он окажется пустым.
+				if index < 0 && !reachableAlone(resolveBudgetDefaults(view.Input), inputDay, points[id], candidate.Activity.Duration.DurationSec) {
+					continue
+				}
 				if index >= 0 {
 					selection := c.Selection{ActivityID: id, PlaceID: candidate.Place.PlaceID, PreferredDate: &row.Date}
 					plan, err := p.appendDay(ctx, view, index, []c.Selection{selection}, now)
@@ -264,7 +297,7 @@ func (p Planner) AppendManualChoices(ctx context.Context, view c.TripView, date 
 		}
 	}
 	if len(choices) < 1 || len(choices)+manualCount(view, date) > budgetDefaults.CompletionPolicy.ManualLimitPerDay || len(view.Input.Selections)+len(choices) > len(view.Input.Days)*budgetDefaults.CompletionPolicy.ManualLimitPerDay {
-		return view, stateError("MANUAL_LIMIT", "Можно выбрать вручную не больше двух мест на день.")
+		return view, stateError("MANUAL_LIMIT", "Слишком много мест выбрано вручную.")
 	}
 	var input c.DayInput
 	for _, d := range view.Input.Days {

@@ -11,7 +11,7 @@
 import { onTripChange, loadSavedTrip, loadCachedTrip, listTrips, openTrip, forget, getTrip, getSource, today, planningOptions, previewManualChoices, applyPreview } from './api.js';
 import { startSession, isAuthenticated, isGuest, enterGuest, leaveGuest, userEmail, signOut, initAuthScreen, openAuth } from './session.js';
 import { loadFamily, syncLocalProfile, seedDemoNames, clearDeviceData, openOnboarding, closeOnboarding, currentProfile, childName, genitive, familySummary } from './onboarding.js';
-import { openTripSetup, markStep, clearResume, afterPick, backToWhen, backToChat, backToWishes, backToPreview, closeTripSetup, prepareInitialChoices } from './trip-setup.js';
+import { openTripSetup, markStep, clearResume, afterPick, backToWhen, backToChat, backToPreview, closeTripSetup, prepareInitialChoices } from './trip-setup.js';
 import { manualSelection, pickConfiguration } from './recommendation-cards.js';
 import { loadRoutePlaces, clearRoutePlaces, onPlacesChange, loadPlaceTypes } from './places.js';
 import { initMap, resizeMap, focusPlace, showRoutePreview, clearRoutePreview, showPicked, refreshMap } from './map.js';
@@ -134,7 +134,7 @@ $('pick-skip').onclick = () => { if(customPickCancel){const cancel=customPickCan
 function supplementPicker(configuration,done,cancel) {
   customPickFinish=done;customPickCancel=cancel;pickInFlow=false;
   openTab('pick');openPick(configuration);
-  document.querySelector('#screen-pick .pick-top h1').textContent='Дополнить короткий день';
+  document.querySelector('#screen-pick .pick-top h1').textContent=configuration.title||'Дополнить короткий день';
 }
 document.addEventListener('pick:open', async () => {
   const trip=getTrip();if(!trip || getSource()!=='backend')return toast('Сначала сохраните маршрут.',true);
@@ -163,12 +163,8 @@ function startTripSetup({ keep = false, resume = false } = {}) {
     authenticated: isAuthenticated(),
     onBack: () => { closeTripSetup(); if (mainStarted) startMain(); else { app.classList.remove('flow-mode'); showLanding(); } },
     onPick: enterPickStep,
+    onBusy: text => loading(text),
     onSupplement: supplementPicker,
-    onEditProfile: () => openOnboarding({
-      authenticated: isAuthenticated(),
-      onDone: () => { closeOnboarding(); backToWishes(); },
-      onBack: () => backToWishes(),
-    }),
     onLogin: () => openAuthFlow(async () => { await syncLocalProfile(); backToPreview(); }),
     onDone: (trip, picked) => {
       closeTripSetup();

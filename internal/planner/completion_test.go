@@ -74,7 +74,7 @@ func completionFixture(t *testing.T) (Planner, c.TripView) {
 	response.Candidates[2].Activity.Duration.DurationSec = 300
 	return Planner{Router: &testRouter{}, Source: fixedSource{response: response}}, view
 }
-func TestRankedPrefixAndTwoManualChoices(t *testing.T) {
+func TestRankedPrefixAndManyManualChoices(t *testing.T) {
 	p, view := completionFixture(t)
 	result, err := p.Build(context.Background(), view, time.Now())
 	if err != nil {
@@ -85,8 +85,8 @@ func TestRankedPrefixAndTwoManualChoices(t *testing.T) {
 	}
 	date := view.Input.Days[0].Date
 	view.Input.Selections = append(view.Input.Selections, c.Selection{ActivityID: "activity-2", PlaceID: "place-2", PreferredDate: &date}, c.Selection{ActivityID: "activity-3", PlaceID: "place-3", PreferredDate: &date})
-	if !errors.Is(Validate(view.Input), ErrValidation) {
-		t.Fatal("accepted three manual choices in a day")
+	if err := Validate(view.Input); err != nil {
+		t.Fatalf("верхнего ограничения на места за день больше нет: %v", err)
 	}
 }
 func TestManualChoicesNeverSilentlyFillOtherStopsOrDays(t *testing.T) {
@@ -126,7 +126,7 @@ func TestShortDaySupplementRadiusQuotaAndPreservedChoices(t *testing.T) {
 		t.Fatal(err)
 	}
 	row := options.Days[0]
-	if !row.IsShort || row.FillRatio >= .7 || row.ManualCount != 1 || row.RemainingManualChoices != 1 || row.Anchor == nil {
+	if !row.IsShort || row.FillRatio >= .7 || row.ManualCount != 1 || row.RemainingManualChoices != budgetDefaults.CompletionPolicy.ManualLimitPerDay-1 || row.Anchor == nil {
 		t.Fatalf("wrong short-day policy: %+v", row)
 	}
 	ids := map[c.ID]bool{}

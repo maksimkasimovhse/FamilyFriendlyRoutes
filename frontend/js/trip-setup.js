@@ -3,10 +3,11 @@
 // Аккаунт: POST /trips/from-profile с expected_profile_version.
 // Дальше: preview generate_plan → предпросмотр → apply («Сохранить маршрут»).
 
-import { createTrip, createTripFromProfile, planDraft, applyPreview, referenceData, planningOptions, previewManualChoices, ApiError } from './api.js';
+import { createTrip, createTripFromProfile, planDraft, applyPreview, referenceData, planningOptions, previewDraftChange, ApiError } from './api.js';
 import { openChat, resetChat, chatText } from './trip-chat.js';
+import { openPlanEditor, applyLayout } from './plan-editor.js';
 import { manualSelection, pickConfiguration, planningPolicyForSelections } from './recommendation-cards.js';
-import { currentProfile, profileVersion, familySummary, childName } from './onboarding.js';
+import { currentProfile, profileVersion } from './onboarding.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -70,9 +71,20 @@ function restore() {
   try { return JSON.parse(sessionStorage.getItem(RESUME_KEY)); } catch { return null; }
 }
 export function markStep(name) { step = name; persist(); }
-let hooks = { authenticated: false, guest: false, onBack() {}, onPick() {}, onEditProfile() {}, onLogin() {}, onDone() {} };
+let hooks = { authenticated: false, guest: false, onBack() {}, onPick() {}, onBusy() {}, onEditProfile() {}, onLogin() {}, onDone() {} };
 let draftTrip = null, preview = null, previewDay = 0;
-let completionOptions = null;
+// Правки из «Изменить план»: раскладка по дням, данные добавленных мест и убранные места. Нужны, чтобы при устаревании
+// варианта (на сервере он живёт 10 минут) пересобрать план и наложить правки заново, а не потерять их.
+let layout = null, layoutMeta = new Map(), userRemoved = new Set();
+// Правки копятся между открытиями окна: убранное и добавленное (с днём). Убрали то, что добавили сами, — запись просто стирается.
+function mergeLayout(prev, lay) {
+  const removed = new Set(prev?.removed || []);
+  const added = [...(prev?.added || [])];
+  lay.removed.forEach(id => { const k = added.findIndex(a => a.id === id); if (k >= 0) added.splice(k, 1); else removed.add(id); });
+  lay.added.forEach(a => { if (!added.some(x => x.id === a.id && x.date === a.date)) added.push(a); });
+  return { removed: [...removed], added };
+}
+const resetEdits = () => { layout = null; layoutMeta = new Map(); userRemoved = new Set(); };
 let capabilities = { free_text: false };
 
 const todayIso = () => mskDate(new Date());
@@ -213,14 +225,13 @@ function dayInputs() {
   });
 }
 
-// request_text: не меняли — null (backend возьмёт пожелания анкеты), очистили — "", иначе текст.
+// request_text: пожелания анкеты + то, что семья написала в ИИ-чате. Ничего не писали — null (backend возьмёт пожелания анкеты).
 // В demo-режиме backend свободный текст не принимает → всегда "".
 function requestText() {
   if (!capabilities.free_text) return '';
-  const text = $('trip-request').value.trim();
-  const original = (currentProfile()?.wishes || '').trim();
-  if (text === original) return null;
-  return text;
+  const chat = chatText().trim();
+  if (!chat) return null;
+  return [(currentProfile()?.wishes || '').trim(), chat].filter(Boolean).join('\n');
 }
 
 function buildRequest() {
@@ -238,37 +249,6 @@ export async function prepareInitialChoices() {
   return pickConfiguration(options,{selected:st.picked});
 }
 
-// ---------- Экран 7: пожелания и итог ----------
-function renderWishes() {
-  step = 'wishes';
-  const p = currentProfile();
-  if (st.request === null) st.request = [p?.wishes, chatText()].filter(Boolean).join('\n');   // пожелания анкеты + то, что написали в чате
-  $('trip-request').value = st.request;
-  $('request-hint').textContent = capabilities.free_text
-    ? 'Пожелания из анкеты уже здесь. Допишите, что нужно именно сейчас — анкета не изменится.'
-    : 'Пожелания пока учитываются не полностью: подбор мест работает в демо-режиме.';
-  const n = daysBetween(st.from, st.to) + 1;
-  const kids = p.family.children.map((c, i) => `${childName(i)}: ${c.interest_ids.length ? plural(c.interest_ids.length, 'интерес', 'интереса', 'интересов') : 'подберём сами'}`).join('; ');
-  const rows = [
-    ['Семья', familySummary(p), 'profile'],
-    ['Интересы', kids, 'profile'],
-    ['Когда', `${$('cal-sum').textContent || plural(n, 'день', 'дня', 'дней')} · до ${st.hours} ч в день`, 'when'],
-    ['Старт', (st.start.label === CENTER.label ? 'Центр города' : st.start.label) + (st.returnHome !== false ? ' · вернёмся сюда' : ''), 'when'],
-    ['Выбрано вручную', st.picked.length ? plural(st.picked.length, 'место', 'места', 'мест') + ' · до двух на день' : 'подберём сами', 'pick'],
-  ];
-  $('trip-summary').innerHTML = rows.map(([k, v, to]) => `<dt>${k}</dt><dd>${esc(v)}</dd><dd><button type="button" data-to="${to}">Изм.</button></dd>`).join('');
-  persist();
-  $('trip-summary').querySelectorAll('[data-to]').forEach(b => {
-    b.onclick = () => {
-      st.request = $('trip-request').value;
-      $('trip-wishes').hidden = true;
-      if (b.dataset.to === 'when') { renderWhen(); $('trip-when').hidden = false; }
-      else if (b.dataset.to === 'pick') goPick();
-      else hooks.onEditProfile();
-    };
-  });
-}
-
 function humanError(e) {
   if (e.code === 'NETWORK') return 'Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.';
   if (e.status === 503) return 'Сервис подбора мест сейчас недоступен. Попробуйте через минуту.';
@@ -278,28 +258,23 @@ function humanError(e) {
   return e.message;
 }
 
+// После подбора мест маршрут строится сразу (раньше был отдельный шаг «Что-то особенное»; пожелания теперь пишут в ИИ-чате)
 async function build() {
-  const btn = $('trip-build');
-  btn.disabled = true;
-  btn.textContent = 'Строим маршрут…';
-  $('wishes-error').hidden = true;
-  st.request = $('trip-request').value;
+  hooks.onBusy('Строим маршрут…');
   try {
     const req = buildRequest();
     draftTrip = await (hooks.authenticated ? createTripFromProfile(req) : createTrip(req));
     preview = await planDraft(draftTrip);
-    completionOptions = null;
+    resetEdits();
     previewDay = 0;
-    $('trip-wishes').hidden = true;
+    hooks.onBusy('');
     renderPreview();
     $('trip-preview').hidden = false;
-    await refreshCompletionOptions();
   } catch (e) {
-    $('wishes-error').textContent = humanError(e);
-    $('wishes-error').hidden = false;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Построить маршрут';
+    hooks.onBusy('');
+    backToWhen();
+    $('when-error').textContent = humanError(e);
+    $('when-error').hidden = false;
   }
 }
 
@@ -309,7 +284,7 @@ function renderPreview() {
   const days = trip.days;
   $('preview-title').textContent = `Маршрут на ${plural(days.length, 'день', 'дня', 'дней')}`;
   $('preview-days').innerHTML = days.length > 1 ? days.map((d, i) =>
-    `<button type="button" role="tab" aria-selected="${i === previewDay}" data-i="${i}">${cap(fmtDay(d.date, { weekday: 'short', day: 'numeric' }))}</button>`).join('') : '';
+    `<button type="button" role="tab" aria-selected="${i === previewDay}" data-i="${i}" ${d.feasibility === 'infeasible' ? 'data-warn' : ''}>${cap(fmtDay(d.date, { weekday: 'short', day: 'numeric' }))}</button>`).join('') : '';
   $('preview-days').querySelectorAll('[data-i]').forEach(b => { b.onclick = () => { previewDay = Number(b.dataset.i); renderPreview(); }; });
 
   const day = days[previewDay];
@@ -325,45 +300,73 @@ function renderPreview() {
     <li><span class="n end">■</span><span><b>Финиш</b><small>${esc(day.end_point.label || 'точка финиша')}</small></span></li>`;
   let excluded = $('preview-excluded');
   if (!excluded) { excluded = document.createElement('p'); excluded.id='preview-excluded'; excluded.className='small'; $('preview-list').after(excluded); }
-  const missing=trip.input.selections.filter(s=>(s.preferred_date===day.date || (s.preferred_date==null && day===days[0])) && !days.some(d=>d.stops.some(stop=>stop.activity_id===s.activity_id)));
+  const missing=trip.input.selections.filter(s=>!userRemoved.has(s.activity_id) && (s.preferred_date===day.date || (s.preferred_date==null && day===days[0])) && !days.some(d=>d.stops.some(stop=>stop.activity_id===s.activity_id)));
   const names=new Map((trip.recommendation_snapshot?.candidates || []).map(c=>[c.activity.activity_id,c.activity.title]));
   excluded.hidden=!missing.length;
   excluded.textContent=missing.length ? `Не удалось включить выбранные места: ${missing.map(s=>names.get(s.activity_id)||s.activity_id).join(', ')}. Проверьте доступное время, лимит ходьбы и даты.` : '';
 
-  // Предупреждения бекенда пользователю не показываем: подтверждаем их автоматически при сохранении
+  // Предупреждения бекенда о данных пользователю не показываем (подтверждаем при сохранении). Перегрузку и пустые дни — показываем.
+  const overloaded = days.filter(d => d.feasibility === 'infeasible');
+  const total = days.reduce((n, d) => n + d.stops.length, 0);
+  const lowDays = days.filter(d => d.stops.length < 2);
+  const dayName = d => cap(fmtDay(d.date, { weekday: 'short', day: 'numeric' }));
+  const overload = $('preview-overload');
+  if (overloaded.length && preview.can_apply) {
+    overload.textContent = `${overloaded.length > 1 ? 'В днях' : 'В день'} ${overloaded.map(dayName).join(', ')} не хватает времени или сил на ходьбу. Можно убрать часть мест через «Изменить план» или сохранить как есть: маршрут сохранится с вашими местами.`;
+    overload.hidden = false;
+  } else if (!preview.can_apply) {
+    overload.textContent = total ? 'Этот вариант сохранить нельзя. Откройте «Изменить план» и уберите или перенесите места.' : 'В плане нет ни одного места. Откройте «Изменить план» и добавьте места карточками.';
+    overload.hidden = false;
+  } else { overload.hidden = true; }
+  const low = $('preview-lowcount');
+  low.hidden = !(total && lowDays.length);
+  low.textContent = lowDays.length ? `${lowDays.length > 1 ? 'В днях' : 'В день'} ${lowDays.map(dayName).join(', ')} меньше двух мест — добавьте ещё через «Изменить план».` : '';
   $('preview-save').disabled = !preview.can_apply;
+  $('preview-save').textContent = overloaded.length && preview.can_apply ? 'Сохранить всё равно' : 'Сохранить маршрут';
   $('preview-error').hidden = true;
   renderCompletionOffer();
 }
+// «Изменить план»: окно с днями — перетаскивание между днями, удаление и добавление мест (plan-editor.js)
 function renderCompletionOffer() {
   let panel = $('preview-completion');
   if (!panel) { panel = document.createElement('div'); panel.id = 'preview-completion'; $('preview-list').after(panel); }
   panel.replaceChildren();
-  const row = completionOptions?.days.find(d=>d.date===preview.proposed_trip.days[previewDay].date);
-  if (!row?.is_short) return;
-  const text = document.createElement('p');
-  text.className='small';
-  text.textContent = `День заполнен на ${Math.round(row.fill_ratio*100)}%. ` + (row.remaining_manual_choices ? row.anchor ? `Можно предложить места в пределах ${completionOptions.policy.supplement_radius_m / 1000} км от последней активности.` : 'День пустой — предложим подходящие места без привязки к старту.' : 'Два ручных выбора на этот день уже использованы.');
-  panel.append(text);
-  if (!row.remaining_manual_choices || !row.candidates.length) {
-    if (row.remaining_manual_choices) text.textContent += ' В текущем пуле нет дополнительных мест, которые помещаются в этот день.';
-    return;
-  }
-  const button = document.createElement('button');button.type='button';button.className='btn alt';button.textContent='Дополнить этот день';
-  button.onclick=()=> {
-    const options = {...completionOptions,days:[row]};
-    $('trip-preview').hidden=true;
-    hooks.onSupplement(pickConfiguration(options,{supplemental:true}),async cards=>{
-      preview=await previewManualChoices(draftTrip,row.date,cards.map(manualSelection),preview.preview_id);
-      completionOptions=null;renderPreview();$('trip-preview').hidden=false;await refreshCompletionOptions();
-    },()=>{$('trip-preview').hidden=false;});
+  const button = document.createElement('button');
+  button.type = 'button'; button.className = 'btn alt'; button.textContent = 'Изменить план';
+  button.onclick = () => {
+    const change = (command, baseId) => previewDraftChange(draftTrip, command, baseId);
+    const idsOf = pv => new Set(pv.proposed_trip.days.flatMap(d => d.stops.map(x => x.activity_id)));
+    openPlanEditor({
+      preview,
+      change,
+      // Вариант устарел: строим план заново и накладываем прежние правки
+      refresh: async () => {
+        const fresh = await planDraft(draftTrip);
+        return layout ? applyLayout({ preview: fresh, layout, change, meta: layoutMeta }) : fresh;
+      },
+      // Экран подбора мест поверх окна: выбранные карточки возвращаются в редактор
+      pickCards: (date, cards, title) => new Promise(resolve => {
+        $('trip-preview').hidden = true;
+        hooks.onSupplement({ days: [{ date, limit: Infinity, anchorOnFirstPick: false, radiusM: 0 }], cardsByDay: { [date]: cards }, selected: [], title },
+          async chosen => { $('trip-preview').hidden = false; resolve(chosen); },
+          () => { $('trip-preview').hidden = false; resolve(null); });
+      }),
+      onDone: (next, lay, meta) => {
+        const before = idsOf(preview), after = idsOf(next);
+        before.forEach(id => { if (!after.has(id)) userRemoved.add(id); });
+        after.forEach(id => userRemoved.delete(id));
+        meta.forEach((v, k) => layoutMeta.set(k, v));
+        layout = mergeLayout(layout, lay); preview = next; renderPreview();
+      },
+    });
   };
   panel.append(button);
 }
-async function refreshCompletionOptions() {
-  const current=preview;
-  try { const result=await planningOptions(draftTrip,current.preview_id);if(preview===current){completionOptions=result;renderCompletionOffer();} }
-  catch(err) { console.warn('Дополнение маршрута:',err.message); }
+
+function renderPreviewSaveButton() {
+  const overloaded = preview?.proposed_trip.days.some(d => d.feasibility === 'infeasible');
+  $('preview-save').textContent = overloaded && preview.can_apply ? 'Сохранить всё равно' : 'Сохранить маршрут';
+  $('preview-save').disabled = !preview?.can_apply;
 }
 
 async function savePreview() {
@@ -377,17 +380,20 @@ async function savePreview() {
     hooks.onDone(trip, st.picked);
   } catch (e) {
     if (e.code === 'PREVIEW_EXPIRED' || e.code === 'PREVIEW_STALE') {
-      // Вариант устарел (время ушло вперёд) — пересчитываем и показываем заново
-      preview = await planDraft(draftTrip).catch(() => null);
-      if (preview) { completionOptions=null;renderPreview();refreshCompletionOptions(); $('preview-error').textContent = 'Время ушло вперёд — мы пересчитали маршрут. Проверьте и сохраните.'; }
-      else $('preview-error').textContent = humanError(e);
+      // Вариант устарел (на сервере он живёт 10 минут): строим план заново и накладываем ваши правки
+      try {
+        const fresh = await planDraft(draftTrip);
+        const change = (command, baseId) => previewDraftChange(draftTrip, command, baseId);
+        preview = layout ? await applyLayout({ preview: fresh, layout, change, meta: layoutMeta }) : fresh;
+        renderPreview();
+        $('preview-error').textContent = layout ? 'Время ушло вперёд — мы пересчитали маршрут с вашими правками. Проверьте и сохраните.' : 'Время ушло вперёд — мы пересчитали маршрут. Проверьте и сохраните.';
+      } catch (e2) { $('preview-error').textContent = humanError(e2); }
     } else {
       $('preview-error').textContent = humanError(e);
     }
     $('preview-error').hidden = false;
   } finally {
-    btn.textContent = 'Сохранить маршрут';
-    if (!$('trip-preview').hidden) btn.disabled = !preview?.can_apply;
+    if (!$('trip-preview').hidden) { renderPreviewSaveButton(); }
   }
 }
 
@@ -407,46 +413,37 @@ export async function openTripSetup(h, { keep = false, resume = false } = {}) {
   if (!bound) {
     bound = true;
     bindWhen();
-    $('trip-build').onclick = build;
-    $('trip-wishes').querySelector('[data-back]').onclick = () => { st.request = $('trip-request').value; $('trip-wishes').hidden = true; goPick(); };
-    $('trip-preview').querySelector('[data-back]').onclick = () => { $('trip-preview').hidden = true; renderWishes(); $('trip-wishes').hidden = false; };
+    $('trip-preview').querySelector('[data-back]').onclick = () => {
+      if (layout && !confirm('Правки плана ещё не сохранены. Вернуться к подбору мест и потерять их?')) return;
+      $('trip-preview').hidden = true; goPick();
+    };
     $('preview-save').onclick = savePreview;
   }
   // Вернуться туда, где остановились до обновления страницы
   if (saved?.st && step === 'chat') { backToChat(); return; }
   if (saved?.st && step === 'pick') { goPick(); return; }
-  if (saved?.st && step === 'wishes') { renderWishes(); $('trip-wishes').hidden = false; return; }
+  if (saved?.st && (step === 'wishes' || step === 'preview')) { goPick(); return; }
   renderWhen();
   $('trip-when').hidden = false;
 }
 
-// Шаг 2 закончен (места выбраны или пропущены) → шаг 3
+// Подбор мест закончен (выбраны или пропущены) → маршрут строится сразу.
 export function afterPick(places) {
   st.picked = places || [];
-  renderWishes();
-  $('trip-wishes').hidden = false;
+  build();
 }
 // Шаг 2 — ИИ-чат: пожелания словами → подобранные карточки для шага 3
 export function backToChat() {
   step = 'chat'; persist();
   openChat({
     onBack: () => { renderWhen(); $('trip-when').hidden = false; },
-    onDone: ids => {
-      st.chatIds = ids;
-      // Пожелания из чата уходят в запрос поездки вместе с анкетой: их учтёт ML, когда принимает свободный текст
-      const p = currentProfile();
-      st.request = [p?.wishes, chatText()].filter(Boolean).join('\n');
-      $('trip-request').value = st.request;
-      goPick();
-    },
+    onDone: ids => { st.chatIds = ids; goPick(); },
   });
 }
 // Шаг 3: подбор мест; порядок карточек подсказывает чат
 const goPick = () => hooks.onPick(st.chatIds || null);
-// Вернуться к шагу 1 из подбора мест («‹» на экране карточек)
+// Вернуться к шагу 1 («‹» на экране чата или после ошибки)
 export function backToWhen() { renderWhen(); $('trip-when').hidden = false; }
-// Вернуться на шаг 3 после правки анкеты
-export function backToWishes() { renderWishes(); $('trip-wishes').hidden = false; }
 // Вернуться к предпросмотру (после входа гостя)
 export function backToPreview() { if (preview) { hooks.authenticated = true; renderPreview(); $('trip-preview').hidden = false; } }
-export function closeTripSetup() { ['trip-when', 'trip-chat', 'trip-wishes', 'trip-preview'].forEach(s => { $(s).hidden = true; }); }
+export function closeTripSetup() { ['trip-when', 'trip-chat', 'trip-preview'].forEach(s => { $(s).hidden = true; }); }
