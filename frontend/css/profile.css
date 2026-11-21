@@ -1,13 +1,11 @@
-/* ===== Нижнее меню: План · Карта · Профиль — плоская панель фиксированной высоты ===== */
+/* ===== Нижнее меню: План · Карта · Профиль — текущий раздел подсвечен «таблеткой» ===== */
 .tabbar { flex: none; align-items: stretch; height: calc(60px + env(safe-area-inset-bottom)); }
-.tabbar button { flex: 1; min-height: 0; padding: 6px 0 4px; justify-content: center; gap: 3px; }
-.tabbar svg { width: 22px; height: 22px; margin: 4px 0; }   /* 30 px — как «таблетка» Карты, подписи на одной линии */
-/* Карта — единственная акцентная кнопка: синяя «таблетка» в пределах панели, ничего не выступает */
-.map-pill { display: grid; place-items: center; width: 52px; height: 30px; border-radius: 15px; color: #fff; background: var(--now); box-shadow: 0 3px 8px rgba(36,99,214,.35); transition: transform .12s; }
-.tabbar .map-pill svg { width: 20px; height: 20px; margin: 0; }
-.tabbar .map-tab, .tabbar .map-tab.on { color: var(--now); }
-.tabbar .map-tab:active .map-pill { transform: scale(.94); }
-.tabbar .map-tab:not(.on) .map-pill { background: var(--now-soft); color: var(--now); box-shadow: none; }
+.tabbar button { flex: 1; min-height: 0; padding: 7px 0 4px; justify-content: center; gap: 3px; color: var(--ink-2); font-size: 12px; font-weight: 700; transition: color .2s; }
+.tab-ico { display: grid; place-items: center; width: 56px; height: 30px; border-radius: 15px; transition: background .25s, color .25s, transform .25s; }
+.tab-ico svg { width: 22px; height: 22px; }
+.tabbar button.on { color: var(--now); font-weight: 800; }
+.tabbar button.on .tab-ico { background: var(--now); color: #fff; box-shadow: 0 3px 8px rgba(36,99,214,.3); }
+.tabbar button:active .tab-ico { transform: scale(.93); }
 
 /* ===== Карта: панель лежит поверх карты, а не сжимает её — карта не прыгает при раскрытии панели ===== */
 #screen-map .map-wrap { position: absolute; inset: 0; flex: none; }
