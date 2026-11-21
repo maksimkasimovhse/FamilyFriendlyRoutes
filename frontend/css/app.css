@@ -21,6 +21,10 @@
 html, body { margin: 0; height: 100%; }
 body { background: #DDE3EC; color: var(--ink); font-family: var(--font-ui); }
 button { font: inherit; color: inherit; cursor: pointer; }
+/* Ощущение приложения: без серой подсветки нажатий, зума по двойному тапу, «резинки» и выделения текста на кнопках */
+html { -webkit-tap-highlight-color: transparent; -webkit-text-size-adjust: 100%; }
+body { overscroll-behavior: none; }
+button, a, summary, .tabbar { touch-action: manipulation; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
 h1 { margin: 0; font-size: 30px; font-weight: 800; letter-spacing: -.01em; }
 
 /* Приложение — колонка телефона; на десктопе по центру */
