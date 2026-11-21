@@ -38,21 +38,32 @@ export async function openSession() {
   return data;
 }
 
-async function call(method, path, body, idempotent = false) {
+async function request(method, path, body, idempotent = false) {
   const headers = { 'Content-Type': 'application/json' };
   if (method !== 'GET') headers['X-CSRF-Token'] = csrfToken;
   if (idempotent) headers['Idempotency-Key'] = requestId();
   let res;
   try { res = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : undefined }); }
   catch { throw new ApiError('NETWORK', 'Нет связи с сервером'); }
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const err = new ApiError(data.error?.code || 'HTTP_' + res.status, data.error?.message || 'Ошибка сервера ' + res.status);
-    err.status = res.status;
-    err.retryAfter = Number(res.headers.get('Retry-After')) || null;
+  return { res, data: await res.json().catch(() => ({})) };
+}
+
+async function call(method, path, body, idempotent = false) {
+  let result = await request(method, path, body, idempotent);
+  // A running tab can retain the old in-memory token while its session cookie
+  // was replaced (for example after login or a backend restart). The rejected
+  // request had no side effect, so refresh once and replay it safely.
+  if (result.res.status === 403 && result.data.error?.code === 'CSRF_FAILED') {
+    await openSession();
+    result = await request(method, path, body, idempotent);
+  }
+  if (!result.res.ok) {
+    const err = new ApiError(result.data.error?.code || 'HTTP_' + result.res.status, result.data.error?.message || 'Ошибка сервера ' + result.res.status);
+    err.status = result.res.status;
+    err.retryAfter = Number(result.res.headers.get('Retry-After')) || null;
     throw err;
   }
-  return data;
+  return result.data;
 }
 
 const tripPath = () => `/api/v1/trips/${trip.trip_id}`;
