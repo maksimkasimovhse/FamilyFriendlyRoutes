@@ -4,6 +4,11 @@
 
 let places = [];
 let evidence = new Map();
+let nearbyBenches = [];
+let benchEvidence = new Map();
+let benchGeneration = 0;
+let benchController = null;
+export const BENCH_RADIUS_M = 125;
 let types = {};
 let typesLoading = null;
 export function loadPlaceTypes() {
@@ -38,7 +43,7 @@ export function loadRoutePlaces(trip, day = trip.days[0]) {
   routeKey = key;
   const requestGeneration = generation;
   controller = new AbortController();
-  loading = fetchPlacesAlongRoute({ tripId: trip.trip_id, version: trip.version, date: day.date, signal: controller.signal })
+  loading = fetchPlacesAlongRoute({ tripId: trip.trip_id, version: trip.version, date: day.date, categories:['toilet','playground','park','pharmacy','restaurant'], signal: controller.signal })
     .then(data => {
       if (requestGeneration !== generation) return places;
       places = data.items;
@@ -54,7 +59,7 @@ export function loadRoutePlaces(trip, day = trip.days[0]) {
 }
 
 export async function fetchPlacesAlongRoute({ tripId, version, date, categories, signal }) {
-  const query = new URLSearchParams({ date, expected_version: version, buffer_m: 250, limit: 1000 });
+  const query = new URLSearchParams({ date, expected_version: version, buffer_m: 125, limit: 1000 });
   if (categories) categories.forEach(c => query.append('categories', c));
   const result = { items: [], evidence: [], next_cursor: null, catalog_version: '' };
   const evidenceById = new Map();
@@ -94,7 +99,45 @@ export async function fetchPlacesInRadius({ lon, lat, radiusKm, categories, sign
   result.evidence = [...evidenceById.values()];
   return result;
 }
-export const allPlaces = () => places;
+// No distance cutoff: request the closest published objects across the catalog.
+export async function fetchNearestPlaces({lon,lat,categories,count=3,accept=()=>true,signal}) {
+  const query=new URLSearchParams({lon,lat,nearest:true,limit:count});
+  categories.forEach(c=>query.append('categories',c));
+  const result={items:[],evidence:[]};
+  do {
+    const response=await fetch('/api/v1/map/places?'+query,{signal});
+    const data=await response.json();
+    if(!response.ok)throw Error(data.error?.message || 'Инфраструктура: HTTP '+response.status);
+    result.items.push(...data.items.filter(accept));result.evidence.push(...data.evidence);
+    if(result.items.length>=count || !data.next_cursor)break;
+    query.set('cursor',data.next_cursor);
+  } while(true);
+  result.items=result.items.slice(0,count);return result;
+}
+// Benches use GPS only: never substitute a route, hotel or map centre.
+export const allPlaces = () => [...places.filter(p => !p.categories?.includes('bench')), ...nearbyBenches];
+export function clearNearbyBenches() {
+  benchGeneration++;
+  benchController?.abort();
+  nearbyBenches = []; benchEvidence = new Map(); notify();
+}
+export async function loadNearbyBenches(point) {
+  clearNearbyBenches();
+  const requestGeneration = benchGeneration;
+  if (!Array.isArray(point) || point.length !== 2 || !point.every(Number.isFinite)) return;
+  benchController = new AbortController();
+  try {
+    const data = await fetchPlacesInRadius({lon:point[0],lat:point[1],radiusKm:BENCH_RADIUS_M/1000,categories:['bench'],signal:benchController.signal});
+    if (requestGeneration !== benchGeneration) return;
+    nearbyBenches = data.items.filter(p => p.categories.includes('bench') && distanceM(point,p.location.coordinates) <= BENCH_RADIUS_M)
+      .map(p => ({...p,distance_to_route_m:null,distance_m:distanceM(point,p.location.coordinates)}));
+    benchEvidence = new Map(data.evidence.map(e => [e.evidence_id,e]));
+    notify(); return nearbyBenches;
+  } catch (err) {
+    if (requestGeneration !== benchGeneration || err.name === 'AbortError') return;
+    throw err;
+  }
+}
 
 // ---------- Расстояния ----------
 export function distanceM(a, b) {
@@ -114,7 +157,7 @@ export const kindOf = p => p.categories.includes('toilet') ? 'toilets'
 
 // Ближайшие места нужного вида к точке
 export function nearest(point, kind, count = 3, filter = () => true) {
-  return places
+  return allPlaces()
     .filter(p => kindOf(p) === kind && filter(p))
     .map(p => ({ place: p, dist: distanceM(point, p.location.coordinates) }))
     .sort((a, b) => a.dist - b.dist)
@@ -145,14 +188,14 @@ export function isDemo(p) {
 }
 export function sourceOf(p) {
   const ids = [p.toilet, ...(p.restaurant ? Object.values(p.restaurant) : [])].flatMap(f => f.evidence_ids);
-  const e = ids.map(id => evidence.get(id)).find(Boolean);
+  const e = ids.map(id => evidence.get(id) || benchEvidence.get(id)).find(Boolean);
   return e ? e.source_kind : null;
 }
 
 // Тип заведения, как подпись в Яндекс Картах: «кофейня», «грузинская кухня»…
 // place_id из базы — свой номер; связь с OSM — через ссылку-источник (evidence map-source-<id>)
 function osmKey(p) {
-  const url = evidence.get('map-source-' + p.place_id)?.source_url || '';
+  const url = (evidence.get('map-source-' + p.place_id) || benchEvidence.get('map-source-' + p.place_id))?.source_url || '';
   const m = url.match(/openstreetmap\.org\/(node|way|relation)\/(\d+)/);
   return m ? `osm-${m[1]}-${m[2]}` : p.place_id;
 }

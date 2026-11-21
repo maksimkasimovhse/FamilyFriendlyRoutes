@@ -18,6 +18,7 @@ from baseline_query import parse_baseline_text
 from place_ranker import RankCandidate, RankingPolicy, rank_places
 from query_match import query_match_score
 from request_schema import ParsedRequest, validate_evidence
+from model_contracts import recommendation_schemas
 from taxonomy import FORMATS, INTEREST_IDS
 
 
@@ -83,7 +84,7 @@ class RecommendationEngine:
         self.records = [json.loads(line) for line in raw.decode().splitlines() if line.strip()]
         json.dumps(self.records, allow_nan=False)
         self.policy = json.loads(policy_path.read_text())
-        self.schemas = json.loads(contract_path.read_text())["components"]["schemas"]
+        self.schemas = recommendation_schemas(json.loads(contract_path.read_text()))
         self.validators = {name: Draft202012Validator(
             {"$ref": f"#/components/schemas/{name}", "components": {"schemas": self.schemas}},
             format_checker=contract_formats(),
@@ -147,7 +148,8 @@ class RecommendationEngine:
             a[field] = deepcopy(activity.get("facts", {}).get(field, UNKNOWN))
         return p, a
 
-    def recommend(self, request: dict, parsed_request=None) -> dict:
+    def validate_request(self, request: dict) -> None:
+        """Reject invalid requests before any optional remote parser call."""
         def finite_values(value):
             if isinstance(value, float) and not math.isfinite(value):
                 return False
@@ -189,6 +191,15 @@ class RecommendationEngine:
                 selection["preferred_date"] is not None and selection["preferred_date"] not in dates
             ):
                 raise RecommendationError("SELECTION_CONFLICT", "Выбранная активность конфликтует с исключениями, сеансом или датой.")
+
+    def recommend(self, request: dict, parsed_request=None) -> dict:
+        self.validate_request(request)
+        children = request["profile"]["children"]
+        child_ids = [c["child_id"] for c in children]
+        dates = [d["date"] for d in request["days"]]
+        excluded = set(request["excluded_activity_ids"]) | set(request["visited_activity_ids"])
+        selections = request["selections"]
+        selected = {s["activity_id"] for s in selections}
         if parsed_request is None and request.get("parsed_request") is not None:
             try:
                 parsed_request = ParsedRequest.model_validate(request["parsed_request"])

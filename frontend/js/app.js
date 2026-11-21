@@ -8,14 +8,15 @@
 //
 // ?newtrip=1 — сразу «Новая поездка» (для репетиции демо).
 
-import { onTripChange, loadSavedTrip, loadCachedTrip, listTrips, openTrip, forget, getTrip, getSource, today } from './api.js';
-import { startSession, isAuthenticated, isGuest, userEmail, signOut, initAuthScreen, openAuth } from './session.js';
-import { loadFamily, syncLocalProfile, openOnboarding, closeOnboarding, currentProfile, childName, genitive, familySummary } from './onboarding.js';
-import { openTripSetup, afterPick, backToWhen, backToWishes, backToPreview, closeTripSetup } from './trip-setup.js';
+import { onTripChange, loadSavedTrip, loadCachedTrip, listTrips, openTrip, forget, getTrip, getSource, today, planningOptions, previewManualChoices, applyPreview } from './api.js';
+import { startSession, isAuthenticated, isGuest, enterGuest, leaveGuest, userEmail, signOut, initAuthScreen, openAuth } from './session.js';
+import { loadFamily, syncLocalProfile, seedDemoNames, clearDeviceData, openOnboarding, closeOnboarding, currentProfile, childName, genitive, familySummary } from './onboarding.js';
+import { openTripSetup, markStep, clearResume, afterPick, backToWhen, backToChat, backToWishes, backToPreview, closeTripSetup, prepareInitialChoices } from './trip-setup.js';
+import { manualSelection, pickConfiguration } from './recommendation-cards.js';
 import { loadRoutePlaces, clearRoutePlaces, onPlacesChange, loadPlaceTypes } from './places.js';
 import { initMap, resizeMap, focusPlace, showPicked, refreshMap } from './map.js';
 import { initPick, openPick } from './pick.js';
-import { initToday, refreshToday } from './today.js';
+import { initToday, refreshToday, toast } from './today.js';
 import { initWeatherSky } from './weather-sky.js';
 import { initAssistant, openAssistant } from './assistant.js';
 import { initKid, openKid, syncKidOrder, kidStopInfo, setKidPlaces, clearKidPlaces } from './kid.js';
@@ -91,12 +92,20 @@ function startMain() {
 
 // ---------- Подбор мест: шаг 2 «Новой поездки» или отдельно с карты ----------
 let pickInFlow = false;
-function enterPickStep() {
+let customPickFinish = null, customPickCancel = null;
+async function enterPickStep(chatIds) {
+  let configuration;
+  loading('Подбираем карточки…');
+  try { configuration = await prepareInitialChoices(); }
+  catch(err) { loading('');backToWhen();$('when-error').textContent=err.message;$('when-error').hidden=false;return; }
+  loading('');customPickFinish=null;customPickCancel=null;
+  configuration.rankHint = chatIds || null;     // порядок от ИИ-чата: подходящие по пожеланию места — первыми
   pickInFlow = true;
+  markStep('pick');
   app.classList.add('flow-mode');
   openTab('pick');
-  openPick();
-  document.querySelector('#screen-pick .pick-top h1').textContent = 'Что точно хотите увидеть?';
+  openPick(configuration);
+  document.querySelector('#screen-pick .pick-top h1').textContent = 'Что хотите увидеть?';
 }
 function leavePickStep() {
   pickInFlow = false;
@@ -105,28 +114,57 @@ function leavePickStep() {
 }
 initWeatherSky($('map-sky'));
 initPick({
-  onFinish: places => {
-    kidReady.then(() => setKidPlaces(places, today()?.start_point?.coordinates || [44.0066, 56.3273]));   // тропа Маши строится из выбранных мест
+  onFinish: async places => {
+    if (customPickFinish) {
+      const done=customPickFinish;
+      try { await done(places);customPickFinish=null;customPickCancel=null;$('screen-pick').hidden=true; }
+      catch(err) { toast(err.message,true); }
+      return;
+    }
+    kidReady.then(() => setKidPlaces(places.map(p=>p.presentation_id ? {...p,id:p.presentation_id}:p), today()?.start_point?.coordinates || [44.0066,56.3273]));
     if (pickInFlow) { leavePickStep(); afterPick(places); return; }
     openTab('map'); showPicked(places);      // отдельно с карты: выбранные места → карта
   },
   onClose: () => {
-    if (pickInFlow) { leavePickStep(); backToWhen(); return; }
+    if (customPickCancel) { const cancel=customPickCancel;customPickFinish=null;customPickCancel=null;$('screen-pick').hidden=true;cancel();return; }
+    if (pickInFlow) { leavePickStep(); backToChat(); return; }
     openTab('map');
   },
 });
-$('pick-skip').onclick = () => { leavePickStep(); afterPick([]); };
-document.addEventListener('pick:open', () => { openTab('pick'); openPick(); });   // «Подобрать ещё» на карте
+$('pick-skip').onclick = () => { if(customPickCancel){const cancel=customPickCancel;customPickFinish=null;customPickCancel=null;$('screen-pick').hidden=true;cancel();return;}leavePickStep(); afterPick([]); };
+function supplementPicker(configuration,done,cancel) {
+  customPickFinish=done;customPickCancel=cancel;pickInFlow=false;
+  openTab('pick');openPick(configuration);
+  document.querySelector('#screen-pick .pick-top h1').textContent='Дополнить короткий день';
+}
+document.addEventListener('pick:open', async () => {
+  const trip=getTrip();if(!trip || getSource()!=='backend')return toast('Сначала сохраните маршрут.',true);
+  try {
+    const options=await planningOptions(trip);
+    const config=pickConfiguration({...options,days:options.days.filter(d=>d.date===today()?.date)},{supplemental:true});
+    if(!config.days.length)return toast('Нет подходящих дополнений: день заполнен, начат или два ручных выбора уже использованы.');
+    supplementPicker(config,async cards=>{
+      // One supplemental day per preview: dates remain explicit and counters apply per day.
+      const dates=[...new Set(cards.map(c=>c.preferred_date))];
+      if(dates.length!==1)throw new Error('Дополняйте по одному дню за раз.');
+      const p=await previewManualChoices(trip,dates[0],cards.map(manualSelection));
+      const warnings=p.warnings.filter(w=>p.required_acknowledgement_codes.includes(w.code)).map(w=>w.message);
+      if(!confirm(`Добавить ${cards.length} места в маршрут?\n${cards.map(c=>c.title).join('\n')}\n${warnings.join('\n')}`)){openTab('map');return;}
+      await applyPreview(p,p.required_acknowledgement_codes);openTab('map');
+    },()=>openTab('map'));
+  } catch(err) { toast(err.message,true); }
+});
 document.addEventListener('pick:reset', () => { showPicked(null); kidReady.then(clearKidPlaces); });
 
 // ---------- Новая поездка ----------
-function startTripSetup({ keep = false } = {}) {
+function startTripSetup({ keep = false, resume = false } = {}) {
   loading('');
   app.classList.add('flow-mode');
   openTripSetup({
     authenticated: isAuthenticated(),
-    onBack: () => { if (mainStarted) { closeTripSetup(); startMain(); } else openProfileFlow({ firstTime: false }); },
+    onBack: () => { closeTripSetup(); if (mainStarted) startMain(); else { app.classList.remove('flow-mode'); showLanding(); } },
     onPick: enterPickStep,
+    onSupplement: supplementPicker,
     onEditProfile: () => openOnboarding({
       authenticated: isAuthenticated(),
       onDone: () => { closeOnboarding(); backToWishes(); },
@@ -136,11 +174,8 @@ function startTripSetup({ keep = false } = {}) {
     onDone: (trip, picked) => {
       closeTripSetup();
       startMain();
-      // Выбранные свайпами места пока не попадают в план (id карточек ≠ id мест ML) —
-      // показываем их на карте отдельно, как раньше (ТЗ, открытый вопрос 2)
-      if (picked.length) { openTab('map'); showPicked(picked); }
     },
-  }, { keep });
+  }, { keep, resume });
 }
 
 // ---------- Анкета ----------
@@ -154,18 +189,55 @@ function openProfileFlow({ firstTime }) {
   });
 }
 
-// ---------- Вход ----------
+// ---------- Лендинг и вход ----------
+// Не вошедшему показываем лендинг; кнопки на нём ведут на экран входа / регистрации.
 let authCallback = null;
-function openAuthFlow(callback) {
+function showLanding() {
   loading('');
+  const login = document.querySelector('.ld-login');
+  login.textContent = isAuthenticated() ? 'Выйти' : 'Войти';
+  login.title = isAuthenticated() ? 'Вы вошли как ' + userEmail() : '';
+  $('onb-auth').hidden = true;
+  $('landing').hidden = false;
+  $('landing').scrollTop = 0;
+}
+function openAuthFlow(callback, mode) {
+  loading('');
+  $('landing').hidden = true;
   app.classList.add('flow-mode');
   authCallback = callback;
-  openAuth(isGuest() ? 'login' : 'register');
+  openAuth(mode || (isGuest() ? 'login' : 'register'));
 }
+// Якорные ссылки лендинга («Как это работает», логотип) только прокручивают — адрес страницы не меняем
+document.querySelectorAll('#landing a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = a.getAttribute('href') === '#top' ? $('landing') : $(a.getAttribute('href').slice(1));
+    if (target === $('landing')) $('landing').scrollTo({ top: 0, behavior: 'smooth' });
+    else target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+document.querySelectorAll('#landing [data-auth]').forEach(b => {
+  b.onclick = async () => {
+    if (b.classList.contains('ld-login') && isAuthenticated()) {   // «Выйти» на лендинге
+      await signOut(); forget(); clearDeviceData(); clearResume(); showLanding(); return;
+    }
+    if (isAuthenticated()) { $('landing').hidden = true; afterAuth(); return; }   // уже вошли — сразу к поездке
+    openAuthFlow(afterAuth, b.dataset.auth);
+  };
+});
+$('ld-guest').onclick = () => { $('landing').hidden = true; guestEnter(); };
+$('auth-back').onclick = () => { $('onb-auth').hidden = true; if (mainStarted) { app.classList.remove('flow-mode'); } else showLanding(); };
 initAuthScreen({
   onDone: async () => { $('onb-auth').hidden = true; await authCallback?.(); },
-  onGuest: () => { $('onb-auth').hidden = true; afterAuth(); },
+  onGuest: () => { $('onb-auth').hidden = true; guestEnter(); },
 });
+// Гость всегда начинает с чистого листа: анкета и поездка заполняются с нуля
+async function guestEnter() {
+  if (isAuthenticated()) await signOut();   // был в аккаунте — выходим, иначе подтянется его анкета
+  enterGuest(); clearDeviceData(); clearResume(); forget();
+  afterAuth();
+}
 // После входа: анкету гостя — в аккаунт (если там пусто), дальше по обычной схеме
 async function afterAuth() {
   loading('Загружаем анкету…');
@@ -208,7 +280,7 @@ $('prof-edit').onclick = () => openOnboarding({
   onDone: () => location.reload(),          // имя и возраст ребёнка перечитаются везде
   onBack: () => { closeOnboarding(); app.classList.remove('flow-mode'); },
 });
-$('prof-newtrip').onclick = () => startTripSetup();
+$('prof-newtrip').onclick = () => { clearResume(); startTripSetup(); };
 $('prof-auth').onclick = async () => {
   if (isAuthenticated()) {
     await signOut();
@@ -231,12 +303,20 @@ function showFatal(err) {
 
 async function continueBoot() {
   const profile = await loadFamily({ authenticated: isAuthenticated() });
+  seedDemoNames(userEmail());
   if (!profile) return openProfileFlow({ firstTime: true });
-  if (q.has('newtrip')) { forget(); return startTripSetup(); }
+  if (q.has('newtrip')) {
+    // Разовая команда: сразу убираем её из адреса, иначе каждое обновление страницы начинало бы поездку заново
+    history.replaceState(null, '', location.pathname + location.hash);
+    q.delete('newtrip');
+    forget();
+    clearResume();
+    return startTripSetup();
+  }
   loading('Загружаем поездку…');
   const trip = await loadSavedTrip();
   if (trip) return startMain();
-  startTripSetup();
+  startTripSetup({ resume: true });   // после обновления страницы возвращаемся на тот же шаг
 }
 
 async function boot() {
@@ -249,7 +329,14 @@ async function boot() {
     await loadCachedTrip();
     return startMain();
   }
-  if (!isAuthenticated() && !isGuest()) return openAuthFlow(afterAuth);
-  try { await continueBoot(); } catch (err) { showFatal(err); }
+  // Правило входа на страницу: есть сохранённый маршрут — открываем его; иначе ВСЕГДА лендинг
+  // (и для аккаунта, и для гостя). ?newtrip=1 — сразу «Новая поездка» (для репетиции, только если уже вошли).
+  if ((isAuthenticated() || isGuest()) && q.has('newtrip')) { try { return await continueBoot(); } catch (err) { return showFatal(err); } }
+  if (isAuthenticated() || isGuest()) {
+    if (await loadSavedTrip()) { try { return await continueBoot(); } catch (err) { return showFatal(err); } }
+    if (isGuest()) { leaveGuest(); clearDeviceData(); }   // гость без маршрута — начнёт с чистого листа
+  }
+  clearResume(); forget();
+  showLanding();
 }
 boot();

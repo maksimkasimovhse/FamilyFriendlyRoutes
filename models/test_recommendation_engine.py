@@ -146,7 +146,8 @@ class RecommendationAPITests(unittest.TestCase):
         self.assertEqual(self.post(sample_request()).status_code, 200)
         recommendation_engine.cache_clear()
         with patch.dict(os.environ, {"MODEL_CATALOG_PATH": "/missing/catalog"}):
-            self.assertEqual(self.client.get("/health").status_code, 503)
+            self.assertEqual(self.client.get("/ready").status_code, 503)
+            self.assertEqual(self.client.get("/health").status_code, 200)
 
     def test_version_validation_and_unsupported_purposes(self):
         request = sample_request()

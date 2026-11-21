@@ -50,8 +50,8 @@ def recommendation_engine() -> RecommendationEngine:
 async def service_auth(request: Request, call_next):
     token = os.environ.get("ML_API_TOKEN", "")
     legacy = request.url.path == "/internal/v1/rankings"
-    requires_auth = not legacy or os.environ.get("ML_REQUIRE_LEGACY_AUTH", "false").lower() == "true"
-    if request.url.path != "/health" and requires_auth and token and not hmac.compare_digest(
+    requires_auth = request.url.path == "/internal/v1/recommendations" or (legacy and os.environ.get("ML_REQUIRE_LEGACY_AUTH", "false").lower() == "true")
+    if requires_auth and token and not hmac.compare_digest(
         request.headers.get("authorization", "").encode(), ("Bearer " + token).encode()
     ):
         return api_error(401, "SERVICE_AUTH_REQUIRED", "Требуется сервисный токен.")
@@ -60,6 +60,11 @@ async def service_auth(request: Request, call_next):
 
 @app.get("/health")
 def health() -> dict:
+    return {"status": "ok", "service": "model-service"}
+
+
+@app.get("/ready")
+def ready() -> dict:
     try:
         engine = recommendation_engine()
     except Exception:
@@ -76,6 +81,7 @@ def recommendations(request: dict) -> dict:
     except Exception:
         return api_error(503, "CATALOG_UNAVAILABLE", "Каталог недоступен или некорректен.")
     try:
+        engine.validate_request(request)
         parsed = None
         parser_url = os.environ.get("REQUEST_PARSER_URL", "")
         text = request.get("request_text")
