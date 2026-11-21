@@ -89,7 +89,7 @@ function bind() {
   bound = true;
   $('wish-chat-form').onsubmit = e => { e.preventDefault(); send($('chat-input').value); };
   // Поле растёт по мере набора (до 4 строк), но пока текст короткий — той же высоты, что кнопка отправки
-  const fit = () => { const t = $('chat-input'); t.style.height = '48px'; t.style.height = Math.min(t.scrollHeight, 110) + 'px'; };
+  const fit = () => { const t = $('chat-input'); t.style.height = '48px'; t.style.height = Math.min(t.scrollHeight, 110) + 'px'; t.style.overflowY = t.scrollHeight > 110 ? 'auto' : 'hidden'; };
   $('chat-input').addEventListener('input', fit);
   $('chat-input').addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send($('chat-input').value); }

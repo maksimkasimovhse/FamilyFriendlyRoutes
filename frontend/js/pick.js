@@ -110,7 +110,7 @@ function updateHud() {
   if (configuration?.tripLimit != null) {
     $('pick-count').textContent = need
       ? `Выбрано ${liked.length} · нужно минимум ${minNeeded()} (по 2 на день)`
-      : `Выбрано ${liked.length} · можно выбирать сколько угодно`;
+      : '';   // набрано достаточно — подсказка не нужна, остаётся кнопка «Завершить»
   } else if (configuration) {
     $('pick-count').textContent = `Добавлено: ${choicesToday()}`;
   } else {
