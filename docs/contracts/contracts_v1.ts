@@ -95,6 +95,7 @@ export interface Selection {
   preferred_date: ISODate | null;
 }
 export interface TripInput {
+  planning_policy?: 'ranked_prefix' | 'manual_choices';
   city_id: 'nizhny_novgorod'; timezone: TimeZone;
   planning_context: 'before_arrival' | 'in_city';
   family: FamilyProfile; load_limits: LoadLimits;
@@ -257,6 +258,7 @@ export interface DayPlan {
   execution?: DayExecution;
 }
 export interface TripView {
+  recommendation_snapshot?: RecommendationResponse;
   trip_id: ID; version: number; updated_at: Instant;
   status: 'draft' | 'planned' | 'active' | 'completed';
   input: TripInput; policy: FamilyPolicy;
@@ -269,6 +271,7 @@ export interface TripView {
   warnings: Warning[];
 }
 export type PlanCommand =
+  | { kind: 'append_manual_choices'; date: ISODate; choices: Selection[]; base_preview_id?: ID }
   | { kind: 'generate_plan' }
   | { kind: 'update_trip_input'; input: TripInput }
   | { kind: 'add_activity'; date: ISODate; selection: Selection;
@@ -280,6 +283,17 @@ export type PlanCommand =
   | { kind: 'return_to_hotel'; date: ISODate; hotel_point: Point }
   | { kind: 'start_day'; date: ISODate; point: Point; start_at: Instant }
   | { kind: 'replan_day'; date: ISODate };
+export interface CompletionPolicy { manual_limit_per_day: number; short_day_ratio: number; supplement_radius_m: number }
+export interface PlanningOptionsRequest { expected_version: number; preview_id?: ID }
+export interface DayPlanningOptions {
+  date: ISODate; available_duration_sec: number; planned_duration_sec: number; fill_ratio: number;
+  is_short: boolean; manual_count: number; remaining_manual_choices: number;
+  anchor: Point | null; candidates: Candidate[];
+}
+export interface PlanningOptions {
+  trip_id: ID; trip_version: number; policy: CompletionPolicy; candidates: Candidate[];
+  days: DayPlanningOptions[]; evidence: Evidence[];
+}
 export interface PreviewRequest {
   expected_version: number; command: PlanCommand;
   current_position: Point | null; observed_at: Instant | null;

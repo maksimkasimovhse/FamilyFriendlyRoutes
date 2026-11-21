@@ -18,7 +18,6 @@
 .draft-label { color: var(--kid) !important; }
 
 .flow-title { font-size: 28px; font-weight: 800; margin: 8px 0 6px; line-height: 1.15; }
-.flow-title.serif { font-family: var(--font-title); font-weight: 400; }
 .flow-sub { color: var(--ink-2); font-weight: 600; margin: 0 0 14px; line-height: 1.4; }
 
 .card-w { background: var(--surface); border-radius: 20px; padding: 16px; margin-bottom: 12px; }
@@ -48,8 +47,17 @@ textarea { resize: vertical; min-height: 84px; line-height: 1.4; }
 .eye { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); margin-top: 3px; width: 44px; height: 44px; border: 0; background: none; font-size: 18px; }
 .eye[aria-pressed="true"] { opacity: .5; }
 
-/* Иллюстрация входа */
-.auth-art { width: 100%; height: auto; display: block; margin: 8px 0 4px; }
+/* Логотип входа — только оленёнок в маленьком кружке */
+.auth-logo { display: grid; place-items: center; margin: 4px 0 10px; }
+#auth-back { position: absolute; left: 16px; top: 12px; z-index: 1; }
+/* «Продолжить без входа» — спокойная серая ссылка с подсказкой «i», а не яркая кнопка */
+.guest-row { position: relative; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 4px 0 12px; flex-wrap: wrap; }
+.guest-link { border: 0; background: none; min-height: 44px; padding: 0 8px; color: var(--ink-2); font: 700 15px var(--font-ui); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; cursor: pointer; }
+.guest-link:hover { color: var(--ink); }
+.tip-btn { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink-2); font: italic 800 14px Georgia, serif; padding: 0; cursor: pointer; }
+.tip-btn[aria-expanded="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.tip-pop { position: absolute; top: calc(100% + 4px); left: 8px; right: 8px; z-index: 3; margin: 0; box-shadow: 0 8px 20px rgba(15,22,40,.25); padding: 12px 14px; border-radius: 14px; background: var(--ink); color: #fff; font-size: 14px; font-weight: 600; line-height: 1.4; text-align: center; }
+.tip-pop[hidden] { display: none; }
 
 /* Сегмент (Регистрация | Вход, 1 | 2 ребёнка) */
 .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--line); border-radius: 16px; padding: 4px; margin: 4px 0 14px; }
@@ -67,7 +75,7 @@ textarea { resize: vertical; min-height: 84px; line-height: 1.4; }
 /* Карточка ребёнка */
 .kid-card-w { border-left: 0; }
 .kid-num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--kid); color: #fff; font-weight: 800; font-size: 14px; margin-right: 8px; }
-.kid-head { display: flex; align-items: center; margin-bottom: 12px; font-weight: 800; font-size: 16px; }
+.kid-head { display: flex; align-items: center; margin-bottom: 8px; font-weight: 800; font-size: 16px; }
 .ages { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; margin-top: 6px; }
 .ages button { min-height: 44px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); font-weight: 800; font-size: 15px; padding: 0; }
 .ages button[aria-pressed="true"] { background: var(--kid); border-color: var(--kid); color: #fff; }
@@ -164,3 +172,34 @@ textarea { resize: vertical; min-height: 84px; line-height: 1.4; }
 .app.flow-mode #screen-pick .pick-count { flex-basis: 100%; padding-left: 56px; margin-top: -4px; }
 
 .flow-bar.four { grid-template-columns: repeat(4, 1fr); }
+
+/* Экран входа: содержимое по центру экрана, а не прижато к верху */
+#onb-auth .flow-scroll { display: flex; flex-direction: column; justify-content: center; padding-bottom: 40px; }
+#onb-auth .flow-title { margin-bottom: 18px; }
+
+/* Демо-вход: одно нажатие — почта и пароль заполнены, вход */
+.demo-login { margin-top: 8px; padding: 14px; border-radius: 18px; border: 1.5px dashed var(--line); }
+.demo-title { margin: 0 0 10px; text-align: center; color: var(--ink-2); font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+.demo-btns { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.demo-btns button { min-height: 56px; border: 0; border-radius: 14px; background: var(--surface); padding: 8px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; box-shadow: 0 1px 3px rgba(15,22,40,.08); }
+.demo-btns b { font-size: 13px; }
+.demo-btns small { color: var(--ink-2); font-weight: 600; font-size: 11px; }
+.demo-btns button:disabled { opacity: .5; }
+
+/* Возраст: компактно — «−  7 лет  +» и тонкий ползунок */
+.age-pick { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 0; }
+.age-btn { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--kid-soft); color: var(--kid); font-size: 24px; font-weight: 800; line-height: 1; cursor: pointer; padding: 0; }
+.age-btn:active { transform: scale(.92); }
+.age-val { display: flex; align-items: baseline; gap: 6px; line-height: 1; }
+.age-val b { font-size: 36px; font-weight: 800; color: var(--kid); }
+.age-val span { font-size: 17px; font-weight: 700; color: var(--ink-2); }
+.age-range { -webkit-appearance: none; appearance: none; display: block; width: 100%; height: 8px; margin: 10px 0 4px; padding: 0; border: 0; border-radius: 999px; outline: none; cursor: pointer;
+  background: linear-gradient(to right, var(--kid) var(--p, 0%), var(--line) var(--p, 0%)); }
+.age-range.empty { background: var(--line); }
+.age-range::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 3px solid var(--kid); box-shadow: 0 2px 6px rgba(232,100,31,.3); }
+.age-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 3px solid var(--kid); box-shadow: 0 2px 6px rgba(232,100,31,.3); }
+.age-range.empty::-webkit-slider-thumb { border-color: #C2C8D2; box-shadow: 0 2px 6px rgba(15,22,40,.15); }
+.age-range.empty::-moz-range-thumb { border-color: #C2C8D2; }
+
+/* Шаг «Что интересно детям?»: на карточке только имя и чипсы */
+.kid-title { margin: 0 0 12px; font-size: 20px; font-weight: 800; color: var(--kid); }

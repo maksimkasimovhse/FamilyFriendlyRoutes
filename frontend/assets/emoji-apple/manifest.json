@@ -1,0 +1,52 @@
+{
+  "package": "emoji-datasource-apple",
+  "version": "16.0.0",
+  "repository": "https://github.com/iamcal/emoji-data",
+  "assets": {
+    "toilet": {
+      "unicode": "1F6BB",
+      "source": "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/1f6bb.png",
+      "bytes": 3572
+    },
+    "pin": {
+      "unicode": "1F4CD",
+      "source": "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/1f4cd.png",
+      "bytes": 3242
+    },
+    "pharmacy": {
+      "unicode": "1F48A",
+      "source": "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/1f48a.png",
+      "bytes": 5406
+    },
+    "bench": {
+      "unicode": "1FA91",
+      "source": "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/1fa91.png",
+      "bytes": 3717
+    },
+    "playground": {
+      "unicode": "1F6DD",
+      "source": "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/1f6dd.png",
+      "bytes": 6665
+    },
+    "park": {
+      "unicode": "1F333",
+      "source": "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/1f333.png",
+      "bytes": 7043
+    },
+    "event": {
+      "unicode": "1F3AD",
+      "source": "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/1f3ad.png",
+      "bytes": 6995
+    },
+    "landmark": {
+      "unicode": "1F3DB-FE0F",
+      "source": "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/1f3db-fe0f.png",
+      "bytes": 5908
+    },
+    "food": {
+      "unicode": "1F37D-FE0F",
+      "source": "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@16.0.0/img/apple/64/1f37d-fe0f.png",
+      "bytes": 6291
+    }
+  }
+}

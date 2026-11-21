@@ -114,6 +114,7 @@ type TripInput struct {
 	Days            []DayInput    `json:"days"`
 	Selections      []Selection   `json:"selections"`
 	RequestText     *string       `json:"request_text"`
+	PlanningPolicy  *string       `json:"planning_policy,omitempty"`
 }
 
 type Place struct {
@@ -356,7 +357,8 @@ type TripView struct {
 		PlannedCredit float64  `json:"planned_credit"`
 		AchievedShare *float64 `json:"achieved_share"`
 	} `json:"family_balance"`
-	Warnings []Warning `json:"warnings"`
+	Warnings               []Warning               `json:"warnings"`
+	RecommendationSnapshot *RecommendationResponse `json:"recommendation_snapshot,omitempty"`
 }
 
 type PlanCommand = json.RawMessage
@@ -591,6 +593,7 @@ type TripFromProfileRequest struct {
 	Days                   []DayInput  `json:"days"`
 	Selections             []Selection `json:"selections"`
 	RequestText            *string     `json:"request_text"`
+	PlanningPolicy         *string     `json:"planning_policy,omitempty"`
 }
 
 type TripSummary struct {
@@ -603,4 +606,36 @@ type TripSummary struct {
 
 type TripList struct {
 	Items []TripSummary `json:"items"`
+}
+
+type CompletionPolicy struct {
+	ManualLimitPerDay int     `json:"manual_limit_per_day"`
+	ShortDayRatio     float64 `json:"short_day_ratio"`
+	SupplementRadiusM float64 `json:"supplement_radius_m"`
+}
+
+type PlanningOptionsRequest struct {
+	ExpectedVersion int `json:"expected_version"`
+	PreviewID       *ID `json:"preview_id,omitempty"`
+}
+
+type DayPlanningOptions struct {
+	Date                   ISODate     `json:"date"`
+	AvailableDurationSec   float64     `json:"available_duration_sec"`
+	PlannedDurationSec     float64     `json:"planned_duration_sec"`
+	FillRatio              float64     `json:"fill_ratio"`
+	IsShort                bool        `json:"is_short"`
+	ManualCount            int         `json:"manual_count"`
+	RemainingManualChoices int         `json:"remaining_manual_choices"`
+	Anchor                 *Point      `json:"anchor"`
+	Candidates             []Candidate `json:"candidates"`
+}
+
+type PlanningOptions struct {
+	TripID      ID                   `json:"trip_id"`
+	TripVersion int                  `json:"trip_version"`
+	Policy      CompletionPolicy     `json:"policy"`
+	Candidates  []Candidate          `json:"candidates"`
+	Days        []DayPlanningOptions `json:"days"`
+	Evidence    []Evidence           `json:"evidence"`
 }

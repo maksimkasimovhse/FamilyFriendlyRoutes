@@ -1,6 +1,6 @@
 # Family Friendly Routes
 
-Семейные маршруты по Нижнему Новгороду для детей 3–11 лет. ML возвращает до 50 рекомендованных мест на всю поездку. Backend распределяет их по дням, выбирает порядок и проверяет маршрут через OSM. Реализованы регистрация и вход, анкета семьи, гостевая сессия, создание/чтение поездки, preview/apply, HTTP-адаптер ML и отдельный режим синтетического каталога. Реальный сервис ML и frontend ещё не подключены.
+Семейные маршруты по Нижнему Новгороду для детей 3–11 лет. ML возвращает до 50 рекомендованных мест на всю поездку. Backend распределяет их по дням, выбирает порядок и проверяет маршрут через OSM. Фронтенд подключён к Go API: вход, анкета, настройка поездки, ручной выбор карточек, preview/apply и инфраструктура вдоль маршрута. В стандартном Compose рекомендации пока отдаёт mock-api; настоящий ML-сервис ещё не соединён с планировщиком.
 
 ## Backend маршрутов
 
@@ -28,9 +28,10 @@ go run ./cmd/backend -ml-url http://127.0.0.1:8090/internal/v1/recommendations -
 - `POST /api/v1/trips/from-profile` — draft из снимка анкеты; `GET /api/v1/trips` — свои поездки.
 - `GET /api/v1/reference-data` — справочники и дополнительный demo_activities для интеграции.
 - `GET /api/v1/map/places?lon=44.0066&lat=56.3273&radius_km=2` — площадки, парки, скамейки, туалеты, аптеки и кафе из PostgreSQL. Поддержаны bbox, категории и страницы. [Импорт и параметры](docs/map_infrastructure.md).
-- `GET /api/v1/trips/{trip_id}/map/places?date=YYYY-MM-DD&expected_version=2` — инфраструктура в коридоре **250 м вдоль реального OSM-маршрута дня**. Эта ручка используется основной картой, обновляется после изменения маршрута.
+- `GET /api/v1/trips/{trip_id}/map/places?date=YYYY-MM-DD&expected_version=2` — инфраструктура в коридоре **125 м вдоль реального OSM-маршрута дня**. Эта ручка используется основной картой, обновляется после изменения маршрута.
 - `POST /api/v1/trips` и `GET /api/v1/trips/{trip_id}` — draft и чтение.
 - `POST /api/v1/trips/{trip_id}/previews` — generate_plan, start_day, remove_stop, replan_day.
+- `POST /api/v1/trips/{trip_id}/planning-options` — карточки из общего пула ML, до двух ручных выборов на день и предложение дополнения при загрузке <70%. Дополнение — `append_manual_choices` через preview/apply. [Правила и контракт](docs/manual_choices.md).
 - `POST /api/v1/trips/{trip_id}/progress` — посещение или пропуск следующей остановки активного дня.
 - `GET /api/v1/trips/{trip_id}/previews/{preview_id}` — чтение варианта.
 - `POST /api/v1/trips/{trip_id}/previews/{preview_id}/apply` — сохранение выбранного варианта с проверкой версии и предупреждений.
@@ -259,3 +260,7 @@ go vet ./...
 4. Если просили то, чего нет в списке (в данных нет, например, зоопарка), чат так и говорит и показывает самые близкие места.
 
 Backend получает адреса сервисов флагами `-parser-url`, `-model-url` (в `compose.yaml` заданы). Реальный разбор через GigaChat включается как описано в `docs/microservices.md` (`GIGACHAT_CREDENTIALS`, `compose.override.example.yaml`). Тесты: `go test ./internal/wishes`.
+
+## HTTPS и геолокация с телефона
+
+Запуск в одной Wi-Fi-сети через Caddy: `powershell -ExecutionPolicy Bypass -File .\scripts\start-phone-https.ps1`. Сертификат нужно один раз установить и включить доверие на телефоне. [Подробная инструкция](docs/phone_https.md).

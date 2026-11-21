@@ -22,16 +22,23 @@ func stateError(code, message string) error { return &StateError{code, message} 
 
 // Only commands implemented in this stage. Unknown fields are rejected by HTTP.
 type ChangeCommand struct {
-	Kind    string         `json:"kind"`
-	Date    *c.ISODate     `json:"date,omitempty"`
-	StopID  *c.ID          `json:"stop_id,omitempty"`
-	Point   *routing.Point `json:"point,omitempty"`
-	StartAt *c.Instant     `json:"start_at,omitempty"`
+	Choices       []c.Selection  `json:"choices,omitempty"`
+	BasePreviewID *c.ID          `json:"base_preview_id,omitempty"`
+	Kind          string         `json:"kind"`
+	Date          *c.ISODate     `json:"date,omitempty"`
+	StopID        *c.ID          `json:"stop_id,omitempty"`
+	Point         *routing.Point `json:"point,omitempty"`
+	StartAt       *c.Instant     `json:"start_at,omitempty"`
 }
 
 func (cmd ChangeCommand) Validate() error {
+	if cmd.Kind != "append_manual_choices" && (cmd.Choices != nil || cmd.BasePreviewID != nil) {
+		return stateError("INVALID_COMMAND", "Поля дополнения недопустимы для этой команды.")
+	}
 	valid := false
 	switch cmd.Kind {
+	case "append_manual_choices":
+		valid = cmd.Date != nil && len(cmd.Choices) > 0 && len(cmd.Choices) <= budgetDefaults.CompletionPolicy.ManualLimitPerDay && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
 	case "generate_plan":
 		valid = cmd.Date == nil && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
 	case "start_day":

@@ -25,6 +25,7 @@ import (
 func main() {
 	listen := flag.String("listen", "127.0.0.1:8080", "Development backend address")
 	allowNetwork := flag.Bool("allow-network-listen", false, "Allow binding container network interfaces; publish ports on loopback")
+	trustProxy := flag.Bool("trust-proxy-headers", false, "Trust HTTPS protocol set by our reverse proxy; backend must not be publicly exposed")
 	routingURL := flag.String("routing-url", "http://127.0.0.1:8002", "Valhalla base URL")
 	database := flag.String("store", "data/backend/state.json", "Single-process development store")
 	demo := flag.Bool("demo-catalog", false, "Explicitly enable synthetic integration activities, NOT real venue data")
@@ -99,7 +100,11 @@ func main() {
 		root.Handle("/api/v1/wishes/recommendations", httpapi.WishesHandler(rec))
 	}
 	root.Handle("/", httpapi.TripHandler(store, p))
-	server := &http.Server{Addr: *listen, Handler: root, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 40 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
+	var handler http.Handler = root
+	if *trustProxy {
+		handler = httpapi.TrustedProxyHTTPS(handler)
+	}
+	server := &http.Server{Addr: *listen, Handler: handler, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 40 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	go func() {

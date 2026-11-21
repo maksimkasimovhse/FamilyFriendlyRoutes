@@ -110,7 +110,7 @@ services:
       DATABASE_URL: ${DOCKER_DATABASE_URL:-postgres://familyroutes:${POSTGRES_PASSWORD:-}@postgres:5432/familyroutes?sslmode=disable}
     # Места для маршрута берёт у ML по контракту /internal/v1/recommendations.
     # Пока у Вильдана нет сервиса — у мока (mock-api). Вернуть синтетику: command: ["-demo-catalog"]
-    command: ["-listen", "0.0.0.0:8080", "-allow-network-listen", "-routing-url", "http://valhalla:8002", "-ml-url", "http://mock-api:8090/internal/v1/recommendations", "-catalog-version", "mock-ml-v1", "-parser-url", "http://parser-service:8080", "-model-url", "http://model-service:8080"]
+    command: ["-listen", "0.0.0.0:8080", "-allow-network-listen", "-trust-proxy-headers", "-routing-url", "http://valhalla:8002", "-ml-url", "http://mock-api:8090/internal/v1/recommendations", "-catalog-version", "mock-ml-v1", "-parser-url", "http://parser-service:8080", "-model-url", "http://model-service:8080"]
     volumes:
       - ./data:/app/data
       # Картинки карточек: backend отдаёт их под /media/ и без папки не стартует (-images-dir)
@@ -159,6 +159,25 @@ services:
       - ./infra/docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     restart: unless-stopped
 
+  # Optional trusted local HTTPS for a phone on the same Wi-Fi.
+  caddy:
+    image: caddy:2
+    profiles: ["https"]
+    environment:
+      CADDY_HOST: ${CADDY_HOST:-localhost}
+    ports:
+      - "${CADDY_BIND_ADDRESS:-127.0.0.1}:${CADDY_HTTPS_PORT:-8443}:443"
+      - "${CADDY_BIND_ADDRESS:-127.0.0.1}:${CADDY_CERT_PORT:-8088}:80"
+    volumes:
+      - ./infra/docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - web
+    restart: unless-stopped
+
 volumes:
+  caddy-data:
+  caddy-config:
   valhalla-data:
   pg-data:

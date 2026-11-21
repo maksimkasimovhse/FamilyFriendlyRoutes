@@ -128,20 +128,12 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 	}
 	warnings := []c.Warning{}
 	if p.Source != nil {
-		if view.CatalogVersion != p.Source.CatalogVersion() {
-			return c.TripView{}, ErrMLContract
-		}
-		response, err := p.Source.Recommend(ctx, view)
+		var err error
+		p, view, err = p.Hydrate(ctx, view)
 		if err != nil {
 			return c.TripView{}, err
 		}
-		activities, metadata, err := normalize(response, view)
-		if err != nil {
-			return c.TripView{}, err
-		}
-		p.Activities, p.metadata = activities, metadata
-		view.Evidence = append([]c.Evidence{}, response.Evidence...)
-		warnings = append(warnings, response.Warnings...)
+		warnings = append(warnings, view.RecommendationSnapshot.Warnings...)
 	} else if view.Input.RequestText != nil && strings.TrimSpace(*view.Input.RequestText) != "" {
 		return c.TripView{}, invalid("FREE_TEXT_NOT_IMPLEMENTED: ML is not connected")
 	}
@@ -165,9 +157,12 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 	for _, s := range selections {
 		selected[s.ActivityID] = true
 	}
-	for _, a := range p.Activities {
-		if !selected[a.ID] {
-			selections = append(selections, c.Selection{ActivityID: a.ID, PlaceID: a.PlaceID})
+	manualOnly := view.Input.PlanningPolicy != nil && *view.Input.PlanningPolicy == "manual_choices"
+	if !manualOnly {
+		for _, a := range p.Activities {
+			if !selected[a.ID] {
+				selections = append(selections, c.Selection{ActivityID: a.ID, PlaceID: a.PlaceID})
+			}
 		}
 	}
 	// Required user selections precede ML-ranked optional choices.
@@ -192,6 +187,9 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 	plans := make([]c.DayPlan, len(days))
 	assignments := make([][]c.Selection, len(days))
 	distances := make([]float64, len(days))
+	closedPrefix := make([]bool, len(days))
+	manualCounts := make([]int, len(days))
+	prefix := view.Input.PlanningPolicy != nil
 	speed := budgetDefaults.WalkingSpeedKPHByPace[view.Input.LoadLimits.Pace]
 	build := func(i int, choices []c.Selection) (c.DayPlan, error) {
 		trial := view
@@ -240,6 +238,9 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 		}
 		options := []option{}
 		for i, day := range days {
+			if prefix && ((!selected[s.ActivityID] && closedPrefix[i]) || (selected[s.ActivityID] && manualCounts[i] >= budgetDefaults.CompletionPolicy.ManualLimitPerDay)) {
+				continue
+			}
 			if s.PreferredDate != nil && day.Date != *s.PreferredDate {
 				continue
 			}
@@ -279,14 +280,37 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 			best.distance = distance - distances[i]
 			options = append(options, best)
 		}
-		sort.SliceStable(options, func(i, j int) bool { return options[i].distance < options[j].distance })
+		sort.SliceStable(options, func(i, j int) bool {
+			if prefix && !selected[s.ActivityID] {
+				return options[i].day < options[j].day
+			}
+			// Equal round-trip insertion costs can hide opposite directions from
+			// a shared hotel. Prefer the more compact geographic cluster.
+			if prefix && selected[s.ActivityID] && math.Abs(options[i].distance-options[j].distance) < 0.01 {
+				spread := func(day int) float64 {
+					total := 0.0
+					for _, existing := range assignments[day] {
+						total += proximity(a.Point, available[existing.ActivityID].Point)
+					}
+					return total / float64(max(1, len(assignments[day])))
+				}
+				return spread(options[i].day) < spread(options[j].day)
+			}
+			return options[i].distance < options[j].distance
+		})
 		accepted := false
 		for _, o := range options {
 			if o.totalDistance <= o.budget && o.feasible {
 				assignments[o.day] = o.choices
 				distances[o.day] = o.totalDistance
 				accepted = true
+				if selected[s.ActivityID] {
+					manualCounts[o.day]++
+				}
 				break
+			}
+			if prefix && !selected[s.ActivityID] {
+				closedPrefix[o.day] = true
 			}
 		}
 		if !accepted {
