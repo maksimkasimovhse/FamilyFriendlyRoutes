@@ -5,7 +5,7 @@
 // поровну на все места) или вопросы (quiz, только у памятника Чкалову, текст в data/kid-quiz.json).
 // Решил задание — получил штамп. Озвучки нет. Прогресс — только в этом браузере (localStorage).
 //
-// Плюс одно «Окно в прошлое» (PAST_ID, первая остановка): старое фото PastVu → встать на место фотографа →
+// Плюс два «Окна в прошлое» (PAST_IDS, первые остановки): старое фото PastVu → встать на место фотографа →
 // камера с полупрозрачным старым кадром → «тогда / сейчас», новый наряд оленёнка, сторис.
 //
 // ?reset=1 — начать тропу заново. ?demo=0 — окно открывается только на месте (по GPS);
@@ -33,9 +33,9 @@ let stopWatch = null;       // слежение за GPS на экране ок�
 let lastPhoto = null;       // { stop, url } — для «Сохранить сторис»
 
 // Единственное окно в прошлое на тропе — пока одно, на нём доводим вид и сценарий
-const PAST_ID = 'win_minin';
-const isWindow = s => s.id === PAST_ID;
-const pastStop = () => route.demoStops.find(s => s.id === PAST_ID);
+const PAST_IDS = ['win_minin', 'win_pokrovka'];
+const isWindow = s => PAST_IDS.includes(s.id);
+const pastStops = () => PAST_IDS.map(id => route.demoStops.find(s => s.id === id)).filter(Boolean);
 
 // ---------- Прогресс ----------
 function load() { try { Object.assign(state, JSON.parse(localStorage.getItem('kid-state') || '{}')); } catch { /* приватный режим */ } }
@@ -50,9 +50,9 @@ const placeStop = card => ({ id: 'place_' + card.id, type: 'task', title: card.t
 function applyPicks() {
   const cards = state.picks.map(cardById).filter(Boolean);
   const stops = cards.length ? cards.map(placeStop) : [...route.demoStops];
-  const w = pastStop();
-  // окно — первой остановкой; то же место без окна из тропы убираем
-  route.stops = w ? [w, ...stops.filter(s => s.id !== w.id && s.place !== w.place)] : stops;
+  const ws = pastStops();
+  // окна — первыми остановками; те же места без окна из тропы убираем
+  route.stops = [...ws, ...stops.filter(s => !ws.some(w => w.id === s.id || w.place === s.place))];
 }
 const kindLabel = s => isWindow(s) ? `Окно в прошлое · ${s.years}` : GAME_LABELS[gameOf(s).type];
 const isDone = s => state.done.includes(s.id);
