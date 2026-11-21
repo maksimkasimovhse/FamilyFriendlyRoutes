@@ -232,11 +232,13 @@ function renderKids() {
     card.className = 'card-w';
     const count = child.interest_ids.length;
     card.innerHTML = `
-      <h2 class="kid-title"></h2>
+      <div class="kid-top"><span class="kid-ava"></span><h2 class="kid-title"></h2><span class="kid-age"></span></div>
       <div class="chips-w" role="group" aria-label="Интересы">${interestOptions.child.map(o =>
         `<button type="button" data-id="${o.id}" aria-pressed="${child.interest_ids.includes(o.id)}"></button>`).join('')}
         <button type="button" class="unsure" data-unsure aria-pressed="${!!unsure[child.child_id]}">Пока не знаем</button></div>`;
     card.querySelector('.kid-title').textContent = name;
+    card.querySelector('.kid-ava').textContent = name.replace(/^Ребёнок\s*/, '').charAt(0).toUpperCase() || name.charAt(0).toUpperCase();
+    card.querySelector('.kid-age').textContent = ageText(child.age_years);
     card.querySelectorAll('[data-id]').forEach(b => {
       b.textContent = interestOptions.child.find(o => o.id === b.dataset.id).label;
       b.onclick = () => {
@@ -274,14 +276,12 @@ function renderAdults() {
   });
   document.querySelectorAll('#pace button').forEach(b => b.setAttribute('aria-checked', b.dataset.pace === draft.load_limits.pace));
   $('wishes').value = draft.wishes || '';
-  $('wishes-count').textContent = `${$('wishes').value.length} / 2000`;
 }
 
 function bindAdults() {
   document.querySelectorAll('#pace button').forEach(b => {
     b.onclick = () => { draft.load_limits.pace = b.dataset.pace; renderAdults(); };
   });
-  $('wishes').oninput = () => { $('wishes-count').textContent = `${$('wishes').value.length} / 2000`; };
   document.querySelectorAll('#wish-chips button').forEach(b => {
     b.onclick = () => {
       const t = $('wishes');

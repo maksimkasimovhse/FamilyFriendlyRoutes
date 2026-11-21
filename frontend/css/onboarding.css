@@ -202,4 +202,17 @@ textarea { resize: vertical; min-height: 84px; line-height: 1.4; }
 .age-range.empty::-moz-range-thumb { border-color: #C2C8D2; }
 
 /* Шаг «Что интересно детям?»: на карточке только имя и чипсы */
-.kid-title { margin: 0 0 12px; font-size: 20px; font-weight: 800; color: var(--kid); }
+.kid-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.kid-ava { width: 44px; height: 44px; flex: none; border-radius: 50%; background: var(--kid); color: #fff; display: grid; place-items: center; font-size: 20px; font-weight: 800; box-shadow: 0 0 0 4px var(--kid-soft); }
+.kid-title { margin: 0; flex: 1; min-width: 0; font-size: 22px; font-weight: 800; color: var(--kid); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kid-age { flex: none; padding: 6px 12px; border-radius: 999px; background: var(--kid-soft); color: var(--kid); font-size: 14px; font-weight: 800; }
+
+/* Поиск адреса старта */
+#addr-block { margin-top: 12px; }
+.addr-form { display: flex; gap: 8px; }
+.addr-form input { flex: 1; min-width: 0; min-height: 48px; border-radius: 14px; border: 1.5px solid var(--line); padding: 0 14px; font: 600 15px var(--font-ui); background: var(--bg); color: var(--ink); }
+.addr-form input:focus { outline: none; border-color: var(--now); background: #fff; }
+.addr-form .btn { width: auto; flex: none; padding: 0 18px; min-height: 48px; }
+.addr-results { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.addr-results button { width: 100%; min-height: 48px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--surface); text-align: left; font: 700 15px var(--font-ui); color: var(--ink); cursor: pointer; }
+.addr-results button:hover { border-color: var(--now); }

@@ -133,7 +133,7 @@
   <section class="screen pick" id="screen-pick" data-tab="pick" hidden>
     <!-- Только в «Новой поездке» (шаг 2 из 3): шапка шага и подзаголовок -->
     <div class="pick-flow">
-      <div class="flow-step"><span>Новая поездка · шаг 3 из 4</span><div class="flow-bar four kid"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div></div>
+      <div class="flow-step"><div class="flow-bar four kid"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div></div>
 <p class="pick-flow-sub">Выберите места на всю поездку — распределим по дням с учётом близости и бюджета.</p>
     </div>
     <header class="pick-top">
@@ -409,7 +409,7 @@
   <section class="flow" id="onb-family" hidden>
     <header class="flow-top">
       <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
-      <div class="flow-step"><span>Анкета семьи · шаг 1 из 3</span><div class="flow-bar"><i class="on"></i><i></i><i></i></div></div>
+      <div class="flow-step"><div class="flow-bar"><i class="on"></i><i></i><i></i></div></div>
     </header>
     <div class="flow-scroll">
       <h1 class="flow-title">Кто едет?</h1>
@@ -442,7 +442,7 @@
   <section class="flow" id="onb-kids" hidden>
     <header class="flow-top">
       <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
-      <div class="flow-step"><span>Анкета семьи · шаг 2 из 3</span><div class="flow-bar"><i class="on"></i><i class="on"></i><i></i></div></div>
+      <div class="flow-step"><div class="flow-bar"><i class="on"></i><i class="on"></i><i></i></div></div>
     </header>
     <div class="flow-scroll">
       <h1 class="flow-title">Что интересно детям?</h1>
@@ -456,7 +456,7 @@
   <section class="flow" id="onb-adults" hidden>
     <header class="flow-top">
       <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
-      <div class="flow-step"><span>Анкета семьи · шаг 3 из 3</span><div class="flow-bar"><i class="on"></i><i class="on"></i><i class="on"></i></div></div>
+      <div class="flow-step"><div class="flow-bar"><i class="on"></i><i class="on"></i><i class="on"></i></div></div>
     </header>
     <div class="flow-scroll">
       <h1 class="flow-title">А что интересно вам?</h1>
@@ -467,28 +467,26 @@
       <div class="card-w">
         <b>Темп прогулок</b>
         <div class="pace" id="pace" role="radiogroup" aria-label="Темп прогулок">
-          <button type="button" role="radio" data-pace="relaxed"><b>Спокойный</b><small>больше привалов</small></button>
-          <button type="button" role="radio" data-pace="standard"><b>Обычный</b><small>как все</small></button>
-          <button type="button" role="radio" data-pace="intensive"><b>Активный</b><small>успеть больше</small></button>
+          <button type="button" role="radio" data-pace="relaxed"><b>Спокойный</b></button>
+          <button type="button" role="radio" data-pace="standard"><b>Обычный</b></button>
+          <button type="button" role="radio" data-pace="intensive"><b>Активный</b></button>
         </div>
       </div>
       <div class="card-w">
-        <label class="field" for="wishes"><b>Пожелания и ограничения</b> <span class="muted">— необязательно</span></label>
+        <label class="field" for="wishes"><b>Пожелания и ограничения</b></label>
         <textarea id="wishes" rows="3" maxlength="2000" placeholder="Например: ребёнок боится собак"></textarea>
         <div class="chips-w quick" id="wish-chips">
-          <button type="button">Избегать лестниц</button>
+          <button type="button">Больше игровых площадок</button>
           <button type="button">Ребёнок не любит шум</button>
           <button type="button">Частые перерывы</button>
-          <button type="button">Едем с коляской</button>
+          <button type="button">Нужны перекусы по пути</button>
           <button type="button">Нужен тихий отдых</button>
         </div>
-        <p class="hint right" id="wishes-count">0 / 2000</p>
       </div>
       <p class="form-error" id="adults-error" role="alert" hidden></p>
     </div>
     <div class="flow-bottom">
       <button class="btn flow-main" id="profile-save">Сохранить анкету</button>
-      <p class="fine center">Больше не спросим. Поменять можно в профиле.</p>
     </div>
   </section>
 
@@ -496,7 +494,7 @@
   <section class="flow trip" id="trip-when" hidden>
     <header class="flow-top">
       <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
-      <div class="flow-step"><span>Новая поездка · шаг 1 из 4</span><div class="flow-bar four kid"><i class="on"></i><i></i><i></i><i></i></div></div>
+      <div class="flow-step"><div class="flow-bar four kid"><i class="on"></i><i></i><i></i><i></i></div></div>
     </header>
     <div class="flow-scroll">
       <h1 class="flow-title">Когда и откуда гуляем?</h1>
@@ -529,16 +527,22 @@
       </div>
       <div class="card-w">
         <b>Откуда начинаете день</b>
-        <div class="chips-w" id="start-points" role="radiogroup" aria-label="Точка старта"></div>
-        <button type="button" class="btn alt slim geo" id="start-geo">📍 Моё местоположение</button>
-        <p class="hint" id="start-note"></p>
+        <div class="chips-w" id="start-points" role="radiogroup" aria-label="Точка старта">
+          <button type="button" role="radio" data-start="center">Центр города</button>
+          <button type="button" role="radio" data-start="geo">Моё местоположение</button>
+          <button type="button" role="radio" data-start="address">Адрес</button>
+        </div>
+        <div id="addr-block" hidden>
+          <form class="addr-form" id="addr-form" novalidate>
+            <input id="addr-input" type="text" autocomplete="street-address" maxlength="120" placeholder="Улица и дом, например Большая Покровская, 10" aria-label="Адрес старта">
+            <button class="btn alt slim" id="addr-go">Найти</button>
+          </form>
+          <ul class="addr-results" id="addr-results"></ul>
+        </div>
+        <p class="form-error" id="start-note" role="alert" hidden></p>
         <div class="row-between switch-row">
           <span id="return-label">Возвращаться сюда вечером</span>
           <button type="button" class="switch" id="return-home" role="switch" aria-checked="true" aria-labelledby="return-label"><i></i></button>
-        </div>
-        <div id="end-block" hidden>
-          <b class="sub-b">Где заканчиваете день</b>
-          <div class="chips-w" id="end-points" role="radiogroup" aria-label="Точка финиша"></div>
         </div>
       </div>
       <p class="form-error" id="when-error" role="alert" hidden></p>
@@ -550,7 +554,7 @@
   <section class="flow trip" id="trip-chat" hidden>
     <header class="flow-top">
       <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
-      <div class="flow-step"><span>Новая поездка · шаг 2 из 4</span><div class="flow-bar four kid"><i class="on"></i><i class="on"></i><i></i><i></i></div></div>
+      <div class="flow-step"><div class="flow-bar four kid"><i class="on"></i><i class="on"></i><i></i><i></i></div></div>
     </header>
     <div class="chat-log" id="chat-log" aria-live="polite"></div>
     <div class="chat-chips" id="chat-chips"></div>
@@ -568,7 +572,7 @@
   <section class="flow trip" id="trip-wishes" hidden>
     <header class="flow-top">
       <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
-      <div class="flow-step"><span>Новая поездка · шаг 4 из 4</span><div class="flow-bar four kid"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div></div>
+      <div class="flow-step"><div class="flow-bar four kid"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div></div>
     </header>
     <div class="flow-scroll">
       <h1 class="flow-title">Что-то особенное в этот раз?</h1>
@@ -597,11 +601,6 @@
       <div class="day-tabs" id="preview-days" role="tablist" aria-label="Дни поездки"></div>
       <p class="flow-sub" id="preview-line"></p>
       <ol class="pv-list" id="preview-list"></ol>
-      <label class="ack" id="preview-ack" hidden>
-        <input type="checkbox" id="preview-ack-box">
-        <span id="preview-ack-text">Часы работы проверены не у всех мест — уточню перед выходом</span>
-      </label>
-      <p class="fine" id="preview-guest" hidden>Вы без входа — маршрут хранится сутки. <button type="button" class="btn link inline" id="preview-login">Войти, чтобы не потерять</button></p>
       <p class="form-error" id="preview-error" role="alert" hidden></p>
     </div>
     <div class="flow-bottom"><button class="btn flow-main" id="preview-save">Сохранить маршрут</button></div>
