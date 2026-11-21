@@ -8,7 +8,7 @@ function fixture(preview){
  const ids=new Map(),byId=id=>{if(!ids.has(id))ids.set(id,element());return ids.get(id)};
  const buttons=['rest','toilet','pharmacy','food','park','playground','skip'].map(kind=>({...element(),dataset:{urgentKind:kind}}));
  const filters=[],applied=[];
- const context={document:{getElementById:byId,querySelectorAll:()=>buttons,querySelector:()=>element()},runUrgentAction:async kind=>{assert.equal(kind,'skip');return {preview}},urgentKind(){return null},placeEmojiHtml(){return ''},onTripChange(){},getSource(){return 'backend'},applyPreview:async(p,acks)=>applied.push({p,acks})};
+ const context={document:{getElementById:byId,querySelectorAll:selector=>selector==='[data-urgent-kind]'?buttons:[],querySelector:()=>element()},runUrgentAction:async kind=>{assert.equal(kind,'skip');return {preview}},urgentKind(){return null},placeEmojiHtml(){return ''},onTripChange(){},getSource(){return 'backend'},applyPreview:async(p,acks)=>applied.push({p,acks})};
  vm.createContext(context);vm.runInContext(fs.readFileSync(new URL('./map-actions.js',import.meta.url),'utf8').replace(/^import .*;\r?\n/gm,'').replace(/export function /g,'function '),context);
  context.initMapActions({onFilter:keys=>filters.push(Array.from(keys))});
  return {context,buttons,byId,filters,applied};
