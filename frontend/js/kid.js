@@ -210,7 +210,7 @@ function showStamp(s) {
   $('stamp-icon').innerHTML = isWindow(s) ? ICONS.camera : ICONS.star;
   $('stamp-text').textContent = `Штамп «${s.title}» твой!`;
   $('stamp-row').innerHTML = all.map(x => `<span class="${isDone(x) ? 'on' : ''}"></span>`).join('');
-  $('stamp-next').textContent = nextStop() ? 'Дальше по тропе' : 'Тропа пройдена!';
+  $('stamp-next').textContent = 'Вернуться на тропу';
   showPage('stamp-page');
 }
 
@@ -248,21 +248,11 @@ async function startCamera() {
   openCamera(current, state.demo, (url, asset) => showResult(current, url, asset));
 }
 
-// Шаг 3: окно открыто. Шторка сама проезжает «из прошлого в сейчас», дальше — пальцем.
-let sweep = 0;
-function setCut(v) { $('res-tn').style.setProperty('--cut', v + '%'); $('res-range').value = v; }
-function revealSweep() {
-  cancelAnimationFrame(sweep);
-  const t0 = performance.now(), D = 2200;
-  const ease = t => t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
-  const step = now => {
-    const t = Math.min(1, (now - t0) / D);
-    // 100 → 8 → 50: сначала всё «тогда», потом почти всё «сейчас», и шторка встаёт посередине
-    const v = t < .62 ? 100 - 92 * ease(t / .62) : 8 + 42 * ease((t - .62) / .38);
-    setCut(v);
-    if (t < 1) sweep = requestAnimationFrame(step);
-  };
-  sweep = requestAnimationFrame(step);
+// Шаг 3: окно открыто — карточка «тогда / сейчас» переворачивается; первый раз — сама, для эффекта
+let flipTimer = 0;
+function setFlip(now) {
+  $('res-tn').classList.toggle('flipped', now);
+  $('res-tn').setAttribute('aria-label', now ? 'Сейчас. Нажмите, чтобы увидеть, как было тогда' : 'Тогда. Нажмите, чтобы увидеть, как сейчас');
 }
 
 function showResult(s, url, asset) {
@@ -271,6 +261,8 @@ function showResult(s, url, asset) {
   $('res-years').textContent = s.years;
   $('res-now-year').textContent = String(NOW_YEAR);
   $('res-tn').style.aspectRatio = String(asset.aspect);
+  clearTimeout(flipTimer);
+  setFlip(false);
   $('res-now').src = url;
   $('res-old').src = asset.url;
   $('res-old').alt = `Тогда: ${s.title}, ${s.years}`;
@@ -283,14 +275,13 @@ function showResult(s, url, asset) {
   $('res-kid').textContent = s.kidText;
   $('res-adult').textContent = s.adultText;
   $('res-source').textContent = 'Источник: ' + s.textSource;
-  setCut(100);
   showPage('result-page');
   $('result-page').querySelector('.past-scroll').scrollTop = 0;
-  revealSweep();
+  flipTimer = setTimeout(() => setFlip(true), 1400);
 
   const firstTime = !isDone(s);
   finishStop(s);
-  if (firstTime && s.outfit) setTimeout(() => { if (!$('result-page').hidden) showReward(s.outfit); }, 2600);
+  if (firstTime && s.outfit) setTimeout(() => { if (!$('result-page').hidden) showReward(s.outfit); }, 3000);
 }
 
 function showReward(outfitId) {
@@ -421,9 +412,8 @@ export async function initKid(options) {
   $('fawn-buddy').onclick = () => fawnSays(fawnLine());
   document.querySelectorAll('.kid-mode [data-back]').forEach(b => b.addEventListener('click', backToTrail));
   $('stamp-next').onclick = backToTrail;
-  $('stamp-return').onclick = closeKid;
   $('win-camera').onclick = startCamera;
-  $('res-range').oninput = e => { cancelAnimationFrame(sweep); setCut(e.target.value); };
+  $('res-tn').onclick = () => { clearTimeout(flipTimer); setFlip(!$('res-tn').classList.contains('flipped')); };
   $('res-next').onclick = () => showStamp(current);
   $('res-save').onclick = () => saveStory().catch(err => alert('Не получилось сохранить: ' + err.message));
   addEventListener('resize', () => { if (!$('kid-mode').hidden) renderTrail(); });

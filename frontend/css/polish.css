@@ -42,3 +42,23 @@ details.past-adult summary { color: #F4EBDD; }
 details.past-adult .adult-chev { background-color: rgba(233,199,154,.22); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5' fill='none' stroke='%23E9C79A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 details.past-adult .source a { color: inherit; }
 details.adult:not([open]) { padding-bottom: 4px; }
+
+/* ----- Окно: шаги — одно слово, без подписей ----- */
+.past-steps li { display: flex; align-items: center; gap: 10px; padding: 14px 12px; }
+.past-steps span { margin-bottom: 0; flex: none; }
+.past-steps b { font-size: 16px; }
+
+/* ----- Тогда / сейчас: карточка-переворот ----- */
+.tn-flip { display: block; width: 100%; padding: 0; border: 0; background: none; perspective: 1400px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.tn-inner { position: relative; display: block; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.3,.7,.2,1); }
+.tn-flip.flipped .tn-inner { transform: rotateY(180deg); }
+.tn-flip:active .tn-inner { scale: .985; }
+.tn-face { position: absolute; inset: 0; overflow: hidden; border-radius: 14px; backface-visibility: hidden; -webkit-backface-visibility: hidden; background: #000; box-shadow: 0 18px 40px rgba(0,0,0,.55), 0 0 0 6px #F4EBDD; }
+.tn-face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tn-face .old { filter: sepia(.18) contrast(1.04); }
+.now-face { transform: rotateY(180deg); }
+.tn-face .tag { top: 12px; font-size: 13px; padding: 5px 12px; }
+.then-face .tag { left: 12px; }
+.now-face .tag { right: 12px; }
+.tn-tip { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 18px 0 0; font-size: 14px; font-weight: 800; color: #E9C79A; }
+.tn-tip span { font-size: 18px; }

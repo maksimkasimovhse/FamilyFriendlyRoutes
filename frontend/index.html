@@ -269,8 +269,7 @@
         <div class="stamp-row" id="stamp-row"></div>
       </div>
       <div class="kid-bottom col">
-        <button class="btn kid-main big" id="stamp-next">Дальше по тропе</button>
-        <button class="btn kid-dark" id="stamp-return">Вернуть телефон маме</button>
+        <button class="btn kid-main big" id="stamp-next">Вернуться на тропу</button>
       </div>
     </section>
 
@@ -286,9 +285,9 @@
         <h1 class="past-title" id="win-title"></h1>
         <p class="past-ago" id="win-ago"></p>
         <ol class="past-steps">
-          <li><span>1</span><b>Найди место</b><small>где стоял фотограф</small></li>
-          <li><span>2</span><b>Совмести</b><small>контур старого кадра</small></li>
-          <li><span>3</span><b>Сними</b><small>и окно откроется</small></li>
+          <li><span>1</span><b>Найди</b></li>
+          <li><span>2</span><b>Совмести</b></li>
+          <li><span>3</span><b>Сними</b></li>
         </ol>
         <p class="past-gps" id="win-place">Ищем вас по GPS…</p>
       </div>
@@ -328,13 +327,14 @@
       </header>
       <div class="past-scroll">
         <h1 class="past-title small" id="res-title"></h1>
-        <div class="tn" id="res-tn">
-          <img class="now" id="res-now" alt="Сейчас: ваше фото">
-          <img class="old" id="res-old" alt="">
-          <span class="tag then" id="res-years"></span><span class="tag now-tag" id="res-now-year"></span>
-          <div class="tn-handle" aria-hidden="true"></div>
-          <input type="range" id="res-range" min="0" max="100" value="50" aria-label="Тогда / сейчас">
-        </div>
+        <!-- Тогда / сейчас — карточка переворачивается по нажатию -->
+        <button type="button" class="tn-flip" id="res-tn" aria-label="Перевернуть: тогда или сейчас">
+          <span class="tn-inner">
+            <span class="tn-face then-face"><img class="old" id="res-old" alt=""><span class="tag then" id="res-years"></span></span>
+            <span class="tn-face now-face"><img class="now" id="res-now" alt="Сейчас: ваше фото"><span class="tag now-tag" id="res-now-year"></span></span>
+          </span>
+        </button>
+        <p class="tn-tip" id="res-tip"><span aria-hidden="true">↻</span> Нажми на фото — переверни время</p>
         <div class="past-gap" id="res-gap"></div>
         <p class="past-kid" id="res-kid"></p>
         <details class="adult past-adult">
