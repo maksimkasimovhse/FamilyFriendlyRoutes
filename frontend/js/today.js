@@ -1,4 +1,3 @@
-import { finishInstant } from './route-time.js';
 import { placeEmojiHtml } from './place-display.js';
 // Экран «Сегодня» — главный экран родителя (макет «Сегодня и Карта: что сейчас и что рядом»).
 // Карточка «Сейчас» + лента со временем. Под каждой точкой — одна «семейная» строка:
@@ -20,7 +19,6 @@ function fmtDuration(sec) {
   if (min < 60) return min + ' мин';
   return Math.floor(min / 60) + ' ч' + (min % 60 ? ' ' + (min % 60) + ' мин' : '');
 }
-const fmtTime = iso => iso ? new Date(iso).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Moscow' }) : '';
 const weekday = date => new Date(date + 'T12:00:00').toLocaleDateString('ru-RU', { weekday: 'long' });
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -112,12 +110,11 @@ function render() {
   let card = '';
   if (isToday && next) {
     const leg = legTo(day, next);
-    const time = fmtTime(next.timing.estimated_arrival_at);
     const kid = opt.kidStopInfo(next.activity_id);
     const line = kidLine(next);
     const chips = [...(line ? [{ cls: 'kid', text: line }] : []), ...nearbyChips(next.location.coordinates)];
     const walk = leg && leg.distance_m >= 30;   // старт совпадает с первой точкой — «0 м пешком» не показываем
-    const meta = [time && `в ${time}`, walk && `${fmtDuration(leg.travel_duration_sec)} пешком`, walk && fmtDistance(leg.distance_m), `на месте ~${fmtDuration(next.duration.duration_sec)}`].filter(Boolean).join(' · ');
+    const meta = [walk && `${fmtDuration(leg.travel_duration_sec)} пешком`, walk && fmtDistance(leg.distance_m), `на месте ~${fmtDuration(next.duration.duration_sec)}`].filter(Boolean).join(' · ');
     card = `
       <article class="td-now">
         <div class="td-now-top">
@@ -148,23 +145,23 @@ function render() {
 
   // ----- Лента дня -----
   const showNextInLine = !(isToday && next);
+  const walkText = leg => leg && leg.distance_m >= 30 ? `${fmtDuration(leg.travel_duration_sec)} пешком · ${fmtDistance(leg.distance_m)}` : '';
   const rows = stops.filter(s => showNextInLine || s !== next).map(s => {
     const kid = opt.kidStopInfo(s.activity_id);
     const state = s.progress === 'visited' ? 'done' : s.progress === 'skipped' ? 'skipped' : '';
-    const line = kidLine(s) || (s.progress === 'visited' ? 'пройдено' : `на месте ~${fmtDuration(s.duration.duration_sec)}`);
-    const time = fmtTime(s.progress === 'visited' ? s.timing.estimated_departure_at : s.timing.estimated_arrival_at);
+    // Время старта прогулки заранее неизвестно (человек выходит когда удобно) — показываем, сколько идти от предыдущей точки
+    const line = s.progress === 'visited' ? 'пройдено'
+      : [walkText(legTo(day, s)), kidLine(s) || `на месте ~${fmtDuration(s.duration.duration_sec)}`].filter(Boolean).join(' · ');
     return `<li class="${state}">
       <span class="td-node">${iconFor(s, kid)}</span>
-      <span class="td-t">${time || ''}</span>
       <span class="td-what"><b>${placeEmojiHtml(s.category)} ${esc(s.title)}</b><small>${esc(line)}</small></span>
       ${kid?.photo ? `<img class="td-thumb" src="${kid.photo}" alt="">` : ''}
     </li>`;
   });
-  const finishAt = finishInstant(day) ? fmtTime(finishInstant(day)) : '';
-  rows.push(`<li class="finish"><span class="td-node">${ICON.flag}</span><span class="td-t">${finishAt || ''}</span>
-    <span class="td-what"><b>Финиш</b><small>${esc(day.end_point.label || 'конец прогулки')}</small></span></li>`);
+  const lastLeg = day.legs[day.legs.length - 1];
+  rows.push(`<li class="finish"><span class="td-node">${ICON.flag}</span>
+    <span class="td-what"><b>Финиш</b><small>${esc([lastLeg && lastLeg.to?.kind === 'day_end' ? walkText(lastLeg) : '', day.end_point.label || 'конец прогулки'].filter(Boolean).join(' · '))}</small></span></li>`);
   $('today-list').innerHTML = rows.join('');
-  $('today-list').classList.toggle('no-time', !stops.some(s => s.timing?.estimated_arrival_at));
 
   renderWeather($('today-weather'), day);
   $('today-source').textContent = live ? '' : 'Нет связи с сервером — показан сохранённый план, отметки не работают.';

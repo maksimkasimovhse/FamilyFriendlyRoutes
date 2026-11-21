@@ -140,6 +140,7 @@ export async function renderWeather(el, day) {
     const tips = adviceFor(h);
     const warn = tips.some(t => t.level === 'warn');
     const kind = skyKind(h);
+    const future = day.date > new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' });   // прогноз на будущий день — «Ожидается»
     el.className = 'wx' + (warn ? ' warn' : '');
     // Компактная плашка «☁️ +3…+5°»; по нажатию — подробности и советы
     el.innerHTML = `
@@ -147,7 +148,7 @@ export async function renderWeather(el, day) {
         <span class="wx-ico">${iconSvg(kind)}</span><b>${sign(lo)}${hi - lo >= 1.5 ? '…' + sign(hi) : ''}°</b>${warn ? '<i class="wx-dot" aria-hidden="true"></i>' : ''}
       </button>
       <div class="wx-pop" hidden>
-        <div class="wx-sum"><span class="wx-ico big">${iconSvg(kind)}</span><div><b>${esc(cap(sky.text))}, ${sign(lo)}${hi - lo >= 1.5 ? '…' + sign(hi) : ''}°C</b><small>на время прогулки, ${from}:00–${to}:00</small></div></div>
+        <div class="wx-sum"><span class="wx-ico big">${iconSvg(kind)}</span><b>${future ? 'Ожидается: ' + esc(sky.text) : esc(cap(sky.text))}, ${sign(lo)}${hi - lo >= 1.5 ? '…' + sign(hi) : ''}°C</b></div>
         ${tips.length ? `<ul class="wx-tips">${tips.map(t => `<li class="${t.level}"><span aria-hidden="true">${t.icon}</span>${esc(t.text)}</li>`).join('')}</ul>`
           : '<p class="wx-ok">Хорошая погода для прогулки, специальная одежда не нужна.</p>'}
       </div>`;
