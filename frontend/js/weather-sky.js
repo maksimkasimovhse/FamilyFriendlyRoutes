@@ -10,9 +10,9 @@ const TINT = {   // цвет дымки сверху, плавно уходит 
   rain: 'rgba(95,115,140,.55)', heavyrain: 'rgba(70,88,115,.65)', thunder: 'rgba(55,60,90,.7)',
   snow: 'rgba(205,220,238,.7)', fog: 'rgba(200,205,210,.75)',
 };
-const CLOUDS = { clear: 0, partly: 3, cloud: 6, rain: 6, heavyrain: 7, thunder: 7, snow: 5, fog: 4 };
-const DROPS = { rain: 70, heavyrain: 160, thunder: 180 };
-const FLAKES = { snow: 90 };
+const CLOUDS = { clear: 0, partly: 1, cloud: 1, rain: 1, heavyrain: 1, thunder: 1, snow: 1, fog: 1 };
+const DROPS = { rain: 12, heavyrain: 22, thunder: 24 };
+const FLAKES = { snow: 18 };
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 let root, cv, ctx, W = 0, H = 0, kind = null, parts = [], clouds = [], raf = 0, flash = 0, t0 = 0;
@@ -29,7 +29,7 @@ function fit() {
 function build() {
   const heavy = kind === 'heavyrain' || kind === 'thunder';
   clouds = Array.from({ length: CLOUDS[kind] || 0 }, (_, i) => ({
-    x: rnd(-.1, 1) * W, y: rnd(.02, .22) * H + (i % 2) * 14, s: rnd(.8, 1.5), v: rnd(4, 12) * (heavy ? 1.6 : 1),
+    x: W*.5, y: 46, s: 1.05, v: 0,
     a: kind === 'partly' ? .85 : heavy ? .95 : .9, dark: ['rain', 'heavyrain', 'thunder'].includes(kind) ? (heavy ? .55 : .35) : kind === 'cloud' ? .15 : 0,
   }));
   parts = [];
@@ -47,7 +47,7 @@ function cloud(c) {
 }
 
 function sun(t) {
-  const x = W - 56, y = 52, rays = 12, pulse = 1 + Math.sin(t * 1.4) * .05;
+  const x = kind === 'partly' ? W*.65 : W*.5, y = 38, rays = 12, pulse = 1 + Math.sin(t * 1.4) * .05;
   const glow = ctx.createRadialGradient(x, y, 4, x, y, 90);
   glow.addColorStop(0, 'rgba(255,236,150,.85)'); glow.addColorStop(1, 'rgba(255,236,150,0)');
   ctx.fillStyle = glow; ctx.fillRect(x - 90, y - 90, 180, 180);
@@ -72,13 +72,13 @@ function frame(now) {
       ctx.fillStyle = g; ctx.fillRect(off - 200, y - 18, 400, 36);
     }
   }
-  for (const c of clouds) { c.x += c.v * dt; if (c.x - 70 * c.s > W) c.x = -70 * c.s; cloud(c); }
+  for (const c of clouds) { c.y=46+Math.sin(t*.7)*2; cloud(c); }
   if (DROPS[kind]) {
     ctx.strokeStyle = kind === 'rain' ? 'rgba(80,130,200,.65)' : 'rgba(60,100,180,.8)'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
     ctx.beginPath();
     for (const p of parts) {
       p.y += p.v * dt; p.x -= p.v * dt * .18;
-      if (p.y > H) { p.y = -p.l; p.x = rnd(0, W * 1.1); }
+      if (p.y > H) { p.y = -p.l; p.x = rnd(W*.22, W*.83); }
       ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + p.l * .18, p.y - p.l);
     }
     ctx.stroke();

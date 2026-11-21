@@ -78,3 +78,13 @@ test('late GPS results cannot restore benches around the previous position',asyn
     clearNearbyBenches();assert.deepEqual(allPlaces(),[]);
   } finally {clearNearbyBenches();globalThis.fetch=original;}
 });
+
+test('nearest toilet search fills three unique objects across duplicate pages',async()=>{
+ const original=globalThis.fetch;let calls=0;
+ try {
+  globalThis.fetch=async()=>{calls++;return {ok:true,json:async()=>calls===1?{items:[place('one','toilet',.001),place('one','toilet',.001),place('one','toilet',.001)],evidence:[],next_cursor:'more'}:{items:[place('two','toilet',.002),place('three','toilet',.003)],evidence:[],next_cursor:null}};};
+  const answer=await runUrgentAction('toilet',{getPosition:async()=>origin});
+  assert.deepEqual(answer.places.map(p=>p.place_id),['one','two','three']);
+  assert.equal(calls,2);
+ }finally{globalThis.fetch=original;}
+});

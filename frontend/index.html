@@ -113,7 +113,9 @@
     </div>
 
     <!-- Нижняя карточка: сводка дня или выбранная остановка -->
-    <div class="sheet">
+    <div class="sheet" id="map-sheet">
+      <button type="button" class="map-sheet-toggle" id="map-sheet-toggle" aria-expanded="true" aria-controls="map-sheet-content" aria-label="Свернуть панель карты"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button>
+      <div id="map-sheet-content" class="map-sheet-content">
       <!-- Удобства: как на макете — под картой, «Всё семейное» включает всё -->
       <div class="chips" aria-label="Показать на карте">
         <button class="chip" data-layer="all" aria-pressed="true">Всё семейное</button>
@@ -124,8 +126,10 @@
         <button class="chip" data-layer="bench" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/bench.svg" alt="" aria-hidden="true">Скамейки</button>
         <button class="chip" data-layer="pharmacy" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/pharmacy.svg" alt="" aria-hidden="true">Аптеки</button>
       </div>
+      <button type="button" id="map-kid-mode" class="map-kid-mode"><span class="map-kid-mark" aria-hidden="true">✦</span><span>Детский режим</span><span class="map-kid-arrow" aria-hidden="true">›</span></button>
       <div id="sheet-body" aria-live="polite"><p class="muted">Строим маршрут…</p></div>
       <div class="map-edit"><button type="button" id="map-edit-toggle" aria-expanded="false" aria-controls="map-edit-form"><span>✦</span> Изменить маршрут</button><form id="map-edit-form" hidden><label class="sr-only" for="map-edit-text">Как изменить маршрут</label><div class="map-edit-row"><input id="map-edit-text" maxlength="2000" autocomplete="off" placeholder="Например: убери последнюю точку" required><button type="submit" aria-label="Рассчитать изменение маршрута">↑</button></div><p>Убрать точку, сократить прогулку или пересчитать оставшийся путь.</p></form></div>
+      </div>
     </div>
   </section>
 
@@ -337,7 +341,7 @@
       </div>
     </div>
   </section>
-  <dialog id="urgent-dialog" class="urgent-dialog" aria-labelledby="urgent-title"><header><div><small>ПОМОЖЕМ ПО ПУТИ</small><h2 id="urgent-title">Что нужно сейчас?</h2></div><button type="button" id="urgent-close" aria-label="Закрыть срочные действия">×</button></header><div id="urgent-kinds" class="urgent-kinds"></div><div id="urgent-content" class="urgent-content" aria-live="polite"></div></dialog>
+  <dialog id="urgent-dialog" class="urgent-dialog" aria-labelledby="urgent-title"><header><div><h2 id="urgent-title">Что нужно сейчас?</h2></div><button type="button" id="urgent-close" aria-label="Закрыть срочные действия">×</button></header><div id="urgent-kinds" class="urgent-kinds"></div><div id="urgent-content" class="urgent-content" aria-live="polite"></div></dialog>
   <!-- ===== Альбом и профиль: анкета, мои поездки, выход ===== -->
   <section class="screen profile" data-tab="album" hidden>
     <header class="today-top"><p class="today-sub" id="prof-who"></p><h1>Профиль</h1></header>

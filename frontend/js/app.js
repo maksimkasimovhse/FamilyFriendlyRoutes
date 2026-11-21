@@ -72,6 +72,15 @@ function startMain() {
   });
   initToday({ childName: name, childNameGenitive: genitive(name), kidStopInfo, onOpenKid: () => openKid(), onNeedNow: () => { openTab('map'); openUrgentWidget(); } });
   initMapActions({onFocus:focusPlace,onPreview:showRoutePreview,onCancel:clearRoutePreview});
+  $('map-kid-mode').onclick=()=>kidReady.then(()=>openKid());
+  $('map-sheet-toggle').onclick=()=>{
+    const button=$('map-sheet-toggle'),panel=$('map-sheet-content');
+    panel.hidden=!panel.hidden;
+    $('map-sheet').classList.toggle('is-collapsed',panel.hidden);
+    button.setAttribute('aria-expanded',String(!panel.hidden));
+    button.setAttribute('aria-label',panel.hidden?'Развернуть панель карты':'Свернуть панель карты');
+    requestAnimationFrame(()=>resizeMap());
+  };
 
   // Тропа ребёнка — в порядке маршрута; «Сегодня» — когда подгрузились места рядом
   const syncKid = () => kidReady.then(() => { const day = today(); if (day) syncKidOrder(day.stops.map(s => s.activity_id)); });
