@@ -77,7 +77,7 @@ export function initMapActions(options={}) {
  document.querySelector('.chip[data-layer="all"]').addEventListener('click',()=>{if(inlineMode)close();});
  $('urgent-dialog').addEventListener('cancel',event=>{event.preventDefault();close();});
  $('urgent-dialog').addEventListener('click',event=>{if(event.target===$('urgent-dialog')){const rect=$('urgent-dialog').getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)close();}});
- $('map-edit-toggle').onclick=()=>{const form=$('map-edit-form');form.hidden=!form.hidden;$('map-edit-toggle').setAttribute('aria-expanded',String(!form.hidden));if(!form.hidden)$('map-edit-text').focus();};
+ $('map-edit-toggle').onclick=()=>{const form=$('map-edit-form');form.hidden=!form.hidden;$('map-edit-toggle').setAttribute('aria-expanded',String(!form.hidden));if(!form.hidden){form.scrollIntoView({block:'nearest'});$('map-edit-text').focus({preventScroll:true});}};
  $('map-edit-form').onsubmit=async event=>{
   event.preventDefault();const text=$('map-edit-text').value.trim();if(!text)return;
   open('Изменить маршрут');$('urgent-kinds').hidden=true;const ticket=revision;status('Рассчитываем изменение…');

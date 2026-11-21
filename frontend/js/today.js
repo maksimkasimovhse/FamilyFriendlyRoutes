@@ -243,7 +243,6 @@ export const refreshToday = () => render();
 
 export function initToday(options) {
   opt = { ...opt, ...options };
-  $('need-now').onclick = opt.onNeedNow;
   onTripChange(render);
   render();
 }

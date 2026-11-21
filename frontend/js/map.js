@@ -84,10 +84,11 @@ function boundsOf(coords) {
   return b;
 }
 // Запас под фото-метки (52 px) и кнопки справа, чтобы точки не уходили под край
-const PADDING = { top: 70, bottom: 80, left: 56, right: 80 };
+// Нижняя панель лежит поверх карты — оставляем под неё место, чтобы маршрут не оказался под ней
+const padding = () => ({ top: 70, bottom: Math.max(document.getElementById('map-sheet')?.offsetHeight || 0, innerHeight * 0.42) + 16, left: 56, right: 80 });
 function showArea(coords) {
   map.resize();   // карточка снизу могла поменять высоту — карта должна это узнать
-  map.fitBounds(boundsOf(coords), { padding: PADDING, pitch: map.getPitch(), duration: 600 });
+  map.fitBounds(boundsOf(coords), { padding: padding(), pitch: map.getPitch(), duration: 600 });
 }
 
 // ---------- Значки удобств ----------

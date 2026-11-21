@@ -99,11 +99,6 @@
       <div id="map" aria-label="Карта маршрута"></div>
       <div id="map-sky" class="map-sky" hidden role="img" aria-label="Погода"><span data-weather-icon aria-hidden="true"></span></div>
 
-      <!-- Детский режим: быстрый вход прямо с карты (карту переделает Максим — кнопку просто перенести) -->
-      <button type="button" class="kid-fab" id="kid-fab" aria-label="Детский режим">
-        <span class="kid-fab-ava"><img src="media/fawn/fawn-base.svg" alt=""></span><b>Детский режим</b>
-      </button>
-
       <div class="map-buttons">
         <button id="btn-3d" class="round" aria-label="Переключить 3D" title="2D / 3D">3D</button>
         <button id="btn-locate" class="round" aria-label="Где я" title="Где я">
@@ -198,9 +193,6 @@
       <div id="today-now"></div>
       <ol class="td-line" id="today-list"></ol>
       <p class="source" id="today-source"></p>
-    </div>
-    <div class="today-bottom">
-      <button class="btn need" id="need-now">＋ Нужно сейчас</button>
     </div>
 
     <!-- Подтверждение «Пропустить»: что изменится в маршруте -->
@@ -618,9 +610,9 @@
 
   <!-- ===== Нижнее меню ===== -->
   <nav class="tabbar" aria-label="Разделы">
-    <button data-tab="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c3-1 4-5 7-7s5-1 7-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="5" cy="19" r="2" fill="currentColor"/><circle cx="19" cy="6" r="2" fill="currentColor"/></svg>Сегодня</button>
-    <button data-tab="map" class="map-tab on" aria-label="Карта">
-      <span class="map-disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Карта
+    <button data-tab="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5l1.6 1.6L8.5 5M4 12.5l1.6 1.6 2.9-3.1M4 18.5l1.6 1.6 2.9-3.1M12 7h8M12 13h8M12 19h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>План</button>
+    <button data-tab="map" class="map-tab on">
+      <span class="map-pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Карта
     </button>
     <button data-tab="profile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Профиль</button>
   </nav>

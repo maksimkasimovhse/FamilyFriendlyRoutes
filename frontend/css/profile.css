@@ -1,26 +1,20 @@
-/* ===== Нижнее меню: Сегодня · Карта (крупная) · Профиль ===== */
-.tabbar { padding-top: 0; align-items: flex-end; }
-.tabbar button { min-height: 64px; }
-.tabbar .map-tab { position: relative; justify-content: flex-end; color: var(--ink-2); }
-.map-disc {
-  width: 62px; height: 62px; margin-top: -26px; border-radius: 50%; display: grid; place-items: center; color: #fff;
-  background: linear-gradient(145deg, #3B7BFF 0%, var(--now) 55%, #1A47A8 100%); border: 4px solid var(--surface);
-  box-shadow: 0 8px 20px rgba(36,99,214,.45); transition: transform .15s;
-}
-.map-disc svg { width: 28px; height: 28px; }
-.tabbar .map-tab:active .map-disc { transform: scale(.94); }
-.tabbar .map-tab.on { color: var(--now); }
-.tabbar .map-tab.on .map-disc { box-shadow: 0 0 0 5px var(--now-soft), 0 8px 20px rgba(36,99,214,.5); }
+/* ===== Нижнее меню: План · Карта · Профиль — плоская панель фиксированной высоты ===== */
+.tabbar { flex: none; align-items: stretch; height: calc(60px + env(safe-area-inset-bottom)); }
+.tabbar button { flex: 1; min-height: 0; padding: 6px 0 4px; justify-content: center; gap: 3px; }
+.tabbar svg { width: 22px; height: 22px; margin: 4px 0; }   /* 30 px — как «таблетка» Карты, подписи на одной линии */
+/* Карта — единственная акцентная кнопка: синяя «таблетка» в пределах панели, ничего не выступает */
+.map-pill { display: grid; place-items: center; width: 52px; height: 30px; border-radius: 15px; color: #fff; background: var(--now); box-shadow: 0 3px 8px rgba(36,99,214,.35); transition: transform .12s; }
+.tabbar .map-pill svg { width: 20px; height: 20px; margin: 0; }
+.tabbar .map-tab, .tabbar .map-tab.on { color: var(--now); }
+.tabbar .map-tab:active .map-pill { transform: scale(.94); }
+.tabbar .map-tab:not(.on) .map-pill { background: var(--now-soft); color: var(--now); box-shadow: none; }
 
-/* ===== Детский режим: заметная кнопка на карте ===== */
-.kid-fab {
-  position: absolute; left: 12px; top: calc(12px + env(safe-area-inset-top)); z-index: 3; display: flex; align-items: center; gap: 8px;
-  min-height: 48px; padding: 4px 16px 4px 4px; border: 0; border-radius: 999px; background: var(--kid); color: #fff; cursor: pointer;
-  box-shadow: 0 6px 16px rgba(232,100,31,.45); font: 800 15px var(--font-ui);
-}
-.kid-fab:active { transform: scale(.96); }
-.kid-fab-ava { width: 40px; height: 40px; border-radius: 50%; background: #fff; overflow: hidden; display: grid; place-items: center; flex: none; }
-.kid-fab-ava img { width: 130%; height: 130%; object-fit: contain; object-position: 50% 0; margin-top: 14%; }
+/* ===== Карта: панель лежит поверх карты, а не сжимает её — карта не прыгает при раскрытии панели ===== */
+#screen-map .map-wrap { position: absolute; inset: 0; flex: none; }
+#screen-map .sheet { position: absolute; left: 0; right: 0; bottom: 0; margin-top: 0; }
+#screen-map .map-sheet-content { max-height: 46dvh; scroll-behavior: smooth; }
+.map-info { bottom: auto; top: 66px; }
+.map-info-pop { bottom: auto; top: 102px; }
 
 /* ===== Профиль ===== */
 .profile { background: var(--bg); }

@@ -268,7 +268,6 @@ initProfile({
   },
   onSignIn: () => openAuthFlow(async () => { await syncLocalProfile(); location.reload(); }),
 });
-$('kid-fab').onclick = () => openKid();     // детский режим — кнопка на карте
 
 // ---------- Запуск ----------
 function showFatal(err) {
