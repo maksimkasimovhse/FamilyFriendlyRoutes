@@ -254,10 +254,10 @@ def is_simple_kremlin_request(message: str) -> bool:
 
 def validate_assistant_response(message, context, response):
     intent = AssistantIntent.model_validate(response.value)
-    # GigaChat can occasionally ask which visit format the family prefers.  For a
-    # standalone Kremlin request that question is unnecessary: it is a supported
-    # landmark search, and the user can choose a concrete card afterwards.
-    if intent.action == "clarify" and is_simple_kremlin_request(message):
+    # For a standalone Kremlin request neither a visit format nor an auxiliary
+    # need (for example, shelter) was expressed.  Normalize it to a supported
+    # landmark search; the user can choose a concrete card afterwards.
+    if is_simple_kremlin_request(message):
         intent.action = "preferences" if context.get("initial") else "find_places"
         intent.question = None
         intent.needs = []

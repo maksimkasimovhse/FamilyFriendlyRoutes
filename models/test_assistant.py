@@ -88,6 +88,11 @@ class AssistantTests(unittest.TestCase):
         self.assertFalse(result.preferences.needs_clarification)
         self.assertEqual([claim.value for claim in result.preferences.claims], ["landmark", "history", "architecture"])
 
+        data = intent("find_places")
+        data["needs"] = [dict(kind="shelter", child_id=None, urgency="now", evidence="Хочу посмотреть кремль")]
+        result, _ = parse_assistant("Хочу посмотреть кремль", CONTEXT, FakeClient(data))
+        self.assertEqual(result.needs, [])
+
     def test_closed_schema_and_unsupported_action(self):
         schema = strict_intent_schema()
         self.assertFalse(schema["additionalProperties"])
