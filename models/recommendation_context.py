@@ -133,7 +133,62 @@ def matches_restaurant(place, filters):
     for key, value in filters.items():
         if value is None:
             continue
-        fact = (place.get("restaurant") or {}).get(key)
+        fact = place.get("toilet") if key == "toilet" else (place.get("restaurant") or {}).get(key)
         if not fact or fact["state"] != "known" or fact["value"] is not value:
             return False
     return True
+
+
+RESTAURANT_AMENITY_WEIGHTS = {
+    # A high chair is the most directly useful facility for families with small children.
+    "high_chairs": 0.30,
+    "children_menu": 0.25,
+    "play_area": 0.15,
+    "play_area_supervision": 0.10,
+    "small_portions": 0.10,
+    "toilet": 0.10,
+}
+
+
+def _preference_fact(fact):
+    """Unknown stays distinct from a sourced false value while ranking below true."""
+    if not fact or fact.get("state") != "known":
+        return 0.25
+    return 1.0 if fact.get("value") is True else 0.0
+
+
+def restaurant_rank_features(place, distance, text_relevance):
+    """Restaurant-specific relevance led by proximity and family facilities.
+
+    Distance is geodesic at recommendation time. The planner still validates the
+    real walking route before a restaurant can be applied to a trip.
+    """
+    details = place.get("restaurant") or {}
+    facts = {key: details.get(key) for key in RESTAURANT_AMENITY_WEIGHTS}
+    facts["toilet"] = place.get("toilet")
+    family = sum(RESTAURANT_AMENITY_WEIGHTS[key] * _preference_fact(facts[key])
+                 for key in RESTAURANT_AMENITY_WEIGHTS)
+    proximity = 0.5 if distance is None else 1 / (1 + max(0, distance) / 400)
+    relevance = max(0.0, min(1.0, text_relevance))
+    return {
+        "proximity": proximity,
+        "family_facilities": family,
+        "text_relevance": relevance,
+        "combined": 0.55 * proximity + 0.35 * family + 0.10 * relevance,
+    }
+
+
+def confirmed_restaurant_facilities(place):
+    labels = {
+        "high_chairs": "детские стульчики",
+        "children_menu": "детское меню",
+        "play_area": "игровая зона",
+        "play_area_supervision": "присмотр в игровой зоне",
+        "small_portions": "маленькие порции",
+        "toilet": "туалет",
+    }
+    details = place.get("restaurant") or {}
+    facts = {key: details.get(key) for key in labels}
+    facts["toilet"] = place.get("toilet")
+    return [label for key, label in labels.items()
+            if facts[key] and facts[key].get("state") == "known" and facts[key].get("value") is True]

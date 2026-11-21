@@ -3741,6 +3741,58 @@
                       }
                     ]
                   },
+                  "high_chairs": {
+                    "oneOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "const": "known"
+                          },
+                          "value": {
+                            "type": "boolean"
+                          },
+                          "evidence_ids": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/ID"
+                            },
+                            "minItems": 1
+                          }
+                        },
+                        "required": [
+                          "state",
+                          "value",
+                          "evidence_ids"
+                        ]
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "state": {
+                            "type": "string",
+                            "const": "unknown"
+                          },
+                          "value": {
+                            "type": "null"
+                          },
+                          "evidence_ids": {
+                            "type": "array",
+                            "items": {
+                              "$ref": "#/components/schemas/ID"
+                            }
+                          }
+                        },
+                        "required": [
+                          "state",
+                          "value",
+                          "evidence_ids"
+                        ]
+                      }
+                    ],
+                    "description": "Source-backed availability of child high chairs. Omitted means not collected, never false."
+                  },
                   "cuisine": {
                     "type": "array",
                     "items": {
@@ -7734,6 +7786,12 @@
       "RestaurantFilters": {
         "type": "object",
         "properties": {
+          "high_chairs": {
+            "oneOf": [
+              { "type": "boolean" },
+              { "type": "null" }
+            ]
+          },
           "children_menu": {
             "oneOf": [
               {
@@ -7772,6 +7830,12 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "toilet": {
+            "oneOf": [
+              { "type": "boolean" },
+              { "type": "null" }
             ]
           }
         },

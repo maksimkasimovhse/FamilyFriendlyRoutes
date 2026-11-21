@@ -20,7 +20,9 @@ from query_match import query_match_score
 from request_schema import ParsedRequest, validate_evidence
 from model_contracts import recommendation_schemas
 from taxonomy import FORMATS, INTEREST_IDS
-from recommendation_context import calendar_for, matches_purpose, spatial_distance, distance_m, restaurant_filters, matches_restaurant
+from recommendation_context import (calendar_for, matches_purpose, spatial_distance, distance_m,
+                                    restaurant_filters, matches_restaurant, restaurant_rank_features,
+                                    confirmed_restaurant_facilities)
 
 
 MODEL_VERSION = "city-content-baseline-v1"
@@ -85,7 +87,7 @@ class RecommendationEngine:
         raw = catalog_path.read_bytes()
         self.content_sha256 = hashlib.sha256(raw).hexdigest()
         self.catalog_version = catalog_version
-        self.model_version = "family-content-recsys-v2" if catalog_version == ENRICHED_CATALOG_VERSION else MODEL_VERSION
+        self.model_version = "family-content-recsys-v3" if catalog_version == ENRICHED_CATALOG_VERSION else MODEL_VERSION
         self.records = [json.loads(line) for line in raw.decode().splitlines() if line.strip()]
         json.dumps(self.records, allow_nan=False)
         self.policy = json.loads(policy_path.read_text())
@@ -268,6 +270,14 @@ class RecommendationEngine:
         filters = restaurant_filters(request) if request["purpose"] == "restaurant" else request.get("restaurant_filters") or {}
         selection_by_id = {s["activity_id"]: s for s in selections}
         rank_policy = replace(RankingPolicy(), adult_interest_weight=request["policy"]["adult_interest_weight"])
+        if request["purpose"] == "restaurant":
+            # Restaurant order is driven by the composed proximity/family score.
+            # Age-fit penalties are irrelevant for a meal; hard constraints were
+            # already applied above and real walking feasibility remains backend-owned.
+            rank_policy = RankingPolicy(age_fit_weight=0, child_interest_weight=0,
+                                        adult_interest_weight=0.05, query_match_weight=0.90,
+                                        popularity_weight=0.05, unknown_critical_factor=1,
+                                        mmr_lambda=0.99)
         for row in self.records:
             aid = row["activity"]["activity_id"]
             if aid in excluded:
@@ -340,7 +350,11 @@ class RecommendationEngine:
             adult, unknown = interest_score(request["profile"]["adult_interest_ids"], tags)
             unknown_interests.update(unknown)
             query_score = query_match_score(parsed, tags)
-            if request["purpose"] != "initial":
+            restaurant_features = None
+            if request["purpose"] == "restaurant":
+                restaurant_features = restaurant_rank_features(place, distance, query_score)
+                query_score = restaurant_features["combined"]
+            elif request["purpose"] != "initial":
                 proximity = 1 / (1 + distance / 300) if distance is not None else 0.5
                 query_score = 0.3 * query_score + 0.7 * proximity
             pool.append(RankCandidate(aid, eligibility, interest, age_fit, adult, 0.5, query_score, tags))
@@ -360,6 +374,16 @@ class RecommendationEngine:
                 notices.append(warning("AGE_FIT_UNKNOWN", "Возрастная пригодность не оценена.", aid))
             if unknown_interests:
                 notices.append(warning("UNKNOWN_INTEREST_IDS", "Часть интересов не представлена в словаре и не учитывается.", aid))
+            candidate_reasons = [reason("CONTENT_BASELINE", "Совпадение интересов с темами описания; темы выделены эвристически.", child_ids)]
+            if restaurant_features is not None:
+                candidate_reasons = []
+                if distance is not None:
+                    candidate_reasons.append(reason("RESTAURANT_PROXIMITY", f"Около {round(distance)} м по прямой от текущей точки."))
+                facilities = confirmed_restaurant_facilities(place)
+                if facilities:
+                    candidate_reasons.append(reason("FAMILY_RESTAURANT_FEATURES", "Для семьи подтверждены: " + ", ".join(facilities) + ".", child_ids))
+                if not candidate_reasons:
+                    candidate_reasons.append(reason("RESTAURANT_RELEVANCE", "Подходит по запросу и профилю семьи.", child_ids))
             candidates[aid] = dict(place=place, activity=activity,
                 availability=availability,
                 eligibility=[dict(child_id=cid, status=eligibility[cid], reasons=[]) for cid in child_ids],
@@ -367,7 +391,7 @@ class RecommendationEngine:
                             child_age_fit=[dict(child_id=cid, value=age_fit[cid]) for cid in child_ids],
                             adult_interest=adult / (1 + adult), popularity=0.5, final_relevance=0),
                 balance_credit=[dict(child_id=cid, value=0 if activity["kind"] in {"meal", "rest", "utility"} else 1 / len(children)) for cid in child_ids],
-                is_top_place=False, reasons=[reason("CONTENT_BASELINE", "Совпадение интересов с темами описания; темы выделены эвристически.", child_ids)], warnings=notices)
+                is_top_place=False, reasons=candidate_reasons, warnings=notices)
         ranked = rank_places(pool, limit=len(pool), policy=rank_policy)
         ids = [item.activity_id for item in ranked]
         chosen = set(selected)
