@@ -96,7 +96,7 @@
 
     <div class="map-wrap">
       <div id="map" aria-label="Карта маршрута"></div>
-      <div id="map-sky" class="map-sky" hidden aria-hidden="true"><canvas></canvas></div>
+      <div id="map-sky" class="map-sky" hidden role="img" aria-label="Погода"><span data-weather-icon aria-hidden="true"></span></div>
 
       <div class="map-buttons">
         <button id="btn-3d" class="round" aria-label="Переключить 3D" title="2D / 3D">3D</button>
@@ -108,7 +108,6 @@
       <!-- Источники карты (обязательны по лицензиям) и оговорки — спрятаны под «i», как в Яндекс/Google -->
       <button id="btn-info" class="map-info" aria-label="О карте и маршруте" aria-expanded="false">i</button>
       <div class="map-info-pop" id="map-info-pop" hidden></div>
-      <button type="button" id="urgent-toggle" class="urgent-toggle" aria-haspopup="dialog" aria-controls="urgent-dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H9l-5 4zM8 8h8M8 12h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Нужно сейчас</span></button>
 
     </div>
 
@@ -116,9 +115,10 @@
     <div class="sheet" id="map-sheet">
       <button type="button" class="map-sheet-toggle" id="map-sheet-toggle" aria-expanded="true" aria-controls="map-sheet-content" aria-label="Свернуть панель карты"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button>
       <div id="map-sheet-content" class="map-sheet-content">
-      <!-- Удобства: как на макете — под картой, «Всё семейное» включает всё -->
-      <div class="chips" aria-label="Показать на карте">
-        <button class="chip" data-layer="all" aria-pressed="true">Всё семейное</button>
+      <!-- Конкретные срочные действия; выбор категории показывает ближайшие объекты. -->
+      <div class="chips" aria-label="Действия и места на карте"><span id="map-action-chips" class="map-action-chips"></span></div>
+      <section id="map-action-panel" class="map-action-panel" hidden aria-labelledby="map-action-title"><header hidden><h2 id="map-action-title">По пути</h2><button type="button" id="map-action-close" aria-label="Закрыть предложения">×</button></header><div id="map-action-content" aria-live="polite"></div></section>
+      <div hidden class="map-layer-controls"><button class="chip" data-layer="all" aria-pressed="true">Все объекты</button>
         <button class="chip" data-layer="toilets" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/toilet.svg" alt="" aria-hidden="true">Туалеты</button>
         <button class="chip" data-layer="cafe" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/food.svg" alt="" aria-hidden="true">Еда</button>
         <button class="chip" data-layer="playground" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/playground.svg" alt="" aria-hidden="true">Площадки</button>

@@ -8,27 +8,6 @@ import (
 	c "github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/contracts"
 )
 
-func TestCombinedWalkingBudgetFormula(t *testing.T) {
-	tests := []struct {
-		name                                                                 string
-		limit, speed, day, visits, meals, rest, wait, reserve, want, walkSec float64
-	}{
-		{"time bound", 6000, 2.5, 8 * 3600, 4 * 3600, 1.5 * 3600, 1800, 0, 1000, 4000, 7200},
-		{"distance bound", 6000, 2.5, 8 * 3600, 3 * 3600, 1.5 * 3600, 1800, 0, 1000, 5000, 10800},
-		{"no free time", 6000, 2.5, 3600, 3600, 4500, 0, 0, 1000, 0, 0},
-		{"waiting counted", 6000, 2.5, 7200, 0, 0, 0, 3600, 1000, 1500, 3600},
-		{"reserve exceeds time bound", 6000, 2.5, 3600, 0, 0, 0, 0, 3000, 0, 3600},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, seconds, _ := primaryWalkingBudget(tt.limit, tt.speed, tt.day, tt.visits, tt.meals, tt.rest, tt.wait, tt.reserve)
-			if got != tt.want || seconds != tt.walkSec {
-				t.Fatalf("got %.2fm/%.2fs, want %.2fm/%.2fs", got, seconds, tt.want, tt.walkSec)
-			}
-		})
-	}
-}
-
 func TestAutomaticAgeAndMealDefaultsDoNotMutateInput(t *testing.T) {
 	input := sample(t)
 	input.LoadLimits.MaxWalkDistanceMPerDay = nil
@@ -41,7 +20,7 @@ func TestAutomaticAgeAndMealDefaultsDoNotMutateInput(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if *view.Input.LoadLimits.MaxWalkDistanceMPerDay != 2500 || view.Days[0].Totals.MealDurationSec != 0 || *view.Days[0].Totals.WalkingSpeedKPH != 2.5 || *view.Days[0].Totals.BudgetPolicyVersion != "family-budget-v2" {
+	if view.Input.LoadLimits.MaxWalkDistanceMPerDay != nil || view.Days[0].Totals.MealDurationSec != 0 || *view.Days[0].Totals.WalkingSpeedKPH != 2.5 || *view.Days[0].Totals.BudgetPolicyVersion != "family-time-v3" {
 		t.Fatal("incorrect resolved parameters")
 	}
 	if input.LoadLimits.MaxWalkDistanceMPerDay != nil || input.Days[0].MealDurationSec != nil || input.Days[0].MealCount != nil {

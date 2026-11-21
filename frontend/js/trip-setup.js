@@ -346,8 +346,8 @@ function renderSelectionReview() {
  if(!panel){panel=document.createElement('section');panel.id='preview-selection-review';panel.className='selection-review';$('preview-list').after(panel);}
  const {cards,excludedCount}=selectionReview(preview.proposed_trip);
  panel.hidden=!cards.length;
- panel.innerHTML=(excludedCount ? '<p class="selection-overflow" role="alert"><b>Вы не успеете пройти маршрут со всеми выбранными местами.</b> Рекомендуем исключить '+plural(excludedCount,'карточку','карточки','карточек')+'.</p><p class="small">Отмечены места, которые не вошли в текущий расчёт. Можно убрать любые карточки — после удаления пересчитаем маршрут. Также можно увеличить время или изменить даты.</p>' : '')+
- '<h3>Выбранные места ('+cards.length+')</h3><ul class="selection-review-list">'+cards.map(card=>'<li class="'+(card.missing?'is-excluded':'')+'"><span><b>'+esc(card.title)+'</b>'+(card.missing?'<small>Не помещается или недоступно в выбранные даты</small>':'')+'</span><button type="button" data-remove-choice="'+esc(card.activityId)+'" aria-label="Убрать '+esc(card.title)+'" title="Убрать место">×</button></li>').join('')+'</ul>';
+ panel.innerHTML=(excludedCount ? '<p class="selection-overflow" role="alert"><b>В маршрут поездки не удалось включить '+plural(excludedCount,'выбранное место','выбранных места','выбранных мест')+'.</b></p><p class="small">Это итог для всей поездки, а не оценка загруженности открытого дня. Причины указаны у невключённых карточек. Можно убрать место или изменить ограничения и пересчитать маршрут.</p>' : '')+
+ '<h3>Выбранные места ('+cards.length+')</h3><ul class="selection-review-list">'+cards.map(card=>'<li class="'+(card.missing?'is-excluded':'')+'"><span><b>'+esc(card.title)+'</b>'+(card.missing?'<small>'+esc(card.reason)+'</small>':'')+'</span><button type="button" data-remove-choice="'+esc(card.activityId)+'" aria-label="Убрать '+esc(card.title)+'" title="Убрать место">×</button></li>').join('')+'</ul>';
  panel.querySelectorAll('[data-remove-choice]').forEach(button=>button.onclick=()=>removePreviewChoice(button.dataset.removeChoice));
 }
 async function removePreviewChoice(activityId) {

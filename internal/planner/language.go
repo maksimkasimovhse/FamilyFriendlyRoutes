@@ -101,26 +101,7 @@ func (p Planner) understandInitial(ctx context.Context, view c.TripView, now tim
 		warnings = append(warnings, Warning("REQUEST_NEED", fmt.Sprintf("Потребность из пожелания: «%s». Конкретное место перерыва можно выбрать через помощника.", need.Evidence)))
 	}
 	if intent.MaxWalkDistanceM != nil {
-		if len(view.Input.Days) > 1 && intent.Date == nil {
-			return original, p, nil, stateError("REQUEST_CLARIFICATION_REQUIRED", "Для какого дня ограничить ходьбу?")
-		}
-		limit := *intent.MaxWalkDistanceM
-		if !finite(limit) || limit < 0 || limit > 100000 || intent.WalkEvidence == nil || !strings.Contains(source, strings.Join(strings.Fields(strings.ToLower(*intent.WalkEvidence)), " ")) {
-			return original, p, nil, assistant.ErrContract
-		}
-		matched := false
-		for index, day := range view.Input.Days {
-			if intent.Date != nil && day.Date != *intent.Date {
-				continue
-			}
-			matched = true
-			value := math.Min(dailyWalkLimit(view.Input, day), limit)
-			view.Input.Days[index].MaxWalkDistanceM = &value
-		}
-		if !matched {
-			return original, p, nil, assistant.ErrContract
-		}
-		warnings = append(warnings, Warning("REQUEST_WALK_LIMIT", fmt.Sprintf("Явный лимит ходьбы из пожелания: %.0f метров на выбранный день.", limit)))
+		return original, p, nil, stateError("TIME_LIMIT_REQUIRED", "Укажите доступное время прогулки вместо ограничения километража.")
 	}
 	// A parsed request travels with this calculation only, rather than shared mutable state.
 	if source, ok := p.Source.(HTTPSource); ok {

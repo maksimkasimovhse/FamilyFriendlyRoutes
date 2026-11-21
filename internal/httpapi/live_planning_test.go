@@ -156,8 +156,8 @@ func TestLiveFiftyCandidatePlanning(t *testing.T) {
 		seen := map[c.ID]bool{}
 		days := []any{}
 		for i, day := range preview.ProposedTrip.Days {
-			if preview.CanApply && (*day.Totals.WalkDistanceM > limit-reserve || *day.Totals.PrimaryWalkBudgetM != limit-reserve || *day.Totals.RestaurantWalkReserveM != reserve) {
-				t.Fatal("violated distance budget after restaurant reserve")
+			if preview.CanApply && (*day.Totals.ElapsedDurationSec > preview.ProposedTrip.Input.Days[i].DurationBudgetSec || day.Totals.PrimaryWalkBudgetM != nil) {
+				t.Fatal("violated user time budget")
 			}
 			for _, stop := range day.Stops {
 				if seen[stop.PlaceID] {

@@ -62,13 +62,6 @@ func proximity(a, b routing.Point) float64 {
 	return math.Hypot((a.Coordinates[0]-b.Coordinates[0])*math.Cos(lat), a.Coordinates[1]-b.Coordinates[1])
 }
 
-func walkingBudget(limits c.LoadLimits) (budget, reserve float64) {
-	if limits.RestaurantWalkReserveMPerDay != nil {
-		reserve = *limits.RestaurantWalkReserveMPerDay
-	}
-	return *limits.MaxWalkDistanceMPerDay - reserve, reserve
-}
-
 // Actual directed walking distance; timeline costs are handled by buildDay.
 func (p Planner) clusterDistance(ctx context.Context, day c.DayInput, choices []c.Selection, activities map[c.ID]Activity, speed float64) (float64, error) {
 	from := day.StartPoint
@@ -200,9 +193,13 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 	p.Router = &routeCache{router: p.Router, values: map[routeKey]routing.Result{}}
 	days := append([]c.DayInput{}, view.Input.Days...)
 	sort.Slice(days, func(i, j int) bool { return days[i].Date < days[j].Date })
+	if manualOnly && len(days) > 1 {
+		selections = geographicSeeds(selections, available, len(days))
+	}
 	plans := make([]c.DayPlan, len(days))
 	assignments := make([][]c.Selection, len(days))
 	distances := make([]float64, len(days))
+	loads := make([]float64, len(days))
 	prefix := view.Input.PlanningPolicy != nil
 	speed := budgetDefaults.WalkingSpeedKPHByPace[view.Input.LoadLimits.Pace]
 	build := func(i int, choices []c.Selection) (c.DayPlan, error) {
@@ -242,20 +239,27 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 			return c.TripView{}, err
 		}
 		a := available[s.ActivityID]
+		loadSum, loadSquares := 0.0, 0.0
+		for _, load := range loads {
+			loadSum += load
+			loadSquares += load * load
+		}
 		type option struct {
-			day, position int
-			distance      float64
-			totalDistance float64
-			budget        float64
-			feasible      bool
-			choices       []c.Selection
+			day, position   int
+			distance        float64
+			totalDistance   float64
+			load, imbalance float64
+			feasible        bool
+			choices         []c.Selection
 		}
 		options := []option{}
+		rejections := map[string]bool{}
 		for i, day := range days {
 			if s.PreferredDate != nil && day.Date != *s.PreferredDate {
 				continue
 			}
 			if !s.Mandatory && !p.candidateOpenOnDate(s.ActivityID, day.Date, s.OccurrenceID) {
+				rejections["availability"] = true
 				continue
 			}
 			best := option{day: i, distance: math.Inf(1)}
@@ -278,31 +282,49 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 			choices = append(choices, assignments[i][best.position:]...)
 			plan, err := build(i, choices)
 			if errors.Is(err, routing.ErrNoRoute) {
+				rejections["routing"] = true
 				continue
 			}
 			if err != nil {
 				return c.TripView{}, err
 			}
 			distance := *plan.Totals.WalkDistanceM
+			if *plan.Totals.ElapsedDurationSec > dailyTimeBudget(day) {
+				rejections["time"] = true
+			}
+			for _, warning := range plan.Warnings {
+				if warning.Code == "AVAILABILITY_CONFLICT" {
+					rejections["availability"] = true
+				}
+			}
 			best.choices = choices
 			best.totalDistance = distance
-			best.budget = *plan.Totals.PrimaryWalkBudgetM
 			best.feasible = plan.Feasibility != "infeasible"
+			best.load = *plan.Totals.ElapsedDurationSec / dailyTimeBudget(day)
+			sum := loadSum - loads[i] + best.load
+			best.imbalance = loadSquares - loads[i]*loads[i] + best.load*best.load - sum*sum/float64(len(days))
 			best.distance = distance - distances[i]
 			options = append(options, best)
 		}
 		sort.SliceStable(options, func(i, j int) bool {
-			if prefix && !selected[s.ActivityID] {
+			if prefix {
 				// Cover every day with its minimum before adding extra stops.
 				left, right := len(assignments[options[i].day]), len(assignments[options[j].day])
-				minimum := budgetDefaults.MinAutoStopsPerDay
+				minimum := 1
+				if !manualOnly {
+					minimum = budgetDefaults.MinAutoStopsPerDay
+				}
 				if (left < minimum) != (right < minimum) {
 					return left < minimum
 				}
 				if left < minimum && left != right {
 					return left < right
 				}
-				return options[i].day < options[j].day
+				// Compare the variance of projected time utilization across all days.
+				// Time is visits plus actual travel/waiting; no hidden meal reserve.
+				if math.Abs(options[i].imbalance-options[j].imbalance) > 1e-9 {
+					return options[i].imbalance < options[j].imbalance
+				}
 			}
 			// Equal round-trip insertion costs can hide opposite directions from
 			// a shared hotel. Prefer the more compact geographic cluster.
@@ -320,9 +342,10 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 		})
 		accepted := false
 		for _, o := range options {
-			if o.totalDistance <= o.budget && o.feasible {
+			if o.feasible {
 				assignments[o.day] = o.choices
 				distances[o.day] = o.totalDistance
+				loads[o.day] = o.load
 				accepted = true
 				break
 			}
@@ -335,8 +358,9 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 				o := options[0]
 				assignments[o.day] = o.choices
 				distances[o.day] = o.totalDistance
+				loads[o.day] = o.load
 			} else {
-				w := Warning("CANDIDATE_NOT_SCHEDULED", "Место не включено: не найден вариант в пределах max(0, min(M, V×T_ходьбы) − P) и условий посещения.")
+				w := Warning("CANDIDATE_NOT_SCHEDULED", exclusionReason(rejections))
 				id := s.ActivityID
 				w.ActivityID = &id
 				warnings = append(warnings, w)
@@ -462,4 +486,61 @@ func schedule(candidate c.Candidate, day c.DayInput, clock time.Time, elapsed fl
 		return best, nil, true
 	}
 	return 0, nil, false
+}
+
+// Seed one distinct geographic neighborhood per day before inserting nearby
+// choices. Only flexible manual choices are reordered; pinned/mandatory choices
+// and the ML ranking are preserved. Real routing still decides feasibility.
+func geographicSeeds(selections []c.Selection, activities map[c.ID]Activity, count int) []c.Selection {
+	positions := []int{}
+	pool := []c.Selection{}
+	for i, s := range selections {
+		if !s.Mandatory && s.PreferredDate == nil {
+			positions = append(positions, i)
+			pool = append(pool, s)
+		}
+	}
+	if len(pool) < 2 {
+		return selections
+	}
+	ordered := make([]c.Selection, 0, len(pool))
+	for len(ordered) < min(count, len(positions)) {
+		best, farthest := 0, -1.0
+		for i, candidate := range pool {
+			nearest := math.Inf(1)
+			for _, seed := range ordered {
+				nearest = math.Min(nearest, proximity(activities[candidate.ActivityID].Point, activities[seed.ActivityID].Point))
+			}
+			if nearest > farthest {
+				best, farthest = i, nearest
+			}
+		}
+		ordered = append(ordered, pool[best])
+		pool = append(pool[:best], pool[best+1:]...)
+	}
+	ordered = append(ordered, pool...)
+	result := append([]c.Selection{}, selections...)
+	for i, pos := range positions {
+		result[pos] = ordered[i]
+	}
+	return result
+}
+
+// These are observed rejection reasons, not a claim that deleting N arbitrary
+// cards would make the trip feasible. Time and walking limits are independent.
+func exclusionReason(rejections map[string]bool) string {
+	reasons := []string{}
+	for _, item := range []struct{ key, label string }{
+		{"time", "не хватает доступного времени на посещения и переходы"},
+		{"availability", "не подходят даты, часы работы или сеансы"},
+		{"routing", "не найден пеший путь"},
+	} {
+		if rejections[item.key] {
+			reasons = append(reasons, item.label)
+		}
+	}
+	if len(reasons) == 0 {
+		return "Место не включено в маршрут поездки: не найден подходящий вариант размещения по дням."
+	}
+	return "Место не включено в маршрут поездки. При проверке вариантов: " + strings.Join(reasons, "; ") + "."
 }

@@ -343,3 +343,143 @@ func TestAutoMinimumCoversEveryDayBeforeExtraStops(t *testing.T) {
 		t.Fatal("missing explanation for unmet auto minimum")
 	}
 }
+
+func TestManualClustersCoverFiveDaysWithBalancedLoad(t *testing.T) {
+	input := sample(t)
+	policy := "manual_choices"
+	input.PlanningPolicy = &policy
+	template := input.Days[0]
+	input.Days = nil
+	input.Selections = nil
+	for i := 0; i < 5; i++ {
+		day := template
+		date := fmt.Sprintf("2030-06-%02d", 15+i)
+		day.Date = c.ISODate(date)
+		day.AvailableWindow = nil
+		day.DurationBudgetSec = 21600
+		day.StartPoint.Coordinates = routing.Position{44.005, 56.32}
+		day.EndPoint = day.StartPoint
+		input.Days = append(input.Days, day)
+	}
+	for i := 0; i < 10; i++ {
+		input.Selections = append(input.Selections, c.Selection{ActivityID: c.ID(fmt.Sprintf("activity-%d", i)), PlaceID: c.ID(fmt.Sprintf("place-%d", i))})
+	}
+	view := NewDraft("balanced-five", input, time.Now())
+	response := mlResponse(t, view, 10)
+	for i := range response.Candidates {
+		x := 44.0
+		if i >= 6 {
+			x = 44.01
+		}
+		response.Candidates[i].Place.Location.Coordinates = routing.Position{x + float64(i)*0.00001, 56.32}
+		response.Candidates[i].Activity.Duration.DurationSec = 1200
+	}
+	p := Planner{Router: geographicRouter{}, Source: fixedSource{response: response}}
+	result, err := p.Build(context.Background(), view, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	seen := map[c.ID]bool{}
+	minTime, maxTime := math.Inf(1), 0.0
+	for _, day := range result.Days {
+		if len(day.Stops) != 2 {
+			t.Fatalf("%s: expected two stops, got %d", day.Date, len(day.Stops))
+		}
+		group := -1
+		for _, stop := range day.Stops {
+			if seen[stop.ActivityID] {
+				t.Fatal("duplicate")
+			}
+			seen[stop.ActivityID] = true
+			var index int
+			fmt.Sscanf(string(stop.ActivityID), "activity-%d", &index)
+			next := 0
+			if index >= 6 {
+				next = 1
+			}
+			if group != -1 && group != next {
+				t.Fatal("mixed neighborhoods")
+			}
+			group = next
+		}
+		elapsed := *day.Totals.ElapsedDurationSec
+		minTime = math.Min(minTime, elapsed)
+		maxTime = math.Max(maxTime, elapsed)
+		if day.Feasibility == "infeasible" {
+			t.Fatal("infeasible day")
+		}
+	}
+	if len(seen) != 10 || maxTime-minTime > 120 {
+		t.Fatal("unbalanced or missing choices")
+	}
+}
+
+func TestManualBalanceUsesVisitDurationInsteadOfOnlyCount(t *testing.T) {
+	input := secondDay(sample(t))
+	policy := "manual_choices"
+	input.PlanningPolicy = &policy
+	input.Selections = nil
+	for i := 0; i < 8; i++ {
+		input.Selections = append(input.Selections, c.Selection{ActivityID: c.ID(fmt.Sprintf("activity-%d", i)), PlaceID: c.ID(fmt.Sprintf("place-%d", i))})
+	}
+	view := NewDraft("balanced-duration", input, time.Now())
+	response := mlResponse(t, view, 8)
+	for i := range response.Candidates {
+		response.Candidates[i].Place.Location.Coordinates = routing.Position{44.005, 56.32}
+		response.Candidates[i].Activity.Duration.DurationSec = 600
+	}
+	response.Candidates[0].Activity.Duration.DurationSec = 3600
+	p := Planner{Router: &testRouter{}, Source: fixedSource{response: response}}
+	result, err := p.Build(context.Background(), view, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Days[0].Stops) == len(result.Days[1].Stops) {
+		t.Fatal("balanced counts instead of time")
+	}
+	left := *result.Days[0].Totals.ElapsedDurationSec / dailyTimeBudget(input.Days[0])
+	right := *result.Days[1].Totals.ElapsedDurationSec / dailyTimeBudget(input.Days[1])
+	if math.Abs(left-right) > 0.08 {
+		t.Fatalf("uneven utilization %.3f / %.3f", left, right)
+	}
+	total := 0
+	for _, day := range result.Days {
+		total += len(day.Stops)
+	}
+	if total != 8 {
+		t.Fatal("lost choices")
+	}
+}
+
+func TestDistantChoiceFitsWhenActualTravelTimeFits(t *testing.T) {
+	input := secondDay(sample(t))
+	policy := "manual_choices"
+	input.PlanningPolicy = &policy
+	cap := 5000.0
+	input.LoadLimits.MaxWalkDistanceMPerDay = &cap
+	for i := range input.Days {
+		input.Days[i].AvailableWindow = nil
+		input.Days[i].DurationBudgetSec = 40000
+		input.Days[i].StartPoint.Coordinates = routing.Position{44.0066, 56.3273}
+		input.Days[i].EndPoint = input.Days[i].StartPoint
+	}
+	input.Selections = []c.Selection{{ActivityID: "activity-0", PlaceID: "place-0"}, {ActivityID: "activity-1", PlaceID: "place-1"}}
+	view := NewDraft("distant-time", input, time.Now())
+	response := mlResponse(t, view, 2)
+	response.Candidates[0].Place.Location.Coordinates = routing.Position{44.007, 56.3273}
+	response.Candidates[1].Place.Location.Coordinates = routing.Position{43.838947, 56.344366}
+	p := Planner{Router: geographicRouter{}, Source: fixedSource{response: response}}
+	result, err := p.Build(context.Background(), view, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	seen := map[c.ID]bool{}
+	for _, day := range result.Days {
+		for _, stop := range day.Stops {
+			seen[stop.ActivityID] = true
+		}
+	}
+	if !seen["activity-1"] {
+		t.Fatal("distance cap rejected time-fitting choice")
+	}
+}

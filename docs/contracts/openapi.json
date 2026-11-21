@@ -2945,7 +2945,8 @@
                 "type": "null"
               }
             ],
-            "description": "Daily family walking limit M, meters. Null selects the minimum configured age default among children; explicit value overrides the default."
+            "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m.",
+            "deprecated": true
           },
           "max_continuous_walk_duration_sec": {
             "oneOf": [
@@ -2956,13 +2957,16 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "deprecated": true,
+            "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m."
           },
           "restaurant_walk_reserve_m_per_day": {
             "type": "number",
             "minimum": 0,
             "default": 0,
-            "description": "Daily reserve p in meters for future restaurant detours. Must not exceed m. Primary route budget is m-p, including start and end legs. Omitted means zero. This is not meal duration or walked distance."
+            "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m.",
+            "deprecated": true
           }
         },
         "required": [
@@ -3046,7 +3050,8 @@
                 "type": "null"
               }
             ],
-            "description": "Optional cap for this day, additionally bounded by family load_limits."
+            "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m.",
+            "deprecated": true
           }
         },
         "required": [
@@ -5270,25 +5275,32 @@
               "walk_budget_m": {
                 "type": "number",
                 "minimum": 0,
-                "description": "Total daily walking limit m."
+                "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m.",
+                "deprecated": true
               },
               "restaurant_walk_reserve_m": {
                 "type": "number",
                 "minimum": 0,
-                "description": "Reserved walking distance p, not part of actual walked distance."
+                "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m.",
+                "deprecated": true
               },
               "primary_walk_budget_m": {
                 "type": "number",
                 "minimum": 0,
-                "description": "max(0, min(M, V*T_walk) - P), meters. Recalculated for candidate visits and waits."
+                "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m.",
+                "deprecated": true
               },
               "walking_time_budget_sec": {
                 "type": "number",
-                "minimum": 0
+                "minimum": 0,
+                "deprecated": true,
+                "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m."
               },
               "time_limited_walk_budget_m": {
                 "type": "number",
-                "minimum": 0
+                "minimum": 0,
+                "deprecated": true,
+                "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m."
               },
               "walking_speed_kph": {
                 "type": "number",
@@ -5301,7 +5313,8 @@
               "remaining_walk_distance_m": {
                 "type": "number",
                 "minimum": 0,
-                "description": "Original daily M minus confirmed estimated walked distance, before planning the remaining stops."
+                "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m.",
+                "deprecated": true
               },
               "remaining_duration_sec": {
                 "type": "number",
@@ -5704,7 +5717,9 @@
               "target_remaining_walk_distance_m": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100000
+                "maximum": 100000,
+                "deprecated": true,
+                "description": "No longer supported; use target_remaining_duration_sec. Returns TIME_LIMIT_REQUIRED."
               }
             },
             "required": [
@@ -5745,7 +5760,9 @@
               "target_remaining_walk_distance_m": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100000
+                "maximum": 100000,
+                "deprecated": true,
+                "description": "No longer supported; use target_remaining_duration_sec. Returns TIME_LIMIT_REQUIRED."
               }
             },
             "required": [

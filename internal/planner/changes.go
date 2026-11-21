@@ -177,12 +177,7 @@ func (p Planner) shorten(ctx context.Context, view c.TripView, i, j int, cmd Cha
 		spent = math.Max(0, at.Sub(started).Seconds())
 	}
 	if cmd.TargetRemainingWalkDistanceM != nil {
-		spentDistance := 0.0
-		if execution := view.Days[i].Execution; execution != nil {
-			spentDistance = execution.ConsumedWalkDistanceM
-		}
-		limit := math.Min(dailyWalkLimit(view.Input, *day), spentDistance+*cmd.TargetRemainingWalkDistanceM)
-		day.MaxWalkDistanceM = &limit
+		return c.TripView{}, stateError("TIME_LIMIT_REQUIRED", "Укажите доступное время: ограничения километража больше не используются.")
 	}
 	if cmd.HotelPoint != nil {
 		if err := (routing.Request{From: *cmd.HotelPoint, To: *cmd.HotelPoint, Mode: "walk"}).Validate(); err != nil {

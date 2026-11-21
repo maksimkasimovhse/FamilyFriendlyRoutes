@@ -1,20 +1,9 @@
 {
-  "policy_version": "family-budget-v2",
-  "note": "Editable product hypotheses for planning, not measured age-specific medical limits. Units: meters, seconds, kilometers per hour. Rebuild/restart to apply changes.",
-  "daily_walk_limit_m_by_age": {
-    "3": 2000,
-    "4": 2500,
-    "5": 3000,
-    "6": 3500,
-    "7": 4000,
-    "8": 4500,
-    "9": 5000,
-    "10": 5000,
-    "11": 5000
-  },
+  "policy_version": "family-time-v3",
+  "note": "Capacity is the user-selected daily duration: actual OSM travel plus visits and fixed-session waiting. Distances are descriptive, never a cap.",
   "walking_speed_kph_by_pace": {
     "relaxed": 2.5,
-    "standard": 3.0,
+    "standard": 3,
     "intensive": 3.5
   },
   "min_auto_stops_per_day": 2,
@@ -25,7 +14,6 @@
     "table_service": 4500,
     "meal_with_play": 6300
   },
-  "restaurant_walk_reserve_m_per_day": 0,
   "completion_policy": {
     "manual_limit_per_day": 0,
     "short_day_ratio": 0.7,

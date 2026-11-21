@@ -12,6 +12,6 @@ for(const interests of [[],['animals'],['history']]) {
  const draft=await post('/api/v1/trips',input);
  const preview=await post('/api/v1/trips/'+draft.trip_id+'/previews',{expected_version:draft.version,command:{kind:'generate_plan'},current_position:null,observed_at:null});
  const days=preview.proposed_trip.days,ids=days.flatMap(day=>day.stops.map(stop=>stop.place_id));
- if(!preview.can_apply||days.length!==3||days.some(day=>day.stops.length<2||day.totals.elapsed_duration_sec>14400||day.totals.walk_distance_m>5000)||new Set(ids).size!==ids.length)throw Error('Invalid multiday result: '+JSON.stringify({interests,days:days.map(d=>({stops:d.stops.length,totals:d.totals}))}));
+ if(!preview.can_apply||days.length!==3||days.some(day=>day.stops.length<2||day.totals.elapsed_duration_sec>14400)||new Set(ids).size!==ids.length)throw Error('Invalid multiday result: '+JSON.stringify({interests,days:days.map(d=>({stops:d.stops.length,totals:d.totals}))}));
  console.log(JSON.stringify({status:'passed',interests,stops_per_day:days.map(day=>day.stops.length)}));
 }

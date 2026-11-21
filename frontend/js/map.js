@@ -6,6 +6,7 @@ import { loadMapStyle } from './map-style.js';
 import { onTripChange, today, getSource } from './api.js';
 import { allPlaces, loadNearbyBenches, clearNearbyBenches, BENCH_RADIUS_M, onPlacesChange, kindOf, cafeBadges, isFamilyCafe, isDemo, walkMinutes, placeType } from './places.js';
 import { orderByNearest } from './catalog.js';
+import { currentPosition } from './geolocation.js';
 
 const CENTER = [44.0066, 56.3273];   // площадь Минина и Пожарского, [долгота, широта]
 const NEAR_ROUTE_M = 125;            // удобства показываем только в этой полосе вдоль маршрута
@@ -23,6 +24,7 @@ let pendingPicked;      // выбор, пришедший до загрузки 
 let pickedPins = [];
 let focusedPlacePin = null;
 let focusedPlace = null;
+let amenityFilter = null;
 
 // ---------- Форматирование ----------
 const fmtDistance = m => m < 1000 ? Math.round(m / 10) * 10 + ' м' : (m / 1000).toFixed(1).replace('.', ',') + ' км';
@@ -160,7 +162,7 @@ function amenitiesNearRoute() {
     .map(p => ({ p, near_m: kindOf(p) === 'bench' ? p.distance_m : p.distance_to_route_m }))
     .filter(x => Number.isFinite(x.near_m) && x.near_m <= (kindOf(x.p) === 'bench' ? BENCH_RADIUS_M : NEAR_ROUTE_M) && kindOf(x.p) !== 'other')
     .map(({ p, near_m }) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: p.location.coordinates },
-      properties: { place_id: p.place_id, kind: kindOf(p), name: p.name, sub: placeType(p) || '', near_m, family: isFamilyCafe(p) } }));
+      properties: { place_id: p.place_id, kind: kindOf(p), name: p.name, sub: placeType(p) || '', near_m, family: isFamilyCafe(p), sheltered: [p.indoor,p.shelter].some(f=>f?.state==='known'&&f.value===true) } }));
   return { type: 'FeatureCollection', features: near };
 }
 
@@ -412,18 +414,26 @@ function showPickedPlace(i) {
   map.flyTo({ center: p.location, zoom: Math.max(map.getZoom(), 15.5), duration: 600 });
 }
 
+export function setAmenityFilter(kind){
+ amenityFilter=kind;
+ if(mapReady){showSummary({fit:false});applyChips();}
+ if(kind==='rest')currentPosition().then(point=>loadNearbyBenches(point)).catch(err=>console.warn('Скамейки рядом недоступны:',err));
+}
+
 // ---------- Кнопки ----------
 function applyChips() {
-  document.querySelectorAll('.chip').forEach(c => {
+  document.querySelectorAll('.chip[data-layer]').forEach(c => {
     if (c.dataset.layer === 'all') return;
     // Пока показан маршрут из выбранных мест, удобства вдоль маршрута дня не нужны
-    const on = !picked && c.getAttribute('aria-pressed') === 'true';
+    const wanted={rest:'bench',toilet:'toilets',pharmacy:'pharmacy',food:'cafe'}[amenityFilter];
+    const on = !picked && c.getAttribute('aria-pressed') === 'true' && (!wanted || wanted===c.dataset.layer);
+    map.setFilter('amenity-'+c.dataset.layer, amenityFilter==='rain' ? ['all',['==',['get','kind'],c.dataset.layer],['==',['get','sheltered'],true]] : ['==',['get','kind'],c.dataset.layer]);
     map.setLayoutProperty('amenity-' + c.dataset.layer, 'visibility', on ? 'visible' : 'none');
   });
 }
 
 function bindChips() {
-  const chips = [...document.querySelectorAll('.chip')];
+  const chips = [...document.querySelectorAll('.chip[data-layer]')];
   chips.forEach(chip => chip.addEventListener('click', () => {
     if (chip.dataset.layer === 'all') {
       const on = chip.getAttribute('aria-pressed') !== 'true';

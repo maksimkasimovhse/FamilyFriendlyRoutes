@@ -14,7 +14,7 @@ import { loadFamily, syncLocalProfile, seedDemoNames, clearDeviceData, openOnboa
 import { openTripSetup, markStep, clearResume, afterPick, backToWhen, backToChat, backToWishes, backToPreview, closeTripSetup, prepareInitialChoices } from './trip-setup.js';
 import { manualSelection, pickConfiguration } from './recommendation-cards.js';
 import { loadRoutePlaces, clearRoutePlaces, onPlacesChange, loadPlaceTypes } from './places.js';
-import { initMap, resizeMap, focusPlace, showRoutePreview, clearRoutePreview, showPicked, refreshMap } from './map.js';
+import { initMap, resizeMap, focusPlace, showRoutePreview, clearRoutePreview, showPicked, refreshMap, setAmenityFilter } from './map.js';
 import { initPick, openPick } from './pick.js';
 import { initToday, refreshToday, toast } from './today.js';
 import { initWeatherSky } from './weather-sky.js';
@@ -71,7 +71,7 @@ function startMain() {
     $('sheet-body').innerHTML = `<p class="source warn">Не удалось загрузить карту: ${err.message}</p>`;
   });
   initToday({ childName: name, childNameGenitive: genitive(name), kidStopInfo, onOpenKid: () => openKid(), onNeedNow: () => { openTab('map'); openUrgentWidget(); } });
-  initMapActions({onFocus:focusPlace,onPreview:showRoutePreview,onCancel:clearRoutePreview});
+  initMapActions({onFilter:setAmenityFilter,onFocus:focusPlace,onPreview:showRoutePreview,onCancel:clearRoutePreview});
   $('map-kid-mode').onclick=()=>kidReady.then(()=>openKid());
   $('map-sheet-toggle').onclick=()=>{
     const button=$('map-sheet-toggle'),panel=$('map-sheet-content');

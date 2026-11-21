@@ -185,3 +185,7 @@ export function previewInfrastructure(placeId,position) {
 export function previewRouteEdit(text) {
  return preview({kind:'edit_route',date:today().date,text});
 }
+
+export function previewActivity(selection) {
+ return preview({kind:'add_activity',date:today().date,selection});
+}
