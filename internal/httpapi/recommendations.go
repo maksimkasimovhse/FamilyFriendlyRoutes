@@ -108,6 +108,17 @@ func routeScope(view c.TripView, date c.ISODate, point c.Point) *c.SpatialScope 
 	return radiusScope(point, 1500)
 }
 
+// restaurantRouteScope searches a broader walkable corridor for a meal stop.
+// Feasibility of the eventual detour is still checked when the user applies a preview.
+func restaurantRouteScope(view c.TripView, date c.ISODate, point c.Point) *c.SpatialScope {
+	scope := routeScope(view, date, point)
+	if scope.Routes != nil {
+		width := 600.0
+		scope.CorridorWidthM = &width
+	}
+	return scope
+}
+
 func (a *tripAPI) modelRecommendations(ctx context.Context, view c.TripView, purpose string, date *c.ISODate,
 	text *string, excluded []c.ID, scope *c.SpatialScope, origin *c.Point, filters *c.RestaurantFilters, limit int) (c.RecommendationResponse, error) {
 	p, err := a.planner.ForCatalog(view.CatalogVersion)
@@ -173,7 +184,7 @@ func (a *tripAPI) recommend(w http.ResponseWriter, r *http.Request) {
 			scope = routeScope(view, *date, point)
 		}
 		if input.Purpose == "restaurant" {
-			scope = radiusScope(point, 1500)
+			scope = restaurantRouteScope(view, *date, point)
 		}
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)

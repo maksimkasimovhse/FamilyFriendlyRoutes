@@ -27,6 +27,7 @@
 <link href="css/today.css" rel="stylesheet">
 <link href="css/profile.css" rel="stylesheet">
 <link href="css/landing.css" rel="stylesheet">
+<link href="css/restaurants.css" rel="stylesheet">
 <link href="css/polish.css" rel="stylesheet">
 <script src="vendor/maplibre-gl-4.7.1/maplibre-gl.js"></script>
 <script type="module" src="js/app.js"></script>
@@ -125,6 +126,9 @@
 
     <!-- Нижняя карточка: сводка дня или выбранная остановка -->
     <div class="sheet" id="map-sheet">
+      <button type="button" id="restaurant-map-widget" class="restaurant-map-widget" aria-label="Подобрать ресторан по маршруту" aria-pressed="false">
+        <img src="/assets/category-icons/food.svg" alt="" aria-hidden="true">
+      </button>
       <button type="button" class="map-sheet-toggle" id="map-sheet-toggle" aria-expanded="true" aria-controls="map-sheet-content" aria-label="Свернуть панель карты"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button>
       <div id="map-sheet-content" class="map-sheet-content">
       <!-- Конкретные срочные действия; выбор категории показывает ближайшие объекты. -->

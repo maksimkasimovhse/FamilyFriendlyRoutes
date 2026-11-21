@@ -182,6 +182,28 @@ export const previewManualChoices = (t, date, choices, basePreviewId = null) => 
   expected_version:t.version, command:{kind:'append_manual_choices',date,choices,...(basePreviewId ? {base_preview_id:basePreviewId} : {})}, current_position:null, observed_at:null,
 });
 
+// Read-only restaurant search for a trip day. Adding a result still goes through preview/apply.
+export const recommendRestaurants = ({ date, filters = {}, limit = 30 }) => call('POST', tripPath() + '/recommendations', {
+  expected_version: trip.version,
+  purpose: 'restaurant',
+  date,
+  request_text: null,
+  exclude_activity_ids: trip.days.flatMap(day => day.stops.map(stop => stop.activity_id)),
+  limit,
+  restaurant_filters: filters,
+});
+export const previewAddRestaurant = (candidate, date) => preview({
+  kind: 'add_activity',
+  date,
+  selection: {
+    activity_id: candidate.activity.activity_id,
+    place_id: candidate.place.place_id,
+    occurrence_id: null,
+    mandatory: false,
+    preferred_date: date,
+  },
+});
+
 export function previewRemove(stopId, position = null) {
   return preview({ kind: 'remove_stop', date: today().date, stop_id: stopId }, trip, position);
 }

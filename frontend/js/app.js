@@ -14,12 +14,13 @@ import { loadFamily, syncLocalProfile, seedDemoNames, clearDeviceData, openOnboa
 import { openTripSetup, markStep, clearResume, afterPick, backToWhen, backToChat, backToPreview, closeTripSetup, prepareInitialChoices } from './trip-setup.js';
 import { manualSelection, pickConfiguration } from './recommendation-cards.js';
 import { loadRoutePlaces, clearRoutePlaces, onPlacesChange, loadPlaceTypes } from './places.js';
-import { initMap, resizeMap, focusPlace, showRoutePreview, clearRoutePreview, showPicked, refreshMap, setAmenityFilter } from './map.js';
+import { initMap, resizeMap, focusPlace, focusPlaceOnMap, clearFocusedPlaceOnMap, showRoutePreview, clearRoutePreview, showPicked, refreshMap, setAmenityFilter } from './map.js';
 import { initPick, openPick } from './pick.js';
 import { initToday, refreshToday, toast } from './today.js';
 import { initMapActions, openUrgentWidget } from './map-actions.js';
 import { initProfile, renderProfile } from './profile.js';
 import { initKid, openKid, kidStopInfo, setKidRoute, clearKidPlaces } from './kid.js';
+import { initRestaurants, openRestaurants, closeRestaurants } from './restaurants.js';
 
 const $ = id => document.getElementById(id);
 const app = document.querySelector('.app');
@@ -29,16 +30,41 @@ const q = new URLSearchParams(location.search);
 const tabs = document.querySelectorAll('.tabbar button');
 const screens = document.querySelectorAll('.screen');
 let currentTab = 'today';
+function setMapSheetExpanded(expanded) {
+  const button = $('map-sheet-toggle'), panel = $('map-sheet-content');
+  panel.hidden = !expanded;
+  $('map-sheet').classList.toggle('is-collapsed', !expanded);
+  button.setAttribute('aria-expanded', String(expanded));
+  button.setAttribute('aria-label', expanded ? 'Свернуть панель карты' : 'Развернуть панель карты');
+  requestAnimationFrame(() => resizeMap());
+}
 function openTab(name) {
   // «Маша» — не вкладка, а детский режим на весь экран поверх приложения
   if (name === 'kid') { openKid(); return; }
+  if (name === 'restaurants') {
+    currentTab = 'map';
+    tabs.forEach(t => t.classList.toggle('on', t.dataset.tab === 'map'));
+    screens.forEach(s => { s.hidden = s.dataset.tab !== 'map'; });
+    $('restaurant-map-widget').classList.add('on');
+    $('restaurant-map-widget').setAttribute('aria-pressed', 'true');
+    $('restaurant-map-widget').setAttribute('aria-label', 'Закрыть подбор ресторанов');
+    setMapSheetExpanded(true);
+    resizeMap();
+    openRestaurants();
+    return;
+  }
   if (name !== 'pick') currentTab = name;
+  closeRestaurants();
+  $('restaurant-map-widget').classList.remove('on');
+  $('restaurant-map-widget').setAttribute('aria-pressed', 'false');
+  $('restaurant-map-widget').setAttribute('aria-label', 'Подобрать ресторан по маршруту');
   tabs.forEach(t => t.classList.toggle('on', t.dataset.tab === name));
   screens.forEach(s => { s.hidden = s.dataset.tab !== name; });
   if (name === 'map') resizeMap();
   if (name === 'profile') renderProfile();
 }
 tabs.forEach(t => t.addEventListener('click', () => openTab(t.dataset.tab)));
+document.addEventListener('restaurants:open', () => openTab('restaurants'));
 
 // ---------- Загрузка ----------
 function loading(text) {
@@ -70,15 +96,10 @@ function startMain() {
   });
   initToday({ childName: name, childNameGenitive: genitive(name), kidStopInfo, onOpenKid: () => openKid(), onNeedNow: () => { openTab('map'); openUrgentWidget(); } });
   initMapActions({onFilter:setAmenityFilter,onFocus:focusPlace,onPreview:showRoutePreview,onCancel:clearRoutePreview});
+  initRestaurants({ onFocus:focusPlaceOnMap, onClear:clearFocusedPlaceOnMap, onResize:resizeMap });
+  $('restaurant-map-widget').onclick=()=>openTab($('restaurant-map-widget').getAttribute('aria-pressed') === 'true' ? 'map' : 'restaurants');
   $('map-kid-mode').onclick=()=>kidReady.then(()=>openKid());
-  $('map-sheet-toggle').onclick=()=>{
-    const button=$('map-sheet-toggle'),panel=$('map-sheet-content');
-    panel.hidden=!panel.hidden;
-    $('map-sheet').classList.toggle('is-collapsed',panel.hidden);
-    button.setAttribute('aria-expanded',String(!panel.hidden));
-    button.setAttribute('aria-label',panel.hidden?'Развернуть панель карты':'Свернуть панель карты');
-    requestAnimationFrame(()=>resizeMap());
-  };
+  $('map-sheet-toggle').onclick=()=>setMapSheetExpanded($('map-sheet-content').hidden);
 
   // Тропа ребёнка — в порядке маршрута; «Сегодня» — когда подгрузились места рядом
   // Детская тропа = все места итогового маршрута (по дням, в порядке маршрута); обновляется при любом изменении поездки

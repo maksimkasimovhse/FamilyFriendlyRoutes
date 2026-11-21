@@ -121,6 +121,7 @@ export interface Place {
   fee_raw?: string | null;
   restaurant: {
     children_menu: Fact<boolean>; small_portions: Fact<boolean>;
+    high_chairs?: Fact<boolean>;
     play_area: Fact<boolean>; play_area_min_age: Fact<number>;
     play_area_max_age: Fact<number>; play_area_supervision: Fact<boolean>;
     cuisine?: string[]; menu_urls?: string[];
@@ -398,6 +399,7 @@ export interface PublicRecommendationRequest {
   restaurant_filters?: RestaurantFilters | null;
 }
 export interface RestaurantFilters {
+  high_chairs?: boolean | null; toilet?: boolean | null;
   children_menu?: boolean | null; small_portions?: boolean | null;
   play_area?: boolean | null; play_area_supervision?: boolean | null;
 }

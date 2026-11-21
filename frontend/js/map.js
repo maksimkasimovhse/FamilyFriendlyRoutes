@@ -278,6 +278,25 @@ function showPlace(place, nearM) {
 }
 
 // Открыть место из «Помощника»: включить его слой и показать карточку
+export function focusPlaceOnMap(place) {
+  if (!mapReady) return;
+  selected = null;
+  resetSelection();
+  if (focusedPlacePin) focusedPlacePin.remove();
+  focusedPlace = place;
+  focusedPlacePin = new maplibregl.Marker({element:markerEl(createPlaceEmoji(kindOf(place))),anchor:'bottom'})
+    .setLngLat(place.location.coordinates).addTo(map);
+  map.resize();
+  map.flyTo({ center:place.location.coordinates, zoom:Math.max(map.getZoom(), 15.5), duration:500 });
+}
+
+export function clearFocusedPlaceOnMap() {
+  if (focusedPlacePin) focusedPlacePin.remove();
+  focusedPlacePin = null;
+  focusedPlace = null;
+  if (mapReady && day) showSummary({ fit:false });
+}
+
 export function focusPlace(place) {
   if (!mapReady) return;
   const chip = document.querySelector(`.chip[data-layer="${kindOf(place)}"]`);
