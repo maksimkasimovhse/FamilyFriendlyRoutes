@@ -80,7 +80,7 @@
       <div class="ld-grid">
         <article><h3>Под возраст детей</h3><p>Анкета для любого количества детей от 3 до 11 лет: возраст и интересы каждого.</p></article>
         <article><h3>Всё нужное рядом</h3><p>На карте — туалеты, еда, детские площадки, парки, скамейки и аптеки вдоль маршрута.</p></article>
-        <article><h3>Срочные действия на карте</h3><p>Ребёнок устал или пошёл дождь — помощник предложит, что убрать из маршрута, и найдёт место рядом.</p></article>
+        <article><h3>Срочные действия на карте</h3><p>Покажите на карте туалеты, кафе, аптеки и места для отдыха. При необходимости пропустите следующую остановку.</p></article>
         <article><h3>Настоящие фото</h3><p>Только снимки из архива PastVu, с автором и ссылкой. Ничего не нарисовано нейросетью.</p></article>
       </div>
     </section>
@@ -140,7 +140,7 @@
       </div>
       <button type="button" id="map-kid-mode" class="map-kid-mode"><span class="map-kid-mark" aria-hidden="true">✦</span><span>Детский режим</span><span class="map-kid-arrow" aria-hidden="true">›</span></button>
       <div id="sheet-body" aria-live="polite"><p class="muted">Строим маршрут…</p></div>
-      <div class="map-edit"><button type="button" id="map-edit-toggle" aria-expanded="false" aria-controls="map-edit-form"><span>✦</span> Изменить маршрут</button><form id="map-edit-form" hidden><label class="sr-only" for="map-edit-text">Как изменить маршрут</label><div class="map-edit-row"><input id="map-edit-text" maxlength="2000" autocomplete="off" placeholder="Например: убери последнюю точку" required><button type="submit" aria-label="Рассчитать изменение маршрута">↑</button></div></form></div>
+      <div class="map-edit"><button type="button" id="map-edit-toggle" aria-expanded="false" aria-controls="map-edit-form"><span>✦</span> Помощник по маршруту</button><form id="map-edit-form" hidden><label class="sr-only" for="map-edit-text">Что сделать с маршрутом</label><div class="map-edit-row"><input id="map-edit-text" maxlength="2000" autocomplete="off" placeholder="Например: добавь Кремль или сократи прогулку" required><button type="submit" aria-label="Отправить просьбу помощнику">↑</button></div><div class="map-assistant-examples" aria-label="Примеры просьб"><button type="button" data-assistant-prompt="Найди музей для ребёнка">Музей для ребёнка</button><button type="button" data-assistant-prompt="Добавь Кремль">Добавить Кремль</button><button type="button" data-assistant-prompt="Убери следующую точку">Убрать точку</button><button type="button" data-assistant-prompt="Сократи прогулку">Сократить прогулку</button><button type="button" data-assistant-prompt="Перестрой маршрут">Перестроить маршрут</button></div></form></div>
       </div>
     </div>
   </section>
@@ -196,7 +196,6 @@
   <section class="screen today" data-tab="today" hidden>
     <header class="td-head">
       <div class="td-title"><p id="today-sub"></p><h1 id="today-h1">Сегодня</h1></div>
-      <div class="wx" id="today-weather" hidden aria-live="polite"></div>
     </header>
     <div class="td-days" id="today-days" role="tablist" aria-label="Дни поездки" hidden></div>
     <div class="today-scroll td-scroll">
@@ -360,6 +359,7 @@
       </div>
     </div>
   </section>
+  <dialog id="nap-start-dialog" class="urgent-dialog"><header><h2>Начать день с дневным сном</h2></header><div class="urgent-content" id="nap-start-content"></div><div class="urgent-preview-actions"><button type="button" class="btn alt" id="nap-start-cancel">Отмена</button><button type="button" class="btn main" id="nap-start-apply">Начать с этим планом</button></div></dialog>
   <dialog id="urgent-dialog" class="urgent-dialog" aria-labelledby="urgent-title"><header><div><h2 id="urgent-title">Что нужно сейчас?</h2></div><button type="button" id="urgent-close" aria-label="Закрыть срочные действия">×</button></header><div id="urgent-kinds" class="urgent-kinds"></div><div id="urgent-content" class="urgent-content" aria-live="polite"></div></dialog>
   <!-- ===== Профиль: дети, память о поездке (статистика, фото, достижения), мои поездки ===== -->
   <section class="screen profile" data-tab="profile" hidden>
@@ -375,7 +375,20 @@
         </div>
       </section>
 
-      <section class="pf-memory" id="pf-memory" aria-labelledby="pf-mem-h">
+      <section class="pf-card" aria-labelledby="pf-trips-h">
+        <div class="pf-head"><h2 id="pf-trips-h">Мои поездки</h2><button class="pf-link" id="prof-newtrip" type="button">Новая</button></div>
+        <div class="trip-rail" id="prof-trips" role="list" aria-label="Мои поездки"></div>
+      </section>
+    </div>
+
+    <!-- Альбом поездки: открывается нажатием на поездку в «Моих поездках» -->
+    <div class="pf-album" id="pf-album" hidden>
+      <header class="pf-album-top">
+        <button type="button" class="pf-album-back" id="pf-album-back" aria-label="Назад к поездкам">‹</button>
+        <b id="pf-album-title">Альбом поездки</b>
+      </header>
+      <div class="pf-album-scroll">
+        <section class="pf-memory" id="pf-memory" aria-labelledby="pf-mem-h">
         <div class="pf-mem-top">
           <div><span class="pf-kicker" id="pf-kicker">Альбом прогулки</span><h2 id="pf-mem-h"></h2></div>
           <div class="pf-ring" id="pf-ring"></div>
@@ -390,10 +403,8 @@
         <button class="pf-share" id="pf-share" type="button">✦ Выложить в сторис</button>
       </section>
 
-      <section class="pf-card" aria-labelledby="pf-trips-h">
-        <div class="pf-head"><h2 id="pf-trips-h">Мои поездки</h2><button class="pf-link" id="prof-newtrip" type="button">Новая</button></div>
-        <ul class="trip-list" id="prof-trips"></ul>
-      </section>
+        <button class="btn alt pf-album-open" id="pf-album-open" type="button" hidden>Открыть маршрут</button>
+      </div>
     </div>
   </section>
 
@@ -505,7 +516,7 @@
         <b>Взрослым</b>
         <div class="chips-w" id="adult-interests"></div>
       </div>
-      <p class="form-error" id="adults-error" role="alert" hidden></p>
+ <p class="form-error" id="adults-error" role="alert" hidden></p>
     </div>
     <div class="flow-bottom">
       <button class="btn flow-main" id="profile-save">Сохранить анкету</button>
@@ -547,7 +558,16 @@
           <button type="button" role="radio" data-h="8">весь день</button>
         </div>
       </div>
-      <div class="card-w">
+      <div class="card-w" id="trip-nap">
+ <label><input type="checkbox" id="trip-nap-enabled"> <b>Нужен дневной сон?</b></label>
+ <div id="trip-nap-settings" hidden><div class="nap-time-fields"><label>Начало сна<input type="time" id="trip-nap-start" value="13:00"></label><label>Окончание сна<input type="time" id="trip-nap-end" value="15:00"></label></div><p id="trip-nap-window" class="hint"></p>
+ <label class="field" for="nap-address-input"><b>Адрес жилья для сна</b></label>
+ <form class="addr-form" id="nap-address-form"><input id="nap-address-input" type="text" autocomplete="street-address" placeholder="Улица и дом в Нижнем Новгороде" maxlength="120"><button type="submit" class="btn alt slim" id="nap-address-go">Найти</button></form>
+ <ul class="addr-results" id="nap-address-results"></ul><p id="nap-address-selected" class="hint"></p>
+ <button type="button" class="btn link" id="nap-use-start">Жильё совпадает с точкой старта</button>
+ <p class="hint">Сон повторяется каждый день. Снимите отметку у дней без сна.</p><div id="trip-nap-dates" class="nap-dates"></div></div>
+ </div>
+ <div class="card-w">
         <b>Откуда начинаете день</b>
         <div class="chips-w" id="start-points" role="radiogroup" aria-label="Точка старта">
           <button type="button" role="radio" data-start="center">Центр города</button>

@@ -77,8 +77,33 @@ func Open(filename string) (*Store, error) {
 	if store.state.FamilyProfiles == nil {
 		store.state.FamilyProfiles = map[string]c.FamilyOnboardingView{}
 	}
+	pruneExpired(&store.state, time.Now())
 	return store, nil
 }
+
+// pruneExpired удаляет то, что уже нельзя использовать: варианты плана, просроченные больше часа назад (живут 10 минут;
+// час оставляем, чтобы сервер ещё отвечал «вариант устарел», а не «не найден»), просроченные сессии и квитанции повторных запросов. Без этого файл растёт (каждый вариант хранит весь пул кандидатов),
+// а каждое чтение копирует всё состояние, и приложение замедляется.
+const previewGrace = time.Hour
+
+func pruneExpired(state *State, now time.Time) {
+	for id, p := range state.Previews {
+		if expires, err := time.Parse(time.RFC3339Nano, string(p.View.ExpiresAt)); err == nil && expires.Add(previewGrace).Before(now) {
+			delete(state.Previews, id)
+		}
+	}
+	for id, v := range state.Sessions {
+		if !v.ExpiresAt.IsZero() && v.ExpiresAt.Before(now) {
+			delete(state.Sessions, id)
+		}
+	}
+	for id, r := range state.Receipts {
+		if !r.ExpiresAt.IsZero() && r.ExpiresAt.Before(now) {
+			delete(state.Receipts, id)
+		}
+	}
+}
+
 func clone(state State) (State, error) {
 	raw, err := json.Marshal(state)
 	if err != nil {
@@ -114,6 +139,7 @@ func (s *Store) Update(fn func(*State) error) error {
 	if err := fn(&next); err != nil {
 		return err
 	}
+	pruneExpired(&next, time.Now())
 	raw, err := json.Marshal(next)
 	if err != nil {
 		return err

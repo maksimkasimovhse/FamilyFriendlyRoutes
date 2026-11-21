@@ -289,7 +289,7 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 				return c.TripView{}, err
 			}
 			distance := *plan.Totals.WalkDistanceM
-			if *plan.Totals.ElapsedDurationSec > dailyTimeBudget(day) {
+			if outingDuration(plan) > dailyTimeBudget(day) {
 				rejections["time"] = true
 			}
 			for _, warning := range plan.Warnings {
@@ -300,7 +300,7 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 			best.choices = choices
 			best.totalDistance = distance
 			best.feasible = plan.Feasibility != "infeasible"
-			best.load = *plan.Totals.ElapsedDurationSec / dailyTimeBudget(day)
+			best.load = outingDuration(plan) / dailyTimeBudget(day)
 			sum := loadSum - loads[i] + best.load
 			best.imbalance = loadSquares - loads[i]*loads[i] + best.load*best.load - sum*sum/float64(len(days))
 			best.distance = distance - distances[i]
@@ -372,9 +372,9 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 		if err != nil {
 			return c.TripView{}, err
 		}
-		if view.Input.PlanningPolicy != nil && *view.Input.PlanningPolicy == "ranked_prefix" && len(plan.Stops) < budgetDefaults.MinAutoStopsPerDay {
+		if view.Input.PlanningPolicy != nil && *view.Input.PlanningPolicy == "ranked_prefix" && touristStopCount(plan) < budgetDefaults.MinAutoStopsPerDay {
 			plan.Feasibility = "infeasible"
-			plan.Warnings = append(plan.Warnings, Warning("AUTO_DAY_BELOW_MINIMUM", fmt.Sprintf("%s: для автоподбора нужно минимум %d места; удалось подобрать %d в пределах времени, ходьбы и доступности. Измените точку старта, даты или доступное время.", plan.Date, budgetDefaults.MinAutoStopsPerDay, len(plan.Stops))))
+			plan.Warnings = append(plan.Warnings, Warning("AUTO_DAY_BELOW_MINIMUM", fmt.Sprintf("%s: для автоподбора нужно минимум %d места; удалось подобрать %d в пределах времени, ходьбы и доступности. Измените точку старта, даты или доступное время.", plan.Date, budgetDefaults.MinAutoStopsPerDay, touristStopCount(plan))))
 		}
 		plans[i] = plan
 	}

@@ -148,7 +148,9 @@ export function seedDemoNames(email) {
 }
 
 // Названия интересов для профиля
-export const interestLabel = id => (CHILD_INTERESTS.concat(ADULT_INTERESTS).find(o => o.id === id) || { label: id }).label;
+// Старые анкеты могут хранить id, которых уже нет в списках (например, science) — подписываем их по-русски
+const LEGACY_LABELS = { science: 'Наука', tech: 'Техника', play: 'Активные игры' };
+export const interestLabel = id => (CHILD_INTERESTS.concat(ADULT_INTERESTS).find(o => o.id === id) || { label: LEGACY_LABELS[id] || id }).label;
 export const adultInterestLabels = ids => ids.map(interestLabel);
 
 // ---------- Экраны ----------
@@ -342,3 +344,25 @@ export async function openOnboarding(opts) {
 }
 
 export function closeOnboarding() { ['onb-family', 'onb-kids', 'onb-adults'].forEach(s => { $(s).hidden = true; }); }
+
+// ---------- Правка интересов из профиля (карандашик) ----------
+// kind: 'child' | 'adult'. Варианты — те же, что в анкете.
+export async function interestChoices(kind) {
+  await loadInterests();
+  return kind === 'adult' ? interestOptions.adult : interestOptions.child;
+}
+
+// Сохраняет интересы одного ребёнка (index) или всех взрослых. Аккаунт — на сервере (с проверкой версии), гость — на устройстве.
+export async function updateInterests({ kind, index = 0, ids, authenticated }) {
+  if (!profile) throw new Error('Анкета ещё не заполнена');
+  const next = clone(profile);
+  if (kind === 'adult') next.family.adult_interest_ids = ids;
+  else next.family.children[index].interest_ids = ids;
+  if (authenticated) {
+    const view = await saveProfile({ expected_version: next.version || 0, family: next.family, load_limits: next.load_limits, wishes: next.wishes });
+    next.version = view.version;
+  }
+  profile = next;
+  write(PROFILE_KEY, profile);
+  return profile;
+}

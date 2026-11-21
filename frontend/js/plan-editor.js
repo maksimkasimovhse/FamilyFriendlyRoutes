@@ -13,7 +13,7 @@ const fmtTime = iso => iso ? new Date(iso).toLocaleTimeString('ru-RU', { hour: '
 const fmtDay = iso => { const t = new Date(iso + 'T12:00:00Z').toLocaleDateString('ru-RU', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'long' }); return t.charAt(0).toUpperCase() + t.slice(1); };
 const fmtDayShort = iso => { const t = new Date(iso + 'T12:00:00Z').toLocaleDateString('ru-RU', { timeZone: 'UTC', weekday: 'short', day: 'numeric' }); return t.charAt(0).toUpperCase() + t.slice(1); };
 
-const isExpired = e => e && (e.code === 'PREVIEW_EXPIRED' || e.code === 'PREVIEW_STALE');
+const isExpired = e => e && (e.code === 'PREVIEW_EXPIRED' || e.code === 'PREVIEW_STALE' || e.code === 'PREVIEW_NOT_FOUND');
 function humanError(e) {
   if (isExpired(e)) return 'Вариант устарел. Нажмите «Применить» ещё раз: мы пересоберём план с вашими правками.';
   if (e.code === 'NETWORK') return 'Нет связи с сервером. Правки сохранены в окне — попробуйте ещё раз.';
@@ -58,7 +58,7 @@ export function openPlanEditor({ preview, change, refresh, pickCards, onDone, pr
   const trip = () => current.proposed_trip;
   const info = new Map();
   const remember = pv => {
-    pv.proposed_trip.days.forEach(d => d.stops.forEach(s => info.set(s.activity_id, { title: s.title, mins: Math.round((s.duration?.duration_sec || 0) / 60) })));
+    pv.proposed_trip.days.forEach(d => d.stops.forEach(s => info.set(s.activity_id, { title: s.title, nap:s.activity_kind==='nap', mandatory:s.mandatory, mins: Math.round((s.duration?.duration_sec || 0) / 60) })));
     (pv.proposed_trip.recommendation_snapshot?.candidates || []).forEach(c => { if (!info.has(c.activity.activity_id)) info.set(c.activity.activity_id, { title: c.activity.title, mins: Math.round((c.activity.duration?.duration_sec || 0) / 60) }); });
   };
   remember(current);
@@ -81,6 +81,7 @@ export function openPlanEditor({ preview, change, refresh, pickCards, onDone, pr
   const candidates = () => (trip().recommendation_snapshot?.candidates || []);
   const remove = id => work.forEach(d => { d.ids = d.ids.filter(x => x !== id); });
 
+  const placeCount=d=>d.ids.filter(id=>!info.get(id)?.nap).length;
   function draw() {
     const multi = work.length > 1;
     const freeCount = taken().size < candidates().length;
@@ -91,15 +92,15 @@ export function openPlanEditor({ preview, change, refresh, pickCards, onDone, pr
           <p class="small">Уберите лишнее (✕) или добавьте места карточками: маршрут этого дня перестроится сам.</p>
           ${work.map((d, di) => `
             <section class="pe-day" data-di="${di}">
-              <h3>${esc(fmtDay(d.date))} <span>${d.ids.length ? d.ids.length + ' мест' : 'пусто'}</span></h3>
+              <h3>${esc(fmtDay(d.date))} <span>${placeCount(d) ? placeCount(d) + ' мест' : 'нет мест'}</span></h3>
               <ul class="pe-list">
                 ${d.ids.map(id => `
                   <li class="pe-row" data-id="${esc(id)}">
                     <span class="pe-title">${esc(info.get(id)?.title || id)}<small>${info.get(id)?.mins ? '~' + info.get(id).mins + ' мин' : ''}</small></span>
-                    <button type="button" class="pe-x" data-rm="${esc(id)}" aria-label="Убрать">✕</button>
+                    <button type="button" class="pe-x" data-rm="${esc(id)}" ${info.get(id)?.mandatory?'disabled title="Обязательная остановка"':''} aria-label="Убрать">✕</button>
                   </li>`).join('') || '<li class="pe-empty">В этот день пока нет мест — добавьте карточками</li>'}
               </ul>
-              ${d.ids.length < 2 ? '<p class="pe-hint">В день лучше хотя бы 2 места</p>' : ''}
+              ${placeCount(d) < 2 ? '<p class="pe-hint">В день лучше хотя бы 2 места</p>' : ''}
               <button type="button" class="pe-addcards" data-add="${di}" ${freeCount ? '' : 'disabled'}>＋ Добавить карточками${multi ? ' · ' + esc(fmtDayShort(d.date)) : ''}</button>
             </section>`).join('')}
           ${freeCount ? '' : '<p class="small">Все подходящие места уже в плане.</p>'}

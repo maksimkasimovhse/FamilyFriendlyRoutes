@@ -41,6 +41,9 @@ class JourneyFixTests(unittest.TestCase):
         self.assertEqual(result.needs[0].kind, 'rest')
         result, _ = parse_rules('Нужна безглютеновая еда', context)
         self.assertEqual(result.action, 'clarify')
+        result, _ = parse_rules('Добавь Кремль в маршрут', CONTEXT)
+        self.assertEqual(result.action, 'find_places')
+        self.assertIsNone(result.question)
 
     def test_offline_needs_and_followup_still_produce_only_intents(self):
         for message, action in [('Ребёнок устал', 'shorten_day'), ('Хотим поесть по пути', 'find_places'), ('Пошёл дождь', 'find_places'), ('Убери следующую точку', 'remove_stop'), ('Добавь первый вариант', 'add_activity')]:
@@ -54,6 +57,14 @@ class JourneyFixTests(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(response.json()['parser']['provider'], 'rules')
             self.assertFalse(response.json()['route_changed'])
+
+    def test_invalid_structured_llm_response_uses_rules_instead_of_502(self):
+        body = {'contract_version': '1.0', 'request_id': 'invalid-llm', 'message': 'Ребёнок устал', 'context': CONTEXT}
+        with patch.dict('os.environ', {'ML_API_TOKEN': '', 'ASSISTANT_RULES_FALLBACK': 'true'}), TestClient(app) as client, patch('services.parser_service.app.online_client', return_value=object()), patch('services.parser_service.app.parse_assistant', side_effect=ValueError('invalid schema')):
+            response = client.post('/internal/v1/assistant-intents', json=body)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['parser']['provider'], 'rules')
+        self.assertEqual(response.json()['intent']['action'], 'shorten_day')
 
 
 if __name__ == '__main__':

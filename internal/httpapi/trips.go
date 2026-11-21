@@ -501,7 +501,11 @@ func (a *tripAPI) prepareWithPlanner(r *http.Request, owner string, raw []byte, 
 			// Перегруженный день (не хватает времени или лимита ходьбы) сохранить можно, если человек это
 			// подтвердил: он сам выбрал столько мест. Остальные причины невыполнимости по-прежнему запрещают сохранение.
 			overload := false
+			hardConflict := false
 			for _, w := range day.Warnings {
+				if w.Code == "NAP_RETURN_MISSED" || w.Code == "AVAILABILITY_CONFLICT" || w.Code == "AUTO_DAY_BELOW_MINIMUM" {
+					hardConflict = true
+				}
 				if w.Code == "DAY_BUDGET_EXCEEDED" || w.Code == "WALK_DISTANCE_LIMIT" {
 					overload = true
 					if !slices.Contains(preview.RequiredAcknowledgementCodes, w.Code) {
@@ -509,7 +513,7 @@ func (a *tripAPI) prepareWithPlanner(r *http.Request, owner string, raw []byte, 
 					}
 				}
 			}
-			if !overload || day.Execution != nil {
+			if !overload || day.Execution != nil || hardConflict {
 				preview.CanApply = false
 			}
 		}

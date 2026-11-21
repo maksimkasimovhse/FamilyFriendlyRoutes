@@ -1,20 +1,30 @@
 // Профиль: дети и их интересы, «память о поездке» (статистика, фото, достижения), сторис, мои поездки.
 // Фото хранятся ТОЛЬКО на этом устройстве (localStorage, уменьшенные копии) — никуда не отправляются.
 
-import { getTrip, listTrips, openTrip } from './api.js';
+import { getTrip, listTrips, openTrip, fetchTrip } from './api.js';
 import { isAuthenticated, userEmail } from './session.js';
-import { currentProfile, childName, ageText, interestLabel, adultInterestLabels } from './onboarding.js';
+import { currentProfile, childName, ageText, interestLabel, interestChoices, updateInterests, loadFamily } from './onboarding.js';
 import { kidProgress } from './kid.js';
+import { loadCards, cardById } from './catalog.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 let hooks = { onEditProfile() {}, onNewTrip() {}, onSignOut() {}, onSignIn() {}, onOpenTrip() {} };
 
-// ---------- Фото на память ----------
-const PHOTOS_KEY = 'memory-photos-v1';
+// ---------- Фото на память (у каждой поездки свои) ----------
+const PHOTOS_KEY = 'memory-photos-v1';          // прежнее общее хранилище: достаётся текущей поездке
+const photosKey = id => 'memory-photos-v2:' + id;
 const MAX_PHOTOS = 8;
-const readPhotos = () => { try { return JSON.parse(localStorage.getItem(PHOTOS_KEY)) || []; } catch { return []; } };
-function writePhotos(list) { try { localStorage.setItem(PHOTOS_KEY, JSON.stringify(list)); return true; } catch { return false; } }
+const isCurrent = id => id && id === getTrip()?.trip_id;
+function readPhotos(id, trip = null) {
+  if (trip?.demo) return trip.demoPhotos || [];
+  try {
+    const own = JSON.parse(localStorage.getItem(photosKey(id)));
+    if (own) return own;
+    return isCurrent(id) ? JSON.parse(localStorage.getItem(PHOTOS_KEY)) || [] : [];
+  } catch { return []; }
+}
+function writePhotos(id, list) { try { localStorage.setItem(photosKey(id), JSON.stringify(list)); return true; } catch { return false; } }
 
 // Уменьшаем до 900 px по длинной стороне: большие снимки не поместятся в память браузера
 function downscale(file) {
@@ -33,31 +43,59 @@ function downscale(file) {
   });
 }
 
+// ---------- Заглушка: уже завершённая поездка ----------
+// Показывается в «Моих поездках» всегда, чтобы был виден готовый альбом. На сервере её нет и она ничего не меняет.
+const DEMO_ID = 'demo-past';
+const DEMO_PLAN = [   // день → места (id карточек из data/cards.json) и пройденные метры
+  { back: 22, walked: 4300, places: ['18', '45', '43', '47'] },
+  { back: 21, walked: 3200, places: ['131', '5', '45'] },
+];
+const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+function demoPastTrip() {
+  const days = DEMO_PLAN.map(plan => {
+    const d = new Date(); d.setDate(d.getDate() - plan.back);
+    return {
+      date: iso(d),
+      stops: plan.places.map(id => ({ title: cardById(id)?.title || 'Место', progress: 'visited', activity_id: 'demo-' + id })),
+      execution: { consumed_walk_distance_m: plan.walked },
+    };
+  });
+  const photoCards = ['47', '45', '18', '131'].map(id => cardById(id)?.image?.card).filter(Boolean);
+  return {
+    trip_id: DEMO_ID, version: 1, status: 'completed', demo: true, days,
+    demoStamps: 6, demoPhotos: photoCards,
+    // та же форма, что у строки списка (summary), чтобы карточка рисовалась одним кодом
+    summary: { trip_id: DEMO_ID, version: 1, status: 'completed', demo: true, days: days.map(d => ({ date: d.date, stops: d.stops.length, visited: d.stops.length, walked_m: d.execution.consumed_walk_distance_m })) },
+  };
+}
+
 // ---------- Статистика поездки ----------
 // Альбом наполняется только тем, что реально случилось: открытые окна, пройденные км, штампы, фото.
 // План поездки нужен лишь для «закрытых окон» и обратного отсчёта.
 const DAY = 864e5;
 const localDate = iso => { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d); };
-function tripStats() {
-  const trip = getTrip();
+function tripStats(trip) {
   const days = trip?.days || [];
   const stops = days.flatMap(d => d.stops.filter(s => s.progress !== 'removed').map(s => ({ ...s, date: d.date })));
   const opened = stops.filter(s => s.progress === 'visited');
   const walkedKm = days.reduce((m, d) => m + (d.execution?.consumed_walk_distance_m || 0), 0) / 1000;
   const kid = kidProgress();
-  const photos = readPhotos().length;
-  const stamps = kid?.stamps || 0;
+  const current = isCurrent(trip?.trip_id);
+  const photoList = trip ? readPhotos(trip.trip_id, trip) : [];
+  const photos = photoList.length;
+  const stamps = trip?.demo ? trip.demoStamps : current ? kid?.stamps || 0 : 0;      // штампы детского режима ведутся по текущей поездке
   const now = new Date(); now.setHours(0, 0, 0, 0);
   const first = days[0] ? localDate(days[0].date) : null;
   const last = days.length ? localDate(days[days.length - 1].date) : null;
   const daysWithWalk = days.filter(d => d.stops.some(s => s.progress === 'visited') || d.execution?.consumed_walk_distance_m > 0).length;
   return {
-    hasTrip: !!trip, stops, opened, walkedKm, stamps, photos, days: days.length, daysWithWalk,
+    hasTrip: !!trip, trip, current, stops, opened, walkedKm, stamps, photos, photoList, days: days.length, daysWithWalk,
     started: opened.length > 0 || walkedKm > 0.05 || stamps > 0 || photos > 0,
     untilStart: first ? Math.round((first - now) / DAY) : null,
     finished: last ? now > last : false,
+    upcoming: first ? now < first : false,
     range: first ? dateRange(first, last) : '',
-    fawn: kid?.outfitImg || 'media/fawn/fawn-base.svg',
+    fawn: (current && kid?.outfitImg) || 'media/fawn/fawn-base.svg',
   };
 }
 function dateRange(a, b) {
@@ -90,28 +128,32 @@ export async function renderProfile() {
   $('pf-sub').textContent = isAuthenticated() ? email || 'Вы вошли' : 'Гость · поездка хранится сутки на этом устройстве';
   $('prof-auth').textContent = isAuthenticated() ? 'Выйти' : 'Войти';
 
-  // Семья: дети и взрослые — одинаковые строки
-  const row = (ava, avaCls, name, meta, tags) => `
+  // Семья: дети и взрослые — одинаковые строки; справа карандашик: поменять интересы человека
+  const row = (ava, avaCls, name, meta, edit) => `
     <div class="pf-member">
       <span class="pf-m-ava ${avaCls}">${esc(ava)}</span>
       <div class="pf-m-main">
         <div class="pf-m-top"><b>${esc(name)}</b>${meta ? `<span>${esc(meta)}</span>` : ''}</div>
-        <div class="pf-tags">${tags.length ? tags.map(t => `<span>${esc(t)}</span>`).join('') : '<span class="muted-tag">интересы не выбраны</span>'}</div>
       </div>
+      <button type="button" class="pf-pencil" data-edit="${esc(edit)}" aria-label="Изменить интересы: ${esc(name)}" title="Изменить интересы">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17z M14 7l3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>
+      </button>
     </div>`;
   const kids = (p?.family.children || []).map((c, i) => {
     const name = childName(i);
-    return row(name.replace(/^Ребёнок\s*/, '').charAt(0).toUpperCase() || name.charAt(0), 'kid', name, ageText(c.age_years), c.interest_ids.map(interestLabel));
+    return row(name.replace(/^Ребёнок\s*/, '').charAt(0).toUpperCase() || name.charAt(0), 'kid', name, ageText(c.age_years), 'child:' + i);
   });
-  const adults = p ? row(String(p.family.adult_count), 'adult', 'Взрослые', '', adultInterestLabels(p.family.adult_interest_ids)) : '';
+  const adults = p ? row(String(p.family.adult_count), 'adult', 'Взрослые', '', 'adult:0') : '';
   $('pf-kids').innerHTML = kids.join('') + adults || '<p class="muted">Анкета ещё не заполнена</p>';
+  $('pf-kids').querySelectorAll('[data-edit]').forEach(b => { b.onclick = () => openInterestEditor(...b.dataset.edit.split(':')); });
 
-  renderMemory();
   renderTrips();
 }
 
 function renderMemory() {
-  const st = tripStats();
+  if (!album) return;
+  const st = tripStats(album);
+  const tid = album.trip_id;
   const total = st.stops.length, opened = st.opened.length;
   const kid = childName(0);
 
@@ -143,11 +185,12 @@ function renderMemory() {
   }).join('')}</div>` : '';
 
   // Фото: полароиды + плитка «добавить»
-  const photos = readPhotos();
+  const ro = !!album.demo;
+  const photos = readPhotos(tid, album);
   $('pf-photos').innerHTML = photos.map((src, i) =>
-    `<figure class="pf-photo" style="--r:${[-4, 3, -2, 4, -3, 2, -5, 3][i % 8]}deg"><img src="${src}" alt="Фото на память ${i + 1}"><button type="button" data-del="${i}" aria-label="Убрать фото">×</button></figure>`).join('')
-    + (photos.length < MAX_PHOTOS ? `<button type="button" class="pf-add" id="pf-add"><span>+</span>${photos.length ? 'Ещё фото' : 'Первое фото'}</button>` : '');
-  $('pf-photos').querySelectorAll('[data-del]').forEach(b => { b.onclick = () => { const l = readPhotos(); l.splice(+b.dataset.del, 1); writePhotos(l); renderMemory(); }; });
+    `<figure class="pf-photo" style="--r:${[-4, 3, -2, 4, -3, 2, -5, 3][i % 8]}deg"><img src="${src}" alt="Фото на память ${i + 1}">${ro ? '' : `<button type="button" data-del="${i}" aria-label="Убрать фото">×</button>`}</figure>`).join('')
+    + (!ro && photos.length < MAX_PHOTOS ? `<button type="button" class="pf-add" id="pf-add"><span>+</span>${photos.length ? 'Ещё фото' : 'Первое фото'}</button>` : '');
+  $('pf-photos').querySelectorAll('[data-del]').forEach(b => { b.onclick = () => { const l = readPhotos(tid); l.splice(+b.dataset.del, 1); writePhotos(tid, l); renderMemory(); }; });
   const add = $('pf-add'); if (add) add.onclick = () => $('pf-file').click();
 
   // Достижения
@@ -159,30 +202,175 @@ function renderMemory() {
   $('pf-share').textContent = st.started ? '✦ Выложить в сторис' : 'Сторис откроется после первого окна';
 }
 
+// ---------- Окно «Интересы» (карандашик) ----------
+async function openInterestEditor(kind, indexStr) {
+  const p = currentProfile();
+  const index = Number(indexStr);
+  if (!p) return;
+  const who = kind === 'adult' ? 'Взрослые' : childName(index);
+  const current = new Set(kind === 'adult' ? p.family.adult_interest_ids : p.family.children[index].interest_ids);
+  const chosen = new Set(current);
+  let options = [];
+  try { options = await interestChoices(kind); } catch { options = []; }
+  // Интересы, которых уже нет в списке (из старой анкеты), показываем выбранными, чтобы их можно было снять
+  const extra = [...current].filter(id => !options.some(o => o.id === id)).map(id => ({ id, label: interestLabel(id) }));
+  // Одинаковые подписи (например, «Техника» в двух справочниках) показываем одной плашкой, id собираем вместе
+  const groups = [];
+  [...options, ...extra].forEach(o => {
+    const g = groups.find(x => x.label === o.label);
+    if (g) g.ids.push(o.id); else groups.push({ label: o.label, ids: [o.id] });
+  });
+  const isOn = g => g.ids.some(id => chosen.has(id));
+
+  const sheet = $('pf-int-sheet') || (() => {
+    const el = document.createElement('div');
+    el.id = 'pf-int-sheet'; el.className = 'pf-int-sheet';
+    $('pf-kids').closest('.screen').append(el);       // внутри экрана профиля, а не на всю страницу
+    return el;
+  })();
+  let busy = false, error = '';
+  const close = () => { sheet.hidden = true; sheet.replaceChildren(); };
+  const draw = () => {
+    sheet.innerHTML = `
+      <div class="pf-int-panel" role="dialog" aria-modal="true" aria-labelledby="pf-int-title">
+        <div class="pf-int-head"><h2 id="pf-int-title">Интересы: ${esc(who)}</h2><button type="button" class="pf-int-x" aria-label="Закрыть" data-act="close">✕</button></div>
+        <div class="pf-int-chips">${groups.map((g, i) => `<button type="button" class="pf-int-chip" aria-pressed="${isOn(g)}" data-g="${i}">${esc(g.label)}</button>`).join('')}</div>
+        ${error ? `<p class="form-error" role="alert">${esc(error)}</p>` : ''}
+        <div class="pf-int-foot">
+          <button type="button" class="btn flow-main" data-act="save" ${busy ? 'disabled' : ''}>${busy ? 'Сохраняем…' : 'Сохранить'}</button>
+          <button type="button" class="btn link" data-act="close">Отмена</button>
+        </div>
+      </div>`;
+    sheet.querySelectorAll('[data-act="close"]').forEach(b => { b.onclick = () => { if (!busy) close(); }; });
+    sheet.querySelectorAll('.pf-int-chip').forEach(b => { b.onclick = () => { const g = groups[Number(b.dataset.g)]; if (isOn(g)) g.ids.forEach(id => chosen.delete(id)); else chosen.add(g.ids[0]); draw(); }; });
+    sheet.querySelector('[data-act="save"]').onclick = async () => {
+      busy = true; error = ''; draw();
+      try {
+        await updateInterests({ kind, index, ids: groups.filter(isOn).flatMap(g => g.ids.filter(id => chosen.has(id))), authenticated: isAuthenticated() });
+        close();
+        renderProfile();
+      } catch (e) {
+        busy = false;
+        if (e.code === 'VERSION_CONFLICT') {
+          try { await loadFamily({ authenticated: isAuthenticated() }); } catch { /* оставим как есть */ }
+          error = 'Анкета изменилась на другом устройстве — мы загрузили новую версию. Закройте окно и повторите.';
+        } else error = e.message || 'Не удалось сохранить';
+        draw();
+      }
+    };
+  };
+  draw();
+  sheet.hidden = false;
+}
+
+// ---------- Мои поездки: карусель, нажатие открывает альбом ----------
+let album = null;               // поездка, чей альбом сейчас открыт
+let demoTrip = null;            // заглушка собирается из каталога карточек
+let tripsCache = null;          // последний полученный список: при повторном входе в профиль показываем сразу
+const fullCache = new Map();    // trip_id@version → поездка целиком (нужна только для открытого альбома)
+
+// Карточка строится из строки списка (даты и счётчики приходят вместе со списком, без запроса каждой поездки)
+const item_demo = t => !!t.demo;
+function tripCard(t, current) {
+  const days = t.days || [];
+  const first = days[0] ? localDate(days[0].date) : null, last = days.length ? localDate(days[days.length - 1].date) : null;
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  const total = days.reduce((n, d) => n + d.stops, 0);
+  const done = days.reduce((n, d) => n + d.visited, 0);
+  const state = item_demo(t) ? ['done', 'Завершённая'] : current ? ['cur', 'Текущая'] : last && now > last ? ['done', 'Завершённая'] : first && now < first ? ['soon', 'Скоро'] : first ? ['going', 'Идёт сейчас'] : ['past', 'Поездка'];
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'trip-card ' + state[0]; b.setAttribute('role', 'listitem');
+  b.innerHTML = `
+    <span class="tc-top"><span class="tc-chip">${state[1]}</span>
+      <span class="tc-go" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+    <b class="tc-range">${esc(first ? dateRange(first, last) : 'Без дат')}</b>
+    <span class="tc-meta">${daysWord(days.length || 1)} · ${total} ${plural(total, 'место', 'места', 'мест')}</span>
+    <span class="tc-bar" aria-hidden="true"><i style="width:${total ? Math.round(done / total * 100) : 0}%"></i></span>
+    <small>${done ? `пройдено ${done} из ${total} · ` : ''}<u>Открыть альбом →</u></small>`;
+  b.onclick = () => openAlbum(t);
+  return b;
+}
+
+// Две закреплённые ячейки слева направо:
+//  1) динамическая — самая свежая поездка (текущая, а новая сразу занимает это место); если поездок нет — «Создать поездку»;
+//  2) закреплённая оранжевая «Завершённая» (заглушка для показа), всегда на втором месте;
+//  дальше — остальные поездки от новых к старым.
+function newTripCard() {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'trip-card empty'; b.setAttribute('role', 'listitem');
+  b.innerHTML = '<span class="tc-plus" aria-hidden="true">+</span><b class="tc-range">Новая поездка</b><small>Подобрать места и маршрут</small>';
+  b.onclick = () => hooks.onNewTrip();
+  return b;
+}
+function composeTrips(realCards) {
+  const out = [realCards[0] || newTripCard()];
+  if (demoTrip) out.push(tripCard(demoTrip.summary, false));
+  out.push(...realCards.slice(1));
+  return out;
+}
+
+function drawTrips(items) {
+  const rail = $('prof-trips');
+  const current = getTrip()?.trip_id;
+  const list = items.filter(t => t.status !== 'draft' && (t.days || []).length).slice(0, 12);
+  // Текущая впереди, остальные от новых к старым по первому дню
+  list.sort((a, b) => (b.trip_id === current) - (a.trip_id === current) || String(b.days[0].date).localeCompare(String(a.days[0].date)));
+  rail.replaceChildren(...composeTrips(list.map(t => tripCard(t, t.trip_id === current))));
+}
+
+// Пока список едет с сервера: текущая поездка уже в памяти (рисуем её сразу), заглушка на своём месте и «скелетоны»
+function drawTripsPlaceholder() {
+  const rail = $('prof-trips');
+  const t = getTrip();
+  const items = [];
+  if (t) items.push({ trip_id: t.trip_id, status: t.status, days: t.days.map(d => ({ date: d.date, stops: d.stops.filter(s => s.progress !== 'removed').length, visited: d.stops.filter(s => s.progress === 'visited').length })) });
+  drawTrips(items);
+  rail.append(...[0, 1].map(() => Object.assign(document.createElement('div'), { className: 'trip-card skeleton', innerHTML: '<i></i><i></i><i></i>' })));
+}
+
 async function renderTrips() {
-  const list = $('prof-trips');
+  const rail = $('prof-trips');
+  if (!demoTrip) { try { await loadCards(); demoTrip = demoPastTrip(); } catch { /* без каталога заглушки не будет */ } }
+  if (tripsCache) drawTrips(tripsCache); else drawTripsPlaceholder();      // не ждём сервер
   try {
     const { items } = await listTrips();
-    const current = getTrip()?.trip_id;
-    list.innerHTML = items.length ? '' : '<li class="muted">Поездок пока нет</li>';
-    items.filter(t => t.status !== 'draft').slice(0, 6).forEach(t => {
-      const li = document.createElement('li');
-      const date = new Date(t.updated_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
-      li.innerHTML = `<span><b>Поездка от ${date}</b><small>маршрут сохранён</small></span>`;
-      if (t.trip_id === current) li.insertAdjacentHTML('beforeend', '<span class="cur">открыта</span>');
-      else {
-        const b = document.createElement('button');
-        b.className = 'btn alt slim';
-        b.textContent = 'Открыть';
-        b.onclick = async () => { await openTrip(t.trip_id); hooks.onOpenTrip(); };
-        li.append(b);
-      }
-      list.append(li);
-    });
-    if (!list.children.length) list.innerHTML = '<li class="muted">Сохранённых поездок пока нет</li>';
+    tripsCache = items;
+    drawTrips(items);
   } catch {
-    list.innerHTML = '<li class="muted">Список поездок сейчас недоступен</li>';
+    if (!tripsCache) rail.replaceChildren(Object.assign(document.createElement('p'), { className: 'muted', textContent: 'Список поездок сейчас недоступен' }));
   }
+}
+
+// Альбом открывается сразу; сама поездка (окна маршрута, км) подгружается за это время, текущая — из памяти
+async function openAlbum(item) {
+  const el = $('pf-album');
+  const current = isCurrent(item.trip_id) ? getTrip() : null;
+  const key = item.trip_id + '@' + item.version;
+  let trip = item.demo ? demoTrip : current || fullCache.get(key) || null;
+  album = trip || { trip_id: item.trip_id, days: [], loading: true };
+  $('pf-album-title').textContent = item.days?.[0] ? `Поездка · ${dateRange(localDate(item.days[0].date), localDate(item.days[item.days.length - 1].date))}` : 'Альбом поездки';
+  $('pf-album-open').hidden = isCurrent(item.trip_id) || !!item.demo;
+  el.classList.toggle('loading', !trip);
+  renderMemory();
+  el.hidden = false;
+  el.querySelector('.pf-album-scroll').scrollTop = 0;
+  el.animate([{ transform: 'translateX(40px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 260, easing: 'cubic-bezier(.2,.8,.2,1)' });
+  if (!trip) {
+    try {
+      trip = await fetchTrip(item.trip_id);
+      fullCache.set(key, trip);
+      if (album?.trip_id === item.trip_id) { album = trip; el.classList.remove('loading'); renderMemory(); }
+    } catch {
+      el.classList.remove('loading');
+      $('pf-lead').textContent = 'Не удалось загрузить поездку. Закройте альбом и попробуйте ещё раз.';
+    }
+  }
+}
+function closeAlbum() {
+  const el = $('pf-album');
+  const done = () => { el.hidden = true; album = null; };
+  const a = el.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateX(40px)', opacity: 0 }], { duration: 200, easing: 'ease-in' });
+  a.onfinish = done; a.oncancel = done;
 }
 
 // ---------- Сторис: картинка 1080×1920 ----------
@@ -191,7 +379,7 @@ const FALLBACK_OLD = ['media/windows/kremlin-old.jpg', 'media/windows/pokrovka-o
 
 async function buildStory() {
   await document.fonts.load('800 100px Nunito').catch(() => {});
-  const st = tripStats();
+  const st = tripStats(album);
   const W = 1080, H = 1920;
   const c = document.createElement('canvas'); c.width = W; c.height = H;
   const g = c.getContext('2d');
@@ -233,7 +421,7 @@ async function buildStory() {
   });
 
   // Полароиды: свои фото, а если их нет — старые снимки города («тогда»)
-  const own = readPhotos().slice(0, 3);
+  const own = readPhotos(album.trip_id, album).slice(0, 3);
   const polaroids = [...own.map(src => ({ src, tag: null })), ...FALLBACK_OLD.map(src => ({ src, tag: 'ТОГДА' }))].slice(0, 3);
   const rot = [-7, 4, -3];
   for (let i = 0; i < polaroids.length; i++) {
@@ -296,12 +484,15 @@ export function initProfile(h) {
   $('prof-newtrip').onclick = () => hooks.onNewTrip();
   $('prof-auth').onclick = () => (isAuthenticated() ? hooks.onSignOut() : hooks.onSignIn());
   $('pf-share').onclick = shareStory;
+  $('pf-album-back').onclick = closeAlbum;
+  $('pf-album-open').onclick = async () => { if (!album) return; await openTrip(album.trip_id); closeAlbum(); hooks.onOpenTrip(); };
   $('pf-file').onchange = async e => {
-    const list = readPhotos();
+    if (!album) return;
+    const list = readPhotos(album.trip_id);
     for (const f of [...e.target.files].slice(0, MAX_PHOTOS - list.length)) {
       try { list.push(await downscale(f)); } catch { /* пропускаем битый файл */ }
     }
-    if (!writePhotos(list)) alert('Не хватило места в браузере — удалите одно из фото');
+    if (!writePhotos(album.trip_id, list)) alert('Не хватило места в браузере — удалите одно из фото');
     e.target.value = '';
     renderMemory();
   };

@@ -359,20 +359,52 @@ func (a *tripAPI) familyProfile(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, status, result)
 }
+
+// Строка списка поездок: сводка плюс краткие итоги по дням, чтобы карточки в профиле не запрашивали каждую поездку отдельно.
+type tripListItem struct {
+	c.TripSummary
+	Days []tripDaySummary `json:"days"`
+}
+type tripDaySummary struct {
+	Date    c.ISODate `json:"date"`
+	Stops   int       `json:"stops"`
+	Visited int       `json:"visited"`
+	WalkedM float64   `json:"walked_m"`
+}
+
 func (a *tripAPI) listTrips(w http.ResponseWriter, r *http.Request) {
 	owner, err := a.owner(r, false)
 	if err != nil {
 		a.respondError(w, r, err)
 		return
 	}
-	result := c.TripList{Items: []c.TripSummary{}}
+	result := struct {
+		Items []tripListItem `json:"items"`
+	}{Items: []tripListItem{}}
 	err = a.store.Read(func(s tripstore.State) error {
 		if _, err := a.liveSession(&s, r, owner); err != nil {
 			return err
 		}
 		for _, t := range s.Trips {
 			if t.Owner == owner {
-				result.Items = append(result.Items, c.TripSummary{TripID: t.View.TripID, Version: t.View.Version, UpdatedAt: t.View.UpdatedAt, Status: t.View.Status, CityID: t.View.Input.CityID})
+				item := tripListItem{TripSummary: c.TripSummary{TripID: t.View.TripID, Version: t.View.Version, UpdatedAt: t.View.UpdatedAt, Status: t.View.Status, CityID: t.View.Input.CityID}, Days: []tripDaySummary{}}
+				for _, d := range t.View.Days {
+					day := tripDaySummary{Date: d.Date}
+					for _, stop := range d.Stops {
+						if stop.Progress == "removed" {
+							continue
+						}
+						day.Stops++
+						if stop.Progress == "visited" {
+							day.Visited++
+						}
+					}
+					if d.Execution != nil {
+						day.WalkedM = d.Execution.ConsumedWalkDistanceM
+					}
+					item.Days = append(item.Days, day)
+				}
+				result.Items = append(result.Items, item)
 			}
 		}
 		return nil

@@ -112,6 +112,8 @@ export const previewDraftChange = (draft, command, basePreviewId) => call('POST'
   expected_version: draft.version, command: { ...command, base_preview_id: basePreviewId }, current_position: null, observed_at: null,
 });
 export const listTrips = () => call('GET', '/api/v1/trips');
+// Прочитать поездку, не делая её текущей (альбом прошлых поездок)
+export const fetchTrip = id => call('GET', '/api/v1/trips/' + id);
 
 // Открыть сохранённую поездку как текущую
 export async function openTrip(id) {
@@ -150,6 +152,7 @@ export async function loadCachedTrip() {
 }
 
 // ---------- Действия активного дня ----------
+export function previewStartDay(point=today().start_point){return preview({kind:'start_day',date:today().date,point,start_at:nowIso()});}
 export async function startDay() {
   const day = today();
   const p = await preview({ kind: 'start_day', date: day.date, point: day.start_point, start_at: nowIso() });
@@ -192,4 +195,16 @@ export function previewRouteEdit(text) {
 
 export function previewActivity(selection) {
  return preview({kind:'add_activity',date:today().date,selection});
+}
+
+// Свободная просьба для помощника: сервер сам находит только реальные кандидаты,
+// хранит их в коротком контексте и возвращает preview, а не меняет поездку.
+export function askRouteAssistant(message) {
+ return call('POST', tripPath() + '/assistant/messages', {
+  expected_version: trip.version,
+  date: today().date,
+  message,
+  current_position: null,
+  observed_at: null,
+ }, true);
 }

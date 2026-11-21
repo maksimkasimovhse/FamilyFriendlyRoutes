@@ -212,6 +212,12 @@ func RecordProgress(view c.TripView, request c.ProgressRequest, now time.Time) (
 		return c.TripView{}, stateError("MANDATORY_STOP", "Обязательную остановку нельзя пропустить.")
 	}
 	if request.Status == "visited" {
+		if stopKind(*stop) == "nap" && stop.Timing.EstimatedDepartureAt != nil {
+			end, _ := parseInstant(*stop.Timing.EstimatedDepartureAt)
+			if at.Before(end) {
+				return c.TripView{}, stateError("NAP_NOT_FINISHED", "Отметьте завершение сна после указанного времени окончания.")
+			}
+		}
 		var leg *c.Leg
 		for j := range day.Legs {
 			var target struct {
@@ -230,6 +236,8 @@ func RecordProgress(view c.TripView, request c.ProgressRequest, now time.Time) (
 		execution.ConsumedWalkDistanceM += *leg.DistanceM
 		execution.ConsumedWalkDurationSec += *leg.TravelDurationSec
 		switch stopKind(*stop) {
+		case "nap":
+			// Sleep is not charged to the outing budget.
 		case "meal":
 			execution.ConsumedMealDurationSec += stop.Duration.DurationSec
 		case "rest":
@@ -256,7 +264,7 @@ func RecordProgress(view c.TripView, request c.ProgressRequest, now time.Time) (
 	if err != nil {
 		return c.TripView{}, err
 	}
-	timeLeft := math.Max(0, dailyTimeBudget(view.Input.Days[j])-execution.ElapsedDurationSec)
+	timeLeft := math.Max(0, dailyTimeBudget(view.Input.Days[j])-math.Max(0, execution.ElapsedDurationSec-napHomeTime(*day)))
 	day.Totals.RemainingWalkDistanceM = nil
 	day.Totals.RemainingDurationSec = &timeLeft
 	view.Status = "active"
@@ -447,6 +455,9 @@ func (p Planner) rebuildExistingDay(ctx context.Context, view c.TripView, index,
 			history = append(history, stop)
 			continue
 		}
+		if stopKind(stop) == "nap" {
+			continue
+		}
 		remaining = append(remaining, c.Selection{PlaceID: stop.PlaceID, ActivityID: stop.ActivityID, OccurrenceID: stop.OccurrenceID, Mandatory: stop.Mandatory})
 		local.Activities = append(local.Activities, Activity{ID: stop.ActivityID, PlaceID: stop.PlaceID, Title: stop.Title, Point: stop.Location, DurationSec: stop.Duration.DurationSec, MinAge: 3, MaxAge: 11})
 		if stop.Availability == nil && view.CatalogVersion != "demo-v1" {
@@ -498,11 +509,14 @@ func (p Planner) rebuildExistingDay(ctx context.Context, view c.TripView, index,
 		spentTime = math.Max(0, at.Sub(started).Seconds())
 		spentDistance = execution.ConsumedWalkDistanceM
 		total := dailyTimeBudget(day)
-		timeLeft := math.Max(0, total-spentTime)
+		timeLeft := math.Max(0, total-math.Max(0, spentTime-napHomeTime(original)))
 		if timeLeft == 0 {
 			return c.TripView{}, stateError("DAY_FINISHED", "Доступное время дня исчерпано.")
 		}
 		end := at.Add(time.Duration(timeLeft * float64(time.Second)))
+		if original.Nap != nil && day.AvailableWindow != nil {
+			end, _ = parseInstant(day.AvailableWindow.EndAt)
+		}
 		day.StartPoint = execution.CurrentPoint
 		day.DurationBudgetSec = timeLeft
 		day.AvailableWindow = &c.Interval{StartAt: instant(at), EndAt: instant(end)}
@@ -519,6 +533,9 @@ func (p Planner) rebuildExistingDay(ctx context.Context, view c.TripView, index,
 			}
 		}
 	}
+	if napHomeTime(original) > 0 {
+		day.Nap = nil
+	}
 	input.Days = []c.DayInput{day}
 	input.Selections = remaining
 	temp := view
@@ -528,6 +545,44 @@ func (p Planner) rebuildExistingDay(ctx context.Context, view c.TripView, index,
 		return c.TripView{}, err
 	}
 	plan := result.Days[0]
+
+	if day.Nap != nil && plan.Feasibility == "infeasible" && execution != nil {
+		originalCount := len(remaining)
+		for len(remaining) > 0 && plan.Feasibility == "infeasible" {
+			var nextPlan c.DayPlan
+			var nextChoices []c.Selection
+			found := false
+			for k := len(remaining) - 1; k >= 0; k-- {
+				if remaining[k].Mandatory {
+					continue
+				}
+				choices := append(append([]c.Selection{}, remaining[:k]...), remaining[k+1:]...)
+				temp.Input.Selections = choices
+				trial, e := local.buildDay(ctx, temp, now)
+				if e != nil {
+					return c.TripView{}, e
+				}
+				candidate := trial.Days[0]
+				if !found || candidate.Feasibility != "infeasible" || outingDuration(candidate) < outingDuration(nextPlan) {
+					nextPlan = candidate
+					nextChoices = choices
+					found = true
+				}
+				if candidate.Feasibility != "infeasible" {
+					break
+				}
+			}
+			if !found {
+				break
+			}
+			remaining = nextChoices
+			plan = nextPlan
+		}
+		if len(remaining) < originalCount {
+			plan.Warnings = append(plan.Warnings, Warning("NAP_ROUTE_ADJUSTED", "Чтобы вернуться к дневному сну, предложено убрать часть необязательных мест. Изменения сохраняются только после подтверждения."))
+		}
+	}
+
 	if view.CatalogVersion != "demo-v1" {
 		warnings := []c.Warning{}
 		for _, warning := range plan.Warnings {
@@ -568,9 +623,21 @@ func (p Planner) rebuildExistingDay(ctx context.Context, view c.TripView, index,
 		plan.Totals.MealDurationSec += execution.ConsumedMealDurationSec
 		plan.Totals.RestDurationSec += execution.ConsumedRestDurationSec
 		plan.Totals.WaitDurationSec = add(plan.Totals.WaitDurationSec, execution.ConsumedWaitDurationSec)
+		remainingOuting := outingDuration(plan)
 		plan.Totals.ElapsedDurationSec = add(plan.Totals.ElapsedDurationSec, spentTime)
+		if original.Nap != nil {
+			totalOuting := remainingOuting + math.Max(0, spentTime-napHomeTime(original))
+			plan.Totals.OutingDurationSec = &totalOuting
+			if napHomeTime(original) > 0 {
+				plan.Nap = original.Nap
+				if original.Totals.NapDurationSec != nil {
+					napDuration := *original.Totals.NapDurationSec
+					plan.Totals.NapDurationSec = &napDuration
+				}
+			}
+		}
 		plan.Totals.WalkBudgetM = nil
-		timeLeft := math.Max(0, dailyTimeBudget(view.Input.Days[inputIndex])-spentTime)
+		timeLeft := math.Max(0, dailyTimeBudget(view.Input.Days[inputIndex])-math.Max(0, spentTime-napHomeTime(original)))
 		plan.Totals.RemainingWalkDistanceM = nil
 		plan.Totals.RemainingDurationSec = &timeLeft
 		plan.Assumptions = append(plan.Assumptions, "Пройденные сегменты сохранены; километры подтверждённых переходов оценены по OSM, время уже прошедшей части — по отметкам пользователя.")
@@ -644,7 +711,7 @@ func ActivePreviewFresh(day c.DayPlan, input c.DayInput, now time.Time) bool {
 	if now.After(asOf.Add(ActivePreviewLifetime)) {
 		return false
 	}
-	if day.Totals.ElapsedDurationSec == nil || *day.Totals.ElapsedDurationSec+delay > dailyTimeBudget(input) {
+	if day.Totals.ElapsedDurationSec == nil || outingDuration(day)+delay > dailyTimeBudget(input) {
 		return false
 	}
 	for _, stop := range day.Stops {

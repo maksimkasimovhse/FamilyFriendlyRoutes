@@ -174,7 +174,7 @@ func (p Planner) shorten(ctx context.Context, view c.TripView, i, j int, cmd Cha
 	spent := 0.0
 	if execution := view.Days[i].Execution; execution != nil {
 		started, _ := parseInstant(execution.StartedAt)
-		spent = math.Max(0, at.Sub(started).Seconds())
+		spent = math.Max(0, at.Sub(started).Seconds()-napHomeTime(view.Days[i]))
 	}
 	if cmd.TargetRemainingWalkDistanceM != nil {
 		return c.TripView{}, stateError("TIME_LIMIT_REQUIRED", "Укажите доступное время: ограничения километража больше не используются.")
@@ -188,7 +188,7 @@ func (p Planner) shorten(ctx context.Context, view c.TripView, i, j int, cmd Cha
 	if cmd.TargetRemainingDurationSec != nil {
 		target := *cmd.TargetRemainingDurationSec
 		day.DurationBudgetSec = math.Min(day.DurationBudgetSec, spent+target)
-		if day.AvailableWindow != nil {
+		if day.AvailableWindow != nil && day.Nap == nil {
 			start, _ := parseInstant(day.AvailableWindow.StartAt)
 			end, _ := parseInstant(day.AvailableWindow.EndAt)
 			origin := start
@@ -278,6 +278,9 @@ func (p Planner) move(ctx context.Context, view c.TripView, i, j int, cmd Change
 	}
 	if found < 0 {
 		return c.TripView{}, stateError("STOP_NOT_FOUND", "Остановка не найдена.")
+	}
+	if stopKind(stop) == "nap" {
+		return c.TripView{}, stateError("MANDATORY_STOP", "Дневной сон закреплён за датой; измените настройки сна, чтобы перенести его.")
 	}
 	if stop.Progress != "planned" {
 		return c.TripView{}, stateError("HISTORY_IMMUTABLE", "Посещённую остановку нельзя перенести.")

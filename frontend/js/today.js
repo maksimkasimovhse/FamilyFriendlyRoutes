@@ -3,9 +3,11 @@ import { placeEmojiHtml } from './place-display.js';
 // Карточка «Сейчас» + лента со временем. Под каждой точкой — одна «семейная» строка:
 // что там у ребёнка (задание / штамп) и что рядом (туалет, кафе для детей).
 
-import { onTripChange, today, getTrip, getSource, startDay, markVisited, previewRemove, applyPreview, ApiError } from './api.js';
-import { renderWeather } from './weather.js';
+import { onTripChange, today, getTrip, getSource, startDay, previewStartDay, markVisited, previewRemove, applyPreview, ApiError } from './api.js';
 import { nearest, walkMinutes, isFamilyCafe } from './places.js';
+
+import { currentPosition } from './geolocation.js';
+import { napDayHtml } from './nap-display.js';
 
 const $ = id => document.getElementById(id);
 let opt = { childName: 'Маша', childNameGenitive: 'Маши', kidStopInfo: () => null, onOpenKid: () => {}, onNeedNow: () => {} };
@@ -19,6 +21,7 @@ function fmtDuration(sec) {
   if (min < 60) return min + ' мин';
   return Math.floor(min / 60) + ' ч' + (min % 60 ? ' ' + (min % 60) + ' мин' : '');
 }
+const fmtTime = value => value ? new Date(value).toLocaleTimeString('ru-RU', {timeZone:'Europe/Moscow',hour:'2-digit',minute:'2-digit'}) : '';
 const weekday = date => new Date(date + 'T12:00:00').toLocaleDateString('ru-RU', { weekday: 'long' });
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
@@ -82,7 +85,7 @@ function render() {
   const doneCount = stops.filter(s => s.progress === 'visited').length;
   const walked = day.execution?.consumed_walk_distance_m || 0;
 
-  // ----- Шапка: дата, «Сегодня/Завтра/День недели», погода -----
+  // ----- Шапка: дата, «Сегодня/Завтра/День недели» -----
   $('today-sub').textContent = cap(new Date(day.date + 'T12:00:00').toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' }));
   $('today-h1').textContent = dayWord(day.date);
 
@@ -102,7 +105,7 @@ function render() {
     <div class="td-sum-row">
       <b>${started ? `${doneCount} из ${stops.length} точек` : pluralPts(stops.length)}</b>
       <span>${fmtDistance(started ? walked : total)}${started ? ' из ' + fmtDistance(total) : ''}</span>
-      <span>${fmtDuration(day.totals.elapsed_duration_sec)}</span>
+      <span>${day.nap ? fmtDuration(day.totals.outing_duration_sec || 0)+' прогулка + '+fmtDuration(day.totals.nap_duration_sec || 0)+' сон' : fmtDuration(day.totals.elapsed_duration_sec)}</span>
     </div>
     ${started ? `<div class="td-prog" aria-hidden="true"><i style="width:${stops.length ? doneCount / stops.length * 100 : 0}%"></i></div>` : ''}`;
 
@@ -110,11 +113,12 @@ function render() {
   let card = '';
   if (isToday && next) {
     const leg = legTo(day, next);
+    const sleepTime = next.activity_kind==='nap' ? fmtTime(next.timing.fixed_event_interval?.start_at)+'–'+fmtTime(next.timing.fixed_event_interval?.end_at) : '';
     const kid = opt.kidStopInfo(next.activity_id);
     const line = kidLine(next);
     const chips = [...(line ? [{ cls: 'kid', text: line }] : []), ...nearbyChips(next.location.coordinates)];
     const walk = leg && leg.distance_m >= 30;   // старт совпадает с первой точкой — «0 м пешком» не показываем
-    const meta = [walk && `${fmtDuration(leg.travel_duration_sec)} пешком`, walk && fmtDistance(leg.distance_m), `на месте ~${fmtDuration(next.duration.duration_sec)}`].filter(Boolean).join(' · ');
+    const meta = [sleepTime, walk && `${fmtDuration(leg.travel_duration_sec)} пешком`, walk && fmtDistance(leg.distance_m), `на месте ~${fmtDuration(next.duration.duration_sec)}`].filter(Boolean).join(' · ');
     card = `
       <article class="td-now">
         <div class="td-now-top">
@@ -124,11 +128,11 @@ function render() {
             <h2>${placeEmojiHtml(next.category)} ${esc(next.title)}</h2>
             <p>${esc(meta)}</p>
           </div>
-          ${started && canAct ? '<button class="td-more" data-act="skip" aria-label="Пропустить эту точку">⋯</button>' : ''}
+          ${started && canAct && !next.mandatory ? '<button class="td-more" data-act="skip" aria-label="Пропустить эту точку">⋯</button>' : ''}
         </div>
         ${chips.length ? `<div class="td-chips">${chips.map(chipHtml).join('')}</div>` : ''}
         ${started
-          ? `<button class="btn main slim" data-act="visited" ${live && canAct ? '' : 'disabled'}>Мы на месте ✓</button>`
+          ? `<button class="btn main slim" data-act="visited" ${live && canAct ? '' : 'disabled'}>${next.activity_kind==='nap'?'Сон закончился':'Мы на месте ✓'}</button>`
           : canAct
           ? `<button class="btn main slim" data-act="start" ${live ? '' : 'disabled'}>Начинаем прогулку</button>`
           : ''}
@@ -141,7 +145,7 @@ function render() {
         <p>${fmtDistance(walked)} пешком за день. Фото «тогда и сейчас» — в альбоме.</p>
       </article>`;
   }
-  $('today-now').innerHTML = card;
+  $('today-now').innerHTML = napDayHtml(day)+card;
 
   // ----- Лента дня -----
   const showNextInLine = !(isToday && next);
@@ -151,7 +155,7 @@ function render() {
     const state = s.progress === 'visited' ? 'done' : s.progress === 'skipped' ? 'skipped' : '';
     // Время старта прогулки заранее неизвестно (человек выходит когда удобно) — показываем, сколько идти от предыдущей точки
     const line = s.progress === 'visited' ? 'пройдено'
-      : [walkText(legTo(day, s)), kidLine(s) || `на месте ~${fmtDuration(s.duration.duration_sec)}`].filter(Boolean).join(' · ');
+      : [s.activity_kind==='nap' ? fmtTime(s.timing.fixed_event_interval?.start_at)+'–'+fmtTime(s.timing.fixed_event_interval?.end_at) : '', walkText(legTo(day, s)), kidLine(s) || `на месте ~${fmtDuration(s.duration.duration_sec)}`].filter(Boolean).join(' · ');
     return `<li class="${state}">
       <span class="td-node">${iconFor(s, kid)}</span>
       <span class="td-what"><b>${placeEmojiHtml(s.category)} ${esc(s.title)}</b><small>${esc(line)}</small></span>
@@ -163,18 +167,28 @@ function render() {
     <span class="td-what"><b>Финиш</b><small>${esc([lastLeg && lastLeg.to?.kind === 'day_end' ? walkText(lastLeg) : '', day.end_point.label || 'конец прогулки'].filter(Boolean).join(' · '))}</small></span></li>`);
   $('today-list').innerHTML = rows.join('');
 
-  renderWeather($('today-weather'), day);
   $('today-source').textContent = live ? '' : 'Нет связи с сервером — показан сохранённый план, отметки не работают.';
   bind(next);
 }
 
 function bind(next) {
   const act = name => $('today-now').querySelector(`[data-act="${name}"]`);
-  if (act('start')) act('start').onclick = () => run(startDay, 'Идём! Время прибытия пересчитано от сейчас.');
+  if (act('start')) act('start').onclick = () => today().nap ? startNapDay() : run(startDay, 'Идём! Время прибытия пересчитано от сейчас.');
   if (act('visited')) act('visited').onclick = () => run(() => markVisited(next.stop_id), `Отметили: ${next.title}`);
   if (act('skip')) act('skip').onclick = () => askSkip(next);
 }
 
+async function startNapDay(){
+ if(busy)return;busy=true;
+ try{
+ const coordinates=await currentPosition().catch(()=>null),point=coordinates?{coordinates,label:'Текущая геопозиция'}:today().start_point;
+ const preview=await previewStartDay(point),plan=preview.proposed_trip.days.find(d=>d.date===today().date);
+ const removed=preview.diff.removed_stop_ids.map(id=>today().stops.find(s=>s.stop_id===id)?.title).filter(Boolean);
+ const dialog=$('nap-start-dialog');$('nap-start-content').innerHTML='<p>Старт: '+esc(point.label||'выбранная точка')+(coordinates?'':' (геопозиция недоступна, используем указанную точку старта)')+'</p>'+napDayHtml(plan)+(removed.length?'<p>Чтобы вернуться вовремя, уберём: '+removed.map(esc).join(', ')+'.</p>':'<p>Места распределены до и после сна по фактическому времени старта.</p>')+(!preview.can_apply?'<p class="form-error">Этот план не помещается. Измените места или настройки сна.</p>':'');
+ $('nap-start-apply').disabled=!preview.can_apply;$('nap-start-cancel').onclick=()=>dialog.close();
+ $('nap-start-apply').onclick=async()=>{$('nap-start-apply').disabled=true;try{await applyPreview(preview);dialog.close();toast('День начат. Возвращение к дневному сну учтено.');}catch(error){dialog.close();toast(error.message,true)}};dialog.showModal();
+ }catch(error){toast(error.message,true)}finally{busy=false}
+}
 async function run(action, okText) {
   if (busy) return;
   busy = true;

@@ -19,7 +19,7 @@ import { initPick, openPick } from './pick.js';
 import { initToday, refreshToday, toast } from './today.js';
 import { initMapActions, openUrgentWidget } from './map-actions.js';
 import { initProfile, renderProfile } from './profile.js';
-import { initKid, openKid, syncKidOrder, kidStopInfo, setKidPlaces, clearKidPlaces } from './kid.js';
+import { initKid, openKid, kidStopInfo, setKidRoute, clearKidPlaces } from './kid.js';
 
 const $ = id => document.getElementById(id);
 const app = document.querySelector('.app');
@@ -81,7 +81,8 @@ function startMain() {
   };
 
   // Тропа ребёнка — в порядке маршрута; «Сегодня» — когда подгрузились места рядом
-  const syncKid = () => kidReady.then(() => { const day = today(); if (day) syncKidOrder(day.stops.map(s => s.activity_id)); });
+  // Детская тропа = все места итогового маршрута (по дням, в порядке маршрута); обновляется при любом изменении поездки
+  const syncKid = () => kidReady.then(() => { const t = getTrip(); setKidRoute(t && getSource() === 'backend' ? t : null); });
   onTripChange(syncKid);
   if (getTrip()) syncKid(getTrip());
   const syncInfrastructure = trip => {
@@ -126,7 +127,6 @@ initPick({
       catch(err) { toast(err.message,true); }
       return;
     }
-    kidReady.then(() => setKidPlaces(places.map(p=>p.presentation_id ? {...p,id:p.presentation_id}:p), today()?.start_point?.coordinates || [44.0066,56.3273]));
     if (pickInFlow) { leavePickStep(); afterPick(places); return; }
     openTab('map'); showPicked(places);      // отдельно с карты: выбранные места → карта
   },
