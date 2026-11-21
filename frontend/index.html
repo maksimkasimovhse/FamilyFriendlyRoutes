@@ -9,6 +9,7 @@
 <link href="vendor/maplibre-gl-4.7.1/maplibre-gl.css" rel="stylesheet">
 <link href="css/app.css" rel="stylesheet">
 <link href="css/kid.css" rel="stylesheet">
+<link href="css/window.css" rel="stylesheet">
 <link href="css/pick.css" rel="stylesheet">
 <link href="css/games.css" rel="stylesheet">
 <link href="css/chat.css" rel="stylesheet">
@@ -268,69 +269,85 @@
       </div>
     </section>
 
-    <!-- ===== Окно в прошлое, шаг 1: старое фото и «где стоял фотограф» ===== -->
-    <section class="kid-page" id="window-page" hidden>
-      <header class="kid-bar">
-        <b id="win-title"></b><span class="kid-chip" id="win-years"></span>
-        <button class="kid-exit" data-back aria-label="Назад к тропе">✕</button>
+    <!-- ===== Окно в прошлое, шаг 1: старый кадр и задание ===== -->
+    <section class="kid-page past" id="window-page" hidden>
+      <header class="past-bar">
+        <button class="past-x" data-back aria-label="Назад к тропе">✕</button>
+        <span class="past-kicker">Окно в прошлое</span>
       </header>
-      <div class="kid-center top">
-        <figure class="old-card">
-          <img id="win-old" alt="">
-          <figcaption id="win-attrib"></figcaption>
-        </figure>
-        <p class="kid-say small" id="win-say">Встаньте туда, где стоял фотограф, и сфотографируйтесь вместе!</p>
-        <p class="place-chip" id="win-place">Ищем вас по GPS…</p>
+      <div class="past-scroll">
+        <figure class="past-frame"><img id="win-old" alt=""></figure>
+        <p class="past-attrib" id="win-attrib"></p>
+        <p class="past-year" id="win-years"></p>
+        <h1 class="past-title" id="win-title"></h1>
+        <p class="past-ago" id="win-ago"></p>
+        <ol class="past-steps">
+          <li><span>1</span><b>Найди место</b><small>где стоял фотограф</small></li>
+          <li><span>2</span><b>Совмести</b><small>контур старого кадра</small></li>
+          <li><span>3</span><b>Сними</b><small>и окно откроется</small></li>
+        </ol>
+        <p class="past-gps" id="win-place">Ищем вас по GPS…</p>
       </div>
-      <div class="kid-bottom">
-        <button class="btn kid-main big" id="win-camera">Открыть камеру</button>
-      </div>
+      <div class="past-bottom"><button class="btn past-go" id="win-camera">Открыть окно</button></div>
     </section>
 
-    <!-- ===== Шаг 2: камера на весь экран ===== -->
+    <!-- ===== Шаг 2: камера. Горизонтальное «окно» в пропорциях старого кадра, вокруг — затемнение ===== -->
     <section class="kid-page cam" id="cam-page" hidden>
       <video id="cam-video" autoplay muted playsinline></video>
-      <img id="cam-ghost" alt="">
-      <button class="cam-close" data-back aria-label="Закрыть камеру">✕</button>
-      <p class="cam-tip" id="cam-tip">Совместите старое фото с тем, что видите</p>
+      <div class="cam-window" id="cam-window">
+        <img id="cam-ghost" alt="">
+        <i class="cw tl"></i><i class="cw tr"></i><i class="cw bl"></i><i class="cw br"></i>
+      </div>
+      <div class="cam-flash" id="cam-flash"></div>
+      <header class="cam-top">
+        <button class="cam-close" data-back aria-label="Закрыть камеру">✕</button>
+        <p class="cam-tip" id="cam-tip">Совместите контур с тем, что видите</p>
+      </header>
       <div class="cam-panel">
-        <input type="range" id="cam-opacity" min="0" max="100" value="50" aria-label="Прозрачность старого фото">
+        <div class="cam-modes" role="group" aria-label="Подсказка на кадре">
+          <button type="button" data-mode="edges" class="on">Контур</button>
+          <button type="button" data-mode="photo">Старое фото</button>
+        </div>
+        <input type="range" id="cam-opacity" min="15" max="95" value="70" aria-label="Насколько видна подсказка">
         <div class="cam-buttons">
-          <label class="cam-side" title="Фото из галереи">
+          <label class="cam-side" title="Фото из галереи" aria-label="Фото из галереи">
             <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 16l5-5 4 4 3-3 6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
             <input type="file" accept="image/*" id="cam-file" hidden>
           </label>
           <button class="shutter" id="cam-shot" aria-label="Сфотографировать"><span></span></button>
-          <span class="cam-side ghost-label">Тогда</span>
+          <button type="button" class="cam-side peek" id="cam-peek" aria-label="Удерживайте, чтобы увидеть старый кадр">Тогда</button>
         </div>
       </div>
     </section>
 
     <!-- ===== Шаг 3: окно открыто — тогда / сейчас ===== -->
-    <section class="kid-page result" id="result-page" hidden>
-      <header class="kid-bar">
-        <b id="res-title"></b><span class="kid-chip" id="res-years"></span>
-        <button class="kid-exit" data-back aria-label="Назад к тропе">✕</button>
+    <section class="kid-page past result" id="result-page" hidden>
+      <header class="past-bar">
+        <button class="past-x" data-back aria-label="Назад к тропе">✕</button>
+        <span class="past-kicker open">Окно открыто</span>
       </header>
-      <div class="result-scroll">
+      <div class="past-scroll">
+        <h1 class="past-title small" id="res-title"></h1>
         <div class="tn" id="res-tn">
           <img class="now" id="res-now" alt="Сейчас: ваше фото">
           <img class="old" id="res-old" alt="">
-          <span class="tag then">Тогда</span><span class="tag now-tag">Сейчас</span>
+          <span class="tag then" id="res-years"></span><span class="tag now-tag" id="res-now-year"></span>
           <div class="tn-handle" aria-hidden="true"></div>
           <input type="range" id="res-range" min="0" max="100" value="50" aria-label="Тогда / сейчас">
         </div>
-        <p class="res-attrib" id="res-attrib"></p>
-        <p class="kid-say left" id="res-kid"></p>
-        <details class="adult">
+        <p class="past-hint">Двигай шторку — путешествуй во времени</p>
+        <p class="past-attrib" id="res-attrib"></p>
+        <div class="past-gap" id="res-gap"></div>
+        <p class="past-kid" id="res-kid"></p>
+        <details class="adult past-adult">
           <summary>Для взрослых: история места</summary>
           <p id="res-adult"></p>
           <p class="source" id="res-source"></p>
         </details>
       </div>
-      <div class="kid-bottom row">
-        <button class="btn kid-ghost" id="res-save">Сохранить сторис</button>
-        <button class="btn kid-main" id="res-next">Дальше</button>
+      <div class="past-bottom row">
+        <button class="btn past-ghost" id="res-save">Сторис</button>
+        <button class="btn past-go" id="res-next">Дальше</button>
       </div>
     </section>
 

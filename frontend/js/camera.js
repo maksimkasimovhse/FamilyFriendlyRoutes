@@ -79,31 +79,93 @@ export function watchPlace(stop, demo, onChange) {
   };
 }
 
+// ---------- Старый кадр: чистим и строим контур ----------
+// У снимков PastVu внизу тёмная полоса с водяным знаком — срезаем её (подпись автора показываем отдельно).
+const TRIM_BOTTOM = 0.045;
+const assets = new Map();
+const loadImg = src => new Promise((ok, fail) => { const i = new Image(); i.onload = () => ok(i); i.onerror = fail; i.src = src; });
+
+// { url, edges, aspect } — чистый кадр, его контур (светлые линии на прозрачном) и пропорции
+export function prepareOld(stop) {
+  if (!assets.has(stop.id)) assets.set(stop.id, (async () => {
+    const img = await loadImg(stop.photo.url);
+    const w = img.naturalWidth, h = Math.round(img.naturalHeight * (1 - TRIM_BOTTOM));
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    c.getContext('2d').drawImage(img, 0, 0, w, h, 0, 0, w, h);
+    return { url: c.toDataURL('image/jpeg', 0.92), edges: edgesOf(c), aspect: w / h };
+  })());
+  return assets.get(stop.id);
+}
+
+// Контур Собелем: оставляем ~13% самых резких границ — дома, купола, линия площади
+function edgesOf(src) {
+  const W = 560, H = Math.round(W * src.height / src.width);
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  g.filter = 'blur(1px)'; g.drawImage(src, 0, 0, W, H); g.filter = 'none';
+  const px = g.getImageData(0, 0, W, H), d = px.data;
+  const gray = new Float32Array(W * H);
+  for (let i = 0; i < W * H; i++) gray[i] = d[i * 4] * .3 + d[i * 4 + 1] * .59 + d[i * 4 + 2] * .11;
+  const mag = new Float32Array(W * H);
+  for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+    const i = y * W + x, q = k => gray[i + k];
+    const gx = -q(-W - 1) - 2 * q(-1) - q(W - 1) + q(-W + 1) + 2 * q(1) + q(W + 1);
+    const gy = -q(-W - 1) - 2 * q(-W) - q(-W + 1) + q(W - 1) + 2 * q(W) + q(W + 1);
+    mag[i] = Math.hypot(gx, gy);
+  }
+  const sorted = Float32Array.from(mag).sort();
+  const lo = sorted[Math.floor(sorted.length * .87)], hi = sorted[Math.floor(sorted.length * .985)] || lo + 1;
+  for (let i = 0; i < W * H; i++) {
+    const a = Math.max(0, Math.min(1, (mag[i] - lo) / (hi - lo)));
+    d[i * 4] = 255; d[i * 4 + 1] = 236; d[i * 4 + 2] = 196; d[i * 4 + 3] = Math.round(a * 255);
+  }
+  g.putImageData(px, 0, 0);
+  return c.toDataURL('image/png');
+}
+
 // ---------- Камера ----------
 const video = $('cam-video');
 const ghost = $('cam-ghost');
-let stream = null;
-let onPhoto = null;
-let stopWatch = null;
+const win = $('cam-window');
+let stream = null, onPhoto = null, stopWatch = null, asset = null, mode = 'edges';
+
+// Окно — по центру между верхней подсказкой и панелью; на повёрнутом телефоне становится шире
+function layoutWindow() {
+  if (!asset || $('cam-page').hidden) return;
+  const page = $('cam-page').getBoundingClientRect();
+  const top = 76, bottom = $('cam-page').querySelector('.cam-panel').offsetHeight + 16;
+  const availW = page.width - 28, availH = page.height - top - bottom;
+  const w = Math.min(availW, availH * asset.aspect), h = w / asset.aspect;
+  Object.assign(win.style, { width: w + 'px', height: h + 'px', left: (page.width - w) / 2 + 'px', top: top + (availH - h) / 2 + 'px' });
+}
+addEventListener('resize', layoutWindow);
+
+function setMode(m) {
+  mode = m;
+  ghost.src = m === 'edges' ? asset.edges : asset.url;
+  $('cam-page').querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
+  ghost.style.opacity = $('cam-opacity').value / 100;
+}
 
 export async function openCamera(stop, demo, photoCallback) {
   onPhoto = photoCallback;
-  ghost.src = stop.photo.url;
-  ghost.style.opacity = $('cam-opacity').value / 100;
+  asset = await prepareOld(stop);
   $('cam-page').hidden = false;
-  $('cam-tip').textContent = 'Совместите старое фото с тем, что видите';
+  setMode('edges');
+  layoutWindow();
+  $('cam-tip').textContent = 'Совместите контур с тем, что видите';
   stopWatch = watchPlace(stop, demo, s => {
-    $('cam-tip').textContent = s.ready && !s.text.includes('Повернитесь') ? 'Совместите старое фото с тем, что видите' : s.text;
+    $('cam-tip').textContent = s.ready && !s.text.includes('Повернитесь') ? 'Совместите контур с тем, что видите' : s.text;
   });
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     $('cam-tip').textContent = 'Камера работает только по HTTPS — выберите фото из галереи';
     return;
   }
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
     video.srcObject = stream;
     await video.play();
-  } catch (err) {
+  } catch {
     $('cam-tip').textContent = 'Камера недоступна — выберите фото из галереи';
   }
 }
@@ -117,32 +179,50 @@ export function closeCamera() {
   $('cam-page').hidden = true;
 }
 
-// Снимок с той же обрезкой, что видна на экране (object-fit: cover),
-// чтобы «сейчас» легло на «тогда» так же, как человек их совместил.
-function captureCover(source, srcW, srcH) {
-  const view = $('cam-page').getBoundingClientRect();
-  const outW = 1080, outH = Math.round(outW * view.height / view.width);
-  const scale = Math.max(view.width / srcW, view.height / srcH);
-  const sw = view.width / scale, sh = view.height / scale;
-  const canvas = document.createElement('canvas');
-  canvas.width = outW; canvas.height = outH;
-  canvas.getContext('2d').drawImage(source, (srcW - sw) / 2, (srcH - sh) / 2, sw, sh, 0, 0, outW, outH);
-  return { url: canvas.toDataURL('image/jpeg', 0.9), aspect: view.width / view.height };
+// Снимаем ровно то, что видно в окне: те же пропорции, что у старого кадра —
+// поэтому «тогда» и «сейчас» потом лягут друг на друга без обрезки.
+function captureWindow() {
+  const vr = video.getBoundingClientRect(), wr = win.getBoundingClientRect();
+  const vw = video.videoWidth, vh = video.videoHeight;
+  const scale = Math.max(vr.width / vw, vr.height / vh);
+  const x0 = vr.left + (vr.width - vw * scale) / 2, y0 = vr.top + (vr.height - vh * scale) / 2;
+  return cropTo(video, (wr.left - x0) / scale, (wr.top - y0) / scale, wr.width / scale, wr.height / scale);
+}
+// Фото из галереи: берём центр в пропорциях старого кадра
+function captureFile(img) {
+  const iw = img.naturalWidth, ih = img.naturalHeight;
+  const w = Math.min(iw, ih * asset.aspect), h = w / asset.aspect;
+  return cropTo(img, (iw - w) / 2, (ih - h) / 2, w, h);
+}
+function cropTo(source, sx, sy, sw, sh) {
+  const outW = 1600, outH = Math.round(outW / asset.aspect);
+  const c = document.createElement('canvas'); c.width = outW; c.height = outH;
+  c.getContext('2d').drawImage(source, sx, sy, sw, sh, 0, 0, outW, outH);
+  return c.toDataURL('image/jpeg', 0.9);
 }
 
-function finish(photo) { closeCamera(); onPhoto(photo.url, photo.aspect); }
+function finish(url) {
+  const f = $('cam-flash');
+  f.classList.remove('go'); void f.offsetWidth; f.classList.add('go');
+  setTimeout(() => { closeCamera(); onPhoto(url, asset); }, 260);
+}
 
+$('cam-page').querySelectorAll('[data-mode]').forEach(b => { b.onclick = () => setMode(b.dataset.mode); });
 $('cam-opacity').addEventListener('input', e => { ghost.style.opacity = e.target.value / 100; });
+// «Тогда» — пока держишь палец, видно старый кадр целиком
+const peek = on => { if (!asset) return; ghost.src = on ? asset.url : (mode === 'edges' ? asset.edges : asset.url); ghost.style.opacity = on ? 1 : $('cam-opacity').value / 100; };
+$('cam-peek').addEventListener('pointerdown', () => peek(true));
+['pointerup', 'pointerleave', 'pointercancel'].forEach(e => $('cam-peek').addEventListener(e, () => peek(false)));
 $('cam-shot').addEventListener('click', () => {
   if (!stream || !video.videoWidth) { $('cam-tip').textContent = 'Камера ещё не включилась — подождите или выберите фото из галереи'; return; }
-  finish(captureCover(video, video.videoWidth, video.videoHeight));
+  finish(captureWindow());
 });
 // Запасной путь: фото из галереи (если камера недоступна)
 $('cam-file').addEventListener('change', e => {
   const file = e.target.files[0];
   if (!file) return;
   const img = new Image();
-  img.onload = () => { finish(captureCover(img, img.naturalWidth, img.naturalHeight)); URL.revokeObjectURL(img.src); };
+  img.onload = () => { finish(captureFile(img)); URL.revokeObjectURL(img.src); };
   img.src = URL.createObjectURL(file);
   e.target.value = '';
 });
