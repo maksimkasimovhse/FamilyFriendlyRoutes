@@ -1,0 +1,44 @@
+/* Полировка юзабилити перед показом. Подключается последним. */
+
+/* ----- Нижние кнопки чуть выше: на iPhone полоска «домой» не задевает их ----- */
+:root { --safe-b: max(20px, calc(env(safe-area-inset-bottom) + 12px)); }
+.flow-bottom, .kid-bottom, .past-bottom, .pick-finish, .sheet-actions { padding-bottom: var(--safe-b) !important; }
+.tabbar { height: calc(64px + env(safe-area-inset-bottom)); padding-bottom: calc(env(safe-area-inset-bottom) + 4px); }
+.cam-panel { padding-bottom: calc(var(--safe-b) + 6px) !important; }
+
+/* ----- Панель карты не уезжает вбок при касании ----- */
+#screen-map .sheet, #screen-map .map-sheet-content { overflow-x: hidden; overscroll-behavior-x: none; }
+#screen-map .map-sheet-content { touch-action: pan-y; }
+#screen-map .map-sheet-content .chips { touch-action: pan-x; }
+
+/* ----- Старт и финиш в маршруте — подписи, а не кнопки ----- */
+.pv-list .pv-end { background: transparent; }
+.pv-list .n.end { background: transparent; color: var(--ink-2); width: 30px; height: 30px; }
+.pv-list .n.end svg { width: 22px; height: 22px; }
+.pv-list .pv-end b { font-size: 13px; font-weight: 700; color: var(--ink-2); text-transform: uppercase; letter-spacing: .04em; }
+.pv-list .pv-end small { color: var(--ink); font-weight: 700; }
+
+/* ----- Выход из детского режима — удержанием, с заполнением ----- */
+.kid-exit { position: relative; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; font-size: 12px; }
+.kid-exit .hold-fill { position: absolute; inset: 0; background: rgba(255,255,255,.45); transform: scaleX(0); transform-origin: left; transition: transform .15s; pointer-events: none; }
+.kid-exit.holding .hold-fill { transform: scaleX(1); transition: transform 1.2s linear; }
+.kid-exit svg, .kid-exit .hold-text { position: relative; }
+.kid-exit .hold-text { font-size: 11px; line-height: 1.15; text-align: left; white-space: nowrap; }
+.kid-exit { min-height: 40px; padding: 0 12px; border-radius: 14px; flex: none; }
+
+/* ----- Камера окна: без ползунка, контур с тёмной обводкой — виден на любом фоне ----- */
+.cam-modes { margin-bottom: 18px; }
+.cam-modes button { min-height: 42px; padding: 0 20px; font-size: 15px; }
+.cam-window img.edges { filter: drop-shadow(0 0 1px rgba(0,0,0,.95)) drop-shadow(0 0 2px rgba(0,0,0,.7)); }
+
+/* ----- «Для взрослых» — видно, что это кнопка-раскрывашка ----- */
+details.adult summary { list-style: none; gap: 10px; }
+details.adult summary::-webkit-details-marker { display: none; }
+details.adult .adult-ico { font-size: 18px; }
+details.adult .adult-chev { margin-left: auto; width: 30px; height: 30px; border-radius: 50%; flex: none; background: rgba(36,99,214,.12) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5' fill='none' stroke='%232463D6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 18px no-repeat; transition: transform .2s; }
+details.adult[open] .adult-chev { transform: rotate(180deg); }
+details.past-adult { border: 1.5px solid rgba(233,199,154,.45); background: rgba(244,235,221,.1); }
+details.past-adult summary { color: #F4EBDD; }
+details.past-adult .adult-chev { background-color: rgba(233,199,154,.22); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5' fill='none' stroke='%23E9C79A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+details.past-adult .source a { color: inherit; }
+details.adult:not([open]) { padding-bottom: 4px; }

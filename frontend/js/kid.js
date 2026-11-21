@@ -87,7 +87,8 @@ function renderTrail() {
   const total = route.stops.length;
   const opened = route.stops.filter(isDone).length;
   $('kid-title').textContent = 'Тропа ' + child.nameGenitive;
-  $('kid-progress').textContent = `${opened} из ${total} ${plural(total, 'задания', 'заданий', 'заданий')}`;
+  $('kid-progress').textContent = `★ ${opened}/${total}`;
+  $('kid-progress').setAttribute('aria-label', `${opened} из ${total} ${plural(total, 'задания', 'заданий', 'заданий')}`);
   $('fawn-img').src = outfitImg(state.outfit);
 
   const map = $('trail-map');
@@ -227,7 +228,6 @@ async function openWindow(s) {
   $('win-title').textContent = s.title;
   $('win-years').textContent = s.years;
   $('win-ago').textContent = `${agoText(s)} здесь стоял фотограф. Найди его место — и посмотри на площадь его глазами.`;
-  $('win-attrib').textContent = s.photo.attribution;
   $('win-old').alt = `Старое фото: ${s.title}, ${s.years}`;
   $('win-old').src = s.photo.url;
   showPage('window-page');
@@ -384,6 +384,21 @@ function closeKid() {
   onExit();
 }
 
+function holdToExit(btn, done) {
+  const HOLD = 1200;
+  let timer = null;
+  const stop = () => { clearTimeout(timer); timer = null; btn.classList.remove('holding'); };
+  btn.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    btn.classList.add('holding');
+    timer = setTimeout(() => { stop(); done(); }, HOLD);
+  });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => btn.addEventListener(ev, stop));
+  btn.addEventListener('contextmenu', e => e.preventDefault());
+  // с клавиатуры (Enter/пробел) выход остаётся обычным — это взрослый с клавиатурой, не ребёнок
+  btn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); done(); } });
+}
+
 // options: { childName, childNameGenitive, ageYears, onExit }
 export async function initKid(options) {
   let loaded;
@@ -401,7 +416,8 @@ export async function initKid(options) {
   save();
 
   $('kid-go').onclick = () => { const n = nextStop(); if (n) openStop(n); };
-  $('kid-exit').onclick = closeKid;
+  // Выход — только удержанием 1,2 с: ребёнок не выйдет случайным касанием
+  holdToExit($('kid-exit'), closeKid);
   $('fawn-buddy').onclick = () => fawnSays(fawnLine());
   document.querySelectorAll('.kid-mode [data-back]').forEach(b => b.addEventListener('click', backToTrail));
   $('stamp-next').onclick = backToTrail;

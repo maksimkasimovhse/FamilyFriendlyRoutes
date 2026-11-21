@@ -296,9 +296,9 @@ function renderPreview() {
     return `<li><span class="n">${i + 1}</span><span><b>${esc(s.title)}</b><small>${time ? time + ' · ' : ''}на месте ~${fmtDuration(s.duration.duration_sec)}</small></span></li>`;
   }).join('');
   $('preview-list').innerHTML = `
-    <li><span class="n end">▶</span><span><b>Старт</b><small>${esc(day.start_point.label || 'точка старта')}</small></span></li>
+    <li class="pv-end"><span class="n end"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.6-6-10.5A6 6 0 0 1 18 10.5C18 15.4 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10.5" r="2.2" fill="currentColor"/></svg></span><span><b>Старт</b><small>${esc(day.start_point.label || 'точка старта')}</small></span></li>
     ${stops || '<li><span><small>На этот день мест не нашлось — попробуйте больше часов или другие даты</small></span></li>'}
-    <li><span class="n end">■</span><span><b>Финиш</b><small>${esc(day.end_point.label || 'точка финиша')}</small></span></li>`;
+    <li class="pv-end"><span class="n end"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 4h11l-2 4 2 4H6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></span><span><b>Финиш</b><small>${esc(day.end_point.label || 'точка финиша')}</small></span></li>`;
   renderSelectionReview();
   let minimumPanel=$('preview-auto-minimum');
   if(!minimumPanel){minimumPanel=document.createElement('p');minimumPanel.id='preview-auto-minimum';minimumPanel.className='selection-overflow';minimumPanel.setAttribute('role','alert');$('preview-line').after(minimumPanel);}

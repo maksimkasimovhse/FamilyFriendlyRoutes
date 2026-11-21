@@ -114,10 +114,16 @@ function edgesOf(src) {
     mag[i] = Math.hypot(gx, gy);
   }
   const sorted = Float32Array.from(mag).sort();
-  const lo = sorted[Math.floor(sorted.length * .87)], hi = sorted[Math.floor(sorted.length * .985)] || lo + 1;
+  const lo = sorted[Math.floor(sorted.length * .84)], hi = sorted[Math.floor(sorted.length * .95)] || lo + 1;
+  // Утолщаем линии (берём максимум по соседям) — контур читается и на ярком небе, и на тёмных домах
+  const thick = new Float32Array(W * H);
+  for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) {
+    const i = y * W + x;
+    thick[i] = Math.max(mag[i], mag[i - 1], mag[i + 1], mag[i - W], mag[i + W]);
+  }
   for (let i = 0; i < W * H; i++) {
-    const a = Math.max(0, Math.min(1, (mag[i] - lo) / (hi - lo)));
-    d[i * 4] = 255; d[i * 4 + 1] = 236; d[i * 4 + 2] = 196; d[i * 4 + 3] = Math.round(a * 255);
+    const a = Math.max(0, Math.min(1, (thick[i] - lo) / (hi - lo)));
+    d[i * 4] = 255; d[i * 4 + 1] = 246; d[i * 4 + 2] = 214; d[i * 4 + 3] = Math.round(a * 255);
   }
   g.putImageData(px, 0, 0);
   return c.toDataURL('image/png');
@@ -144,7 +150,8 @@ function setMode(m) {
   mode = m;
   ghost.src = m === 'edges' ? asset.edges : asset.url;
   $('cam-page').querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
-  ghost.style.opacity = $('cam-opacity').value / 100;
+  ghost.classList.toggle('edges', m === 'edges');
+  ghost.style.opacity = m === 'edges' ? 1 : 0.55;
 }
 
 export async function openCamera(stop, demo, photoCallback) {
@@ -158,7 +165,7 @@ export async function openCamera(stop, demo, photoCallback) {
     $('cam-tip').textContent = s.ready && !s.text.includes('Повернитесь') ? 'Совместите контур с тем, что видите' : s.text;
   });
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    $('cam-tip').textContent = 'Камера работает только по HTTPS — выберите фото из галереи';
+    $('cam-tip').textContent = 'Камера работает только по HTTPS';
     return;
   }
   try {
@@ -166,7 +173,7 @@ export async function openCamera(stop, demo, photoCallback) {
     video.srcObject = stream;
     await video.play();
   } catch {
-    $('cam-tip').textContent = 'Камера недоступна — выберите фото из галереи';
+    $('cam-tip').textContent = 'Камера недоступна — разрешите доступ к камере в настройках';
   }
 }
 
@@ -188,12 +195,6 @@ function captureWindow() {
   const x0 = vr.left + (vr.width - vw * scale) / 2, y0 = vr.top + (vr.height - vh * scale) / 2;
   return cropTo(video, (wr.left - x0) / scale, (wr.top - y0) / scale, wr.width / scale, wr.height / scale);
 }
-// Фото из галереи: берём центр в пропорциях старого кадра
-function captureFile(img) {
-  const iw = img.naturalWidth, ih = img.naturalHeight;
-  const w = Math.min(iw, ih * asset.aspect), h = w / asset.aspect;
-  return cropTo(img, (iw - w) / 2, (ih - h) / 2, w, h);
-}
 function cropTo(source, sx, sy, sw, sh) {
   const outW = 1600, outH = Math.round(outW / asset.aspect);
   const c = document.createElement('canvas'); c.width = outW; c.height = outH;
@@ -208,21 +209,7 @@ function finish(url) {
 }
 
 $('cam-page').querySelectorAll('[data-mode]').forEach(b => { b.onclick = () => setMode(b.dataset.mode); });
-$('cam-opacity').addEventListener('input', e => { ghost.style.opacity = e.target.value / 100; });
-// «Тогда» — пока держишь палец, видно старый кадр целиком
-const peek = on => { if (!asset) return; ghost.src = on ? asset.url : (mode === 'edges' ? asset.edges : asset.url); ghost.style.opacity = on ? 1 : $('cam-opacity').value / 100; };
-$('cam-peek').addEventListener('pointerdown', () => peek(true));
-['pointerup', 'pointerleave', 'pointercancel'].forEach(e => $('cam-peek').addEventListener(e, () => peek(false)));
 $('cam-shot').addEventListener('click', () => {
-  if (!stream || !video.videoWidth) { $('cam-tip').textContent = 'Камера ещё не включилась — подождите или выберите фото из галереи'; return; }
+  if (!stream || !video.videoWidth) { $('cam-tip').textContent = 'Камера ещё не включилась — подождите секунду'; return; }
   finish(captureWindow());
-});
-// Запасной путь: фото из галереи (если камера недоступна)
-$('cam-file').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const img = new Image();
-  img.onload = () => { finish(captureFile(img)); URL.revokeObjectURL(img.src); };
-  img.src = URL.createObjectURL(file);
-  e.target.value = '';
 });

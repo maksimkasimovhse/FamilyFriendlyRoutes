@@ -27,6 +27,7 @@
 <link href="css/today.css" rel="stylesheet">
 <link href="css/profile.css" rel="stylesheet">
 <link href="css/landing.css" rel="stylesheet">
+<link href="css/polish.css" rel="stylesheet">
 <script src="vendor/maplibre-gl-4.7.1/maplibre-gl.js"></script>
 <script type="module" src="js/app.js"></script>
 </head>
@@ -139,7 +140,7 @@
       </div>
       <button type="button" id="map-kid-mode" class="map-kid-mode"><span class="map-kid-mark" aria-hidden="true">✦</span><span>Детский режим</span><span class="map-kid-arrow" aria-hidden="true">›</span></button>
       <div id="sheet-body" aria-live="polite"><p class="muted">Строим маршрут…</p></div>
-      <div class="map-edit"><button type="button" id="map-edit-toggle" aria-expanded="false" aria-controls="map-edit-form"><span>✦</span> Изменить маршрут</button><form id="map-edit-form" hidden><label class="sr-only" for="map-edit-text">Как изменить маршрут</label><div class="map-edit-row"><input id="map-edit-text" maxlength="2000" autocomplete="off" placeholder="Например: убери последнюю точку" required><button type="submit" aria-label="Рассчитать изменение маршрута">↑</button></div><p>Убрать точку, сократить прогулку или пересчитать оставшийся путь.</p></form></div>
+      <div class="map-edit"><button type="button" id="map-edit-toggle" aria-expanded="false" aria-controls="map-edit-form"><span>✦</span> Изменить маршрут</button><form id="map-edit-form" hidden><label class="sr-only" for="map-edit-text">Как изменить маршрут</label><div class="map-edit-row"><input id="map-edit-text" maxlength="2000" autocomplete="off" placeholder="Например: убери последнюю точку" required><button type="submit" aria-label="Рассчитать изменение маршрута">↑</button></div></form></div>
       </div>
     </div>
   </section>
@@ -223,8 +224,8 @@
     <header class="kid-bar">
       <b id="kid-title">Тропа Маши</b>
       <span class="kid-chip" id="kid-progress">0 из 4 окон</span>
-      <button class="kid-exit" id="kid-exit" aria-label="Выйти из детского режима">
-        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>выход
+      <button class="kid-exit" id="kid-exit" aria-label="Зажмите и держите, чтобы выйти из детского режима">
+        <span class="hold-fill" aria-hidden="true"></span><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.5"/></svg><span class="hold-text">Зажмите,<br>чтобы выйти</span>
       </button>
     </header>
 
@@ -281,7 +282,6 @@
       </header>
       <div class="past-scroll">
         <figure class="past-frame"><img id="win-old" alt=""></figure>
-        <p class="past-attrib" id="win-attrib"></p>
         <p class="past-year" id="win-years"></p>
         <h1 class="past-title" id="win-title"></h1>
         <p class="past-ago" id="win-ago"></p>
@@ -312,14 +312,10 @@
           <button type="button" data-mode="edges" class="on">Контур</button>
           <button type="button" data-mode="photo">Старое фото</button>
         </div>
-        <input type="range" id="cam-opacity" min="15" max="95" value="70" aria-label="Насколько видна подсказка">
         <div class="cam-buttons">
-          <label class="cam-side" title="Фото из галереи" aria-label="Фото из галереи">
-            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 16l5-5 4 4 3-3 6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-            <input type="file" accept="image/*" id="cam-file" hidden>
-          </label>
+          <span></span>
           <button class="shutter" id="cam-shot" aria-label="Сфотографировать"><span></span></button>
-          <button type="button" class="cam-side peek" id="cam-peek" aria-label="Удерживайте, чтобы увидеть старый кадр">Тогда</button>
+          <span></span>
         </div>
       </div>
     </section>
@@ -339,14 +335,13 @@
           <div class="tn-handle" aria-hidden="true"></div>
           <input type="range" id="res-range" min="0" max="100" value="50" aria-label="Тогда / сейчас">
         </div>
-        <p class="past-hint">Двигай шторку — путешествуй во времени</p>
-        <p class="past-attrib" id="res-attrib"></p>
         <div class="past-gap" id="res-gap"></div>
         <p class="past-kid" id="res-kid"></p>
         <details class="adult past-adult">
-          <summary>Для взрослых: история места</summary>
+          <summary><span class="adult-ico" aria-hidden="true">📖</span><span>Для взрослых: история места</span><span class="adult-chev" aria-hidden="true"></span></summary>
           <p id="res-adult"></p>
           <p class="source" id="res-source"></p>
+          <p class="source" id="res-attrib"></p>
         </details>
       </div>
       <div class="past-bottom row">
@@ -599,7 +594,7 @@
   <section class="flow trip" id="trip-preview" hidden>
     <header class="flow-top">
       <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
-      <div class="flow-step"><span class="draft-label">Черновик — ещё не сохранён</span></div>
+      <div class="flow-step"></div>
     </header>
     <div class="flow-scroll">
       <h1 class="flow-title" id="preview-title">Маршрут</h1>
