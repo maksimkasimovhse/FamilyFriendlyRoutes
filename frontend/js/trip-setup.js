@@ -1,4 +1,3 @@
-import { routeDurationHtml } from './route-duration.js';
 import { selectionReview } from './selection-review.js';
 // Новая поездка: экраны 5, 7, 8 (+ шаг 2 — подбор мест из pick.js) — docs/tz-onboarding.md.
 // Гость: POST /trips с полным TripInput из локальной анкеты.
@@ -292,9 +291,6 @@ function renderPreview() {
   const day = days[previewDay];
   const t = day.totals;
   $('preview-line').textContent = `${cap(fmtDay(day.date, { weekday: 'long', day: 'numeric', month: 'long' }))} · около ${fmtDuration(t.elapsed_duration_sec || 0)} · ${fmtDistance(t.walk_distance_m || 0)} пешком`;
-  let durationPanel=$('preview-duration');
-  if(!durationPanel){durationPanel=document.createElement('div');durationPanel.id='preview-duration';$('preview-line').after(durationPanel);}
-  durationPanel.innerHTML=routeDurationHtml(day,fmtDuration);
   const stops = day.stops.map((s, i) => {
     const time = fmtTime(s.timing?.estimated_arrival_at);
     return `<li><span class="n">${i + 1}</span><span><b>${esc(s.title)}</b><small>${time ? time + ' · ' : ''}на месте ~${fmtDuration(s.duration.duration_sec)}</small></span></li>`;
@@ -337,36 +333,15 @@ function reviewOf(trip) {
   return { cards, excludedCount: cards.filter(card => card.missing).length };
 }
 let selectionBusy=false;
+// Список «Выбранные места» убран. Остался только короткий текст, если часть выбранных мест не вошла в план.
 function renderSelectionReview() {
- let panel=$('preview-selection-review');
- if(!panel){panel=document.createElement('section');panel.id='preview-selection-review';panel.className='selection-review';$('preview-list').after(panel);}
- const {cards,excludedCount}=reviewOf(preview.proposed_trip);
- panel.hidden=!cards.length;
- panel.innerHTML=(excludedCount ? '<p class="selection-overflow" role="alert"><b>Вы не успеете пройти маршрут со всеми выбранными местами.</b> Рекомендуем исключить '+plural(excludedCount,'карточку','карточки','карточек')+'.</p><p class="small">Отмечены места, которые не вошли в текущий расчёт. Можно убрать любые карточки — после удаления пересчитаем маршрут. Также можно увеличить время или изменить даты.</p>' : '')+
- '<h3>Выбранные места ('+cards.length+')</h3><ul class="selection-review-list">'+cards.map(card=>'<li class="'+(card.missing?'is-excluded':'')+'"><span><b>'+esc(card.title)+'</b>'+(card.missing?'<small>Не помещается или недоступно в выбранные даты</small>':'')+'</span><button type="button" data-remove-choice="'+esc(card.activityId)+'" aria-label="Убрать '+esc(card.title)+'" title="Убрать место">×</button></li>').join('')+'</ul>';
- panel.querySelectorAll('[data-remove-choice]').forEach(button=>button.onclick=()=>removePreviewChoice(button.dataset.removeChoice));
-}
-async function removePreviewChoice(activityId) {
- if(selectionBusy)return;
- selectionBusy=true;
- $('trip-preview').querySelectorAll('button').forEach(button=>button.disabled=true);
- $('preview-selection-review').insertAdjacentHTML('afterbegin','<p class="small" role="status">Пересчитываем маршрут…</p>');
- $('preview-error').hidden=true;
- try {
-  const input=structuredClone(preview.proposed_trip.input);
-  input.selections=input.selections.filter(choice=>choice.activity_id!==activityId);
-  const nextDraft=await createTrip(input);
-  const nextPreview=await planDraft(nextDraft);
-  draftTrip=nextDraft;preview=nextPreview;
-  st.picked=st.picked.filter(card=>card.activity_id!==activityId);persist();
-  renderPreview();
- }catch(error){
-  renderPreview();$('preview-error').textContent=humanError(error);$('preview-error').hidden=false;
- }finally{
-  selectionBusy=false;
-  $('trip-preview').querySelectorAll('button').forEach(button=>button.disabled=false);
-  renderPreviewSaveButton();
- }
+  let panel = $('preview-selection-review');
+  if (!panel) { panel = document.createElement('section'); panel.id = 'preview-selection-review'; panel.className = 'selection-review'; $('preview-list').after(panel); }
+  const { excludedCount } = reviewOf(preview.proposed_trip);
+  panel.hidden = !excludedCount;
+  panel.innerHTML = excludedCount
+    ? `<p class="selection-overflow" role="alert"><b>${plural(excludedCount, 'выбранное место не вошло', 'выбранных места не вошли', 'выбранных мест не вошли')} в маршрут.</b> Не хватает времени или сил на ходьбу, либо место недоступно в выбранные даты. Добавьте его через «Изменить план» или сохраните как есть.</p>`
+    : '';
 }
 
 function renderCompletionOffer() {
