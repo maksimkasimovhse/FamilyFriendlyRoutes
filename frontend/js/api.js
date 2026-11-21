@@ -193,3 +193,15 @@ export function previewRouteEdit(text) {
 export function previewActivity(selection) {
  return preview({kind:'add_activity',date:today().date,selection});
 }
+
+// Свободная просьба для помощника: сервер сам находит только реальные кандидаты,
+// хранит их в коротком контексте и возвращает preview, а не меняет поездку.
+export function askRouteAssistant(message) {
+ return call('POST', tripPath() + '/assistant/messages', {
+  expected_version: trip.version,
+  date: today().date,
+  message,
+  current_position: null,
+  observed_at: null,
+ }, true);
+}
