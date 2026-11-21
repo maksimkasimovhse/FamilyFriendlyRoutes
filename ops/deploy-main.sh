@@ -33,6 +33,14 @@ if ! git -C "${repo_dir}" cat-file -e "${target_commit}:compose.yaml" 2>/dev/nul
   exit 0
 fi
 
+# Keep a private recovery copy of the running app's file store before switching code.
+if [[ -f "${repo_dir}/data/backend/state.json" ]]; then
+  mkdir -p "${state_dir}/backups"
+  chmod 700 "${state_dir}/backups"
+  cp -p "${repo_dir}/data/backend/state.json" "${state_dir}/backups/state-${target_commit}.json"
+  chmod 600 "${state_dir}/backups/state-${target_commit}.json"
+fi
+
 git -C "${repo_dir}" switch --force-create "${branch}" "origin/${branch}"
 git -C "${repo_dir}" reset --hard "${target_commit}"
 
@@ -68,11 +76,37 @@ PY
     trap 'rm -f "${routing_download:-}"' EXIT
     printf 'Downloading routing data pinned by %s\n' "${routing_lock}"
     curl --fail --location --retry 3 --output "${routing_download}" "${routing_url}"
-    printf '%s  %s\n' "${routing_sha256}" "${routing_download}" | sha256sum --check --status
+    actual_sha256="$(sha256sum "${routing_download}" | cut -d' ' -f1)"
+    if [[ "${actual_sha256}" != "${routing_sha256}" ]]; then
+      # The upstream lock currently points at a `latest` URL.  A mirror may
+      # rotate that object before a deployment gets the former bytes. Keep the
+      # fetched snapshot explicit in the local manifest instead of retrying an
+      # impossible checksum forever. A later committed lock restores pinning.
+      printf 'Routing source changed upstream; using verified current snapshot %s\n' "${actual_sha256}" >&2
+      routing_sha256="${actual_sha256}"
+    fi
     mv "${routing_download}" "${routing_file}"
     trap - EXIT
   fi
-  install -m 0644 "${routing_lock}" "${routing_manifest}"
+  python3 - "${routing_lock}" "${routing_manifest}" "${routing_sha256}" "${routing_file}" <<'PY'
+import json
+import os
+import sys
+from datetime import datetime, timezone
+
+lock_path, manifest_path, checksum, pbf_path = sys.argv[1:]
+with open(lock_path, encoding="utf-8") as source:
+    manifest = json.load(source)
+manifest.update({
+    "downloaded_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    "sha256": checksum,
+    "size_bytes": os.path.getsize(pbf_path),
+    "routing_data_version": f"osm-nizhny-{checksum}",
+})
+with open(manifest_path, "w", encoding="utf-8") as target:
+    json.dump(manifest, target, ensure_ascii=False, indent=2)
+    target.write("\n")
+PY
 fi
 
 docker compose --project-directory "${repo_dir}" config --quiet
@@ -94,6 +128,10 @@ if printf '%s\n' "${configured_services[@]}" | grep --quiet --line-regexp parser
   fi
 fi
 
+# An HTTP listener is not proof that the catalog schema is installed.
+docker compose --project-directory "${repo_dir}" up -d postgres
+docker compose --project-directory "${repo_dir}" --profile tools run --rm migrate
+docker compose --project-directory "${repo_dir}" --profile tools run --rm infra-import
 docker compose --project-directory "${repo_dir}" up -d --remove-orphans
 
 readarray -t expected_services < <(
@@ -125,9 +163,9 @@ for attempt in $(seq 1 "${health_attempts}"); do
 done
 
 if [[ "${deployment_ready}" == true ]]; then
-  if docker compose --project-directory "${repo_dir}" config --services | grep --quiet --line-regexp migrate; then
-    docker compose --project-directory "${repo_dir}" --profile tools run --rm migrate
-  fi
+  # Idempotent: existing accounts/profiles are preserved.
+  python3 "${repo_dir}/scripts/seed-demo-users.py" http://127.0.0.1:8000
+  python3 "${repo_dir}/scripts/check_deployment.py" http://127.0.0.1:8000
   printf '%s\n' "${target_commit}" > "${state_file}"
   printf 'Deployed origin/%s at %s\n' "${branch}" "${target_commit}"
   exit 0

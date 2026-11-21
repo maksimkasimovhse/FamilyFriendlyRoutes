@@ -47,6 +47,8 @@ export interface Evidence {
   evidence_id: ID; source_url: string | null;
   source_kind: 'official' | 'osm' | 'review' | 'manual';
   checked_at: Instant; valid_until: Instant | null;
+  quote?: string | null; content_sha256?: string | null;
+  verification_status?: 'source_claim' | 'reviewed';
 }
 export type Fact<T> =
   | { state: 'known'; value: T; evidence_ids: ID[] }
@@ -84,6 +86,7 @@ export interface DayInput {
   date: ISODate; start_point: Point; end_point: Point;
   available_window: Interval | null;
   duration_budget_sec: number;
+  max_walk_distance_m?: number | null; // Лимит выбранного дня, дополнительно к семейному.
   meal_window: Interval | null; rest_budget_sec: number;
   meal_count?: number; // По умолчанию 1; 0 отключает резерв при отсутствии override.
   meal_format?: 'quick_service' | 'table_service' | 'meal_with_play';
@@ -95,11 +98,12 @@ export interface Selection {
   preferred_date: ISODate | null;
 }
 export interface TripInput {
+  planning_policy?: 'ranked_prefix' | 'manual_choices';
   city_id: 'nizhny_novgorod'; timezone: TimeZone;
   planning_context: 'before_arrival' | 'in_city';
   family: FamilyProfile; load_limits: LoadLimits;
   days: DayInput[]; selections: Selection[]; // 1..14 дней.
-  request_text: string | null; // Уточняет интересы, не hard constraints.
+  request_text: string | null; // LLM извлекает интересы и явно названные лимиты; backend проверяет их.
 }
 
 // ML отвечает за эти данные и их происхождение; backend хранит версию каталога.
@@ -111,6 +115,7 @@ export interface Place {
   distance_m?: number; // geodesic metres from centre; radius search only
   distance_to_route_m?: number; // geodesic metres to complete saved route, corridor search only
   address?: string | null;
+  description?: string | null; website?: string | null; phone?: string | null;
   opening_hours_raw?: string | null;
   access_raw?: string | null;
   fee_raw?: string | null;
@@ -118,6 +123,8 @@ export interface Place {
     children_menu: Fact<boolean>; small_portions: Fact<boolean>;
     play_area: Fact<boolean>; play_area_min_age: Fact<number>;
     play_area_max_age: Fact<number>; play_area_supervision: Fact<boolean>;
+    cuisine?: string[]; menu_urls?: string[];
+    play_area_staff_hours_raw?: string | string[] | null;
   } | null;
 }
 export interface DurationEstimate {
@@ -134,6 +141,8 @@ export interface Activity {
   admission_rule: Fact<'allowed' | 'adult_required' | 'forbidden'>;
   booking_required: Fact<boolean>;
   evidence_ids: ID[];
+  description?: string | null; content_label_min?: number | null;
+  participation_rules_raw?: string[];
 }
 export interface AvailabilityDay {
   date: ISODate;
@@ -179,12 +188,22 @@ export interface RecommendationRequest {
   current_day_date: ISODate | null; current_point: Point | null;
   visited_activity_ids: ID[]; excluded_activity_ids: ID[];
   request_text: string | null;
+  parsed_request?: ParsedRequest | null;
+  restaurant_filters?: RestaurantFilters | null;
   spatial_scope: {
     center: Point | null; radius_m: number | null;
     route: { type: 'LineString'; coordinates: Position[] } | null;
+    routes?: { type: 'LineString'; coordinates: Position[] }[];
     corridor_width_m: number | null;
   } | null;
   limit: number; // 1..50; initial=50 на всю поездку, без плана и маршрутов.
+}
+export interface ParsedRequest {
+  taxonomy_version: '1.0';
+  claims: { kind: 'interest' | 'category' | 'format'; value: string;
+    polarity: 'prefer' | 'avoid'; evidence: string }[];
+  needs_clarification: boolean; clarification_question: string | null;
+  unsupported_requests: string[];
 }
 export interface RecommendationResponse {
   contract_version: '1.0'; request_id: ID;
@@ -197,7 +216,7 @@ export interface RecommendationResponse {
 }
 
 export type StopRef = { kind: 'day_start' } | { kind: 'day_end' } |
-  { kind: 'stop'; stop_id: ID };
+  { kind: 'stop'; stop_id: ID } | { kind: 'current_position'; point: Point };
 export interface Stop {
   stop_id: ID; place_id: ID; activity_id: ID; occurrence_id: ID | null;
   title: string; category: Category; location: Point;
@@ -257,6 +276,7 @@ export interface DayPlan {
   execution?: DayExecution;
 }
 export interface TripView {
+  recommendation_snapshot?: RecommendationResponse;
   trip_id: ID; version: number; updated_at: Instant;
   status: 'draft' | 'planned' | 'active' | 'completed';
   input: TripInput; policy: FamilyPolicy;
@@ -269,6 +289,9 @@ export interface TripView {
   warnings: Warning[];
 }
 export type PlanCommand =
+  | { kind: 'insert_infrastructure_stop'; date: ISODate; place_id: ID }
+  | { kind: 'edit_route'; date: ISODate; text: string }
+  | { kind: 'append_manual_choices'; date: ISODate; choices: Selection[]; base_preview_id?: ID }
   | { kind: 'generate_plan' }
   | { kind: 'update_trip_input'; input: TripInput }
   | { kind: 'add_activity'; date: ISODate; selection: Selection;
@@ -276,10 +299,24 @@ export type PlanCommand =
   | { kind: 'remove_stop'; date: ISODate; stop_id: ID }
   | { kind: 'replace_stop'; date: ISODate; stop_id: ID; selection: Selection }
   | { kind: 'reorder_stops'; date: ISODate; stop_ids: ID[] }
-  | { kind: 'shorten_day'; date: ISODate; target_remaining_duration_sec: number }
-  | { kind: 'return_to_hotel'; date: ISODate; hotel_point: Point }
+  | { kind: 'shorten_day'; date: ISODate; target_remaining_duration_sec?: number;
+      target_remaining_walk_distance_m?: number } // Требуется хотя бы один лимит.
+  | { kind: 'return_to_hotel'; date: ISODate; hotel_point: Point;
+      target_remaining_duration_sec?: number; target_remaining_walk_distance_m?: number }
+  | { kind: 'move_stop'; date: ISODate; stop_id: ID; target_date: ISODate }
   | { kind: 'start_day'; date: ISODate; point: Point; start_at: Instant }
   | { kind: 'replan_day'; date: ISODate };
+export interface CompletionPolicy { manual_limit_per_day: number; short_day_ratio: number; supplement_radius_m: number }
+export interface PlanningOptionsRequest { expected_version: number; preview_id?: ID }
+export interface DayPlanningOptions {
+  date: ISODate; available_duration_sec: number; planned_duration_sec: number; fill_ratio: number;
+  is_short: boolean; manual_count: number; remaining_manual_choices: number;
+  anchor: Point | null; candidates: Candidate[];
+}
+export interface PlanningOptions {
+  trip_id: ID; trip_version: number; policy: CompletionPolicy; candidates: Candidate[];
+  days: DayPlanningOptions[]; evidence: Evidence[];
+}
 export interface PreviewRequest {
   expected_version: number; command: PlanCommand;
   current_position: Point | null; observed_at: Instant | null;
@@ -302,6 +339,20 @@ export interface PlanPreview {
 export interface ApplyRequest {
   expected_version: number; acknowledged_warning_codes: string[];
 }
+export interface AssistantNeed {
+  kind: 'rest' | 'food' | 'toilet' | 'shelter' | 'play' | 'less_walking' | 'return';
+  child_id: ID | null; urgency: 'now' | 'soon' | 'unspecified'; evidence: string;
+}
+export interface AssistantMessageRequest {
+  expected_version: number; message: string; date?: ISODate;
+  current_position: Point | null; observed_at: Instant | null;
+  hotel_point?: Point | null;
+}
+export interface AssistantMessageResponse {
+  reply: string; preview: PlanPreview | null; places: Place[];
+  options: { place_id: ID; walk_duration_sec: number; detour_duration_sec: number }[];
+  suggestions: string[]; needs: AssistantNeed[]; mode: 'gigachat';
+}
 export interface ProgressRequest {
   expected_version: number; date: ISODate; stop_id: ID;
   status: 'visited' | 'skipped'; observed_at: Instant;
@@ -310,6 +361,7 @@ export interface NeedRequest {
   expected_version: number; date: ISODate;
   need: 'tired' | 'toilet' | 'rain' | 'hotel' | 'playground';
   current_position: Point | null; observed_at: Instant | null;
+  hotel_point?: Point | null;
 }
 export type NeedOption =
   | { option_id: ID; kind: 'candidate'; candidate: Candidate;
@@ -333,6 +385,8 @@ export interface ReferenceData {
   supported_child_age: { min: 3; max: 11 };
   capabilities: {
     taxi_suggestions: boolean; weather_automation: boolean; free_text: boolean;
+    assistant?: boolean; llm_understanding?: boolean;
+    recommendations?: boolean; needs?: boolean; fixed_sessions?: boolean;
   };
   default_family_policy: FamilyPolicy;
 }
@@ -341,6 +395,11 @@ export interface PublicRecommendationRequest {
   purpose: 'initial' | 'restaurant' | 'along_route';
   date: ISODate | null; request_text: string | null;
   exclude_activity_ids: ID[]; limit: number;
+  restaurant_filters?: RestaurantFilters | null;
+}
+export interface RestaurantFilters {
+  children_menu?: boolean | null; small_portions?: boolean | null;
+  play_area?: boolean | null; play_area_supervision?: boolean | null;
 }
 export interface PublicRecommendationResponse {
   trip_id: ID; trip_version: number; catalog_version: string;

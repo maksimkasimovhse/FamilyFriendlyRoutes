@@ -125,6 +125,14 @@ func TestPostGISRadiusBBoxImportAndHTTP(t *testing.T) {
 	if len(filtered.Items) != 1 || filtered.Items[0].Name != "Far pharmacy" {
 		t.Fatal("radius/category filter broken")
 	}
+	nearest := get("lon=44&lat=56&nearest=true&categories=pharmacy&limit=3", 200)
+	if len(nearest.Items) != 1 || nearest.Items[0].Name != "Far pharmacy" || nearest.Items[0].DistanceM == nil || *nearest.Items[0].DistanceM <= 1000 {
+		t.Fatal("nearest search incorrectly cut off far results")
+	}
+	lookup, lookupErr := (mapdata.Postgres{Pool: pool}).Search(ctx, mapdata.Query{PlaceID: string(nearest.Items[0].PlaceID), Nearest: true, Categories: mapdata.Categories, Limit: 1})
+	if lookupErr != nil || len(lookup.Items) != 1 || lookup.Items[0].Name != "Far pharmacy" {
+		t.Fatal("catalog identity lookup failed", lookupErr)
+	}
 	empty := get("lon=40&lat=50&radius_km=1", 200)
 	if len(empty.Items) != 0 || empty.Items == nil || empty.Evidence == nil {
 		t.Fatal("empty arrays not preserved")
@@ -145,8 +153,8 @@ func TestPostGISRadiusBBoxImportAndHTTP(t *testing.T) {
 		t.Fatal("missing database must not silently return fake data")
 	}
 	// A long meridian leg: an object in its middle must be found even when
-	// several kilometres from both vertices; 249 m is inside and 251 m outside.
-	for name, offset := range map[string]float64{"Middle": 0, "Inside249": 249, "Outside251": 251} {
+	// several kilometres from both vertices; 124 m is inside and 126 m outside.
+	for name, offset := range map[string]float64{"Middle": 0, "Inside124": 124, "Outside126": 126} {
 		var id int
 		err := pool.QueryRow(ctx, `INSERT INTO items(item_type,category_id,show_in_cards,title,source_dataset,source_id,catalog_version)
  VALUES('map_object',32,false,$1,'route_test',$1,'test-map-v1') RETURNING item_id`, name).Scan(&id)
@@ -169,11 +177,11 @@ func TestPostGISRadiusBBoxImportAndHTTP(t *testing.T) {
 	names := map[string]bool{}
 	for _, p := range response.Items {
 		names[p.Name] = true
-		if p.DistanceM != nil || p.DistanceToRouteM == nil || *p.DistanceToRouteM > 250 {
+		if p.DistanceM != nil || p.DistanceToRouteM == nil || *p.DistanceToRouteM > 125 {
 			t.Fatal("route distance missing or outside corridor")
 		}
 	}
-	if !names["Middle"] || !names["Inside249"] || names["Outside251"] {
+	if !names["Middle"] || !names["Inside124"] || names["Outside126"] {
 		t.Fatalf("incorrect corridor: %+v", names)
 	}
 	// Independent legs must not introduce a fictitious connector through Middle.
@@ -186,7 +194,7 @@ func TestPostGISRadiusBBoxImportAndHTTP(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, p := range response.Items {
-		if p.Name == "Middle" || p.Name == "Inside249" {
+		if p.Name == "Middle" || p.Name == "Inside124" {
 			t.Fatal("disconnected legs created a false straight connector")
 		}
 	}

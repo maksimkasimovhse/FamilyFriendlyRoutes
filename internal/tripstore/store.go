@@ -4,6 +4,7 @@ package tripstore
 import (
 	"encoding/json"
 	"errors"
+	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/assistant"
 	"os"
 	"path/filepath"
 	"sync"
@@ -46,6 +47,7 @@ type State struct {
 	Trips          map[string]Trip                   `json:"trips"`
 	Previews       map[string]Preview                `json:"previews"`
 	Receipts       map[string]Receipt                `json:"receipts"`
+	Assistant      map[string]assistant.Memory       `json:"assistant"`
 }
 type Store struct {
 	mu       sync.Mutex
@@ -105,6 +107,9 @@ func (s *Store) Update(fn func(*State) error) error {
 	next, err := clone(s.state)
 	if err != nil {
 		return err
+	}
+	if next.Assistant == nil {
+		next.Assistant = map[string]assistant.Memory{}
 	}
 	if err := fn(&next); err != nil {
 		return err

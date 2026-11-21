@@ -13,6 +13,7 @@ import (
 var defaultsJSON []byte
 
 type budgetParameters struct {
+	CompletionPolicy             c.CompletionPolicy `json:"completion_policy"`
 	PolicyVersion                string             `json:"policy_version"`
 	DailyWalkLimitMByAge         map[int]float64    `json:"daily_walk_limit_m_by_age"`
 	WalkingSpeedKPHByPace        map[string]float64 `json:"walking_speed_kph_by_pace"`
@@ -24,6 +25,9 @@ type budgetParameters struct {
 
 var budgetDefaults = loadBudgetParameters()
 
+// WalkingSpeedKPH uses the same product policy in search previews and day plans.
+func WalkingSpeedKPH(pace string) float64 { return budgetDefaults.WalkingSpeedKPHByPace[pace] }
+
 func loadBudgetParameters() budgetParameters {
 	var parameters budgetParameters
 	if err := json.Unmarshal(defaultsJSON, &parameters); err != nil {
@@ -31,6 +35,9 @@ func loadBudgetParameters() budgetParameters {
 	}
 	if parameters.PolicyVersion == "" || parameters.DefaultMealCount < 0 || parameters.DefaultMealCount > 10 || !finite(parameters.RestaurantWalkReserveMPerDay) || parameters.RestaurantWalkReserveMPerDay < 0 {
 		panic("invalid planning defaults")
+	}
+	if parameters.CompletionPolicy.ManualLimitPerDay != 2 || parameters.CompletionPolicy.ShortDayRatio <= 0 || parameters.CompletionPolicy.ShortDayRatio > 1 || parameters.CompletionPolicy.SupplementRadiusM <= 0 {
+		panic("invalid completion policy")
 	}
 	for age := 3; age <= 11; age++ {
 		if v := parameters.DailyWalkLimitMByAge[age]; !finite(v) || v <= 0 {
@@ -99,6 +106,14 @@ func dailyTimeBudget(day c.DayInput) float64 {
 		budget = math.Min(budget, end.Sub(start).Seconds())
 	}
 	return budget
+}
+
+func dailyWalkLimit(input c.TripInput, day c.DayInput) float64 {
+	limit := *input.LoadLimits.MaxWalkDistanceMPerDay
+	if day.MaxWalkDistanceM != nil {
+		limit = math.Min(limit, *day.MaxWalkDistanceM)
+	}
+	return limit
 }
 
 // Inputs/outputs use meters and seconds. P is deducted once, after the min.

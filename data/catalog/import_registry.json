@@ -1,0 +1,9 @@
+{
+  "imports": [
+    {
+      "file": "_select_cs_id_cs_address_cs_coordinate_cs_description_cs_title_c.csv",
+      "sha256": "60d4b50215dc72e037772e2404b831b2be928e65e9f427e1cf8a5ef1a837c55c",
+      "snapshot": "data/raw/user_imports/60d4b50215dc72e037772e2404b831b2be928e65e9f427e1cf8a5ef1a837c55c.csv"
+    }
+  ]
+}

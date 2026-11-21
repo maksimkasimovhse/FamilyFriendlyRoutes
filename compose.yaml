@@ -31,6 +31,10 @@ services:
       dockerfile: services/model_service/Dockerfile
     ports:
       - "127.0.0.1:8082:8080"
+    environment:
+      CATALOG_PATH: /app/data/demo/catalog.jsonl
+    volumes:
+      - ./data:/app/data:ro
     read_only: true
     tmpfs:
       - /tmp:size=32m
@@ -101,16 +105,18 @@ services:
       - ./db/migrations:/migrations:ro
     command: ["up"]
 
-  # Обычная сеть Compose: контейнеры доступны друг другу по именам сервисов.
+  # Go-бекенд. network_mode: host — потому что бекенд слушает только 127.0.0.1:8080
+  # и ищет Valhalla на 127.0.0.1:8002 (так написан cmd/backend). Работает на Linux;
+  # на Docker Desktop (Windows/macOS) нужно включить host networking в настройках.
   backend:
     build:
       context: .
       dockerfile: infra/docker/backend.Dockerfile
+    network_mode: host
     environment:
-      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgres://familyroutes:${POSTGRES_PASSWORD:-}@postgres:5432/familyroutes?sslmode=disable}
-    # Места для маршрута берёт у ML по контракту /internal/v1/recommendations.
-    # Пока у Вильдана нет сервиса — у мока (mock-api). Вернуть синтетику: command: ["-demo-catalog"]
-    command: ["-listen", "0.0.0.0:8080", "-allow-network-listen", "-routing-url", "http://valhalla:8002", "-ml-url", "http://mock-api:8090/internal/v1/recommendations", "-catalog-version", "mock-ml-v1"]
+      DATABASE_URL: ${DATABASE_URL:-}
+    # Места для маршрута берёт у model-service по контракту /internal/v1/recommendations.
+    command: ["-ml-url", "http://127.0.0.1:8082/internal/v1/recommendations", "-catalog-version", "city-enriched-v3"]
     volumes:
       - ./data:/app/data
       # Картинки карточек: backend отдаёт их под /media/ и без папки не стартует (-images-dir)
@@ -118,7 +124,7 @@ services:
     depends_on:
       valhalla:
         condition: service_healthy
-      mock-api:
+      model-service:
         condition: service_started
       postgres:
         condition: service_healthy
@@ -129,8 +135,9 @@ services:
     build:
       context: .
       dockerfile: infra/docker/backend.Dockerfile
+    network_mode: host
     environment:
-      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgres://familyroutes:${POSTGRES_PASSWORD:-}@postgres:5432/familyroutes?sslmode=disable}
+      DATABASE_URL: ${DATABASE_URL:-}
     entrypoint: ["/usr/local/bin/infraload"]
     volumes:
       - ./data/infrastructure:/app/data/infrastructure:ro
@@ -141,18 +148,14 @@ services:
   # МОК рекомендаций ML. Инфраструктура карты читается Go-бэкендом из PostgreSQL.
   mock-api:
     build: ./infra/mock-api
-    environment:
-      MOCK_API_LISTEN: 0.0.0.0:8090
-    ports:
-      - "127.0.0.1:8090:8090"
+    network_mode: host
     restart: unless-stopped
 
   # Фронтенд (обычные HTML/CSS/JS из ./frontend) + прокси /api на бекенд.
   # Открывать: http://localhost:8000
   web:
     image: nginx:1.27-alpine
-    ports:
-      - "127.0.0.1:8000:8000"
+    network_mode: host
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
       - ./assets/images:/usr/share/nginx/card-images:ro

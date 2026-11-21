@@ -420,6 +420,6 @@ func (a *tripAPI) inputFromProfile(r *http.Request, raw []byte) (c.TripInput, in
 	if wishes == nil {
 		wishes = profile.Wishes
 	}
-	input := c.TripInput{CityID: request.CityID, Timezone: request.Timezone, PlanningContext: request.PlanningContext, Days: request.Days, Selections: request.Selections, RequestText: wishes, Family: profile.Family, LoadLimits: profile.LoadLimits}
+	input := c.TripInput{CityID: request.CityID, Timezone: request.Timezone, PlanningContext: request.PlanningContext, Days: request.Days, Selections: request.Selections, RequestText: wishes, Family: profile.Family, LoadLimits: profile.LoadLimits, PlanningPolicy: request.PlanningPolicy}
 	return input, profile.Version, planner.Validate(input)
 }

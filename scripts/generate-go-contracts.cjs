@@ -1,7 +1,9 @@
 // Minimal generator for the JSON Schema subset currently used by this repository.
 // Unsupported constructs fail explicitly; OpenAPI remains the source of truth.
 const fs=require('node:fs');
-const spec=JSON.parse(fs.readFileSync('docs/contracts/openapi.json','utf8'));
+const path=require('node:path');
+const root=path.resolve(__dirname,'..');
+const spec=JSON.parse(fs.readFileSync(path.join(root,'docs/contracts/openapi.json'),'utf8'));
 const schemas=spec.components.schemas;
 const goName=s=>s.split('_').map(p=>['id','ids','url','kph','csrf'].includes(p)?p.toUpperCase():p[0].toUpperCase()+p.slice(1)).join('');
 function type(s){
@@ -20,5 +22,5 @@ for(const [name,s]of Object.entries(schemas)){
  if(name==='Position'){out+='type Position = routing.Position\n';continue;}
  const value=type(s);out+='type '+name+(value==='json.RawMessage'?' = ':' ')+value+'\n\n';
 }
-fs.mkdirSync('internal/contracts',{recursive:true});fs.writeFileSync('internal/contracts/models.gen.go',out);
+fs.mkdirSync(path.join(root,'internal/contracts'),{recursive:true});fs.writeFileSync(path.join(root,'internal/contracts/models.gen.go'),out);
 console.log('Generated '+Object.keys(schemas).length+' Go models.');

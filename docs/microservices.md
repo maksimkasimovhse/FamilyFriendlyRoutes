@@ -16,7 +16,7 @@ catalog/profile/features ──────────────────�
 
 `parser-service` — единственный из двух сервисов, который загружает сайты и обращается к GigaChat. Он не назначает канонические ID и не ранжирует места.
 
-`model-service` не имеет credentials GigaChat и не загружает URL. Он принимает только канонические `activity_id`, признаки семьи/активности и проверенный `ParsedRequest`; применяет eligibility, query matching, score и MMR.
+`model-service` не имеет credentials GigaChat и не загружает URL. Он принимает только канонические `activity_id`, признаки семьи/активности и проверенный `ParsedRequest`; применяет eligibility, query matching, score и MMR. Для сквозного MVP он также отдаёт `/internal/v1/recommendations`: это адаптер над проверенным снимком `data/demo/catalog.jsonl`, который преобразует его в контракт Go-планировщика. Неизвестные часы работы в нём остаются `unknown`, а не подменяются вымышленным расписанием.
 
 Backend остаётся оркестратором: хранит каталог и версии, вызывает parser для свободного текста, собирает признаки кандидатов и вызывает model-service. Parser и model-service не пишут напрямую в общую БД.
 
@@ -29,6 +29,7 @@ Backend остаётся оркестратором: хранит каталог
 | parser | POST | `/internal/v1/catalog-extractions` | разрешённый URL → кандидаты каталога с evidence |
 | model | GET | `/health` | readiness процесса |
 | model | POST | `/internal/v1/rankings` | признаки кандидатов + claims → ранжированный список |
+| model | POST | `/internal/v1/recommendations` | RecommendationRequest → Candidate[] для Go-планировщика |
 
 Все запросы несут `contract_version="1.0"` и `request_id`. В production к ним нужно добавить service authentication/mTLS, tracing и retry policy; Compose публикует порты только на localhost. Контейнеры работают non-root, с read-only root filesystem и политикой перезапуска `unless-stopped`.
 

@@ -297,7 +297,6 @@ async function save() {
   const wishes = $('wishes').value.trim();
   if (wishes.length > 2000) return err('adults-error', 'Пожелания — не длиннее 2000 символов');
   draft.wishes = wishes || null;
-  draft.load_limits = { ...draft.load_limits, max_walk_distance_m_per_day: null, max_continuous_walk_duration_sec: null, restaurant_walk_reserve_m_per_day: 0 };
   const btn = $('profile-save');
   btn.disabled = true;
   err('adults-error');

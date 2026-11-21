@@ -8,6 +8,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/assistant"
 	c "github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/contracts"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/routing"
 )
@@ -35,10 +36,12 @@ type Router interface {
 	Route(context.Context, routing.Request) (routing.Result, error)
 }
 type Planner struct {
-	Router     Router
-	Activities []Activity
-	Source     CandidateSource
-	metadata   map[c.ID]c.Candidate
+	Infrastructure func(context.Context, c.ID) (c.Place, error)
+	Router         Router
+	Activities     []Activity
+	Source         CandidateSource
+	Interpreter    assistant.Interpreter
+	metadata       map[c.ID]c.Candidate
 }
 
 var ErrValidation = errors.New("trip validation failed")
@@ -105,6 +108,24 @@ func validateInterests(ids []string) error {
 	return nil
 }
 func Validate(input c.TripInput) error {
+	if input.PlanningPolicy != nil {
+		if *input.PlanningPolicy != "ranked_prefix" && *input.PlanningPolicy != "manual_choices" {
+			return invalid("invalid planning_policy")
+		}
+		if len(input.Selections) > len(input.Days)*budgetDefaults.CompletionPolicy.ManualLimitPerDay {
+			return invalid("MANUAL_LIMIT: at most two manual choices per day")
+		}
+		counts := map[c.ISODate]int{}
+		for _, s := range input.Selections {
+			if s.PreferredDate == nil {
+				continue // Days are assigned by geographic clustering, not by the picker.
+			}
+			counts[*s.PreferredDate]++
+			if counts[*s.PreferredDate] > budgetDefaults.CompletionPolicy.ManualLimitPerDay {
+				return invalid("MANUAL_LIMIT: at most two manual choices per day")
+			}
+		}
+	}
 	if err := ValidateFamily(input.Family, input.LoadLimits); err != nil {
 		return err
 	}
@@ -123,6 +144,9 @@ func Validate(input c.TripInput) error {
 	input = resolveBudgetDefaults(input)
 	dates := map[c.ISODate]bool{}
 	for _, day := range input.Days {
+		if day.MaxWalkDistanceM != nil && (!finite(*day.MaxWalkDistanceM) || *day.MaxWalkDistanceM < 0 || *day.MaxWalkDistanceM > 100000) {
+			return invalid("invalid day walking limit")
+		}
 		if dates[day.Date] {
 			return invalid("duplicate day date")
 		}
@@ -210,6 +234,8 @@ func nonNil[T any](values []T) []T {
 func (p Planner) buildDay(ctx context.Context, view c.TripView, now time.Time) (c.TripView, error) {
 	input := view.Input
 	day := input.Days[0]
+	limit := dailyWalkLimit(input, day)
+	input.LoadLimits.MaxWalkDistanceMPerDay = &limit
 	available := map[c.ID]Activity{}
 	for _, a := range p.Activities {
 		available[a.ID] = a

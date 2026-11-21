@@ -1,12 +1,13 @@
 // Экран «Карта» для родителя: маршрут дня по улицам, остановки, удобства рядом.
 
+import { emojiAsset, placeEmojiHtml, createPlaceEmoji, thinBenches } from './place-display.js';
 import { loadMapStyle } from './map-style.js';
 import { onTripChange, today, getSource } from './api.js';
-import { allPlaces, onPlacesChange, kindOf, cafeBadges, isFamilyCafe, isDemo, walkMinutes, placeType } from './places.js';
+import { allPlaces, loadNearbyBenches, clearNearbyBenches, BENCH_RADIUS_M, onPlacesChange, kindOf, cafeBadges, isFamilyCafe, isDemo, walkMinutes, placeType } from './places.js';
 import { orderByNearest } from './catalog.js';
 
 const CENTER = [44.0066, 56.3273];   // площадь Минина и Пожарского, [долгота, широта]
-const NEAR_ROUTE_M = 250;            // удобства показываем только в этой полосе вдоль маршрута
+const NEAR_ROUTE_M = 125;            // удобства показываем только в этой полосе вдоль маршрута
 const sheetBody = document.getElementById('sheet-body');
 let map = null;
 let day = null;
@@ -19,6 +20,8 @@ let stopInfo = () => null;   // что на остановке у ребёнка
 let picked = null;      // выбранные на экране «Подбор мест» (в порядке обхода) или null
 let pendingPicked;      // выбор, пришедший до загрузки карты
 let pickedPins = [];
+let focusedPlacePin = null;
+let focusedPlace = null;
 
 // ---------- Форматирование ----------
 const fmtDistance = m => m < 1000 ? Math.round(m / 10) * 10 + ' м' : (m / 1000).toFixed(1).replace('.', ',') + ' км';
@@ -86,31 +89,19 @@ function showArea(coords) {
 
 // ---------- Значки удобств ----------
 const AMENITIES = {
-  toilets:    { label: 'Туалет',           color: '#1F8A4F', shape: 'square' },
-  cafe:       { label: 'Еда',              color: '#F5B400', shape: 'circle' },
-  playground: { label: 'Детская площадка', color: '#E8641F', shape: 'circle' },
-  park:       { label: 'Парк', color: '#27AE60', shape: 'circle' },
-  bench:      { label: 'Скамейка', color: '#795548', shape: 'square' },
-  pharmacy:   { label: 'Аптека', color: '#C0392B', shape: 'square' },
+  toilets:    { label: 'Туалет', color: '#205FCC' },
+  cafe:       { label: 'Еда', color: '#00757D' },
+  playground: { label: 'Детская площадка', color: '#BF4B08' },
+  park:       { label: 'Парк', color: '#18763D' },
+  bench:      { label: 'Скамейка', color: '#865022' },
+  pharmacy:   { label: 'Аптека', color: '#C52C46' },
 };
 
-function makeIcon(color, shape) {
-  const size = 44;                     // рисуем в 2 раза крупнее — чётко на телефонах
-  const c = document.createElement('canvas');
-  c.width = c.height = size;
-  const g = c.getContext('2d');
-  g.fillStyle = color;
-  g.strokeStyle = '#FFFFFF';
-  g.lineWidth = 6;
-  g.shadowColor = 'rgba(0,0,0,.25)';
-  g.shadowBlur = 4;
-  g.beginPath();
-  if (shape === 'square') g.roundRect(8, 8, 28, 28, 8);
-  else g.arc(22, 22, 14, 0, Math.PI * 2);
-  g.stroke();
-  g.shadowBlur = 0;
-  g.fill();
-  return g.getImageData(0, 0, size, size);
+async function makeIcon(kind) {
+  const image=new Image();image.src=emojiAsset(kind);await image.decode();
+  const canvas=document.createElement('canvas');canvas.width=canvas.height=128;
+  const graphics=canvas.getContext('2d');graphics.drawImage(image,0,0,128,128);
+  return graphics.getImageData(0,0,128,128);
 }
 
 // ---------- Слои ----------
@@ -151,8 +142,9 @@ function addPins() {
   pins = day.stops.map((stop, i) => {
     const btn = document.createElement('button');
     const visited = stop.progress === 'visited';
-    btn.className = 'stop-pin' + (visited ? ' done' : '');
-    btn.textContent = visited ? '✓' : i + 1;
+    btn.className = 'stop-pin emoji-marker' + (visited ? ' done' : '');
+    btn.append(createPlaceEmoji(stop.category || stop.activity_kind));
+    btn.dataset.order = String(i+1);
     btn.setAttribute('aria-label', `Остановка ${i + 1}: ${stop.title}`);
     btn.addEventListener('click', e => { e.stopPropagation(); showStop(i); });
     return new maplibregl.Marker({ element: markerEl(btn) }).setLngLat(stop.location.coordinates).addTo(map);
@@ -163,9 +155,9 @@ const pinBtn = marker => marker.getElement().firstChild;
 // ---------- Удобства вдоль маршрута ----------
 function amenitiesNearRoute() {
   // PostGIS измеряет расстояние до всей исходной линии, а не до выбранных вершин.
-  const near = allPlaces()
-    .map(p => ({ p, near_m: p.distance_to_route_m }))
-    .filter(x => Number.isFinite(x.near_m) && x.near_m <= NEAR_ROUTE_M && kindOf(x.p) !== 'other')
+  const near = thinBenches(allPlaces(),distanceM)
+    .map(p => ({ p, near_m: kindOf(p) === 'bench' ? p.distance_m : p.distance_to_route_m }))
+    .filter(x => Number.isFinite(x.near_m) && x.near_m <= (kindOf(x.p) === 'bench' ? BENCH_RADIUS_M : NEAR_ROUTE_M) && kindOf(x.p) !== 'other')
     .map(({ p, near_m }) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: p.location.coordinates },
       properties: { place_id: p.place_id, kind: kindOf(p), name: p.name, sub: placeType(p) || '', near_m, family: isFamilyCafe(p) } }));
   return { type: 'FeatureCollection', features: near };
@@ -174,14 +166,14 @@ function amenitiesNearRoute() {
 async function addAmenities() {
   map.addSource('amenities', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   for (const [kind, a] of Object.entries(AMENITIES)) {
-    map.addImage('icon-' + kind, makeIcon(a.color, a.shape), { pixelRatio: 2 });
+    map.addImage('icon-' + kind, await makeIcon(kind), { pixelRatio: 3 });
     const id = 'amenity-' + kind;
     const isFood = kind === 'cafe';
-    // На общем виде значков нет (каша); при приближении — значки, у еды ещё и подпись, как в Яндекс Картах
-    map.addLayer({ id, type: 'symbol', source: 'amenities', filter: ['==', ['get', 'kind'], kind], minzoom: 14.5,
+    // Category badges remain visible on the initial route overview too.
+    map.addLayer({ id, type: 'symbol', source: 'amenities', filter: ['==', ['get', 'kind'], kind], minzoom: 13,
       layout: {
         'icon-image': 'icon-' + kind, 'icon-allow-overlap': true,
-        'icon-size': ['interpolate', ['linear'], ['zoom'], 13, 0.8, 17, 1.2],
+        'icon-size': ['interpolate', ['linear'], ['zoom'], 13, 0.6, 17, 0.9],
         'text-field': isFood
           ? ['step', ['zoom'],
               ['case', ['get', 'family'], ['get', 'name'], ''],          // до 16 — только кафе для детей
@@ -204,6 +196,8 @@ function resetSelection() {
 }
 
 function showSummary({ fit = true } = {}) {
+  if (focusedPlacePin) { focusedPlacePin.remove(); focusedPlacePin = null; }
+  focusedPlace = null;
   selected = null;
   resetSelection();
   const t = day.totals;
@@ -266,8 +260,8 @@ function showPlace(place, nearM) {
   if (badges.length && isDemo(place)) badges.push('<span class="badge demo">демо</span>');
   sheetBody.innerHTML = `
     <div class="card plain place-card">
-      <h2><i class="dot ${kind}"></i>${escapeHtml(place.name)}</h2>
-      <p>${[type, nearM !== undefined ? `~${walkMinutes(nearM)} мин от маршрута` : ''].filter(Boolean).map(escapeHtml).join(' · ')}</p>
+      <h2>${placeEmojiHtml(kind)} ${escapeHtml(place.name)}</h2>
+      <p>${[type, nearM !== undefined ? kind === 'bench' ? `~${walkMinutes(nearM)} мин от геопозиции` : `~${walkMinutes(nearM)} мин от маршрута` : ''].filter(Boolean).map(escapeHtml).join(' · ')}</p>
       ${badges.length ? `<div class="badges">${badges.join('')}</div>` : ''}
     </div>
     <button class="btn link" data-act="all">Назад к маршруту</button>`;
@@ -281,6 +275,12 @@ export function focusPlace(place) {
   if (!mapReady) return;
   const chip = document.querySelector(`.chip[data-layer="${kindOf(place)}"]`);
   if (chip && chip.getAttribute('aria-pressed') !== 'true') chip.click();
+  if (focusedPlacePin) focusedPlacePin.remove();
+  focusedPlace = place;
+  // Benches must stay tied to the live GPS pool, including after opening a card.
+  if (place.urgent_origin || kindOf(place) !== 'bench' || allPlaces().some(p=>p.place_id===place.place_id)) {
+    focusedPlacePin = new maplibregl.Marker({element:markerEl(createPlaceEmoji(kindOf(place))),anchor:'bottom'}).setLngLat(place.location.coordinates).addTo(map);
+  } else focusedPlacePin = null;
   showPlace(place);
 }
 
@@ -341,8 +341,9 @@ function applyPicked(places) {
     paint: { 'line-color': '#2463D6', 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 4, 17, 7], 'line-dasharray': [1.2, 1.6] } });
   pickedPins = picked.map((place, i) => {
     const pin = document.createElement('button');
-    pin.className = 'stop-pin';
-    pin.textContent = i + 1;
+    pin.className = 'stop-pin emoji-marker';
+    pin.append(createPlaceEmoji(place.category_key || place.category));
+    pin.dataset.order = String(i+1);
     pin.setAttribute('aria-label', `Место ${i + 1}: ${place.title}`);
     pin.addEventListener('click', e => { e.stopPropagation(); showPickedPlace(i); });
     return new maplibregl.Marker({ element: markerEl(pin) }).setLngLat(place.location).addTo(map);
@@ -444,17 +445,20 @@ function bindMapButtons() {
   });
 
   let me = null;
+  let locationWatch = null;
   document.getElementById('btn-locate').addEventListener('click', () => {
     if (!navigator.geolocation) return alert('Браузер не умеет определять местоположение');
-    navigator.geolocation.getCurrentPosition(pos => {
+    if (locationWatch !== null) navigator.geolocation.clearWatch(locationWatch);
+    locationWatch = navigator.geolocation.watchPosition(pos => {
       const here = [pos.coords.longitude, pos.coords.latitude];
+      loadNearbyBenches(here).catch(err => console.warn('Скамейки рядом недоступны:', err));
       if (!me) {
         const el = document.createElement('div');
         el.className = 'me-pin';
         me = new maplibregl.Marker({ element: markerEl(el) }).setLngLat(here).addTo(map);
       } else me.setLngLat(here);
       map.flyTo({ center: here, zoom: 16 });
-    }, err => alert('Не удалось определить местоположение: ' + err.message + (location.protocol !== 'https:' && location.hostname !== 'localhost' ? ' (на телефоне нужен HTTPS)' : '')),
+    }, err => { clearNearbyBenches(); alert('Не удалось определить местоположение: ' + err.message + (location.protocol !== 'https:' && location.hostname !== 'localhost' ? ' (на телефоне нужен HTTPS)' : '')); },
     { enableHighAccuracy: true, timeout: 10000 });
   });
 }
@@ -464,6 +468,10 @@ function render({ fit }) {
   day = today();
   source = getSource();
   if (!day || !mapReady) return;
+  if (focusedPlace && !focusedPlace.urgent_origin && kindOf(focusedPlace) === 'bench' && !allPlaces().some(p=>p.place_id===focusedPlace.place_id)) {
+    if (focusedPlacePin) focusedPlacePin.remove();
+    focusedPlacePin = null; focusedPlace = null;
+  }
   map.getSource('route').setData(legsGeoJSON());
   map.getSource('amenities').setData(amenitiesNearRoute());
   addPins();
@@ -512,3 +520,11 @@ export function resizeMap() {
   // Пока вкладка была скрыта, карта не знала свой размер и кадр мог «съехать» — переснимаем маршрут целиком
   if (mapReady && day && selected === null && !picked) showArea(allRouteCoords());
 }
+
+export function showRoutePreview(preview) {
+ if(!mapReady)return;const plan=preview.proposed_trip.days.find(d=>d.date===today().date);if(!plan)return;
+ const features=plan.legs.filter(l=>l.geometry).map(l=>({type:'Feature',properties:{leg_id:l.leg_id},geometry:l.geometry}));
+ map.getSource('route').setData({type:'FeatureCollection',features});
+ const coords=features.flatMap(f=>f.geometry.coordinates);if(coords.length)showArea(coords);
+}
+export function clearRoutePreview(){if(mapReady)render({fit:false});}

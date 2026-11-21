@@ -22,16 +22,66 @@ func stateError(code, message string) error { return &StateError{code, message} 
 
 // Only commands implemented in this stage. Unknown fields are rejected by HTTP.
 type ChangeCommand struct {
-	Kind    string         `json:"kind"`
-	Date    *c.ISODate     `json:"date,omitempty"`
-	StopID  *c.ID          `json:"stop_id,omitempty"`
-	Point   *routing.Point `json:"point,omitempty"`
-	StartAt *c.Instant     `json:"start_at,omitempty"`
+	PlaceID                      *c.ID          `json:"place_id,omitempty"`
+	Text                         *string        `json:"text,omitempty"`
+	Choices                      []c.Selection  `json:"choices,omitempty"`
+	BasePreviewID                *c.ID          `json:"base_preview_id,omitempty"`
+	Kind                         string         `json:"kind"`
+	Date                         *c.ISODate     `json:"date,omitempty"`
+	StopID                       *c.ID          `json:"stop_id,omitempty"`
+	Point                        *routing.Point `json:"point,omitempty"`
+	StartAt                      *c.Instant     `json:"start_at,omitempty"`
+	Selection                    *c.Selection   `json:"selection,omitempty"`
+	AfterStopID                  *c.ID          `json:"after_stop_id,omitempty"`
+	TargetRemainingDurationSec   *float64       `json:"target_remaining_duration_sec,omitempty"`
+	TargetRemainingWalkDistanceM *float64       `json:"target_remaining_walk_distance_m,omitempty"`
+	HotelPoint                   *routing.Point `json:"hotel_point,omitempty"`
+	TargetDate                   *c.ISODate     `json:"target_date,omitempty"`
+	StopIDS                      []c.ID         `json:"stop_ids,omitempty"`
+	Input                        *c.TripInput   `json:"input,omitempty"`
 }
 
 func (cmd ChangeCommand) Validate() error {
+	allowed := map[string][]string{
+		"edit_route":                 {"kind", "date", "text"},
+		"insert_infrastructure_stop": {"kind", "date", "place_id"},
+		"append_manual_choices":      {"kind", "date", "choices", "base_preview_id"},
+		"generate_plan":              {"kind"}, "start_day": {"kind", "date", "point", "start_at"},
+		"remove_stop": {"kind", "date", "stop_id"}, "replan_day": {"kind", "date"},
+		"shorten_day":     {"kind", "date", "target_remaining_duration_sec", "target_remaining_walk_distance_m"},
+		"return_to_hotel": {"kind", "date", "hotel_point", "target_remaining_duration_sec", "target_remaining_walk_distance_m"},
+		"add_activity":    {"kind", "date", "selection", "after_stop_id"},
+		"replace_stop":    {"kind", "date", "stop_id", "selection"},
+		"move_stop":       {"kind", "date", "stop_id", "target_date"},
+		"reorder_stops":   {"kind", "date", "stop_ids"}, "update_trip_input": {"kind", "input"},
+	}
+	fields, ok := allowed[cmd.Kind]
+	if !ok {
+		return stateError("COMMAND_NOT_IMPLEMENTED", "Команда пока не реализована.")
+	}
+	raw, _ := json.Marshal(cmd)
+	var values map[string]json.RawMessage
+	_ = json.Unmarshal(raw, &values)
+	for key := range values {
+		if !slices.Contains(fields, key) {
+			return stateError("INVALID_COMMAND", "Неверный набор полей команды.")
+		}
+	}
+	if cmd.TargetRemainingDurationSec != nil && (!finite(*cmd.TargetRemainingDurationSec) || *cmd.TargetRemainingDurationSec < 60 || *cmd.TargetRemainingDurationSec > 86400) {
+		return stateError("INVALID_COMMAND", "Оставшееся время: от 60 до 86400 секунд.")
+	}
 	valid := false
+	if cmd.TargetRemainingWalkDistanceM != nil && (!finite(*cmd.TargetRemainingWalkDistanceM) || *cmd.TargetRemainingWalkDistanceM < 0 || *cmd.TargetRemainingWalkDistanceM > 100000) {
+		return stateError("INVALID_COMMAND", "Некорректный оставшийся лимит ходьбы.")
+	}
 	switch cmd.Kind {
+	case "edit_route":
+		valid = cmd.Date != nil && cmd.Text != nil && len(*cmd.Text) > 0 && len(*cmd.Text) <= 2000 && cmd.PlaceID == nil && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
+	case "insert_infrastructure_stop":
+		valid = cmd.Date != nil && cmd.PlaceID != nil && *cmd.PlaceID != "" && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
+
+	case "append_manual_choices":
+		valid = cmd.Date != nil && len(cmd.Choices) > 0 && len(cmd.Choices) <= budgetDefaults.CompletionPolicy.ManualLimitPerDay && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
 	case "generate_plan":
 		valid = cmd.Date == nil && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
 	case "start_day":
@@ -40,6 +90,20 @@ func (cmd ChangeCommand) Validate() error {
 		valid = cmd.Date != nil && cmd.StopID != nil && cmd.Point == nil && cmd.StartAt == nil
 	case "replan_day":
 		valid = cmd.Date != nil && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
+	case "shorten_day":
+		valid = cmd.Date != nil && (cmd.TargetRemainingDurationSec != nil || cmd.TargetRemainingWalkDistanceM != nil)
+	case "return_to_hotel":
+		valid = cmd.Date != nil && cmd.HotelPoint != nil
+	case "add_activity":
+		valid = cmd.Date != nil && cmd.Selection != nil
+	case "replace_stop":
+		valid = cmd.Date != nil && cmd.StopID != nil && cmd.Selection != nil
+	case "move_stop":
+		valid = cmd.Date != nil && cmd.StopID != nil && cmd.TargetDate != nil && *cmd.Date != *cmd.TargetDate
+	case "reorder_stops":
+		valid = cmd.Date != nil && len(cmd.StopIDS) > 0
+	case "update_trip_input":
+		valid = cmd.Input != nil
 	default:
 		return stateError("COMMAND_NOT_IMPLEMENTED", "Команда пока не реализована.")
 	}
@@ -192,7 +256,7 @@ func RecordProgress(view c.TripView, request c.ProgressRequest, now time.Time) (
 	if err != nil {
 		return c.TripView{}, err
 	}
-	distanceLeft := math.Max(0, *view.Input.LoadLimits.MaxWalkDistanceMPerDay-execution.ConsumedWalkDistanceM)
+	distanceLeft := math.Max(0, dailyWalkLimit(view.Input, view.Input.Days[j])-execution.ConsumedWalkDistanceM)
 	timeLeft := math.Max(0, dailyTimeBudget(view.Input.Days[j])-execution.ElapsedDurationSec)
 	day.Totals.RemainingWalkDistanceM = &distanceLeft
 	day.Totals.RemainingDurationSec = &timeLeft
@@ -207,12 +271,34 @@ func (p Planner) Change(ctx context.Context, view c.TripView, cmd ChangeCommand,
 	if err := cmd.Validate(); err != nil {
 		return c.TripView{}, err
 	}
+	if cmd.Kind == "edit_route" {
+		resolved, err := resolveRouteEdit(view, cmd)
+		if err != nil {
+			return c.TripView{}, err
+		}
+		return p.Change(ctx, view, resolved, position, observed, now)
+	}
 	copied, err := cloneView(view)
 	if err != nil {
 		return c.TripView{}, err
 	}
 	view = copied
 	view.Input = resolveBudgetDefaults(view.Input)
+	if cmd.Kind == "insert_infrastructure_stop" {
+		return p.insertInfrastructure(ctx, view, cmd, position, observed, now)
+	}
+	if cmd.Kind == "update_trip_input" {
+		if position != nil || observed != nil {
+			return c.TripView{}, stateError("INVALID_COMMAND", "Позиция неприменима к замене параметров.")
+		}
+		for _, day := range view.Days {
+			if day.Execution != nil {
+				return c.TripView{}, stateError("ACTIVE_TRIP", "Для начатой поездки используйте команды изменения дня.")
+			}
+		}
+		view.Input = *cmd.Input
+		return p.Build(ctx, view, now)
+	}
 	if cmd.Date == nil {
 		return c.TripView{}, stateError("INVALID_COMMAND", "Нужна дата дня.")
 	}
@@ -277,6 +363,38 @@ func (p Planner) Change(ctx context.Context, view c.TripView, cmd ChangeCommand,
 	} else if position != nil || observed != nil {
 		return c.TripView{}, stateError("DAY_NOT_STARTED", "Текущая позиция применима после старта дня.")
 	}
+	if cmd.Kind == "shorten_day" || cmd.Kind == "return_to_hotel" {
+		return p.shorten(ctx, view, i, j, cmd, position, observed, now)
+	}
+	if cmd.Kind == "add_activity" || cmd.Kind == "replace_stop" {
+		return p.insert(ctx, view, i, j, cmd, position, observed, now)
+	}
+	if cmd.Kind == "move_stop" {
+		return p.move(ctx, view, i, j, cmd, position, observed, now)
+	}
+	if cmd.Kind == "reorder_stops" {
+		ordered, history := []c.Stop{}, []c.Stop{}
+		remaining := map[c.ID]c.Stop{}
+		for _, stop := range view.Days[i].Stops {
+			if stop.Progress == "planned" {
+				remaining[stop.StopID] = stop
+			} else {
+				history = append(history, stop)
+			}
+		}
+		for _, id := range cmd.StopIDS {
+			stop, ok := remaining[id]
+			if !ok {
+				return c.TripView{}, stateError("INVALID_COMMAND", "Порядок должен содержать все оставшиеся остановки ровно один раз.")
+			}
+			ordered = append(ordered, stop)
+			delete(remaining, id)
+		}
+		if len(remaining) != 0 {
+			return c.TripView{}, stateError("INVALID_COMMAND", "В порядке пропущены остановки.")
+		}
+		view.Days[i].Stops = append(history, ordered...)
+	}
 	if cmd.Kind == "remove_stop" {
 		found := false
 		stops := []c.Stop{}
@@ -339,6 +457,9 @@ func (p Planner) rebuildExistingDay(ctx context.Context, view c.TripView, index,
 			candidate := c.Candidate{Place: c.Place{PlaceID: stop.PlaceID, Location: stop.Location, Categories: []c.Category{stop.Category}}, Activity: c.Activity{ActivityID: stop.ActivityID, PlaceID: stop.PlaceID, Title: stop.Title, Kind: stopKind(stop), Duration: stop.Duration}, Availability: *stop.Availability, BalanceCredit: stop.BalanceCredit, Reasons: stop.Reasons, Warnings: stop.Warnings}
 			local.metadata[stop.ActivityID] = candidate
 		}
+		if candidate, ok := p.metadata[stop.ActivityID]; ok {
+			local.metadata[stop.ActivityID] = candidate
+		}
 	}
 	execution := original.Execution
 	spentTime, spentDistance := 0.0, 0.0
@@ -366,7 +487,7 @@ func (p Planner) rebuildExistingDay(ctx context.Context, view c.TripView, index,
 		spentDistance = execution.ConsumedWalkDistanceM
 		total := dailyTimeBudget(day)
 		timeLeft := math.Max(0, total-spentTime)
-		distanceLeft := math.Max(0, *input.LoadLimits.MaxWalkDistanceMPerDay-spentDistance)
+		distanceLeft := math.Max(0, dailyWalkLimit(input, day)-spentDistance)
 		if timeLeft == 0 {
 			return c.TripView{}, stateError("DAY_FINISHED", "Доступное время дня исчерпано.")
 		}
@@ -419,6 +540,15 @@ func (p Planner) rebuildExistingDay(ctx context.Context, view c.TripView, index,
 		}
 		plan.StartPoint = original.StartPoint
 		plan.AvailableWindow = original.AvailableWindow
+		if original.AvailableWindow != nil && view.Input.Days[inputIndex].AvailableWindow != nil {
+			window := *original.AvailableWindow
+			end, _ := parseInstant(view.Input.Days[inputIndex].AvailableWindow.EndAt)
+			originalEnd, _ := parseInstant(window.EndAt)
+			if end.Before(originalEnd) {
+				window.EndAt = instant(end)
+			}
+			plan.AvailableWindow = &window
+		}
 		plan.Execution = execution
 		plan.Stops = append(history, plan.Stops...)
 		plan.Legs = append(historicalLegs, plan.Legs...)
@@ -429,8 +559,9 @@ func (p Planner) rebuildExistingDay(ctx context.Context, view c.TripView, index,
 		plan.Totals.RestDurationSec += execution.ConsumedRestDurationSec
 		plan.Totals.WaitDurationSec = add(plan.Totals.WaitDurationSec, execution.ConsumedWaitDurationSec)
 		plan.Totals.ElapsedDurationSec = add(plan.Totals.ElapsedDurationSec, spentTime)
-		plan.Totals.WalkBudgetM = view.Input.LoadLimits.MaxWalkDistanceMPerDay
-		distanceLeft := math.Max(0, *view.Input.LoadLimits.MaxWalkDistanceMPerDay-spentDistance)
+		dayLimit := dailyWalkLimit(view.Input, view.Input.Days[inputIndex])
+		plan.Totals.WalkBudgetM = &dayLimit
+		distanceLeft := math.Max(0, dayLimit-spentDistance)
 		timeLeft := math.Max(0, dailyTimeBudget(view.Input.Days[inputIndex])-spentTime)
 		plan.Totals.RemainingWalkDistanceM = &distanceLeft
 		plan.Totals.RemainingDurationSec = &timeLeft
