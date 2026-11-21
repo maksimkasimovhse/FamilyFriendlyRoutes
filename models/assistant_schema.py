@@ -241,11 +241,17 @@ def parse_assistant(message, context, client):
 
 
 def is_simple_kremlin_request(message: str) -> bool:
-    """Recognize an unqualified request for the local Kremlin without guessing a visit format."""
+    """Recognize an unqualified local-Kremlin request without inventing visit details.
+
+    A request to add it to the route is still a search request: a place card,
+    not a free-form clarification, is the safe next interaction.
+    """
     words = re.findall(r"[а-яё]+", message.casefold())
     allowed = {
         "я", "мы", "хочу", "хотим", "хотел", "хотела", "хотелось", "бы",
         "посетить", "посмотреть", "увидеть", "сходить", "погулять", "в", "по",
+        "добавь", "добавить", "добавьте", "включи", "включить", "поставь", "поставить",
+        "маршрут", "маршрута", "маршруте", "нам",
         "нижегородский", "нижегородском", "нижний", "новгород", "кремль", "кремле",
         "кремля", "кремлю", "кремлём", "пожалуйста", "давайте",
     }
