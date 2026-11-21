@@ -11,13 +11,29 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 const MAX_DAYS = 14;
 const LATE_HOUR = 20;   // «уже здесь» и позже 20:00 — сегодня гулять поздно, сегодняшний день недоступен
 
-// Готовые точки старта (геокодера адресов в проекте нет). Координаты — из датасета мест кейса.
-const PRESETS = [
-  { coordinates: [44.0066, 56.3273], label: 'Площадь Минина и Пожарского' },
-  { coordinates: [43.998938, 56.320757], label: 'Большая Покровская улица' },
-  { coordinates: [43.991344, 56.330481], label: 'Нижне-Волжская набережная' },
-  { coordinates: [43.988951, 56.328575], label: 'Улица Рождественская' },
-];
+// Старт: «Центр города» — площадь Минина и Пожарского, напротив Кремля (быстро, без GPS) или «Моё местоположение».
+// Геокодера адресов в проекте нет. Координаты — из датасета мест кейса.
+const CENTER = { coordinates: [44.0066, 56.3273], label: 'Площадь Минина и Пожарского' };
+const MY_LOCATION = 'Моё местоположение';
+const isAddressStart = () => st.start.label !== CENTER.label && st.start.label !== MY_LOCATION;
+
+// Поиск адреса: публичный Nominatim (OpenStreetMap), только в пределах Нижнего Новгорода.
+// По правилам сервиса — не чаще раза в секунду и только по нажатию «Найти» (без подсказок на лету).
+// Введённый адрес уходит на их сервер — в проде лучше свой геокодер.
+const GEOCODER = 'https://nominatim.openstreetmap.org/search';
+const CITY_BOX = '43.6,56.43,44.2,56.15';   // запад, север, восток, юг
+async function searchAddress(text) {
+  const url = `${GEOCODER}?${new URLSearchParams({ format: 'jsonv2', addressdetails: 1, limit: 5, 'accept-language': 'ru', viewbox: CITY_BOX, bounded: 1, q: text })}`;
+  let res;
+  try { res = await fetch(url); } catch { throw new Error('Не получилось связаться с сервисом поиска адресов'); }
+  if (!res.ok) throw new Error('Сервис поиска адресов сейчас недоступен');
+  return (await res.json()).map(x => {
+    const a = x.address || {};
+    const street = a.road || a.pedestrian || a.footway || '';
+    const label = street ? street + (a.house_number ? ', ' + a.house_number : '') : x.display_name.split(',').slice(0, 2).join(',').trim();
+    return { label, coordinates: [Number(Number(x.lon).toFixed(6)), Number(Number(x.lat).toFixed(6))] };
+  }).filter((r, i, all) => all.findIndex(o => o.label === r.label) === i);   // одинаковые адреса — один раз
+}
 // Граница, где работает построение пеших маршрутов (internal/routing)
 const inArea = ([lon, lat]) => lon >= 43.5 && lon <= 44.4 && lat >= 56.05 && lat <= 56.6;
 
@@ -64,7 +80,7 @@ function freshState() {
   const first = firstAllowed('in_city');
   return {
     context: 'in_city', from: first, to: first, month: first.slice(0, 7), hours: 5,
-    start: PRESETS[0], returnHome: true, end: PRESETS[0], picked: [], request: null,
+    start: CENTER, returnHome: true, picked: [], request: null,
   };
 }
 
@@ -75,24 +91,12 @@ function renderWhen() {
   document.querySelectorAll('#trip-hours button').forEach(b => b.setAttribute('aria-checked', Number(b.dataset.h) === st.hours));
   renderCalendar();
   persist();
-  renderPoints('start-points', st.start, p => { st.start = p; renderWhen(); });
-  renderPoints('end-points', st.end, p => { st.end = p; renderWhen(); });
-  $('return-home').setAttribute('aria-checked', st.returnHome);
-  $('end-block').hidden = st.returnHome;
-}
-
-function renderPoints(id, current, pick) {
-  const list = PRESETS.some(p => p.label === current.label) ? PRESETS : [...PRESETS, current];
-  $(id).innerHTML = '';
-  list.forEach(p => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.setAttribute('role', 'radio');
-    b.textContent = p.label;
-    b.setAttribute('aria-checked', p.label === current.label);
-    b.onclick = () => pick(p);
-    $(id).append(b);
-  });
+  document.querySelectorAll('#start-points button').forEach(b =>
+    b.setAttribute('aria-checked', b.dataset.start === 'geo' ? st.start.label === MY_LOCATION
+      : b.dataset.start === 'address' ? (isAddressStart() || !!st.addrOpen) : (st.start.label === CENTER.label && !st.addrOpen)));
+  $('addr-block').hidden = !(isAddressStart() || st.addrOpen);
+  if (isAddressStart() && !$('addr-input').value) $('addr-input').value = st.start.label;
+  $('return-home').setAttribute('aria-checked', st.returnHome !== false);
 }
 
 function renderCalendar() {
@@ -138,18 +142,46 @@ function bindWhen() {
   document.querySelectorAll('#trip-hours button').forEach(b => { b.onclick = () => { st.hours = Number(b.dataset.h); renderWhen(); }; });
   $('cal-prev').onclick = () => { st.month = addDays(st.month + '-01', -1).slice(0, 7); renderCalendar(); };
   $('cal-next').onclick = () => { st.month = addDays(st.month + '-28', 5).slice(0, 7); renderCalendar(); };
-  $('return-home').onclick = () => { st.returnHome = !st.returnHome; renderWhen(); };
-  $('start-geo').onclick = () => {
-    if (!navigator.geolocation) { $('start-note').textContent = 'Браузер не умеет определять местоположение'; return; }
-    $('start-note').textContent = 'Определяем…';
+  $('return-home').onclick = () => { st.returnHome = !(st.returnHome !== false); renderWhen(); };
+  $('start-points').querySelector('[data-start="center"]').onclick = () => { st.start = CENTER; st.addrOpen = false; $('start-note').hidden = true; renderWhen(); };
+  $('start-points').querySelector('[data-start="address"]').onclick = () => { st.addrOpen = true; $('start-note').hidden = true; renderWhen(); $('addr-input').focus(); };
+  $('addr-form').onsubmit = async e => {
+    e.preventDefault();
+    const text = $('addr-input').value.trim();
+    const note = t => { $('start-note').textContent = t; $('start-note').hidden = !t; };
+    if (text.length < 3) return note('Введите улицу и дом');
+    note('');
+    $('addr-go').disabled = true;
+    $('addr-results').innerHTML = '';
+    try {
+      const found = await searchAddress(text);
+      if (!found.length) return note('Такого адреса в Нижнем не нашли. Попробуйте иначе: улица и номер дома.');
+      found.forEach(r => {
+        const li = document.createElement('li');
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = r.label;
+        b.onclick = () => { st.start = { coordinates: r.coordinates, label: r.label }; st.addrOpen = true; $('addr-results').innerHTML = ''; renderWhen(); };
+        li.append(b);
+        $('addr-results').append(li);
+      });
+    } catch (err) {
+      note(err.message);
+    } finally {
+      $('addr-go').disabled = false;
+    }
+  };
+  $('start-points').querySelector('[data-start="geo"]').onclick = () => {
+    const note = text => { $('start-note').textContent = text; $('start-note').hidden = !text; };
+    if (!navigator.geolocation) return note('Браузер не умеет определять местоположение');
+    note('');
     navigator.geolocation.getCurrentPosition(pos => {
       const point = [Number(pos.coords.longitude.toFixed(6)), Number(pos.coords.latitude.toFixed(6))];
-      if (!inArea(point)) { $('start-note').textContent = 'Вы далеко от Нижнего — выберите точку из списка'; return; }
-      st.start = { coordinates: point, label: 'Моё местоположение' };
-      $('start-note').textContent = '';
+      if (!inArea(point)) return note('Вы далеко от Нижнего — выберите «Центр города»');
+      st.start = { coordinates: point, label: MY_LOCATION };
       renderWhen();
     }, e => {
-      $('start-note').textContent = 'Не получилось: ' + e.message + (location.protocol !== 'https:' && location.hostname !== 'localhost' ? ' (нужен HTTPS)' : '');
+      note('Не получилось определить местоположение: ' + e.message + (location.protocol !== 'https:' && location.hostname !== 'localhost' ? ' (на телефоне нужен HTTPS)' : ''));
     }, { enableHighAccuracy: true, timeout: 10000 });
   };
   $('when-next').onclick = () => { $('trip-when').hidden = true; hooks.onPick(); };
@@ -169,7 +201,7 @@ function dayInputs() {
     return {
       date,
       start_point: st.start,
-      end_point: st.returnHome ? st.start : st.end,
+      end_point: st.start,   // день заканчиваем там же, где начали
       available_window: { start_at: `${date}T${startAt}:00+03:00`, end_at: `${date}T${endAt}:00+03:00` },
       duration_budget_sec: Math.max(1800, Math.min(st.hours * 3600, windowSec)),
       meal_window: null,
@@ -210,7 +242,7 @@ function renderWishes() {
     ['Семья', familySummary(p), 'profile'],
     ['Интересы', kids, 'profile'],
     ['Когда', `${$('cal-sum').textContent || plural(n, 'день', 'дня', 'дней')} · до ${st.hours} ч в день`, 'when'],
-    ['Старт', st.start.label + (st.returnHome ? ' · возвращаемся сюда' : ` → ${st.end.label}`), 'when'],
+    ['Старт', (st.start.label === CENTER.label ? 'Центр города' : st.start.label) + (st.returnHome !== false ? ' · вернёмся сюда' : ''), 'when'],
     ['Обязательно', st.picked.length ? plural(st.picked.length, 'место', 'места', 'мест') + ' из подбора' : 'подберём сами', 'pick'],
   ];
   $('trip-summary').innerHTML = rows.map(([k, v, to]) => `<dt>${k}</dt><dd>${esc(v)}</dd><dd><button type="button" data-to="${to}">Изм.</button></dd>`).join('');
@@ -279,16 +311,8 @@ function renderPreview() {
     ${stops || '<li><span><small>На этот день мест не нашлось — попробуйте больше часов или другие даты</small></span></li>'}
     <li><span class="n end">■</span><span><b>Финиш</b><small>${esc(day.end_point.label || 'точка финиша')}</small></span></li>`;
 
-  // Предупреждения, которые нужно подтвердить перед сохранением
-  const codes = preview.required_acknowledgement_codes || [];
-  $('preview-ack').hidden = !codes.length;
-  if (codes.length) {
-    const msgs = [...new Set(trip.warnings.filter(w => codes.includes(w.code)).map(w => w.message))];
-    $('preview-ack-text').textContent = msgs.length ? 'Понимаю: ' + msgs.join(' ').replace(/\.\s*$/, '') + '. Уточню перед выходом.' : 'Часы работы проверены не у всех мест — уточню перед выходом';
-  }
-  $('preview-ack-box').checked = false;
-  $('preview-save').disabled = codes.length > 0;
-  $('preview-guest').hidden = hooks.authenticated;
+  // Предупреждения бекенда (часы работы не проверены и т.п.) пользователю не показываем: подтверждаем их автоматически при сохранении
+  $('preview-save').disabled = false;
   $('preview-error').hidden = true;
 }
 
@@ -313,7 +337,7 @@ async function savePreview() {
     $('preview-error').hidden = false;
   } finally {
     btn.textContent = 'Сохранить маршрут';
-    if (!$('trip-preview').hidden) btn.disabled = !$('preview-ack').hidden && !$('preview-ack-box').checked;
+    btn.disabled = false;
   }
 }
 
@@ -336,9 +360,7 @@ export async function openTripSetup(h, { keep = false, resume = false } = {}) {
     $('trip-build').onclick = build;
     $('trip-wishes').querySelector('[data-back]').onclick = () => { st.request = $('trip-request').value; $('trip-wishes').hidden = true; hooks.onPick(); };
     $('trip-preview').querySelector('[data-back]').onclick = () => { $('trip-preview').hidden = true; renderWishes(); $('trip-wishes').hidden = false; };
-    $('preview-ack-box').onchange = e => { $('preview-save').disabled = !e.target.checked; };
     $('preview-save').onclick = savePreview;
-    $('preview-login').onclick = () => hooks.onLogin();
   }
   // Вернуться туда, где остановились до обновления страницы
   if (saved?.st && step === 'pick') { hooks.onPick(); return; }
