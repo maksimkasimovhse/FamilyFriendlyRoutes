@@ -62,11 +62,11 @@ func jsonReply(status int, value any, location string) (tripReply, error) {
 func TripHandler(store *tripstore.Store, p planner.Planner) http.Handler {
 	return tripHandler(store, p, func() time.Time { return time.Now().UTC() })
 }
-func TripHandlerWithAssistant(store *tripstore.Store, p planner.Planner, interpreter assistant.Interpreter, places mapdata.Repository) http.Handler {
-	return tripHandlerWithAssistant(store, p, func() time.Time { return time.Now().UTC() }, interpreter, places)
-}
 func tripHandler(store *tripstore.Store, p planner.Planner, now func() time.Time) http.Handler {
 	return tripHandlerWithAssistant(store, p, now, nil, nil)
+}
+func TripHandlerWithAssistant(store *tripstore.Store, p planner.Planner, interpreter assistant.Interpreter, places mapdata.Repository) http.Handler {
+	return tripHandlerWithAssistant(store, p, func() time.Time { return time.Now().UTC() }, interpreter, places)
 }
 func tripHandlerWithAssistant(store *tripstore.Store, p planner.Planner, now func() time.Time, interpreter assistant.Interpreter, places mapdata.Repository) http.Handler {
 	api := &tripAPI{store: store, planner: p, now: now, auth: newAuthGuard(), assistant: interpreter, places: places}
@@ -90,6 +90,7 @@ func tripHandlerWithAssistant(store *tripstore.Store, p planner.Planner, now fun
 	mux.HandleFunc("POST /api/v1/trips", api.post)
 	mux.HandleFunc("GET /api/v1/trips/{trip_id}", api.getTrip)
 	mux.HandleFunc("POST /api/v1/trips/{trip_id}/previews", api.post)
+	mux.HandleFunc("POST /api/v1/trips/{trip_id}/planning-options", api.planningOptions)
 	mux.HandleFunc("POST /api/v1/trips/{trip_id}/progress", api.post)
 	mux.HandleFunc("GET /api/v1/trips/{trip_id}/previews/{preview_id}", api.getPreview)
 	mux.HandleFunc("POST /api/v1/trips/{trip_id}/previews/{preview_id}/apply", api.post)
@@ -433,7 +434,31 @@ func (a *tripAPI) prepareWithPlanner(r *http.Request, owner string, raw []byte, 
 	ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
 	defer cancel()
 	var proposed c.TripView
-	if command.Kind == "generate_plan" {
+	if command.Kind == "append_manual_choices" {
+		base := view
+		if command.BasePreviewID != nil {
+			err = a.store.Read(func(s tripstore.State) error {
+				previous, ok := s.Previews[string(*command.BasePreviewID)]
+				if !ok || previous.Owner != owner || previous.View.TripID != view.TripID {
+					return failure(404, "PREVIEW_NOT_FOUND", "Вариант не найден.")
+				}
+				if previous.View.BaseVersion != view.Version {
+					return conflict(view.Version)
+				}
+				expiry, _ := time.Parse(time.RFC3339Nano, string(previous.View.ExpiresAt))
+				if !expiry.After(a.now()) {
+					return failure(410, "PREVIEW_EXPIRED", "Вариант устарел.")
+				}
+				base = previous.View.ProposedTrip
+				return nil
+			})
+			if err != nil {
+				return nil, err
+			}
+		}
+		proposed, err = p.AppendManualChoices(ctx, base, *command.Date, command.Choices, a.now())
+		proposed.Version = view.Version + 1
+	} else if command.Kind == "generate_plan" {
 		if request.CurrentPosition != nil || request.ObservedAt != nil {
 			return nil, failure(422, "INVALID_COMMAND", "Для продолжения используйте replan_day.")
 		}
@@ -474,7 +499,7 @@ func (a *tripAPI) prepareWithPlanner(r *http.Request, owner string, raw []byte, 
 	preview.Diff.MovedStopIDS = []c.ID{}
 	preview.Diff.ChangedDates = []c.ISODate{}
 	for _, day := range proposed.Days {
-		if command.Date == nil || day.Date == *command.Date || command.TargetDate != nil && day.Date == *command.TargetDate {
+		if command.Date == nil || day.Date == *command.Date {
 			preview.Diff.ChangedDates = append(preview.Diff.ChangedDates, day.Date)
 		}
 	}

@@ -42,7 +42,7 @@ def main() -> None:
             with httpx.Client(timeout=1, trust_env=False) as client:
                 while time.monotonic() < deadline and server.poll() is None:
                     try:
-                        response = client.get(address + "/health")
+                        response = client.get(address + "/ready")
                         if response.status_code == 200:
                             health = response.json()
                             break
@@ -59,7 +59,7 @@ def main() -> None:
                       "model": health, "routing": "test_fixture_not_real_osm",
                       "checks": ["recommendation HTTP contract", "mandatory selection", "preview does not mutate",
                                  "unknown data acknowledgement", "apply", "idempotent apply", "stale apply rejected",
-                                 "ML outage preserves saved plan", "initial LLM understanding reaches model",
+                                 "validated snapshot survives ML outage", "fresh ML outage preserves draft and saved plan", "initial LLM understanding reaches model",
                                  "explicit time budget", "assistant catalog suggestions and contextual selection"]}
             output = ROOT / "data/processed/mvp/checks.json"
             output.parent.mkdir(parents=True, exist_ok=True)

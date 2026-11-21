@@ -36,9 +36,10 @@ go run ./cmd/backend -ml-url http://127.0.0.1:8082/internal/v1/recommendations -
 - `POST /api/v1/trips/{trip_id}/recommendations` — initial/restaurant/along_route; поддержаны фильтры семейных свойств ресторана.
 - `POST /api/v1/trips/{trip_id}/needs` — tired/toilet/rain/hotel/playground; поиск не меняет поездку, отель передаётся явно.
 - `GET /api/v1/map/places?lon=44.0066&lat=56.3273&radius_km=2` — площадки, парки, скамейки, туалеты, аптеки и кафе из PostgreSQL. Поддержаны bbox, категории и страницы. [Импорт и параметры](docs/map_infrastructure.md).
-- `GET /api/v1/trips/{trip_id}/map/places?date=YYYY-MM-DD&expected_version=2` — инфраструктура в коридоре **250 м вдоль реального OSM-маршрута дня**. Эта ручка используется основной картой, обновляется после изменения маршрута.
+- `GET /api/v1/trips/{trip_id}/map/places?date=YYYY-MM-DD&expected_version=2` — инфраструктура в коридоре **125 м вдоль реального OSM-маршрута дня**. Эта ручка используется основной картой, обновляется после изменения маршрута.
 - `POST /api/v1/trips` и `GET /api/v1/trips/{trip_id}` — draft и чтение.
 - `POST /api/v1/trips/{trip_id}/previews` — generate_plan, start_day, remove_stop, replan_day.
+- `POST /api/v1/trips/{trip_id}/planning-options` — карточки из общего пула ML, до двух ручных выборов на день и предложение дополнения при загрузке <70%. Дополнение — `append_manual_choices` через preview/apply. [Правила и контракт](docs/manual_choices.md).
 - `POST /api/v1/trips/{trip_id}/progress` — посещение или пропуск следующей остановки активного дня.
 - `GET /api/v1/trips/{trip_id}/previews/{preview_id}` — чтение варианта.
 - `POST /api/v1/trips/{trip_id}/previews/{preview_id}/apply` — сохранение выбранного варианта с проверкой версии и предупреждений.
@@ -254,3 +255,20 @@ go vet ./...
 ### Тематическая карта
 
 Над картой (экран «Карта») рисуется небо по погоде дня: ясно — солнышко с лучами и голубая дымка, переменная облачность — солнце и облака, пасмурно — серые тучки, дождь и ливень — тучи с каплями, гроза — со вспышками, снег — снежинки, туман — полосы тумана. `frontend/js/weather-sky.js` (canvas, не перехватывает клики, анимация идёт только пока карта на экране; при включённом «меньше движения» — один кадр). Вид неба выбирает `skyKind` в `weather.js` по тому же прогнозу, что и советы.
+
+## ИИ-чат пожеланий (шаг 2 «Новой поездки»)
+
+Поток: анкета → шаг 1 «когда и откуда» → **шаг 2 ИИ-чат** → шаг 3 «Подбор мест» (свайп) → шаг 4 «Что-то особенное» → маршрут.
+Семья пишет словами, что хочет («любим историю и театры, но без музеев»). Сообщения можно дописывать, разбираются все вместе. На подбор мест попадают только подобранные карточки, лучшие первыми (до 60). «Пропустить» показывает все места.
+
+Как это работает (`POST /api/v1/wishes/recommendations`, `internal/wishes`):
+1. **Разбор текста** — parser-service (LLM, GigaChat) возвращает закрытые claims таксономии `models/taxonomy.py` (интерес, категория, формат; «хочу» или «не надо»). Если сервис недоступен или нет ключа GigaChat, разбор идёт локально по ключевым основам слов (`data/wish_keywords.json`). В чате при этом написано «упрощённый режим».
+2. **Теги карточек** — `data/card_tags.json` (id → теги). Строится `python3 scripts/build-card-tags.py` по категории и тексту из `db/seed/main.csv`, это стартовая разметка (позже её заменят проверенные теги из parser-service). Места с тегом из «без …» убираются.
+3. **Ранжирование** — model-service (`/internal/v1/rankings`, прозрачный baseline из `models/place_ranker.py`): совпадение claims с тегами, интересы ребёнка из анкеты, разнообразие (MMR). Если сервис недоступен — тот же подсчёт совпадения считается локально (`ranker: local`).
+4. Если просили то, чего нет в списке (в данных нет, например, зоопарка), чат так и говорит и показывает самые близкие места.
+
+Backend получает адреса сервисов флагами `-parser-url`, `-model-url` (в `compose.yaml` заданы). Реальный разбор через GigaChat включается как описано в `docs/microservices.md` (`GIGACHAT_CREDENTIALS`, `compose.override.example.yaml`). Тесты: `go test ./internal/wishes`.
+
+## HTTPS и геолокация с телефона
+
+Запуск в одной Wi-Fi-сети через Caddy: `powershell -ExecutionPolicy Bypass -File .\scripts\start-phone-https.ps1`. Сертификат нужно один раз установить и включить доверие на телефоне. [Подробная инструкция](docs/phone_https.md).

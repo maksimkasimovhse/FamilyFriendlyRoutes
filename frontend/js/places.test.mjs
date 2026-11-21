@@ -23,7 +23,7 @@ test('radius helper loads every page and retains query filters', async () => {
   } finally { globalThis.fetch = original; }
 });
 
-test('corridor helper uses saved route and exactly 250 metres, not GPS', async () => {
+test('corridor helper uses saved route and exactly 125 metres, not GPS', async () => {
   const original = globalThis.fetch;
   const urls = [];
   const date = '2030-06-15';
@@ -35,7 +35,7 @@ test('corridor helper uses saved route and exactly 250 metres, not GPS', async (
     const result = await fetchPlacesAlongRoute({tripId:'trip-1',version:2,date});
     assert.equal(result.items.length,2);
     assert.equal(urls[0].pathname,'/api/v1/trips/trip-1/map/places');
-    assert.equal(urls[0].searchParams.get('buffer_m'),'250');
+    assert.equal(urls[0].searchParams.get('buffer_m'),'125');
     assert.equal(urls[0].searchParams.has('lon'),false);
     assert.equal(urls[1].searchParams.get('expected_version'),'2');
     assert.equal(urls[1].searchParams.get('cursor'),'page-2');

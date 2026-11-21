@@ -64,3 +64,25 @@ func TestCatalogSelectionPreservesOldAndNewTrips(t *testing.T) {
 		t.Fatal("snapshot replan called a recommendation provider")
 	}
 }
+
+func TestChangedTripInputRefreshesRecommendationSnapshot(t *testing.T) {
+	source := &versionSource{version: "city-enriched-v3", t: t}
+	p := Planner{Router: &testRouter{}, Source: source}
+	now := time.Now()
+	view, err := p.Build(context.Background(), p.Draft("refresh", sample(t), now), now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if view.RecommendationSnapshot == nil || source.calls != 1 {
+		t.Fatal("missing initial snapshot")
+	}
+	changed := view.Input
+	changed.Family.AdultInterestIDS = []string{"science"}
+	updated, err := p.Change(context.Background(), view, ChangeCommand{Kind: "update_trip_input", Input: &changed}, nil, nil, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if source.calls != 2 || updated.RecommendationSnapshot == nil {
+		t.Fatal("changed profile reused stale recommendations")
+	}
+}

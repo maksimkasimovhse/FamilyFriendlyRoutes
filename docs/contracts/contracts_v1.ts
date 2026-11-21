@@ -84,9 +84,9 @@ export interface LoadLimits {
 }
 export interface DayInput {
   date: ISODate; start_point: Point; end_point: Point;
+  max_walk_distance_m?: number | null;
   available_window: Interval | null;
   duration_budget_sec: number;
-  max_walk_distance_m?: number | null; // Лимит выбранного дня, дополнительно к семейному.
   meal_window: Interval | null; rest_budget_sec: number;
   meal_count?: number; // По умолчанию 1; 0 отключает резерв при отсутствии override.
   meal_format?: 'quick_service' | 'table_service' | 'meal_with_play';
@@ -98,11 +98,12 @@ export interface Selection {
   preferred_date: ISODate | null;
 }
 export interface TripInput {
+  planning_policy?: 'ranked_prefix' | 'manual_choices';
   city_id: 'nizhny_novgorod'; timezone: TimeZone;
   planning_context: 'before_arrival' | 'in_city';
   family: FamilyProfile; load_limits: LoadLimits;
   days: DayInput[]; selections: Selection[]; // 1..14 дней.
-  request_text: string | null; // LLM извлекает интересы и явно названные лимиты; backend проверяет их.
+  request_text: string | null; // Уточняет интересы, не hard constraints.
 }
 
 // ML отвечает за эти данные и их происхождение; backend хранит версию каталога.
@@ -197,13 +198,6 @@ export interface RecommendationRequest {
   } | null;
   limit: number; // 1..50; initial=50 на всю поездку, без плана и маршрутов.
 }
-export interface ParsedRequest {
-  taxonomy_version: '1.0';
-  claims: { kind: 'interest' | 'category' | 'format'; value: string;
-    polarity: 'prefer' | 'avoid'; evidence: string }[];
-  needs_clarification: boolean; clarification_question: string | null;
-  unsupported_requests: string[];
-}
 export interface RecommendationResponse {
   contract_version: '1.0'; request_id: ID;
   trip_id: ID; trip_version: number; catalog_version: string;
@@ -275,6 +269,7 @@ export interface DayPlan {
   execution?: DayExecution;
 }
 export interface TripView {
+  recommendation_snapshot?: RecommendationResponse;
   trip_id: ID; version: number; updated_at: Instant;
   status: 'draft' | 'planned' | 'active' | 'completed';
   input: TripInput; policy: FamilyPolicy;
@@ -287,6 +282,7 @@ export interface TripView {
   warnings: Warning[];
 }
 export type PlanCommand =
+  | { kind: 'append_manual_choices'; date: ISODate; choices: Selection[]; base_preview_id?: ID }
   | { kind: 'generate_plan' }
   | { kind: 'update_trip_input'; input: TripInput }
   | { kind: 'add_activity'; date: ISODate; selection: Selection;
@@ -294,13 +290,21 @@ export type PlanCommand =
   | { kind: 'remove_stop'; date: ISODate; stop_id: ID }
   | { kind: 'replace_stop'; date: ISODate; stop_id: ID; selection: Selection }
   | { kind: 'reorder_stops'; date: ISODate; stop_ids: ID[] }
-  | { kind: 'shorten_day'; date: ISODate; target_remaining_duration_sec?: number;
-      target_remaining_walk_distance_m?: number } // Требуется хотя бы один лимит.
-  | { kind: 'return_to_hotel'; date: ISODate; hotel_point: Point;
-      target_remaining_duration_sec?: number; target_remaining_walk_distance_m?: number }
-  | { kind: 'move_stop'; date: ISODate; stop_id: ID; target_date: ISODate }
+  | { kind: 'shorten_day'; date: ISODate; target_remaining_duration_sec: number }
+  | { kind: 'return_to_hotel'; date: ISODate; hotel_point: Point }
   | { kind: 'start_day'; date: ISODate; point: Point; start_at: Instant }
   | { kind: 'replan_day'; date: ISODate };
+export interface CompletionPolicy { manual_limit_per_day: number; short_day_ratio: number; supplement_radius_m: number }
+export interface PlanningOptionsRequest { expected_version: number; preview_id?: ID }
+export interface DayPlanningOptions {
+  date: ISODate; available_duration_sec: number; planned_duration_sec: number; fill_ratio: number;
+  is_short: boolean; manual_count: number; remaining_manual_choices: number;
+  anchor: Point | null; candidates: Candidate[];
+}
+export interface PlanningOptions {
+  trip_id: ID; trip_version: number; policy: CompletionPolicy; candidates: Candidate[];
+  days: DayPlanningOptions[]; evidence: Evidence[];
+}
 export interface PreviewRequest {
   expected_version: number; command: PlanCommand;
   current_position: Point | null; observed_at: Instant | null;

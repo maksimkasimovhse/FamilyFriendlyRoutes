@@ -125,7 +125,7 @@ ID — в `id_conflicts`, для разбора до публикации.
 # Зарегистрировать другую полученную CSV-выгрузку:
 .venv/bin/python scripts/prepare_city_catalog.py --import-csv /absolute/path/to/export.csv
 PYTHONPATH=models .venv/bin/python -m unittest discover -s models -p 'test_*.py'
-.venv/bin/python scripts/check_mvp.py
+PYTHONPATH=models .venv/bin/python -m unittest discover -s models -p test_ml_boundaries.py
 ```
 
 Основные результаты: `city/manifest.json`, `city/coverage_report.json`,

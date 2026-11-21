@@ -129,8 +129,8 @@ PYTHONPATH=models .venv/bin/python -m uvicorn services.model_service.app:app --h
 go run ./cmd/backend -ml-url http://127.0.0.1:8082/internal/v1/recommendations -catalog-version city-enriched-v3
 ```
 
-`GET /health` модели проверяет каталог и сообщает SHA, версии, число записей/мест,
-поддержанные purpose и сеансы. Он не подменяет `/healthz` Go.
+`GET /ready` модели проверяет каталог и сообщает SHA, версии, число записей/мест,
+поддержанные purpose и сеансы. `GET /health` проверяет только процесс. Эти пути не подменяют `/healthz` Go.
 
 ## Проверка
 
@@ -152,3 +152,13 @@ along_route, меню, неизвестный фильтр, все needs, обя
 
 При подключении Docker daemon был выключен. Compose config проверен; сборка и
 запуск контейнеров и публичное развёртывание в этой работе не выполнялись.
+
+
+## После синхронизации с новой ML-веткой
+
+Сохранены frontend/ручной выбор из удалённой ветки7a1f1bb: ranked_prefix,
+manual_choices, planning-options, append_manual_choices и RecommendationSnapshot.
+Повторный расчёт использует проверенный snapshot при недоступной модели;
+запрос без snapshot честно получает503. update_trip_input очищает старый snapshot,
+чтобы изменённая семья/пожелания получили новый подбор. Контекст LLM ограничивается
+типизированной схемой, malformed requests отклоняются до сетевого вызова.

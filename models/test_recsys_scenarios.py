@@ -145,7 +145,7 @@ class RecSysScenarios(unittest.TestCase):
     def test_service_accepts_new_and_saved_catalog_versions(self):
         recommendation_engine.cache_clear()
         with patch.dict(os.environ,{'MODEL_CATALOG_VERSION':ENRICHED_CATALOG_VERSION,'MODEL_CATALOG_PATH':'','ML_API_TOKEN':'scenario-token','REQUEST_PARSER_URL':''}),TestClient(app) as client:
-            health=client.get('/health').json()
+            health=client.get('/ready').json()
             self.assertEqual(health['catalog_version'],ENRICHED_CATALOG_VERSION)
             self.assertEqual(set(health['purposes']),set(SUPPORTED_PURPOSES))
             for request in [request_for('restaurant'),sample_request()]:

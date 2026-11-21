@@ -226,9 +226,25 @@ func TestMVPModelPreviewApply(t *testing.T) {
 		t.Fatal("stale apply was accepted")
 	}
 	fail.Store(true)
-	outage := request(handler, browser, "POST", base+"/previews", `{"expected_version":2,"command":{"kind":"generate_plan"},"current_position":null,"observed_at":null}`, "")
+	cached := request(handler, browser, "POST", base+"/previews", `{"expected_version":2,"command":{"kind":"generate_plan"},"current_position":null,"observed_at":null}`, "")
+	if cached.Code != 201 {
+		t.Fatal("validated snapshot should survive a model outage", cached.Code, cached.Body.String())
+	}
+	fresh := request(handler, browser, "POST", "/api/v1/trips", string(raw), "mvp-outage-create")
+	if fresh.Code != 201 {
+		t.Fatal(fresh.Body.String())
+	}
+	var freshTrip c.TripView
+	_ = json.Unmarshal(fresh.Body.Bytes(), &freshTrip)
+	freshPath := "/api/v1/trips/" + string(freshTrip.TripID)
+	outage := request(handler, browser, "POST", freshPath+"/previews", `{"expected_version":1,"command":{"kind":"generate_plan"},"current_position":null,"observed_at":null}`, "")
 	if outage.Code != 503 {
 		t.Fatal("expected ML outage to remain an outage", outage.Code)
+	}
+	freshSaved := request(handler, browser, "GET", freshPath, "", "")
+	_ = json.Unmarshal(freshSaved.Body.Bytes(), &freshTrip)
+	if freshTrip.Version != 1 || len(freshTrip.Days) != 0 {
+		t.Fatal("failed fresh lookup changed draft")
 	}
 	saved = request(handler, browser, "GET", base, "", "")
 	var before, after any

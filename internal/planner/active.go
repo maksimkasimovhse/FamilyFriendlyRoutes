@@ -22,6 +22,8 @@ func stateError(code, message string) error { return &StateError{code, message} 
 
 // Only commands implemented in this stage. Unknown fields are rejected by HTTP.
 type ChangeCommand struct {
+	Choices                      []c.Selection  `json:"choices,omitempty"`
+	BasePreviewID                *c.ID          `json:"base_preview_id,omitempty"`
 	Kind                         string         `json:"kind"`
 	Date                         *c.ISODate     `json:"date,omitempty"`
 	StopID                       *c.ID          `json:"stop_id,omitempty"`
@@ -39,7 +41,8 @@ type ChangeCommand struct {
 
 func (cmd ChangeCommand) Validate() error {
 	allowed := map[string][]string{
-		"generate_plan": {"kind"}, "start_day": {"kind", "date", "point", "start_at"},
+		"append_manual_choices": {"kind", "date", "choices", "base_preview_id"},
+		"generate_plan":         {"kind"}, "start_day": {"kind", "date", "point", "start_at"},
 		"remove_stop": {"kind", "date", "stop_id"}, "replan_day": {"kind", "date"},
 		"shorten_day":     {"kind", "date", "target_remaining_duration_sec", "target_remaining_walk_distance_m"},
 		"return_to_hotel": {"kind", "date", "hotel_point", "target_remaining_duration_sec", "target_remaining_walk_distance_m"},
@@ -68,6 +71,8 @@ func (cmd ChangeCommand) Validate() error {
 		return stateError("INVALID_COMMAND", "Некорректный оставшийся лимит ходьбы.")
 	}
 	switch cmd.Kind {
+	case "append_manual_choices":
+		valid = cmd.Date != nil && len(cmd.Choices) > 0 && len(cmd.Choices) <= budgetDefaults.CompletionPolicy.ManualLimitPerDay
 	case "generate_plan":
 		valid = cmd.Date == nil && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
 	case "start_day":
@@ -273,6 +278,7 @@ func (p Planner) Change(ctx context.Context, view c.TripView, cmd ChangeCommand,
 			}
 		}
 		view.Input = *cmd.Input
+		view.RecommendationSnapshot = nil
 		return p.Build(ctx, view, now)
 	}
 	if cmd.Date == nil {

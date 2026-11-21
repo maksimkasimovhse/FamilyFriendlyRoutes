@@ -35,7 +35,7 @@ def main():
             with httpx.Client(timeout=2,trust_env=False) as client:
                 while time.monotonic()<deadline and server.poll() is None:
                     try:
-                        response=client.get(address+'/health')
+                        response=client.get(address+'/ready')
                         if response.status_code==200:health=response.json();break
                     except httpx.HTTPError:pass
                     time.sleep(0.1)

@@ -591,7 +591,7 @@
             }
           }
         },
-        "description": "Implemented: generate_plan, update_trip_input (before start), start_day, remove_stop, replan_day, shorten_day, return_to_hotel, add_activity, replace_stop, reorder_stops, move_stop. Active previews preserve confirmed history and expire 30 seconds after observed_at."
+        "description": "Implemented commands: generate_plan, start_day, remove_stop, replan_day. Active previews expire 30 seconds after observed_at and preserve confirmed history. Other command variants are target API and may return COMMAND_NOT_IMPLEMENTED."
       }
     },
     "/api/v1/trips/{trip_id}/previews/{preview_id}": {
@@ -1113,6 +1113,18 @@
               "maximum": 20
             },
             "description": "Radius in kilometres, greater than zero"
+          },
+          {
+            "name": "nearest",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "enum": [
+                true
+              ]
+            },
+            "description": "Use lon+lat without radius_km or bbox. Return objects ordered by distance across the published catalog, without a distance cutoff. Use limit=3 for urgent scenarios; cursor continues the same nearest search."
           }
         ],
         "responses": {
@@ -1156,7 +1168,7 @@
             "$ref": "#/components/responses/Error503"
           }
         },
-        "description": "Read-only public catalog. Exactly one search mode: lon+lat+radius_km OR bbox. Radius in km (0,20], distance_m in metres on the spheroid, not walking distance. Defaults to all supported categories. Radius results ordered by distance then place_id; bbox results by place_id. OSM availability is not verified on site; date does not filter by opening hours. Unsupported categories return 422. No mock fallback; unavailable database returns 503."
+        "description": "Read-only public catalog. Exactly one search mode: lon+lat+radius_km OR bbox. Radius in km (0,20], distance_m in metres on the spheroid, not walking distance. Defaults to all supported categories. Radius results ordered by distance then place_id; bbox results by place_id. OSM availability is not verified on site; date does not filter by opening hours. Unsupported categories return 422. No mock fallback; unavailable database returns 503. Also supports lon+lat+nearest=true without radius_km or bbox: distance-ordered search without a distance cutoff."
       }
     },
     "/api/v1/trips/{trip_id}/taxi-suggestions": {
@@ -2155,7 +2167,7 @@
     "/api/v1/trips/{trip_id}/map/places": {
       "get": {
         "operationId": "getRouteMapPlaces",
-        "summary": "Инфраструктура в коридоре 250 м вдоль сохранённого маршрута дня",
+        "summary": "Инфраструктура в коридоре 125 м вдоль сохранённого маршрута дня",
         "tags": [
           "Public Backend"
         ],
@@ -2250,9 +2262,9 @@
               "type": "number",
               "exclusiveMinimum": 0,
               "maximum": 1000,
-              "default": 250
+              "default": 125
             },
-            "description": "Maximum geodesic distance from the route in metres; default 250."
+            "description": "Maximum geodesic distance from the route in metres; default 125."
           }
         ],
         "responses": {
@@ -2296,7 +2308,111 @@
             "$ref": "#/components/responses/Error503"
           }
         },
-        "description": "Checks trip ownership and expected_version. Searches PostGIS using the complete original OSM leg geometries as a MultiLineString, without simplification or straight connectors between legs. Default buffer is 250 m to either side and around the ends. distance_to_route_m is the shortest geodesic distance to the line, not a walking detour. All saved legs of the selected day are included. Cursor is bound to route geometry, version, date and filters; version changes return 409. No GPS centre is used."
+        "description": "Checks trip ownership and expected_version. Searches PostGIS using the complete original OSM leg geometries as a MultiLineString, without simplification or straight connectors between legs. Default buffer is 125 m to either side and around the ends. distance_to_route_m is the shortest geodesic distance to the line, not a walking detour. All saved legs of the selected day are included. Cursor is bound to route geometry, version, date and filters; version changes return 409. No GPS centre is used."
+      }
+    },
+    "/api/v1/trips/{trip_id}/planning-options": {
+      "post": {
+        "operationId": "getPlanningOptions",
+        "summary": "Карточки рекомендаций и предложение дополнить короткий день",
+        "tags": [
+          "Public Backend"
+        ],
+        "security": [
+          {
+            "GuestSession": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "trip_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ID"
+            },
+            "description": ""
+          },
+          {
+            "name": "X-Request-ID",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Необязательный ID трассировки"
+          },
+          {
+            "name": "X-CSRF-Token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Токен сессии; backend также проверяет Origin."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Карточки и политика дополнения",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanningOptions"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Error401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Error403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Error404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Error409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Error422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Error429"
+          },
+          "502": {
+            "$ref": "#/components/responses/Error502"
+          },
+          "503": {
+            "$ref": "#/components/responses/Error503"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanningOptionsRequest"
+              }
+            }
+          }
+        },
+        "description": "Loads a validated recommendation snapshot, shared by manual choices and route calculation. Preview options are scoped to its owner/version/expiry. Short day: <70% of effective time; suggestions within 2000 m of the last activity, or globally for an empty day. At most two manual choices per day, including supplements. Excludes all places already scheduled in the trip; checks real OSM paths, time and availability for supplemental candidates. Active trips cannot be supplemented yet."
       }
     },
     "/api/v1/trips/{trip_id}/assistant/messages": {
@@ -3029,6 +3145,14 @@
                 "type": "null"
               }
             ]
+          },
+          "planning_policy": {
+            "type": "string",
+            "enum": [
+              "ranked_prefix",
+              "manual_choices"
+            ],
+            "description": "manual_choices: route only explicitly selected places, with additional cards offered for short days. ranked_prefix: automatic ranked filling only when explicitly requested. Both enforce two manual choices per day. Omission preserves legacy behaviour."
           }
         },
         "required": [
@@ -4566,20 +4690,20 @@
             "maximum": 50,
             "description": "Initial planning requests 50 ranked distinct places for the entire trip. ML does not assign days or compute routes."
           },
-          "parsed_request": {
+          "restaurant_filters": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/ParsedRequest"
+                "$ref": "#/components/schemas/RestaurantFilters"
               },
               {
                 "type": "null"
               }
             ]
           },
-          "restaurant_filters": {
+          "parsed_request": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/RestaurantFilters"
+                "$ref": "#/components/schemas/ParsedRequest"
               },
               {
                 "type": "null"
@@ -5288,6 +5412,9 @@
             "items": {
               "$ref": "#/components/schemas/Warning"
             }
+          },
+          "recommendation_snapshot": {
+            "$ref": "#/components/schemas/RecommendationResponse"
           }
         },
         "required": [
@@ -5444,29 +5571,13 @@
               },
               "target_remaining_duration_sec": {
                 "type": "number",
-                "minimum": 60
-              },
-              "target_remaining_walk_distance_m": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 100000
+                "minimum": 0
               }
             },
             "required": [
               "kind",
-              "date"
-            ],
-            "anyOf": [
-              {
-                "required": [
-                  "target_remaining_duration_sec"
-                ]
-              },
-              {
-                "required": [
-                  "target_remaining_walk_distance_m"
-                ]
-              }
+              "date",
+              "target_remaining_duration_sec"
             ]
           },
           {
@@ -5481,16 +5592,6 @@
               },
               "hotel_point": {
                 "$ref": "#/components/schemas/Point"
-              },
-              "target_remaining_duration_sec": {
-                "type": "number",
-                "minimum": 60,
-                "maximum": 86400
-              },
-              "target_remaining_walk_distance_m": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 100000
               }
             },
             "required": [
@@ -5537,6 +5638,35 @@
             "required": [
               "kind",
               "date"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "append_manual_choices"
+              },
+              "date": {
+                "$ref": "#/components/schemas/ISODate"
+              },
+              "choices": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 2,
+                "items": {
+                  "$ref": "#/components/schemas/Selection"
+                }
+              },
+              "base_preview_id": {
+                "$ref": "#/components/schemas/ID"
+              }
+            },
+            "required": [
+              "kind",
+              "date",
+              "choices"
             ]
           },
           {
@@ -6070,16 +6200,10 @@
               "free_text": {
                 "type": "boolean"
               },
-              "assistant": {
-                "type": "boolean"
-              },
-              "llm_understanding": {
+              "needs": {
                 "type": "boolean"
               },
               "recommendations": {
-                "type": "boolean"
-              },
-              "needs": {
                 "type": "boolean"
               },
               "fixed_sessions": {
@@ -6764,6 +6888,14 @@
                 "type": "null"
               }
             ]
+          },
+          "planning_policy": {
+            "type": "string",
+            "enum": [
+              "ranked_prefix",
+              "manual_choices"
+            ],
+            "description": "manual_choices: route only explicitly selected places, with additional cards offered for short days. ranked_prefix: automatic ranked filling only when explicitly requested. Both enforce two manual choices per day. Omission preserves legacy behaviour."
           }
         },
         "required": [
@@ -6819,151 +6951,319 @@
           "items"
         ]
       },
-      "RequestCategoryClaim": {
+      "CompletionPolicy": {
+        "type": "object",
         "additionalProperties": false,
         "properties": {
-          "polarity": {
-            "enum": [
-              "prefer",
-              "avoid"
-            ],
-            "title": "Polarity",
-            "type": "string"
+          "manual_limit_per_day": {
+            "type": "integer"
           },
-          "evidence": {
-            "maxLength": 160,
-            "minLength": 1,
-            "title": "Evidence",
-            "type": "string"
+          "short_day_ratio": {
+            "type": "number"
           },
-          "kind": {
-            "const": "category",
-            "title": "Kind",
-            "type": "string"
-          },
-          "value": {
-            "enum": [
-              "museum",
-              "event",
-              "park",
-              "playground",
-              "restaurant",
-              "toilet",
-              "bench",
-              "shelter",
-              "landmark",
-              "other"
-            ],
-            "title": "Value",
-            "type": "string"
+          "supplement_radius_m": {
+            "type": "number"
           }
         },
         "required": [
-          "polarity",
-          "evidence",
-          "kind",
-          "value"
-        ],
-        "title": "CategoryClaim",
-        "type": "object"
+          "manual_limit_per_day",
+          "short_day_ratio",
+          "supplement_radius_m"
+        ]
       },
-      "RequestFormatClaim": {
+      "PlanningOptionsRequest": {
+        "type": "object",
         "additionalProperties": false,
         "properties": {
-          "polarity": {
-            "enum": [
-              "prefer",
-              "avoid"
-            ],
-            "title": "Polarity",
-            "type": "string"
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1
           },
-          "evidence": {
-            "maxLength": 160,
-            "minLength": 1,
-            "title": "Evidence",
-            "type": "string"
-          },
-          "kind": {
-            "const": "format",
-            "title": "Kind",
-            "type": "string"
-          },
-          "value": {
-            "enum": [
-              "educational",
-              "playful",
-              "creative",
-              "calm",
-              "active",
-              "spectacular"
-            ],
-            "title": "Value",
-            "type": "string"
+          "preview_id": {
+            "$ref": "#/components/schemas/ID"
           }
         },
         "required": [
-          "polarity",
-          "evidence",
-          "kind",
-          "value"
-        ],
-        "title": "FormatClaim",
-        "type": "object"
+          "expected_version"
+        ]
       },
-      "RequestInterestClaim": {
+      "DayPlanningOptions": {
+        "type": "object",
         "additionalProperties": false,
         "properties": {
-          "polarity": {
-            "enum": [
-              "prefer",
-              "avoid"
-            ],
-            "title": "Polarity",
-            "type": "string"
+          "date": {
+            "$ref": "#/components/schemas/ISODate"
           },
-          "evidence": {
-            "maxLength": 160,
-            "minLength": 1,
-            "title": "Evidence",
-            "type": "string"
+          "available_duration_sec": {
+            "type": "number"
           },
-          "kind": {
-            "const": "interest",
-            "title": "Kind",
-            "type": "string"
+          "planned_duration_sec": {
+            "type": "number"
           },
-          "value": {
-            "enum": [
-              "animals",
-              "plants",
-              "nature",
-              "space",
-              "science",
-              "technology",
-              "transport",
-              "history",
-              "architecture",
-              "art",
-              "music",
-              "theatre",
-              "literature",
-              "crafts",
-              "cooking",
-              "sport"
-            ],
-            "title": "Value",
-            "type": "string"
+          "fill_ratio": {
+            "type": "number"
+          },
+          "is_short": {
+            "type": "boolean"
+          },
+          "manual_count": {
+            "type": "integer"
+          },
+          "remaining_manual_choices": {
+            "type": "integer"
+          },
+          "anchor": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Point"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Candidate"
+            }
           }
         },
         "required": [
-          "polarity",
-          "evidence",
-          "kind",
-          "value"
+          "date",
+          "available_duration_sec",
+          "planned_duration_sec",
+          "fill_ratio",
+          "is_short",
+          "manual_count",
+          "remaining_manual_choices",
+          "anchor",
+          "candidates"
+        ]
+      },
+      "PlanningOptions": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "trip_id": {
+            "$ref": "#/components/schemas/ID"
+          },
+          "trip_version": {
+            "type": "integer"
+          },
+          "policy": {
+            "$ref": "#/components/schemas/CompletionPolicy"
+          },
+          "candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Candidate"
+            }
+          },
+          "days": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayPlanningOptions"
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Evidence"
+            }
+          }
+        },
+        "required": [
+          "trip_id",
+          "trip_version",
+          "policy",
+          "candidates",
+          "days",
+          "evidence"
+        ]
+      },
+      "RouteLine": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "LineString"
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Position"
+            },
+            "minItems": 2
+          }
+        },
+        "required": [
+          "type",
+          "coordinates"
+        ]
+      },
+      "AssistantMessageRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expected_version",
+          "message",
+          "current_position",
+          "observed_at"
         ],
-        "title": "InterestClaim",
-        "type": "object"
+        "properties": {
+          "expected_version": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "date": {
+            "$ref": "#/components/schemas/ISODate"
+          },
+          "current_position": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Point"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observed_at": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Instant"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "hotel_point": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Point"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "RestaurantFilters": {
+        "type": "object",
+        "properties": {
+          "children_menu": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "small_portions": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "play_area": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "play_area_supervision": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "description": "Explicit source-backed requirements. Unknown/brand-only properties never satisfy a boolean filter."
+      },
+      "SpatialScope": {
+        "type": "object",
+        "properties": {
+          "center": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Point"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "radius_m": {
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "route": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RouteLine"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "corridor_width_m": {
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "routes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RouteLine"
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "description": "A union of actual disconnected route legs. No straight connectors are invented."
+          }
+        },
+        "required": [
+          "center",
+          "radius_m",
+          "route",
+          "corridor_width_m"
+        ]
       },
       "ParsedRequest": {
         "additionalProperties": false,
@@ -7025,60 +7325,6 @@
         ],
         "title": "ParsedRequest",
         "type": "object"
-      },
-      "AssistantMessageRequest": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "expected_version",
-          "message",
-          "current_position",
-          "observed_at"
-        ],
-        "properties": {
-          "expected_version": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "message": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 4000
-          },
-          "date": {
-            "$ref": "#/components/schemas/ISODate"
-          },
-          "current_position": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Point"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "observed_at": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Instant"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "hotel_point": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Point"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        }
       },
       "AssistantNeed": {
         "type": "object",
@@ -7207,135 +7453,6 @@
             ]
           }
         }
-      },
-      "SpatialScope": {
-        "type": "object",
-        "properties": {
-          "center": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Point"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "radius_m": {
-            "oneOf": [
-              {
-                "type": "number",
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "route": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/RouteLine"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "corridor_width_m": {
-            "oneOf": [
-              {
-                "type": "number",
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "routes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RouteLine"
-            },
-            "minItems": 1,
-            "maxItems": 100,
-            "description": "A union of actual disconnected route legs. No straight connectors are invented."
-          }
-        },
-        "required": [
-          "center",
-          "radius_m",
-          "route",
-          "corridor_width_m"
-        ]
-      },
-      "RestaurantFilters": {
-        "type": "object",
-        "properties": {
-          "children_menu": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "small_portions": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "play_area": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "play_area_supervision": {
-            "oneOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "additionalProperties": false,
-        "description": "Explicit source-backed requirements. Unknown/brand-only properties never satisfy a boolean filter."
-      },
-      "RouteLine": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "const": "LineString"
-          },
-          "coordinates": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Position"
-            },
-            "minItems": 2
-          }
-        },
-        "required": [
-          "type",
-          "coordinates"
-        ]
       }
     },
     "securitySchemes": {

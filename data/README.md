@@ -40,11 +40,3 @@ curl -fL -o data/raw/geo_reviews_2023/train.parquet https://huggingface.co/datas
 curl -fL -o data/raw/osm_nizhny/volga-fed-district-261117.osm.pbf https://download.geofabrik.de/russia/volga-fed-district-261117.osm.pbf
 python scripts/audit_datasets.py > data/audit.json
 ```
-
-## Проверка исходных CSV задания и расширение MVP
-
-Справочник из 174 основных и 85 дополнительных объектов проверен отдельно от
-учебных наборов Stravl/Geo Reviews. Активный городской каталог расширен до 281
-объекта (165 из CSV и 116 из OSM) с сохранением source ID, отложенными записями и картой дублей. Дополнительная
-SQL-выгрузка пользователя содержит те же 259 записей и зарегистрирована без
-дублирования. [Аудит, ограничения и воспроизведение](catalog/README.md).

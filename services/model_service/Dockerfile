@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt \
 COPY models/place_ranker.py models/query_match.py models/request_schema.py models/taxonomy.py /app/models/
 COPY models/recommendation_engine.py models/baseline_query.py models/age_band_policy.py /app/models/
 COPY models/recommendation_context.py /app/models/
+COPY models/model_contracts.py /app/models/
 COPY models/recommendation_policy.json /app/models/
 COPY data/catalog/city/catalog.jsonl /app/data/catalog/city/catalog.jsonl
 COPY data/catalog/enriched/catalog.jsonl /app/data/catalog/enriched/catalog.jsonl

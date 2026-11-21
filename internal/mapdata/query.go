@@ -20,6 +20,7 @@ var ErrQuery = errors.New("invalid map query")
 var Categories = []string{"playground", "park", "bench", "toilet", "pharmacy", "restaurant"}
 
 type Query struct {
+	Nearest           bool
 	Lon, Lat, RadiusM float64
 	BBox              *[4]float64
 	Categories        []string
@@ -66,7 +67,7 @@ func ParseRoute(v url.Values, lines [][]routing.Position) (Query, error) {
 }
 func parse(v url.Values, lines [][]routing.Position) (Query, error) {
 	q := Query{Limit: 100, Categories: append([]string{}, Categories...)}
-	allowed := []string{"lon", "lat", "radius_km", "bbox", "categories", "limit", "cursor", "date", "include_other"}
+	allowed := []string{"lon", "lat", "radius_km", "bbox", "nearest", "categories", "limit", "cursor", "date", "include_other"}
 	if lines != nil {
 		allowed = []string{"categories", "limit", "cursor", "date", "expected_version", "buffer_m"}
 	}
@@ -74,6 +75,12 @@ func parse(v url.Values, lines [][]routing.Position) (Query, error) {
 		if !slices.Contains(allowed, k) || len(values) != 1 && k != "categories" {
 			return q, bad("неизвестный или повторный параметр " + k)
 		}
+	}
+	if v.Has("nearest") {
+		if v.Get("nearest") != "true" || v.Has("bbox") || v.Has("radius_km") {
+			return q, bad("nearest=true требует lon и lat без bbox и radius_km")
+		}
+		q.Nearest = true
 	}
 	if lines != nil {
 		q.RouteLines = lines
@@ -86,11 +93,11 @@ func parse(v url.Values, lines [][]routing.Position) (Query, error) {
 			return q, bad("expected_version обязателен и больше нуля")
 		}
 		q.RouteVersion = version
-		q.RadiusM = 250
+		q.RadiusM = 125
 		if v.Has("buffer_m") {
 			q.RadiusM, err = number(v.Get("buffer_m"))
 			if err != nil || q.RadiusM <= 0 || q.RadiusM > 1000 {
-				return q, bad("buffer_m: больше 0 и не больше 1000 метров; по умолчанию 250")
+				return q, bad("buffer_m: больше 0 и не больше 1000 метров; по умолчанию 125")
 			}
 		}
 	} else if v.Has("bbox") {
@@ -121,13 +128,18 @@ func parse(v url.Values, lines [][]routing.Position) (Query, error) {
 		if q.Lat, err = number(v.Get("lat")); err != nil {
 			return q, err
 		}
-		if q.RadiusM, err = number(v.Get("radius_km")); err != nil {
-			return q, err
+		if q.Lon < -180 || q.Lon > 180 || q.Lat < -90 || q.Lat > 90 {
+			return q, bad("неверные lon или lat")
 		}
-		if q.Lon < -180 || q.Lon > 180 || q.Lat < -90 || q.Lat > 90 || q.RadiusM <= 0 || q.RadiusM > 20 {
-			return q, bad("lon: −180..180; lat: −90..90; radius_km: больше 0 и не больше 20")
+		if !q.Nearest {
+			if q.RadiusM, err = number(v.Get("radius_km")); err != nil {
+				return q, err
+			}
+			if q.Lon < -180 || q.Lon > 180 || q.Lat < -90 || q.Lat > 90 || q.RadiusM <= 0 || q.RadiusM > 20 {
+				return q, bad("lon: −180..180; lat: −90..90; radius_km: больше 0 и не больше 20")
+			}
+			q.RadiusM *= 1000
 		}
-		q.RadiusM *= 1000
 	}
 	if v.Has("limit") {
 		n, err := strconv.Atoi(v.Get("limit"))

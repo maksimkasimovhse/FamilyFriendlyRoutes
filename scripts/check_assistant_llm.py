@@ -78,7 +78,13 @@ def main():
                 passed = passed and intent.max_walk_distance_m == 500
             if message == "Добавь второй вариант":
                 passed = passed and intent.place_id == "cafe-2"
+            if message == "Убери следующую точку":
+                passed = passed and intent.stop_id == "stop-museum"
+            if message == "Перенеси музей на завтра":
+                passed = passed and intent.stop_id == "stop-museum" and intent.target_date == "2030-06-16"
             results.append({"message": message, "passed": passed, "action": intent.action,
+                            "question": intent.question, "date": intent.date,
+                            "target_date": intent.target_date, "stop_id": intent.stop_id,
                             "needs": [n.kind for n in intent.needs], "model": response.model,
                             "duration_sec": intent.duration_sec,
                             "max_walk_distance_m": intent.max_walk_distance_m,

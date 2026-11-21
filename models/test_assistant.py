@@ -16,7 +16,7 @@ def intent(action="shorten_day"):
                                  clarification_question=None, unsupported_requests=[]))
 
 
-CONTEXT = dict(days=[dict(date="2030-06-15", stops=[dict(stop_id="stop-1", progress="planned"),
+CONTEXT = dict(days=[dict(date="2030-06-15", end_point=dict(coordinates=[44.01, 56.326]), stops=[dict(stop_id="stop-1", progress="planned"),
                      dict(stop_id="old-stop", progress="visited")])],
                family=dict(children=[dict(child_id="child-1")]), history=[],
                choices=[dict(place_id="cafe-1")])

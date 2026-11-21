@@ -1,9 +1,14 @@
-// Контекстный помощник. Изменения рассчитывает backend; пользователь применяет preview.
+// «Помощник» — чат, который перестраивает маршрут на сегодня (ИИ — зона Вильдана).
+// Сначала спрашиваем настоящий сервис (контракт: docs/contracts/assistant_draft.md),
+// если его ещё нет — отвечает мок на правилах (assistant-mock.js) с пометкой «демо».
 // Изменение маршрута приходит как preview: показываем разницу, сохраняем по «Применить».
 
 import { today, tripId, tripVersion, csrf, applyPreview, onTripChange } from './api.js';
-import { cafeBadges, isDemo } from './places.js';
-const DEFAULT_SUGGESTIONS = ['Ребёнок устал', 'Нужен туалет', 'Хотим поесть по пути', 'Пошёл дождь', 'Пропусти следующую точку'];
+import { walkMinutes, distanceM, cafeBadges, isDemo } from './places.js';
+import { mockAssistant, DEFAULT_SUGGESTIONS } from './assistant-mock.js';
+import { placeEmojiHtml } from './place-display.js';
+import { kindOf } from './places.js';
+import { urgentKind, runUrgentAction, walkingDirections } from './urgent-actions.js';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -12,25 +17,32 @@ function fmtDuration(sec) {
   return min < 60 ? min + ' мин' : Math.floor(min / 60) + ' ч' + (min % 60 ? ' ' + (min % 60) + ' мин' : '');
 }
 
-let busy = false;
-let currentTripId = null;
+let useMock = false;
 let onShowOnMap = () => {};
+let lastQuestion = '';
 let greeted = false;
+let sending = false;
 
 // ---------- Запрос: настоящий сервис или мок ----------
 async function ask(message) {
-  const res = await fetch(`/api/v1/trips/${tripId()}/assistant/messages`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf(), 'Idempotency-Key': crypto.randomUUID() },
-    body: JSON.stringify({ expected_version: tripVersion(), date: today().date, message, current_position: null, observed_at: new Date().toISOString() }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const error = new Error(data.error?.message || 'Помощник временно недоступен');
-    error.code = data.error?.code;
-    throw error;
+  const kind = urgentKind(message);
+  if (kind) return runUrgentAction(kind);
+  if (!useMock) {
+    try {
+      const res = await fetch(`/api/v1/trips/${tripId()}/assistant/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf() },
+        body: JSON.stringify({ expected_version: tripVersion(), message, current_position: null, observed_at: new Date().toISOString() }),
+      });
+      if (res.ok) return await res.json();
+      if (res.status !== 404) throw new Error('HTTP ' + res.status);
+    } catch (err) {
+      if (!(err instanceof TypeError) && !String(err.message).startsWith('HTTP 404')) console.warn('Помощник:', err);
+    }
+    useMock = true;
+    $('chat-mode').hidden = false;
   }
-  return data;
+  return mockAssistant(message);
 }
 
 // ---------- Сообщения ----------
@@ -44,17 +56,14 @@ function add(html, who) {
 }
 
 function suggest(list) {
-  $('chat-suggest').innerHTML = (list || []).map(s => `<button type="button">${esc(s)}</button>`).join('');
+  $('chat-suggest').innerHTML = (list || []).map(s => `<button type="button">${urgentKind(s) ? placeEmojiHtml({rest:'bench',toilet:'toilet',food:'restaurant',rain:'landmark',skip:'landmark'}[urgentKind(s)]) : ''}${esc(s)}</button>`).join('');
   $('chat-suggest').querySelectorAll('button').forEach(b => { b.onclick = () => send(b.textContent); });
 }
 
 // Карточка «Новый план»: что изменится, кнопки «Применить / Не надо»
 function previewCard(preview) {
   const titles = new Map(today().stops.map(s => [s.stop_id, s.title]));
-  for (const day of preview.proposed_trip.days) for (const stop of day.stops) titles.set(stop.stop_id, stop.title);
   const d = preview.diff;
-  const codes = preview.required_acknowledgement_codes || [];
-  const warningText = new Map((preview.warnings || []).map(w => [w.code, w.message]));
   const lines = [
     ...d.removed_stop_ids.map(id => `− ${titles.get(id) || 'точка'}`),
     ...d.added_stop_ids.map(id => `+ ${titles.get(id) || 'новая точка'}`),
@@ -65,24 +74,24 @@ function previewCard(preview) {
     <div class="plan-card">
       <div class="kicker">Новый план на сегодня</div>
       <ul>${(lines.length ? lines : ['Маршрут пересчитан от текущего момента']).map(l => `<li>${esc(l)}</li>`).join('')}</ul>
-      ${codes.map(code => `<label class="muted" style="display:block;margin:8px 0"><input type="checkbox" data-ack="${esc(code)}"> ${esc(warningText.get(code) || code)}</label>`).join('')}
-      ${preview.can_apply ? '' : '<p class="err-text">Этот вариант нарушает ограничения и не может быть применён.</p>'}
+      ${(preview.warnings || []).map(w=>`<p class="small">${esc(w.message || w.code)}</p>`).join('')}
+      ${(preview.required_acknowledgement_codes || []).map(code=>`<label class="small"><input type="checkbox" data-ack="${esc(code)}"> Понятно: ${esc(code)}</label>`).join('')}
       <div class="row"><button class="btn alt slim" data-no>Не надо</button><button class="btn main slim" data-yes>Применить</button></div>
     </div>`, 'bot card');
-  const yes = el.querySelector('[data-yes]');
-  const updateApply = () => { yes.disabled = !preview.can_apply || [...el.querySelectorAll('[data-ack]')].some(input => !input.checked); };
-  el.querySelectorAll('[data-ack]').forEach(input => input.addEventListener('change', updateApply));
-  updateApply();
   el.querySelector('[data-no]').onclick = () => { el.querySelector('.row').innerHTML = '<span class="muted">Оставили как было</span>'; };
-  el.querySelector('[data-yes]').onclick = async () => {
+  const applyButton = el.querySelector('[data-yes]');
+  const acknowledgements = [...el.querySelectorAll('[data-ack]')];
+  const updateApply = () => { applyButton.disabled = !preview.can_apply || acknowledgements.some(input=>!input.checked); };
+  acknowledgements.forEach(input=>input.onchange=updateApply); updateApply();
+  applyButton.onclick = async () => {
     el.querySelector('.row').innerHTML = '<span class="muted">Применяю…</span>';
     try {
-      await applyPreview(preview, [...el.querySelectorAll('[data-ack]:checked')].map(input => input.dataset.ack));
+      await applyPreview(preview,acknowledgements.filter(input=>input.checked).map(input=>input.dataset.ack));
       el.querySelector('.row').innerHTML = '<span class="ok-text">✓ Маршрут обновлён — смотрите «Сегодня» и карту</span>';
     } catch (err) {
       if (err.code === 'PREVIEW_EXPIRED' || err.code === 'PREVIEW_STALE' || err.code === 'VERSION_CONFLICT') {
-        el.querySelector('.row').innerHTML = '<span class="muted">Вариант устарел. Повторите поиск или опишите изменение заново.</span>';
-        suggest(DEFAULT_SUGGESTIONS);
+        el.querySelector('.row').innerHTML = '<span class="muted">Вариант устарел — пересчитываю…</span>';
+        send(lastQuestion, { silent: true });
       } else {
         el.querySelector('.row').innerHTML = `<span class="err-text">${esc(err.message)}</span>`;
       }
@@ -90,14 +99,16 @@ function previewCard(preview) {
   };
 }
 
-function placesCard(places, options = []) {
+function placesCard(places) {
+  const from = today().execution ? today().execution.current_point.coordinates
+    : (today().stops.find(s => s.progress === 'planned') || { location: today().start_point }).location.coordinates;
   const el = add(places.map((p, i) => {
-    const route = options.find(option => option.place_id === p.place_id);
-    const walking = route ? `~${Math.ceil(route.walk_duration_sec / 60)} мин пешком · отклонение ~${Math.ceil(route.detour_duration_sec / 60)} мин` : 'Время подхода не рассчитано';
     const badges = cafeBadges(p).filter(b => b.state !== 'unknown')
       .map(b => `<span class="badge ${b.state}">${b.state === 'yes' ? '✓' : '✕'} ${b.text}</span>`);
     if (isDemo(p)) badges.push('<span class="badge demo">демо</span>');
-    return `<div class="place-row"><div><b>${esc(p.name)}</b><small>${esc(walking)}</small>
+    return `<div class="place-row"><div><b>${placeEmojiHtml(kindOf(p))} ${esc(p.name)}</b><small>~${walkMinutes(p.urgent_distance_m ?? distanceM(from, p.location.coordinates))} мин пешком${p.urgent_origin ? ' от геопозиции · оценка' : ''}</small>
+      ${p.urgent_note ? `<small>${esc(p.urgent_note)}</small>` : ''}
+      ${p.urgent_origin ? `<a class="btn link slim" target="_blank" rel="noopener noreferrer" href="${esc(walkingDirections(p.urgent_origin,p.location.coordinates))}">Пешком в Яндекс Картах ↗</a>` : ''}
       ${badges.length ? `<div class="badges">${badges.join('')}</div>` : ''}</div><button class="btn alt slim" data-i="${i}">На карте</button></div>`;
   }).join(''), 'bot card');
   el.querySelectorAll('[data-i]').forEach(b => { b.onclick = () => onShowOnMap(places[+b.dataset.i]); });
@@ -105,25 +116,24 @@ function placesCard(places, options = []) {
 
 async function send(text, { silent = false } = {}) {
   text = text.trim();
-  if (!text || !today() || busy) return;
-  busy = true;
-  const requestedTrip = tripId();
+  if (!text || !today() || sending) return;
+  sending = true;
+  lastQuestion = text;
   if (!silent) add(esc(text), 'me');
   suggest([]);
   const typing = add('<span class="typing"><i></i><i></i><i></i></span>', 'bot');
   try {
     const answer = await ask(text);
     typing.remove();
-    if (tripId() !== requestedTrip) return;
     add(esc(answer.reply), 'bot');
     if (answer.preview) previewCard(answer.preview);
-    if (answer.places?.length) placesCard(answer.places, answer.options);
+    if (answer.places?.length) placesCard(answer.places);
     suggest(answer.suggestions);
   } catch (err) {
     typing.innerHTML = 'Не получилось: ' + esc(err.message);
     suggest(DEFAULT_SUGGESTIONS);
   } finally {
-    busy = false;
+    sending = false;
   }
 }
 
@@ -136,16 +146,12 @@ export function openAssistant() {
 }
 
 export function initAssistant(options) {
-  currentTripId = tripId();
   onShowOnMap = options.onShowOnMap;
   $('chat-form').addEventListener('submit', e => {
     e.preventDefault();
-    if (busy) return;
     const t = $('chat-text').value;
     $('chat-text').value = '';
     send(t);
   });
-  onTripChange(() => {
-    if (currentTripId !== tripId()) { currentTripId = tripId(); $('chat').replaceChildren(); greeted = false; }
-  });
+  onTripChange(() => { if (!$('chat').children.length) greeted = false; });
 }

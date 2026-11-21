@@ -11,11 +11,84 @@
 <link href="css/kid.css" rel="stylesheet">
 <link href="css/pick.css" rel="stylesheet">
 <link href="css/games.css" rel="stylesheet">
+<link href="css/chat.css" rel="stylesheet">
 <link href="css/onboarding.css" rel="stylesheet">
+<link href="css/landing.css" rel="stylesheet">
 <script src="vendor/maplibre-gl-4.7.1/maplibre-gl.js"></script>
 <script type="module" src="js/app.js"></script>
 </head>
 <body>
+<!-- =====================================================================
+     Лендинг: первая страница для тех, кто ещё не вошёл. Кнопка справа сверху → вход/регистрация.
+     Только Nunito; фото — настоящие архивные снимки с PastVu (подписаны).
+     ===================================================================== -->
+<div class="landing" id="landing" hidden>
+  <header class="ld-bar">
+    <a class="ld-brand" href="#top" aria-label="Окно в прошлое">
+      <span class="mark"><img src="media/fawn/fawn-base.svg" alt=""></span>
+      <b>Окно в прошлое</b>
+    </a>
+    <button type="button" class="ld-login" data-auth="login">Войти</button>
+  </header>
+
+  <main id="top">
+    <section class="ld-hero">
+      <div class="ld-hero-text">
+        <p class="ld-eyebrow">Нижний Новгород · для семей с детьми</p>
+        <h1>Нижний, каким его видели сто лет назад</h1>
+        <p class="ld-lead">Семейные маршруты по городу и «окна в прошлое»: встаньте там, где стоял фотограф, поднимите телефон — и старый снимок ляжет поверх живой камеры.</p>
+        <div class="ld-cta">
+          <button type="button" class="ld-btn primary" data-auth="register">Начать прогулку</button>
+          <a class="ld-btn ghost" href="#how">Как это работает</a>
+        </div>
+        <p class="ld-fine">Открыть окно можно только на месте — из дома не получится.</p>
+      </div>
+      <div class="ld-stack" aria-hidden="true">
+        <figure class="ph a"><img src="media/windows/kremlin-old.jpg" alt=""><figcaption>1886–1916</figcaption></figure>
+        <figure class="ph b"><img src="media/windows/pokrovka-old.jpg" alt=""><figcaption>1896–1917</figcaption></figure>
+        <figure class="ph c"><img src="media/windows/minin-old.jpg" alt=""><figcaption>1906–1917</figcaption></figure>
+        <span class="fawn"><img src="media/fawn/fawn-photographer-1896.svg" alt=""></span>
+      </div>
+    </section>
+
+    <section class="ld-section" id="how">
+      <h2>Как это работает</h2>
+      <ol class="ld-steps">
+        <li><span class="n">1</span><div><h3>Расскажите о семье</h3><p>Возраст и интересы детей — один раз. Дальше только даты и места.</p></div></li>
+        <li><span class="n">2</span><div><h3>Получите маршрут</h3><p>На один день или несколько: пешие пути по улицам города, время прибытия, где перекусить и найти туалет.</p></div></li>
+        <li><span class="n">3</span><div><h3>Откройте окно в прошлое</h3><p>На точке старое фото ложится на камеру. Поймали ракурс — окно открыто: двигайте ползунок «тогда / сейчас» и читайте историю места.</p></div></li>
+        <li><span class="n">4</span><div><h3>Оленёнок ведёт ребёнка</h3><p>Задания по возрасту, штампы и новые наряды эпох. Родителю — рассказ о месте, ребёнку — игра.</p></div></li>
+      </ol>
+    </section>
+
+    <section class="ld-section alt">
+      <h2>Чем удобно семье</h2>
+      <div class="ld-grid">
+        <article><h3>Под возраст детей</h3><p>Анкета для одного или двух детей от 3 до 11 лет: интересы, темп прогулки, пожелания.</p></article>
+        <article><h3>Всё нужное рядом</h3><p>На карте — туалеты, еда, детские площадки, парки, скамейки и аптеки вдоль маршрута.</p></article>
+        <article><h3>Помощник</h3><p>Ребёнок устал или пошёл дождь — помощник предложит, что убрать из маршрута, и найдёт место рядом.</p></article>
+        <article><h3>Настоящие фото</h3><p>Только снимки из архива PastVu, с автором и ссылкой. Ничего не нарисовано нейросетью.</p></article>
+      </div>
+    </section>
+
+    <section class="ld-final">
+      <span class="mark big"><img src="media/fawn/fawn-pilot-1949.svg" alt=""></span>
+      <h2>Попробуйте на своей прогулке</h2>
+      <p>Регистрация занимает минуту. Можно и без неё — поездка сохранится на сутки на этом телефоне.</p>
+      <div class="ld-cta center">
+        <button type="button" class="ld-btn primary" data-auth="register">Создать аккаунт</button>
+        <button type="button" class="ld-btn ghost" id="ld-guest">Попробовать без входа</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="ld-foot">
+    <p>Часы работы и детские удобства уточняйте на месте: часть данных предварительная.</p>
+    <p>Старые фото — <a href="https://pastvu.com" target="_blank" rel="noopener">PastVu</a> (авторы указаны в приложении). Карта © участники <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>.</p>
+    <p>GorkyCode 2026 · трек «Туризм»</p>
+  </footer>
+</div>
+
 <div class="app">
 
   <!-- ===== Экран «Карта» ===== -->
@@ -43,12 +116,12 @@
       <!-- Удобства: как на макете — под картой, «Всё семейное» включает всё -->
       <div class="chips" aria-label="Показать на карте">
         <button class="chip" data-layer="all" aria-pressed="true">Всё семейное</button>
-        <button class="chip" data-layer="toilets" aria-pressed="true"><i class="dot toilets"></i>Туалеты</button>
-        <button class="chip" data-layer="cafe" aria-pressed="true"><i class="dot cafe"></i>Еда</button>
-        <button class="chip" data-layer="playground" aria-pressed="true"><i class="dot playground"></i>Площадки</button>
-        <button class="chip" data-layer="park" aria-pressed="true"><i class="dot park"></i>Парки</button>
-        <button class="chip" data-layer="bench" aria-pressed="true"><i class="dot bench"></i>Скамейки</button>
-        <button class="chip" data-layer="pharmacy" aria-pressed="true"><i class="dot pharmacy"></i>Аптеки</button>
+        <button class="chip" data-layer="toilets" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/toilet.svg" alt="" aria-hidden="true">Туалеты</button>
+        <button class="chip" data-layer="cafe" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/food.svg" alt="" aria-hidden="true">Еда</button>
+        <button class="chip" data-layer="playground" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/playground.svg" alt="" aria-hidden="true">Площадки</button>
+        <button class="chip" data-layer="park" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/park.svg" alt="" aria-hidden="true">Парки</button>
+        <button class="chip" data-layer="bench" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/bench.svg" alt="" aria-hidden="true">Скамейки</button>
+        <button class="chip" data-layer="pharmacy" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/pharmacy.svg" alt="" aria-hidden="true">Аптеки</button>
       </div>
       <div id="sheet-body" aria-live="polite"><p class="muted">Строим маршрут…</p></div>
     </div>
@@ -58,7 +131,8 @@
   <section class="screen pick" id="screen-pick" data-tab="pick" hidden>
     <!-- Только в «Новой поездке» (шаг 2 из 3): шапка шага и подзаголовок -->
     <div class="pick-flow">
-      <div class="flow-step"><span>Новая поездка · шаг 2 из 3</span><div class="flow-bar kid"><i class="on"></i><i class="on"></i><i></i></div></div>
+      <div class="flow-step"><span>Новая поездка · шаг 3 из 4</span><div class="flow-bar four kid"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div></div>
+<p class="pick-flow-sub">Выберите места на всю поездку — распределим по дням с учётом близости и бюджета.</p>
     </div>
     <header class="pick-top">
       <button class="pick-back" id="pick-back" aria-label="Назад к карте">‹</button>
@@ -306,16 +380,9 @@
   <!-- Экран 1. Вход и регистрация -->
   <section class="flow" id="onb-auth" hidden>
     <div class="flow-scroll">
-      <svg class="auth-art" viewBox="0 0 320 150" aria-hidden="true">
-        <rect width="320" height="150" rx="24" fill="#E2ECFD"/>
-        <path d="M0 40c50-14 90 8 140-4s110-18 180-2V0H0z" fill="#BFDDF6"/>
-        <path d="M186 64h64v44h-64z" fill="#C4553A" opacity=".85"/>
-        <path d="M180 64l6-14 6 14m24 0l6-14 6 14m22 0l6-14 6 14" fill="#C4553A"/>
-        <path d="M30 122c40-10 60-40 100-44s60 20 90 10 50-30 80-36" fill="none" stroke="#2463D6" stroke-width="5" stroke-dasharray="1 11" stroke-linecap="round"/>
-        <circle cx="30" cy="122" r="8" fill="#2463D6"/><circle cx="130" cy="78" r="8" fill="#2463D6"/><circle cx="300" cy="52" r="8" fill="#E8641F"/>
-      </svg>
-      <h1 class="flow-title serif">Семейные прогулки по Нижнему</h1>
-      <p class="flow-sub">Маршрут под возраст и интересы ваших детей. Анкету заполните один раз — дальше только даты.</p>
+      <button type="button" class="flow-back" id="auth-back" aria-label="Назад на главную">‹</button>
+      <div class="auth-logo"><span class="mark"><img src="media/fawn/fawn-base.svg" alt="Окно в прошлое"></span></div>
+      <h1 class="flow-title center">Семейные прогулки по Нижнему</h1>
 
       <div class="seg" role="tablist" aria-label="Регистрация или вход">
         <button type="button" role="tab" aria-selected="true" data-mode="register">Регистрация</button>
@@ -329,15 +396,25 @@
         <label class="field">Пароль
           <span class="pw">
             <input id="auth-password" type="password" autocomplete="new-password" required minlength="15" maxlength="128">
-            <button type="button" class="eye" id="auth-eye" aria-label="Показать пароль" aria-pressed="false">👁</button>
+            <button type="button" class="eye" id="auth-eye" aria-label="Показать пароль" aria-pressed="false"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg></button>
           </span>
         </label>
-        <p class="hint" id="auth-hint">Не короче 15 символов. Удобно фразой: «едем в нижний всей семьёй»</p>
         <p class="form-error" id="auth-error" role="alert" hidden></p>
         <button class="btn flow-main" id="auth-submit">Создать аккаунт</button>
       </form>
-      <button type="button" class="btn link" id="auth-guest">Продолжить без входа</button>
-      <p class="fine">Без входа поездка живёт сутки на этом телефоне. Войдёте позже — она перейдёт в аккаунт.</p>
+      <div class="guest-row">
+        <button type="button" class="guest-link" id="auth-guest">Продолжить без входа</button>
+        <button type="button" class="tip-btn" id="guest-tip-btn" aria-label="Что значит «без входа»?" aria-expanded="false" aria-controls="guest-tip">i</button>
+        <p class="tip-pop" id="guest-tip" role="tooltip" hidden>Без входа поездка хранится сутки на этом телефоне. Войдёте позже — она перейдёт в аккаунт.</p>
+      </div>
+      <!-- ДЕМО: быстрый вход в тестовые аккаунты (scripts/seed-demo-users.py) — для защиты и репетиций -->
+      <div class="demo-login" aria-labelledby="demo-title">
+        <p class="demo-title" id="demo-title">Демо-аккаунты</p>
+        <div class="demo-btns">
+          <button type="button" data-demo="masha@example.com"><b>Маша, 7 лет</b><small>анкета готова</small></button>
+          <button type="button" data-demo="petya@example.com"><b>Петя и Аня</b><small>двое детей</small></button>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -349,7 +426,6 @@
     </header>
     <div class="flow-scroll">
       <h1 class="flow-title">Кто едет?</h1>
-      <p class="flow-sub">Заполняете один раз. Поменять можно в профиле.</p>
 
       <div class="card-w">
         <div class="row-between">
@@ -368,7 +444,6 @@
           <button type="button" role="radio" aria-checked="true" data-n="1">1 ребёнок</button>
           <button type="button" role="radio" aria-checked="false" data-n="2">2 ребёнка</button>
         </div>
-        <p class="hint">Пока поддерживаем одного или двух детей от 3 до 11 лет.</p>
       </div>
       <div id="kids-cards"></div>
       <p class="form-error" id="family-error" role="alert" hidden></p>
@@ -434,7 +509,7 @@
   <section class="flow trip" id="trip-when" hidden>
     <header class="flow-top">
       <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
-      <div class="flow-step"><span>Новая поездка · шаг 1 из 3</span><div class="flow-bar kid"><i class="on"></i><i></i><i></i></div></div>
+      <div class="flow-step"><span>Новая поездка · шаг 1 из 4</span><div class="flow-bar four kid"><i class="on"></i><i></i><i></i><i></i></div></div>
     </header>
     <div class="flow-scroll">
       <h1 class="flow-title">Когда и откуда гуляем?</h1>
@@ -484,11 +559,29 @@
     <div class="flow-bottom"><button class="btn flow-main" id="when-next">Дальше: выбрать места</button></div>
   </section>
 
-  <!-- Экран 7. Новая поездка, шаг 3 — «Что-то особенное в этот раз?» -->
+  <!-- Новая поездка, шаг 2 — ИИ-чат: пожелания словами, по ним отбираются карточки для подбора -->
+  <section class="flow trip" id="trip-chat" hidden>
+    <header class="flow-top">
+      <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
+      <div class="flow-step"><span>Новая поездка · шаг 2 из 4</span><div class="flow-bar four kid"><i class="on"></i><i class="on"></i><i></i><i></i></div></div>
+    </header>
+    <div class="chat-log" id="chat-log" aria-live="polite"></div>
+    <div class="chat-chips" id="chat-chips"></div>
+    <form class="chat-form" id="chat-form" autocomplete="off">
+      <textarea id="chat-input" rows="1" maxlength="600" placeholder="Например: любим историю и театры, без музеев" aria-label="Ваши пожелания"></textarea>
+      <button type="submit" class="chat-send" id="chat-send" aria-label="Отправить">➤</button>
+    </form>
+    <div class="flow-bottom">
+      <button class="btn flow-main" id="chat-next" disabled>Расскажите о пожеланиях</button>
+      <button class="btn link" id="chat-skip" type="button">Пропустить — покажите все места</button>
+    </div>
+  </section>
+
+  <!-- Экран 7. Новая поездка, шаг 4 — «Что-то особенное в этот раз?» -->
   <section class="flow trip" id="trip-wishes" hidden>
     <header class="flow-top">
       <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
-      <div class="flow-step"><span>Новая поездка · шаг 3 из 3</span><div class="flow-bar kid"><i class="on"></i><i class="on"></i><i class="on"></i></div></div>
+      <div class="flow-step"><span>Новая поездка · шаг 4 из 4</span><div class="flow-bar four kid"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div></div>
     </header>
     <div class="flow-scroll">
       <h1 class="flow-title">Что-то особенное в этот раз?</h1>

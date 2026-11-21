@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-21",
+  "upstream": "7a1f1bb",
+  "validated_snapshot_commit": "68d762f",
+  "branch": "feature/ml-recommendation-pipeline",
+  "python_models": 95,
+  "python_scripts": 16,
+  "frontend_tests": 21,
+  "go_tests": "all packages passed",
+  "recsys_http": "passed",
+  "legacy_http": "passed",
+  "frontend_preserved": true,
+  "manifest_sha256": "a9fcb2f1d993ccfeb63d1ee2fceddfc457f166701bcbef33386c4f39cfc994f5",
+  "docker_compose_config": "passed",
+  "notes": [
+    "No deployment; Docker daemon off",
+    "Routing fixture and structured LLM test double in E2E",
+    "Cached snapshot survives outage; fresh request fails 503 without mutation"
+  ]
+}

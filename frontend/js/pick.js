@@ -2,6 +2,8 @@
 // Свайп вправо (или ♥) — место попадает в маршрут, влево (или ✕) — не нравится.
 // «Завершить подбор мест» отдаёт выбранные места наружу (onFinish) — app.js открывает карту.
 // Тексты вставляются только через textContent: описания приходят из данных, а не из нашей разметки.
+import { createPlaceEmoji } from './place-display.js';
+import { withinCardRadius } from './recommendation-cards.js';
 
 import { loadCards } from './catalog.js';
 
@@ -26,6 +28,23 @@ let liked = [];          // выбранные места, в порядке с�
 let disliked = 0;
 let onFinish = () => {};
 let onClose = () => {};
+let busy = false;
+let configuration = null;
+let currentDate = null;
+const choicesToday = () => configuration?.tripLimit != null ? liked.length : liked.filter(c => c.preferred_date === currentDate).length;
+const dayLimit = () => configuration?.tripLimit ?? configuration?.days.find(d => d.date === currentDate)?.limit ?? Infinity;
+function renderDayTabs() {
+  let tabs = $('pick-day-tabs');
+  if (!tabs) { tabs = el('div', 'day-tabs'); tabs.id = 'pick-day-tabs'; $('deck').before(tabs); }
+  tabs.replaceChildren(); tabs.hidden = !configuration || configuration.tripLimit != null || configuration.days.length<=1;
+  if (tabs.hidden) return;
+  configuration.days.forEach(d => {
+    const b = el('button', null, `${new Date(d.date+'T12:00:00Z').toLocaleDateString('ru-RU',{day:'numeric',month:'short',timeZone:'UTC'})} · ${liked.filter(c=>c.preferred_date===d.date).length}/${d.limit}`);
+    b.type='button'; b.setAttribute('aria-pressed',String(d.date===currentDate));
+    b.onclick=()=>{ if(busy)return;currentDate=d.date;startDeck(false); };
+    tabs.append(b);
+  });
+}
 
 // ---------- Данные ----------
 const loadAll = () => loadCards().then(list => { all = list; });
@@ -46,11 +65,13 @@ function buildCard(card) {
 
   const photo = el('div', 'pcard-photo');
   const img = el('img');
-  img.src = card.image.card;
-  img.alt = card.image.alt || card.title;
+  if (card.image?.card) img.src = card.image.card;
+  else { img.hidden = true; photo.append(el('span','pcard-no-photo','Фото пока нет')); }
+  img.alt = card.image?.alt || card.title;
   img.draggable = false;
   img.decoding = 'async';
-  photo.append(img, el('span', 'pcard-cat', card.category));
+  const category=el('span','pcard-cat');category.append(createPlaceEmoji(card.category_key),document.createTextNode(card.category));
+  photo.append(img, category);
 
   const body = el('div', 'pcard-body');
   body.append(el('h2', null, card.title), el('p', 'pcard-addr', card.address));
@@ -82,10 +103,12 @@ function layoutStack() {
 }
 
 function updateHud() {
-  $('pick-count').textContent = liked.length ? `Выбрано: ${liked.length}` : '';
+  const left = deck.length - pos;
+  $('pick-count').textContent = configuration?.tripLimit != null ? `Выбрано ${liked.length} из ${configuration.tripLimit} на поездку` : configuration ? `Можно добавить: ${choicesToday()} из ${dayLimit()}` : `Выбрано ${liked.length} · ещё ${left}`;
   const finish = $('pick-finish');
   finish.disabled = liked.length === 0;
   finish.textContent = liked.length ? `Завершить подбор мест (${liked.length})` : 'Завершить подбор мест';
+  renderDayTabs();
 }
 
 // ---------- Свайп ----------
@@ -148,6 +171,7 @@ function reset(card) {
 function decide(choice, dy = 0, fromCard = null) {
   const top = fromCard || $('deck').querySelector('.pcard:not(.gone)');
   if (!top || top.classList.contains('gone') || pos >= deck.length) return;
+  if (choice === 'yes' && choicesToday() >= dayLimit()) { reset(top); return; }
   closeDetails();
   const card = deck[pos];
   const dir = choice === 'yes' ? 1 : -1;
@@ -157,7 +181,8 @@ function decide(choice, dy = 0, fromCard = null) {
   top.querySelector(`.pstamp.${choice}`).style.opacity = 1;
   if (choice === 'yes') liked.push(card); else disliked++;
   pos++;
-  layoutStack();
+  if(choice==='yes' && configuration?.days.find(d=>d.date===currentDate)?.anchorOnFirstPick && choicesToday()===1) startDeck(false);
+  else layoutStack();
   setTimeout(() => top.remove(), FLY_MS);
 }
 
@@ -167,8 +192,9 @@ function openDetails() {
   if (!card) return;
   const sheet = $('pick-sheet');
   const img = $('sheet-img');
-  img.src = card.image.full;
-  img.alt = card.image.alt || card.title;
+  img.hidden = !card.image?.full;
+  if (card.image?.full) img.src = card.image.full;
+  img.alt = card.image?.alt || card.title;
   $('sheet-cat').textContent = card.category;
   $('sheet-title').textContent = card.title;
   $('sheet-addr').textContent = card.address;
@@ -180,9 +206,13 @@ function openDetails() {
 function closeDetails() { $('pick-sheet').hidden = true; }
 
 // ---------- Запуск ----------
-function startDeck() {
-  deck = shuffled(all);
-  pos = 0; liked = []; disliked = 0;
+function startDeck(resetChoices = true) {
+  if (resetChoices) liked = [];
+  deck = configuration ? (configuration.tripLimit != null ? configuration.cards : configuration.cardsByDay[currentDate] || []).filter(c=>!liked.some(x=>x.activity_id===c.activity_id)) : shuffled(all);
+  const day=configuration?.days.find(d=>d.date===currentDate);
+  const first=liked.find(c=>c.preferred_date===currentDate);
+  if(day?.anchorOnFirstPick && first) deck=deck.filter(c=>withinCardRadius(first.location,c.location,day.radiusM));
+  pos = 0; disliked = 0; busy = false;
   $('deck').querySelectorAll('.pcard').forEach(c => c.remove());
   layoutStack();
 }
@@ -206,7 +236,32 @@ export function initPick(handlers) {
 }
 
 // Открыть экран. Колода собирается при первом открытии; потом продолжаем с того же места.
-export async function openPick() {
+export async function openPick(options = null) {
+  if (options) {
+    // Reuse photographs only for an unambiguous exact title match. ML IDs,
+    // ranking, day and eligibility always come from the backend pool.
+    try {
+      await loadAll();
+      const normalize = title => title.trim().toLocaleLowerCase('ru-RU');
+      const presentations = new Map();
+      all.forEach(card => { const key=normalize(card.title); presentations.set(key,presentations.has(key)?null:card); });
+      for (const cards of options.tripLimit != null ? [options.cards] : Object.values(options.cardsByDay)) for (const card of cards) {
+        const presentation=presentations.get(normalize(card.title));
+        if(presentation) { card.presentation_id=presentation.id;card.image=presentation.image; if(!card.address)card.address=presentation.address; card.text=[...presentation.text,...card.text]; }
+      }
+    } catch { /* No presentation data: keep the ranked backend cards without photos. */ }
+    // Подсказка ИИ-чата: места, подходящие по пожеланию, показываем первыми (состав карточек решает backend/ML)
+    if (options.rankHint && options.tripLimit != null) {
+      const rank = new Map(options.rankHint.map((id, i) => [String(id), i]));
+      options.cards = [...options.cards].sort((a, b) => (rank.get(String(a.presentation_id)) ?? 1e9) - (rank.get(String(b.presentation_id)) ?? 1e9));
+    }
+    configuration = options; currentDate = options.days[0]?.date || null;
+    liked = [...(options.selected || [])].filter(c=>options.tripLimit != null ? options.cards.some(x=>x.activity_id===c.activity_id) : options.days.some(d=>d.date===c.preferred_date) && options.cardsByDay[c.preferred_date]?.some(x=>x.activity_id===c.activity_id));
+    const note=document.querySelector('.pick-flow-sub');
+    if(note)note.textContent=options.tripLimit!=null ? 'Выберите места на всю поездку — распределим их по дням с учётом близости и бюджета.' : 'Дополнительные места рядом с последней активностью маршрута.';
+    startDeck(false); return;
+  }
+  configuration = null;
   try {
     await loadAll();
   } catch (err) {
@@ -215,7 +270,12 @@ export async function openPick() {
     $('deck-empty').querySelector('p').textContent = 'Не удалось загрузить карточки: ' + err.message;
     return;
   }
-  if (!deck.length) startDeck();
+  const key = ids === undefined ? orderKey : ids ? ids.join(',') : '';
+  if (!deck.length || key !== orderKey) {
+    orderKey = key;
+    order = ids === undefined ? order : ids;
+    startDeck();
+  }
 }
 
 export const pickedPlaces = () => [...liked];
