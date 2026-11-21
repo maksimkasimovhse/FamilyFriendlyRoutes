@@ -104,6 +104,19 @@ export async function forecastFor(day) {
   return h.length ? { h, from, to } : null;
 }
 
+// ---------- Линейные иконки погоды (в стиле остального интерфейса, вместо эмодзи) ----------
+const CLOUD = 'M7 16h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.2 7.2 4.5 4.5 0 0 0 7 16z';
+const ICONS = {
+  clear: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/>',
+  partly: '<circle cx="8" cy="8" r="2.6"/><path d="M8 2.5v1.3M2.5 8h1.3M4.1 4.1l.9.9M11.9 4.1l-.9.9"/><path d="M8.5 20h8.5a3.6 3.6 0 0 0 .5-7.1A5.2 5.2 0 0 0 8 13.2 3.4 3.4 0 0 0 8.5 20z"/>',
+  cloud: `<path d="${CLOUD}" transform="translate(0 2)"/>`,
+  rain: `<path d="${CLOUD}"/><path d="M8 19l-1 2.5M12 19l-1 2.5M16 19l-1 2.5"/>`,
+  snow: `<path d="${CLOUD}"/><path d="M8 20h.01M12 21.5h.01M16 20h.01" stroke-width="3"/>`,
+  fog: '<path d="M4 9h16M3 13h18M5 17h14"/>',
+  thunder: `<path d="${CLOUD}"/><path d="M12.8 14.5l-2.8 4h3l-1.4 3.5"/>`,
+};
+const iconSvg = kind => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[kind === 'heavyrain' ? 'rain' : kind] || ICONS.cloud}</svg>`;
+
 // ---------- Показ ----------
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
@@ -126,14 +139,15 @@ export async function renderWeather(el, day) {
     const lo = min(h, x => x.temp), hi = max(h, x => x.temp);
     const tips = adviceFor(h);
     const warn = tips.some(t => t.level === 'warn');
+    const kind = skyKind(h);
     el.className = 'wx' + (warn ? ' warn' : '');
     // Компактная плашка «☁️ +3…+5°»; по нажатию — подробности и советы
     el.innerHTML = `
       <button type="button" class="wx-btn" aria-expanded="false" aria-label="Погода на прогулку: ${sign(lo)}${hi - lo >= 1.5 ? ' … ' + sign(hi) : ''} градусов, ${esc(sky.text)}. Подробнее">
-        <span class="wx-ico" aria-hidden="true">${sky.icon}</span><b>${sign(lo)}${hi - lo >= 1.5 ? '…' + sign(hi) : ''}°</b>${warn ? '<i class="wx-dot" aria-hidden="true"></i>' : ''}
+        <span class="wx-ico">${iconSvg(kind)}</span><b>${sign(lo)}${hi - lo >= 1.5 ? '…' + sign(hi) : ''}°</b>${warn ? '<i class="wx-dot" aria-hidden="true"></i>' : ''}
       </button>
       <div class="wx-pop" hidden>
-        <div class="wx-sum"><span aria-hidden="true">${sky.icon}</span><div><b>${esc(cap(sky.text))}, ${sign(lo)}${hi - lo >= 1.5 ? '…' + sign(hi) : ''}°C</b><small>на время прогулки, ${from}:00–${to}:00</small></div></div>
+        <div class="wx-sum"><span class="wx-ico big">${iconSvg(kind)}</span><div><b>${esc(cap(sky.text))}, ${sign(lo)}${hi - lo >= 1.5 ? '…' + sign(hi) : ''}°C</b><small>на время прогулки, ${from}:00–${to}:00</small></div></div>
         ${tips.length ? `<ul class="wx-tips">${tips.map(t => `<li class="${t.level}"><span aria-hidden="true">${t.icon}</span>${esc(t.text)}</li>`).join('')}</ul>`
           : '<p class="wx-ok">Хорошая погода для прогулки, специальная одежда не нужна.</p>'}
       </div>`;
