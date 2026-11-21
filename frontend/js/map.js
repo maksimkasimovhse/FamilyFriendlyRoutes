@@ -176,9 +176,10 @@ async function addAmenities() {
     map.addImage('icon-' + kind, await makeIcon(kind), { pixelRatio: 3 });
     const id = 'amenity-' + kind;
     const isFood = kind === 'cafe';
-    // Category badges remain visible on the initial route overview too.
+    // Infrastructure stays hidden until the user enables a category.
     map.addLayer({ id, type: 'symbol', source: 'amenities', filter: ['==', ['get', 'kind'], kind], minzoom: 13,
       layout: {
+        'visibility': 'none',
         'icon-image': 'icon-' + kind, 'icon-allow-overlap': true,
         'icon-size': ['interpolate', ['linear'], ['zoom'], 13, 0.6, 17, 0.9],
         'text-field': isFood
@@ -430,7 +431,7 @@ function applyChips() {
     // Пока показан маршрут из выбранных мест, удобства вдоль маршрута дня не нужны
     const kinds={rest:'bench',toilet:'toilets',pharmacy:'pharmacy',food:'cafe',park:'park',playground:'playground'};
     const wanted=new Set([...amenityFilters].map(kind=>kinds[kind]));
-    const on = !picked && c.getAttribute('aria-pressed') === 'true' && (!wanted.size || wanted.has(c.dataset.layer));
+    const on = !picked && c.getAttribute('aria-pressed') === 'true' && wanted.has(c.dataset.layer);
     map.setFilter('amenity-'+c.dataset.layer,['==',['get','kind'],c.dataset.layer]);
     map.setLayoutProperty('amenity-' + c.dataset.layer, 'visibility', on ? 'visible' : 'none');
   });

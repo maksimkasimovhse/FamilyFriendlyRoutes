@@ -43,3 +43,19 @@ test('map shows the union of selected amenity layers',()=>{
  vm.createContext(context);vm.runInContext(fs.readFileSync(new URL('./map.js',import.meta.url),'utf8').replace(/^import .*;\r?\n/gm,'').replace(/export (async )?function /g,(_,a)=>(a||'')+'function ')+'\nmap=testMap;amenityFilters=new Set(["toilet","park","playground"]);applyChips();',context);
  assert.equal(visible.get('amenity-toilets'),'visible');assert.equal(visible.get('amenity-park'),'visible');assert.equal(visible.get('amenity-playground'),'visible');assert.equal(visible.get('amenity-cafe'),'none');
 });
+
+
+test('infrastructure starts hidden and stays hidden after the last filter is disabled',()=>{
+ const visible=new Map();
+ const chips=['all','bench','toilets','pharmacy','cafe','park','playground'].map(layer=>({dataset:{layer},getAttribute:()=> 'true'}));
+ const context={document:{getElementById(){return {}},querySelectorAll(){return chips}},testMap:{setFilter(){},setLayoutProperty(id,key,value){visible.set(id,value)}}};
+ vm.createContext(context);
+ vm.runInContext(fs.readFileSync(new URL('./map.js',import.meta.url),'utf8').replace(/^import .*;\r?\n/gm,'').replace(/export (async )?function /g,(_,a)=>(a||'')+'function ')+'\nmap=testMap;applyChips();',context);
+ assert.equal(visible.size,6);
+ assert.ok([...visible.values()].every(value=>value==='none'));
+ vm.runInContext('amenityFilters=new Set(["toilet"]);applyChips();',context);
+ assert.equal(visible.get('amenity-toilets'),'visible');
+ assert.equal([...visible.values()].filter(value=>value==='visible').length,1);
+ vm.runInContext('amenityFilters.clear();applyChips();',context);
+ assert.ok([...visible.values()].every(value=>value==='none'));
+});
