@@ -30,6 +30,9 @@ services:
       ML_API_TOKEN: ${ML_API_TOKEN:-}
       ASSISTANT_RULES_FALLBACK: ${ASSISTANT_RULES_FALLBACK:-true}
   caddy:
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     image: caddy:2
     restart: unless-stopped
     ports: ["80:80", "443:443", "443:443/udp"]
