@@ -310,3 +310,78 @@ func TestExpiredAccountSessionAndProfileCSRF(t *testing.T) {
 	h.browser, _ = authRequest(t, h.handler, guest, "login", "expiry@example.com", testPassword, 200)
 	h.read(t)
 }
+
+func TestNapPreferencePersistsAndTripUsesExplicitDailyLodging(t *testing.T) {
+	h := newActiveHarness(t)
+	profileInput := testProfile(t, h)
+	h.browser, _ = authRequest(t, h.handler, h.browser, "register", "nap-family@example.com", testPassword, 201)
+	profileInput.Family.Nap = &c.NapPreference{StartTime: "15:00", EndTime: "13:00"}
+	saveProfile(t, h, profileInput, 422)
+	profileInput.Family.Nap = &c.NapPreference{StartTime: "13:00", EndTime: "15:00"}
+	saved := saveProfile(t, h, profileInput, 201)
+	if saved.Family.Nap == nil || saved.Family.Nap.StartTime != "13:00" {
+		t.Fatal("nap preference not saved")
+	}
+	input := h.read(t).Input
+	for i := range input.Days {
+		date := string(input.Days[i].Date)
+		input.Days[i].Nap = &c.NapBreak{Window: c.Interval{StartAt: c.Instant(date + "T13:00:00+03:00"), EndAt: c.Instant(date + "T15:00:00+03:00")}, Location: input.Days[i].StartPoint}
+	}
+	requestInput := c.TripFromProfileRequest{ExpectedProfileVersion: saved.Version, CityID: input.CityID, Timezone: input.Timezone, PlanningContext: input.PlanningContext, Days: input.Days, Selections: input.Selections}
+	w := request(h.handler, h.browser, "POST", "/api/v1/trips/from-profile", body(t, requestInput), "nap-from-profile")
+	if w.Code != 201 {
+		t.Fatal(w.Body.String())
+	}
+	var trip c.TripView
+	if err := json.Unmarshal(w.Body.Bytes(), &trip); err != nil {
+		t.Fatal(err)
+	}
+	if trip.Input.Family.Nap == nil || trip.Input.Days[1].Nap == nil {
+		t.Fatal("profile or daily nap lost")
+	}
+	w = request(h.handler, h.browser, "POST", "/api/v1/trips/"+string(trip.TripID)+"/previews", body(t, map[string]any{"expected_version": trip.Version, "command": map[string]any{"kind": "generate_plan"}}), "")
+	if w.Code != 201 {
+		t.Fatal(w.Body.String())
+	}
+	var preview c.PlanPreview
+	if err := json.Unmarshal(w.Body.Bytes(), &preview); err != nil {
+		t.Fatal(err)
+	}
+	for _, day := range preview.ProposedTrip.Days {
+		n := 0
+		for _, stop := range day.Stops {
+			if stop.ActivityKind != nil && *stop.ActivityKind == "nap" {
+				n++
+			}
+		}
+		if n != 1 || day.Nap == nil {
+			t.Fatal("daily nap missing from HTTP preview")
+		}
+	}
+}
+
+func TestNapDeadlineCannotBeAcknowledgedAwayAsTimeOverload(t *testing.T) {
+	h := newActiveHarness(t)
+	input := h.read(t).Input
+	input.Days = input.Days[:1]
+	d := &input.Days[0]
+	d.AvailableWindow = &c.Interval{StartAt: "2030-06-15T14:00:00+03:00", EndAt: "2030-06-15T17:00:00+03:00"}
+	d.DurationBudgetSec = 60
+	d.Nap = &c.NapBreak{Window: c.Interval{StartAt: "2030-06-15T13:00:00+03:00", EndAt: "2030-06-15T15:00:00+03:00"}, Location: d.StartPoint}
+	input.Selections = []c.Selection{{ActivityID: "demo-1", PlaceID: "demo-place-1", Mandatory: true}}
+	w := request(h.handler, h.browser, "POST", "/api/v1/trips", body(t, input), "late-nap-conflict")
+	if w.Code != 201 {
+		t.Fatal(w.Body.String())
+	}
+	var trip c.TripView
+	json.Unmarshal(w.Body.Bytes(), &trip)
+	w = request(h.handler, h.browser, "POST", "/api/v1/trips/"+string(trip.TripID)+"/previews", body(t, map[string]any{"expected_version": trip.Version, "command": map[string]any{"kind": "generate_plan"}}), "")
+	if w.Code != 201 {
+		t.Fatal(w.Body.String())
+	}
+	var preview c.PlanPreview
+	json.Unmarshal(w.Body.Bytes(), &preview)
+	if preview.CanApply {
+		t.Fatal("sleep deadline bypassed by acknowledging unrelated time overload")
+	}
+}

@@ -146,7 +146,7 @@ func (p Planner) appendDay(ctx context.Context, view c.TripView, index int, choi
 	}
 	existing := []c.Selection{}
 	for _, stop := range day.Stops {
-		if stop.Progress != "removed" && stop.Progress != "skipped" {
+		if stop.Progress != "removed" && stop.Progress != "skipped" && stopKind(stop) != "nap" {
 			existing = append(existing, c.Selection{ActivityID: stop.ActivityID, PlaceID: stop.PlaceID, Mandatory: stop.Mandatory, OccurrenceID: stop.OccurrenceID})
 		}
 	}
@@ -208,7 +208,7 @@ func (p Planner) PlanningOptions(ctx context.Context, view c.TripView, now time.
 				index = i
 				row.Anchor = lastActivity(d)
 				if d.Totals.ElapsedDurationSec != nil {
-					row.PlannedDurationSec = *d.Totals.ElapsedDurationSec
+					row.PlannedDurationSec = outingDuration(d)
 				}
 				break
 			}
@@ -287,7 +287,7 @@ func (p Planner) AppendManualChoices(ctx context.Context, view c.TripView, date 
 	}
 	planned := 0.0
 	if v := view.Days[index].Totals.ElapsedDurationSec; v != nil {
-		planned = *v
+		planned = outingDuration(view.Days[index])
 	}
 	if planned >= dailyTimeBudget(input)*budgetDefaults.CompletionPolicy.ShortDayRatio {
 		return view, stateError("DAY_NOT_SHORT", "День уже заполнен не менее чем на 70%.")
