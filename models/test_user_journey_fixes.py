@@ -20,6 +20,9 @@ class JourneyFixTests(unittest.TestCase):
         value['needs'][0]['evidence'] = '5 лет, устал'
         result, _ = parse_assistant('Ребёнку 5 лет, устал', context, FakeClient(value))
         self.assertEqual(result.needs[0].child_id, 'child-1')
+        context['family']['children'][1]['age_years'] = 5
+        result, _ = parse_assistant('Ребёнку 5 лет, устал', context, FakeClient(value))
+        self.assertIsNone(result.needs[0].child_id)
 
     def test_confirmed_indoor_restaurant_can_be_a_rain_shelter(self):
         row = {'place': {'category': 'restaurant'}, 'activity': {'kind': 'meal'}}

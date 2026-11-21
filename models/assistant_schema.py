@@ -351,7 +351,7 @@ def validate_assistant_response(message, context, response):
             explicit = need.child_id.casefold() in quote
             if child and child.get("age_years") is not None:
                 age = child["age_years"]
-                explicit |= bool(re.search(rf"\b{age}\s*(?:лет|год|года|летн)", quote))
+                explicit |= ages.count(age) == 1 and bool(re.search(rf"\b{age}\s*[-–]?\s*(?:лет|год|года|летн)", quote))
                 if all(a is not None for a in ages) and ages.count(age) == 1:
                     explicit |= bool(re.search(r"младш", quote)) and age == min(ages)
                     explicit |= bool(re.search(r"старш", quote)) and age == max(ages)
