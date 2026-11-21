@@ -1,0 +1,132 @@
+{
+  "synthetic_data_only": true,
+  "checks": [
+    {
+      "message": "Ребёнок устал, хотим меньше ходить",
+      "passed": true,
+      "action": "shorten_day",
+      "needs": [
+        "rest"
+      ],
+      "model": "GigaChat-3-Pro:32.4.30.3",
+      "duration_sec": null,
+      "max_walk_distance_m": null,
+      "elapsed_sec": 4.28
+    },
+    {
+      "message": "Нужен туалет прямо сейчас",
+      "passed": true,
+      "action": "find_places",
+      "needs": [
+        "toilet"
+      ],
+      "model": "GigaChat-3-Pro:32.4.30.3",
+      "duration_sec": null,
+      "max_walk_distance_m": null,
+      "elapsed_sec": 4.51
+    },
+    {
+      "message": "Хотим поесть по пути",
+      "passed": true,
+      "action": "find_places",
+      "needs": [
+        "food"
+      ],
+      "model": "GigaChat-3-Pro:32.4.30.3",
+      "duration_sec": null,
+      "max_walk_distance_m": null,
+      "elapsed_sec": 4.87
+    },
+    {
+      "message": "Убери следующую точку",
+      "passed": true,
+      "action": "remove_stop",
+      "needs": [],
+      "model": "GigaChat-3-Pro:32.4.30.3",
+      "duration_sec": null,
+      "max_walk_distance_m": null,
+      "elapsed_sec": 4.99
+    },
+    {
+      "message": "Через час нужно быть в отеле",
+      "passed": true,
+      "action": "return_to_hotel",
+      "needs": [
+        "return"
+      ],
+      "model": "GigaChat-3-Pro:32.4.30.3",
+      "duration_sec": 3600,
+      "max_walk_distance_m": null,
+      "elapsed_sec": 4.72
+    },
+    {
+      "message": "Пошёл дождь, где укрыться?",
+      "passed": true,
+      "action": "find_places",
+      "needs": [
+        "shelter"
+      ],
+      "model": "GigaChat-3-Pro:32.4.30.3",
+      "duration_sec": null,
+      "max_walk_distance_m": null,
+      "elapsed_sec": 4.19
+    },
+    {
+      "message": "Перенеси музей на завтра",
+      "passed": true,
+      "action": "move_stop",
+      "needs": [],
+      "model": "GigaChat-3-Pro:32.4.30.3",
+      "duration_sec": null,
+      "max_walk_distance_m": null,
+      "elapsed_sec": 3.39
+    },
+    {
+      "message": "До отеля нужно дойти к 11:00",
+      "passed": true,
+      "action": "return_to_hotel",
+      "needs": [
+        "return"
+      ],
+      "model": "GigaChat-3-Pro:32.4.30.3",
+      "duration_sec": 3600,
+      "max_walk_distance_m": null,
+      "elapsed_sec": 4.11
+    },
+    {
+      "message": "Хотим пройти не больше 500 метров",
+      "passed": true,
+      "action": "shorten_day",
+      "needs": [
+        "less_walking"
+      ],
+      "model": "GigaChat-3-Pro:32.4.30.3",
+      "duration_sec": null,
+      "max_walk_distance_m": 500.0,
+      "elapsed_sec": 4.71
+    },
+    {
+      "message": "Добавь второй вариант",
+      "passed": true,
+      "action": "add_activity",
+      "needs": [],
+      "model": "GigaChat-3-Pro:32.4.30.3",
+      "duration_sec": null,
+      "max_walk_distance_m": null,
+      "elapsed_sec": 4.88
+    },
+    {
+      "message": "Хотим животных, без музеев",
+      "passed": true,
+      "action": "preferences",
+      "needs": [],
+      "model": "GigaChat-3-Pro:32.4.30.3",
+      "duration_sec": null,
+      "max_walk_distance_m": null,
+      "elapsed_sec": 11.78
+    }
+  ],
+  "checked_at": "2026-11-20T22:40:08.048287+00:00",
+  "passed": true,
+  "scenario_count": 11
+}

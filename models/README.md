@@ -2,10 +2,12 @@
 
 Для подключения приложения теперь есть отдельный [MVP рекомендаций](../docs/recommendation_mvp.md):
 полный `/internal/v1/recommendations` строит content scores по анкете и существующему
-каталогу из 281 объекта. Compose направляет backend на этот сервис вместо mock.
+каталогу `city-enriched-v3`: 1 174 места, еда, инфраструктура и опубликованные сеансы.
+Compose направляет новые поездки backend на этот сервис; старый каталог281 сохранён.
 Stravl checkpoint в этом MVP не используется; возрастные свойства остаются
 неизвестными, длительности отмечены как оценки. Сквозная проверка:
-`.venv/bin/python scripts/check_mvp.py` (маршрутизатор в ней тестовый).
+`.venv/bin/python scripts/check_recsys.py` и прежний `check_mvp.py`
+(маршрутизатор в них тестовый).
 
 `train_stravl.py` обучает **одну** модель интереса к направлениям Stravl по анкете без `form_b` (денежный бюджет) и ID направления. Входы — `data/processed/stravl/{interactions,profiles}.parquet` и `destinations.csv`; для подготовки запустите `python scripts/prepare_stravl.py`. Нужны PyTorch, NumPy и PyArrow.
 

@@ -1,0 +1,45 @@
+{
+  "checked_at": "2026-11-21T00:55:02.818498+00:00",
+  "passed": true,
+  "model": {
+    "status": "ok",
+    "service": "model-service",
+    "model_version": "family-content-recsys-v2",
+    "catalog_version": "city-enriched-v3",
+    "catalog_sha256": "a9fcb2f1d993ccfeb63d1ee2fceddfc457f166701bcbef33386c4f39cfc994f5",
+    "catalog_records": 1194,
+    "catalog_places": 1174,
+    "supported_catalog_versions": [
+      "city-osm-v2",
+      "city-enriched-v3"
+    ],
+    "purposes": [
+      "initial",
+      "restaurant",
+      "along_route",
+      "toilet",
+      "rain",
+      "playground",
+      "rest"
+    ],
+    "spatial_filters": true,
+    "fixed_sessions": true
+  },
+  "routing": "test_fixture_not_real_osm",
+  "llm": "structured_test_double",
+  "checks": [
+    "initial/restaurant/along_route backend endpoints",
+    "source-backed restaurant filters",
+    "unknown properties do not match filters",
+    "fixed session preview/apply",
+    "toilet/rain/playground/tired/hotel needs",
+    "explicit hotel point required",
+    "real meal insertion and duration/balance",
+    "assistant food without map database",
+    "contextual choice creates preview",
+    "search and previews do not mutate trip",
+    "version conflict",
+    "ownership isolation",
+    "source-backed active start/progress/replan"
+  ]
+}

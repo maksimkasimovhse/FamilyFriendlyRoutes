@@ -148,13 +148,15 @@ class RecommendationAPITests(unittest.TestCase):
         with patch.dict(os.environ, {"MODEL_CATALOG_PATH": "/missing/catalog"}):
             self.assertEqual(self.client.get("/health").status_code, 503)
 
-    def test_version_validation_and_unsupported_purposes(self):
+    def test_version_validation_and_purpose_without_candidates(self):
         request = sample_request()
         request["catalog_version"] = "stale"
         self.assertEqual(self.post(request).status_code, 409)
         request["catalog_version"] = CATALOG_VERSION
         request["purpose"] = "restaurant"
-        self.assertEqual(self.post(request).status_code, 501)
+        response = self.post(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["status"], "no_candidates")
         request["purpose"] = "initial"
         del request["profile"]
         response = self.post(request)

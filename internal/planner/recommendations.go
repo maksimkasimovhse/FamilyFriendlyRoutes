@@ -28,6 +28,12 @@ type HTTPSource struct {
 	ParsedRequest            *c.ParsedRequest
 	Excluded                 []c.ID
 	Visited                  []c.ID
+	Purpose                  string
+	CurrentDayDate           *c.ISODate
+	CurrentPoint             *c.Point
+	SpatialScope             *c.SpatialScope
+	RestaurantFilters        *c.RestaurantFilters
+	Limit                    int
 }
 
 func (s HTTPSource) CatalogVersion() string { return s.Version }
@@ -44,6 +50,14 @@ func (s HTTPSource) Recommend(ctx context.Context, view c.TripView) (c.Recommend
 	id := c.ID(hex.EncodeToString(nonce[:]))
 	request := c.RecommendationRequest{ContractVersion: "1.0", RequestID: id, TripID: view.TripID, TripVersion: view.Version, CatalogVersion: view.CatalogVersion, Purpose: "initial", Profile: view.Input.Family, Policy: view.Policy, LoadLimits: view.Input.LoadLimits, Days: view.Input.Days, Selections: view.Input.Selections, VisitedActivityIDS: []c.ID{}, ExcludedActivityIDS: []c.ID{}, RequestText: view.Input.RequestText, Limit: CandidateLimit}
 	request.ParsedRequest = s.ParsedRequest
+	if s.Purpose != "" {
+		request.Purpose = s.Purpose
+	}
+	request.CurrentDayDate, request.CurrentPoint = s.CurrentDayDate, s.CurrentPoint
+	request.SpatialScope, request.RestaurantFilters = s.SpatialScope, s.RestaurantFilters
+	if s.Limit > 0 {
+		request.Limit = s.Limit
+	}
 	if s.Excluded != nil {
 		request.ExcludedActivityIDS = s.Excluded
 	}
@@ -131,6 +145,12 @@ func numberFact(raw json.RawMessage) (*float64, error) {
 	}
 	return &value, nil
 }
+
+func (p Planner) ValidateRecommendations(view c.TripView, response c.RecommendationResponse) error {
+	_, _, err := normalize(response, view)
+	return err
+}
+
 func normalize(response c.RecommendationResponse, view c.TripView) ([]Activity, map[c.ID]c.Candidate, error) {
 	bad := func() ([]Activity, map[c.ID]c.Candidate, error) { return nil, nil, ErrMLContract }
 	if response.ContractVersion != "1.0" || response.TripID != view.TripID || response.TripVersion != view.Version || response.CatalogVersion != view.CatalogVersion || response.ModelVersion == "" || response.Candidates == nil || len(response.Candidates) > CandidateLimit {

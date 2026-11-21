@@ -1,0 +1,1001 @@
+﻿place_id,name,category,status,source_url,candidate_urls,errors,description_characters
+place:osm:node:4320825061,Дмитриевская башня,museum,source_discovery_required,,,,0
+place:osm:node:11966302769,"Центр современного искусства ""Арсенал""",museum,restored_from_site,https://nn-grad.ru/kuda-poyti/Centr_sovremennogo_iskusstva_Arsenal/,,,326
+place:osm:node:3302933087,Нижегородский государственный выставочный комплекс,museum,fetch_failed,,http://ngvk.ru/,ReadTimeout,0
+place:osm:node:12104690801,Музей живой бумаги,museum,fetch_failed,,https://muzeybumagi.art/,gaierror,0
+place:osm:node:1768844096,Филиал музея-заповедника А.С. Пушкина,museum,fetch_failed,,http://pushkinmuzey.ru/,gaierror,0
+place:osm:node:9966335766,Электрические витамины,museum,source_discovery_required,,,,0
+place:osm:node:11773549425,Город в шоколаде,museum,source_discovery_required,,,,0
+place:osm:node:12104682901,Игрушечный музей,museum,fetch_failed,,https://ngiamz.ru/igrushechnyy-muzey,ConnectTimeout,0
+place:osm:node:1768844072,Арт-галерея «Кладовка»,museum,restored_from_site,https://nn-grad.ru/kuda-poyti/Art-galereya__Kladovka_/,https://kladovkajournal.livejournal.com/,ConnectError,353
+place:osm:node:1768844092,Русский музей фотографии,museum,restored_from_site,https://www.fotomuseum.nnov.ru/,https://www.fotomuseum.nnov.ru/,JSONDecodeError,178
+place:osm:node:11809455622,Догель,museum,source_discovery_required,,,,0
+place:osm:node:2297015499,Выставочный зал «Зачатская башня»,museum,fetch_failed,,https://ngiamz.ru/,ConnectTimeout,0
+place:osm:node:2295063253,Экспозиция «Подвиг народного единства»,museum,source_discovery_required,,,,0
+place:osm:node:9128493459,Живой музей ремёсел,museum,fetch_failed,,https://jivoeremeslo.ru/,ConnectError,0
+place:osm:node:1808680328,Музей науки «Нижегородская радиолаборатория»,museum,identity_review,,https://radiolaboratorija.ru/,,0
+place:osm:node:1808680330,Музей речного флота,museum,fetch_failed,,http://vgavt-nn.ru/museum/,gaierror,0
+place:osm:node:11904093381,"Музей дизайна, моды и портновского искусства имени Н.П. Ламановой",museum,identity_review,,https://lamanovamuseumnn.ru/,,0
+place:osm:node:5536096038,Живой музей Ремесла,museum,source_discovery_required,,,,0
+place:osm:node:1993500120,Музей В.Г. Короленко,museum,source_discovery_required,,,,0
+place:osm:node:13468095300,Галерея Имён,museum,restored_from_site,https://gallery52.ru/,https://gallery52.ru/,,129
+place:osm:node:1808680323,Музей истории художественных промыслов Нижегородской области,museum,restored_from_site,https://nn-grad.ru/kuda-poyti/Muzei_istorii_hudozhestvennih_promislov_Nizhegorodskoi_oblasti/,https://ngiamz.ru/,ConnectTimeout,438
+place:osm:node:5103927383,Технический музей,museum,restored_from_site,https://nn-grad.ru/kuda-poyti/Tehnicheskii_muzei/,https://ngiamz.ru/tekhnicheskiy-muzey,ConnectTimeout,533
+place:osm:node:3312102332,Музей общества «Динамо»,museum,source_discovery_required,,,,0
+place:osm:node:9084292818,Усадьба Каменских,museum,source_discovery_required,,,,0
+place:osm:node:12881368401,Нижний в шоколаде,museum,restored_from_site,https://muzey-shokolada.ru/,https://muzey-shokolada.ru/,,250
+place:osm:node:6412596831,Литературный музей Горького,museum,osm_description,,,,26
+place:osm:node:11298582401,Луна,museum,source_discovery_required,,,,0
+place:osm:node:6514103494,Музей связи,museum,source_discovery_required,,,,0
+place:osm:node:9800958604,Пакгаузы,museum,restored_from_site,https://packhouses.strelkapark.ru/,https://packhouses.strelkapark.ru/,,139
+place:osm:node:1808680311,Геологический музей,museum,fetch_failed,,http://www.volgageo.nn.ru/,gaierror,0
+place:osm:node:11146567206,Выставочный пакгауз,museum,source_discovery_required,,,,0
+place:osm:node:9084312519,Романовы,museum,source_discovery_required,,,,0
+place:osm:node:11930489855,Нижегородский Музей СВО,museum,identity_review,,https://xn--b1affjmkagzq.xn--p1ai/,JSONDecodeError,0
+place:osm:node:1808680329,"Музей радиофизики, ННГУ",museum,source_discovery_required,,,,0
+place:osm:node:1808680312,Зоологический музей,museum,source_discovery_required,,,,0
+place:osm:node:1808680324,"Музей истории, МП Нижегородэлектротранс",museum,source_discovery_required,,,,0
+place:osm:node:6499514699,Кварки,museum,fetch_failed,,https://kvarky.ru/,PermissionError,0
+place:osm:node:6284593787,Музей Борский,museum,source_discovery_required,,,,0
+place:osm:node:11755592000,Собранье крепких напитков,museum,source_discovery_required,,,,0
+place:osm:node:4247041929,Музей пожарной части,museum,source_discovery_required,,,,0
+place:osm:node:9332430217,Планетарий 1,museum,source_discovery_required,,,,0
+place:osm:node:4994480121,Музей деревянного зодчества,museum,source_discovery_required,,,,0
+place:osm:node:4492225524,Кварки,museum,source_discovery_required,,,,0
+place:osm:node:12438209201,"Галерея кукол ""Хрупкие мечты""",museum,restored_from_site,https://lobachevagallery.ru/,https://lobachevagallery.ru/,,246
+place:osm:node:1993500121,Музей Московского района,museum,source_discovery_required,,,,0
+place:osm:node:1808680319,Музей истории Приокского района,museum,source_discovery_required,,,,0
+place:osm:node:1808680327,"Музей истории, ОАО Нител",museum,source_discovery_required,,,,0
+place:osm:node:1808680322,Музей истории завода Красное Сормово,museum,restored_from_site,http://krsormovo.nnov.ru/o-predpriyatii/muzej-istorii-zavoda/,http://krsormovo.nnov.ru/o-predpriyatii/muzej-istorii-zavoda/,,354
+place:osm:node:11185593838,Музей Самовара,museum,identity_review,,https://xn----jtbfjmwgaax.com/,,0
+place:osm:node:10576703468,Назад в СССР,museum,restored_from_site,https://xn----jtbfjmwgaax.com/,https://xn----jtbfjmwgaax.com/,,425
+place:osm:node:11185593837,Оружие Победы,museum,identity_review,,https://xn----jtbfjmwgaax.com/,,0
+place:osm:node:1808680314,Музей деревянной скульптуры А.И. Новикова,museum,source_discovery_required,,,,0
+place:osm:node:1808680321,Музей истории железнодорожного узла Горький-Сортировочная,museum,source_discovery_required,,,,0
+place:osm:node:1808680318,"Музей истории Горьковской железной дороги, музей паровозов",museum,source_discovery_required,,,,0
+place:osm:node:1808680326,Музей истории Горьковского автомобильного завода,museum,fetch_failed,,https://museum.gaz.ru/,HTTPStatusError,0
+place:osm:node:1808680332,Музей-квартира А.Д. Сахарова,museum,restored_from_site,https://nn-grad.ru/kuda-poyti/Muzei-kvartira_A._D._Saharova/,,,339
+place:osm:node:2527580477,Учебный театр Нижегородского театрального училища им. Е.А. Евстигнеева,event,identity_review,,https://ntu-nn.ru/,ConnectTimeout,0
+place:osm:node:5141054171,Центр эстетического воспитания детей,event,fetch_failed,,http://deti-nn.ru/,ReadTimeout,0
+place:osm:node:2289219095,Филармония имени Мстислава Ростроповича,event,identity_review,,https://www.music-nn.ru/,,0
+place:osm:node:994462777,Кремлевский концертный зал,event,source_discovery_required,,,,0
+place:osm:node:585136663,Рекорд,event,fetch_failed,,https://kulturann.ru/,PermissionError,0
+place:osm:node:2527584549,Спутник,event,source_discovery_required,,,,0
+place:osm:node:12022630128,DKRT,event,source_discovery_required,,,,0
+place:osm:node:11039437060,Цех,event,source_discovery_required,,,,0
+place:osm:node:4462100932,Futuro,event,no_description_on_page,,https://futurogallery.ru/,ValueError,0
+place:osm:node:11799363626,Кинофактура,event,source_discovery_required,,,,0
+place:osm:node:4662902667,Утюг,event,osm_description,,https://utugnn.ru/,gaierror,27
+place:osm:node:11042381496,Terminal A,event,restored_from_site,https://terminal-nn.site/,https://terminal-nn.site/,,308
+place:osm:node:13957448005,Love Cinema,event,osm_description,,https://love-kino.ru/,ValueError,51
+place:osm:node:1808422812,Zooпарк,event,identity_review,,https://teatrzoopark.narod.ru/,,0
+place:osm:node:13572984282,Палитра,event,source_discovery_required,,,,0
+place:osm:node:1808422818,Театр перемен,event,source_discovery_required,,,,0
+place:osm:node:1814750890,Синема парк,event,fetch_failed,,http://www.cinemapark.ru/main,ReadTimeout,0
+place:osm:node:1808422813,Нетеатр «Лифт»,event,fetch_failed,,http://neteatr.com/,gaierror,0
+place:osm:node:4423349298,Арлекино,event,restored_from_site,https://nn-grad.ru/kuda-poyti/_Arlekino_/,https://arlekino52.ru/,ValueError,327
+place:osm:node:1815716466,Смена,event,source_discovery_required,,,,0
+place:osm:node:3908569601,Театр музыкально-пластической драмы «Преображение»,event,fetch_failed,,https://www.preo.su/,ConnectTimeout,0
+place:osm:node:1253194943,Синема-парк,event,fetch_failed,,http://www.cinemapark.ru/,ReadTimeout,0
+place:osm:node:3249937430,Империя грез,event,fetch_failed,,https://xn--c1adbibb0aykc7n.xn--p1ai/,ConnectTimeout,0
+place:osm:node:1815716457,Зарница,event,fetch_failed,,http://zarniza.umi.ru/,PermissionError,0
+place:osm:node:1808422815,Пиано,event,fetch_failed,,https://www.tepi.org/,ConnectTimeout,0
+place:osm:node:13026925312,JamCity,event,identity_review,,https://jamcitycamp.com/,,0
+place:osm:node:4234435144,Сормовский (Империя Грёз),event,source_discovery_required,,,,0
+place:osm:node:1954713874,Листопад,event,fetch_failed,,http://www.teatr-listopad.ru/,gaierror,0
+place:osm:node:4754530865,Детская школа искусств №14,event,source_discovery_required,,,,0
+place:osm:node:12022609237,Smile Park,park,source_discovery_required,,,,0
+place:osm:node:11016554438,КидБург,playground,fetch_failed,,https://kidburg.ru/,ConnectTimeout,0
+place:osm:node:4344946485,playground OSM 4344946485,playground,name_missing,,,,0
+place:osm:node:4344946523,playground OSM 4344946523,playground,name_missing,,,,0
+place:osm:node:2926980312,playground OSM 2926980312,playground,name_missing,,,,0
+place:osm:node:4231351846,playground OSM 4231351846,playground,name_missing,,,,0
+place:osm:node:2709160303,playground OSM 2709160303,playground,name_missing,,,,0
+place:osm:node:6556232596,playground OSM 6556232596,playground,name_missing,,,,0
+place:osm:node:2283255272,playground OSM 2283255272,playground,name_missing,,,,0
+place:osm:node:6556232614,playground OSM 6556232614,playground,name_missing,,,,0
+place:osm:node:4368456464,playground OSM 4368456464,playground,name_missing,,,,0
+place:osm:node:3312103260,playground OSM 3312103260,playground,name_missing,,,,0
+place:osm:node:2879689562,playground OSM 2879689562,playground,name_missing,,,,0
+place:osm:node:3312103220,playground OSM 3312103220,playground,name_missing,,,,0
+place:osm:node:3312103184,playground OSM 3312103184,playground,name_missing,,,,0
+place:osm:node:3470091167,playground OSM 3470091167,playground,name_missing,,,,0
+place:osm:node:4450152235,playground OSM 4450152235,playground,name_missing,,,,0
+place:osm:node:7991891006,playground OSM 7991891006,playground,name_missing,,,,0
+place:osm:node:6468078922,playground OSM 6468078922,playground,name_missing,,,,0
+place:osm:node:4450152234,playground OSM 4450152234,playground,name_missing,,,,0
+place:osm:node:4450101768,playground OSM 4450101768,playground,name_missing,,,,0
+place:osm:node:9127573435,playground OSM 9127573435,playground,name_missing,,,,0
+place:osm:node:4450153927,playground OSM 4450153927,playground,name_missing,,,,0
+place:osm:node:7533665447,playground OSM 7533665447,playground,name_missing,,,,0
+place:osm:node:7555501453,playground OSM 7555501453,playground,name_missing,,,,0
+place:osm:node:3488097968,playground OSM 3488097968,playground,name_missing,,,,0
+place:osm:node:3365706254,playground OSM 3365706254,playground,name_missing,,,,0
+place:osm:node:3365706229,playground OSM 3365706229,playground,name_missing,,,,0
+place:osm:node:5210306015,playground OSM 5210306015,playground,name_missing,,,,0
+place:osm:node:1797429742,playground OSM 1797429742,playground,name_missing,,,,0
+place:osm:node:12109261728,playground OSM 12109261728,playground,name_missing,,,,0
+place:osm:node:5366264211,playground OSM 5366264211,playground,name_missing,,,,0
+place:osm:node:7056108702,playground OSM 7056108702,playground,name_missing,,,,0
+place:osm:node:3043748219,playground OSM 3043748219,playground,name_missing,,,,0
+place:osm:node:3043748213,playground OSM 3043748213,playground,name_missing,,,,0
+place:osm:node:13013479601,playground OSM 13013479601,playground,name_missing,,,,0
+place:osm:node:5857090038,playground OSM 5857090038,playground,name_missing,,,,0
+place:osm:node:11968916787,playground OSM 11968916787,playground,name_missing,,,,0
+place:osm:node:12229137256,playground OSM 12229137256,playground,name_missing,,,,0
+place:osm:node:2430718815,playground OSM 2430718815,playground,name_missing,,,,0
+place:osm:node:14135361813,playground OSM 14135361813,playground,name_missing,,,,0
+place:osm:node:14135358998,playground OSM 14135358998,playground,name_missing,,,,0
+place:osm:node:4247043337,playground OSM 4247043337,playground,name_missing,,,,0
+place:osm:node:4247040278,playground OSM 4247040278,playground,name_missing,,,,0
+place:osm:node:2207215459,playground OSM 2207215459,playground,name_missing,,,,0
+place:osm:node:12157333316,playground OSM 12157333316,playground,name_missing,,,,0
+place:osm:node:6517871241,playground OSM 6517871241,playground,name_missing,,,,0
+place:osm:node:6517871242,playground OSM 6517871242,playground,name_missing,,,,0
+place:osm:node:6517871243,playground OSM 6517871243,playground,name_missing,,,,0
+place:osm:node:4456584740,playground OSM 4456584740,playground,name_missing,,,,0
+place:osm:node:2835377617,playground OSM 2835377617,playground,name_missing,,,,0
+place:osm:node:3801271231,playground OSM 3801271231,playground,name_missing,,,,0
+place:osm:node:2161461453,playground OSM 2161461453,playground,name_missing,,,,0
+place:osm:node:5176645580,playground OSM 5176645580,playground,name_missing,,,,0
+place:osm:node:4247041948,playground OSM 4247041948,playground,name_missing,,,,0
+place:osm:node:2334419529,playground OSM 2334419529,playground,name_missing,,,,0
+place:osm:node:5630955836,playground OSM 5630955836,playground,name_missing,,,,0
+place:osm:node:5630955835,playground OSM 5630955835,playground,name_missing,,,,0
+place:osm:node:2508792217,playground OSM 2508792217,playground,name_missing,,,,0
+place:osm:node:4247043302,playground OSM 4247043302,playground,name_missing,,,,0
+place:osm:node:4353059214,playground OSM 4353059214,playground,name_missing,,,,0
+place:osm:node:5215908503,playground OSM 5215908503,playground,name_missing,,,,0
+place:osm:node:2334415571,playground OSM 2334415571,playground,name_missing,,,,0
+place:osm:node:5951588804,playground OSM 5951588804,playground,name_missing,,,,0
+place:osm:node:2334407087,playground OSM 2334407087,playground,name_missing,,,,0
+place:osm:node:13015368501,playground OSM 13015368501,playground,name_missing,,,,0
+place:osm:node:3073907048,playground OSM 3073907048,playground,name_missing,,,,0
+place:osm:node:10759966961,playground OSM 10759966961,playground,name_missing,,,,0
+place:osm:node:3075334725,playground OSM 3075334725,playground,name_missing,,,,0
+place:osm:node:3075334728,playground OSM 3075334728,playground,name_missing,,,,0
+place:osm:node:3075334726,playground OSM 3075334726,playground,name_missing,,,,0
+place:osm:node:6503740158,playground OSM 6503740158,playground,name_missing,,,,0
+place:osm:node:9241578188,playground OSM 9241578188,playground,name_missing,,,,0
+place:osm:node:6503740159,playground OSM 6503740159,playground,name_missing,,,,0
+place:osm:node:5029315121,playground OSM 5029315121,playground,name_missing,,,,0
+place:osm:node:4368660011,playground OSM 4368660011,playground,name_missing,,,,0
+place:osm:node:9843287114,playground OSM 9843287114,playground,name_missing,,,,0
+place:osm:node:9819869577,playground OSM 9819869577,playground,name_missing,,,,0
+place:osm:node:2513400895,playground OSM 2513400895,playground,name_missing,,,,0
+place:osm:node:6153074165,playground OSM 6153074165,playground,osm_description,,,,59
+place:osm:node:2508797483,playground OSM 2508797483,playground,name_missing,,,,0
+place:osm:node:5623158030,playground OSM 5623158030,playground,name_missing,,,,0
+place:osm:node:12145672417,playground OSM 12145672417,playground,name_missing,,,,0
+place:osm:node:2201761932,playground OSM 2201761932,playground,name_missing,,,,0
+place:osm:node:10189305897,playground OSM 10189305897,playground,name_missing,,,,0
+place:osm:node:2201761912,playground OSM 2201761912,playground,name_missing,,,,0
+place:osm:node:2201761906,playground OSM 2201761906,playground,name_missing,,,,0
+place:osm:node:12145676762,playground OSM 12145676762,playground,name_missing,,,,0
+place:osm:node:4809768455,playground OSM 4809768455,playground,name_missing,,,,0
+place:osm:node:10189305899,playground OSM 10189305899,playground,name_missing,,,,0
+place:osm:node:4609560839,playground OSM 4609560839,playground,name_missing,,,,0
+place:osm:node:5700566486,playground OSM 5700566486,playground,name_missing,,,,0
+place:osm:node:4609562389,playground OSM 4609562389,playground,name_missing,,,,0
+place:osm:node:1126316254,playground OSM 1126316254,playground,name_missing,,,,0
+place:osm:node:8164835410,playground OSM 8164835410,playground,name_missing,,,,0
+place:osm:node:4610236927,playground OSM 4610236927,playground,name_missing,,,,0
+place:osm:node:7779172141,playground OSM 7779172141,playground,name_missing,,,,0
+place:osm:node:5301229561,playground OSM 5301229561,playground,name_missing,,,,0
+place:osm:node:2360254552,playground OSM 2360254552,playground,name_missing,,,,0
+place:osm:node:3237474985,playground OSM 3237474985,playground,name_missing,,,,0
+place:osm:node:7779172142,playground OSM 7779172142,playground,name_missing,,,,0
+place:osm:node:4610236939,playground OSM 4610236939,playground,name_missing,,,,0
+place:osm:node:5167643468,playground OSM 5167643468,playground,name_missing,,,,0
+place:osm:node:9084695906,playground OSM 9084695906,playground,name_missing,,,,0
+place:osm:node:4610236924,playground OSM 4610236924,playground,name_missing,,,,0
+place:osm:node:4876437499,playground OSM 4876437499,playground,name_missing,,,,0
+place:osm:node:1844254382,playground OSM 1844254382,playground,name_missing,,,,0
+place:osm:node:12526578974,playground OSM 12526578974,playground,name_missing,,,,0
+place:osm:node:3676329542,playground OSM 3676329542,playground,name_missing,,,,0
+place:osm:node:12526578973,playground OSM 12526578973,playground,name_missing,,,,0
+place:osm:node:14068930962,playground OSM 14068930962,playground,name_missing,,,,0
+place:osm:node:3561175894,playground OSM 3561175894,playground,name_missing,,,,0
+place:osm:node:12526578963,playground OSM 12526578963,playground,name_missing,,,,0
+place:osm:node:4876437483,playground OSM 4876437483,playground,name_missing,,,,0
+place:osm:node:3472666393,playground OSM 3472666393,playground,name_missing,,,,0
+place:osm:node:3844910283,playground OSM 3844910283,playground,name_missing,,,,0
+place:osm:node:5214308537,playground OSM 5214308537,playground,name_missing,,,,0
+place:osm:node:3092495716,playground OSM 3092495716,playground,name_missing,,,,0
+place:osm:node:3532499597,playground OSM 3532499597,playground,name_missing,,,,0
+place:osm:node:6766047589,playground OSM 6766047589,playground,name_missing,,,,0
+place:osm:node:5262507529,playground OSM 5262507529,playground,name_missing,,,,0
+place:osm:node:4350978476,playground OSM 4350978476,playground,name_missing,,,,0
+place:osm:node:3840372063,playground OSM 3840372063,playground,name_missing,,,,0
+place:osm:node:5155838223,playground OSM 5155838223,playground,name_missing,,,,0
+place:osm:node:4350978436,playground OSM 4350978436,playground,name_missing,,,,0
+place:osm:node:5155839621,playground OSM 5155839621,playground,name_missing,,,,0
+place:osm:node:5633181511,playground OSM 5633181511,playground,name_missing,,,,0
+place:osm:node:2186111253,playground OSM 2186111253,playground,name_missing,,,,0
+place:osm:node:4447380172,playground OSM 4447380172,playground,name_missing,,,,0
+place:osm:node:5633171117,playground OSM 5633171117,playground,name_missing,,,,0
+place:osm:node:10083879824,playground OSM 10083879824,playground,name_missing,,,,0
+place:osm:node:5155838222,playground OSM 5155838222,playground,name_missing,,,,0
+place:osm:node:1433205015,playground OSM 1433205015,playground,name_missing,,,,0
+place:osm:node:1435428493,playground OSM 1435428493,playground,name_missing,,,,0
+place:osm:node:4385962188,playground OSM 4385962188,playground,name_missing,,,,0
+place:osm:node:4462122596,playground OSM 4462122596,playground,name_missing,,,,0
+place:osm:node:1435428486,playground OSM 1435428486,playground,name_missing,,,,0
+place:osm:node:5189090636,playground OSM 5189090636,playground,name_missing,,,,0
+place:osm:node:4225703864,playground OSM 4225703864,playground,name_missing,,,,0
+place:osm:node:5169241458,playground OSM 5169241458,playground,name_missing,,,,0
+place:osm:node:4754530473,playground OSM 4754530473,playground,name_missing,,,,0
+place:osm:node:1118523192,playground OSM 1118523192,playground,name_missing,,,,0
+place:osm:node:4754530484,playground OSM 4754530484,playground,name_missing,,,,0
+place:osm:node:2156413757,playground OSM 2156413757,playground,name_missing,,,,0
+place:osm:node:4754530298,playground OSM 4754530298,playground,name_missing,,,,0
+place:osm:node:4610324938,playground OSM 4610324938,playground,name_missing,,,,0
+place:osm:node:2618745610,playground OSM 2618745610,playground,name_missing,,,,0
+place:osm:node:4246067501,playground OSM 4246067501,playground,name_missing,,,,0
+place:osm:node:2618745583,playground OSM 2618745583,playground,name_missing,,,,0
+place:osm:node:3118008240,playground OSM 3118008240,playground,name_missing,,,,0
+place:osm:node:9830292565,playground OSM 9830292565,playground,name_missing,,,,0
+place:osm:node:9671133252,playground OSM 9671133252,playground,name_missing,,,,0
+place:osm:node:2451391197,playground OSM 2451391197,playground,name_missing,,,,0
+place:osm:node:1289262402,playground OSM 1289262402,playground,name_missing,,,,0
+place:osm:node:3842176142,playground OSM 3842176142,playground,name_missing,,,,0
+place:osm:node:3534925597,playground OSM 3534925597,playground,name_missing,,,,0
+place:osm:node:3534925598,playground OSM 3534925598,playground,name_missing,,,,0
+place:osm:node:3854018878,playground OSM 3854018878,playground,name_missing,,,,0
+place:osm:node:4355293567,playground OSM 4355293567,playground,name_missing,,,,0
+place:osm:node:1341248556,playground OSM 1341248556,playground,name_missing,,,,0
+place:osm:node:3565704974,playground OSM 3565704974,playground,name_missing,,,,0
+place:osm:node:1121367986,playground OSM 1121367986,playground,name_missing,,,,0
+place:osm:node:1119198773,playground OSM 1119198773,playground,name_missing,,,,0
+place:osm:node:4172647056,playground OSM 4172647056,playground,name_missing,,,,0
+place:osm:node:4353756685,playground OSM 4353756685,playground,name_missing,,,,0
+place:osm:node:3707669977,playground OSM 3707669977,playground,name_missing,,,,0
+place:osm:node:1649415171,Гусарская баллада,restaurant,source_discovery_required,,,,0
+place:osm:node:11649646058,Мороженое,restaurant,source_discovery_required,,,,0
+place:osm:node:2295063240,Кладовая башня,restaurant,osm_description,,,,17
+place:osm:node:2334439511,Хачапурия,restaurant,source_discovery_required,,,,0
+place:osm:node:11825668326,Буфетъ,restaurant,source_discovery_required,,,,0
+place:osm:node:6535785285,О'суси,restaurant,source_discovery_required,,,,0
+place:osm:node:6401875302,Rostic's,restaurant,source_discovery_required,,,,0
+place:osm:node:3302933082,Coffee Cake,restaurant,fetch_failed,,https://www.coffee-cake.net/,gaierror,0
+place:osm:node:610322222,Штолле,restaurant,source_discovery_required,,,,0
+place:osm:node:7954664047,Совок,restaurant,fetch_failed,,https://salutandco.ru/,HTTPStatusError,0
+place:osm:node:7859205081,Skuratov Coffee,restaurant,no_description_on_page,,https://skuratovcoffee.ru/,,0
+place:osm:node:11672201293,Верхушка кофе,restaurant,source_discovery_required,,,,0
+place:osm:node:14282551116,Coffee Like,restaurant,source_discovery_required,,,,0
+place:osm:node:9966335770,Та самая шаурма на Средном,restaurant,no_description_on_page,,https://tasamayashaurma.ru/,JSONDecodeError,0
+place:osm:node:7044286351,Джорджиано,restaurant,source_discovery_required,,,,0
+place:osm:node:9678548917,Кремлевская столовая,restaurant,source_discovery_required,,,,0
+place:osm:node:9250787944,Губернское кафе,restaurant,source_discovery_required,,,,0
+place:osm:node:12080978485,Султан,restaurant,source_discovery_required,,,,0
+place:osm:node:11920056719,Самовар да утки,restaurant,source_discovery_required,,,,0
+place:osm:node:2297015500,Кофейня в Арсенале,restaurant,source_discovery_required,,,,0
+place:osm:node:3302933081,Bubble Cafe,restaurant,fetch_failed,,http://bubblecafe.ru/,gaierror,0
+place:osm:node:11832673346,Coffee capella,restaurant,source_discovery_required,,,,0
+place:osm:node:4356535387,Вок & вафля,restaurant,source_discovery_required,,,,0
+place:osm:node:8731592601,Mola Mola,restaurant,source_discovery_required,,,,0
+place:osm:node:11185593865,Hungry Dragon,restaurant,source_discovery_required,,,,0
+place:osm:node:5674550221,Онегин,restaurant,fetch_failed,,https://onegin-nn.ru/,ConnectTimeout,0
+place:osm:node:2451466140,Погребок Шато,restaurant,source_discovery_required,,,,0
+place:osm:node:4356535388,Хачапурия,restaurant,identity_review,,https://hachapuriya.ru/,,0
+place:osm:node:2451466121,фукурамен,restaurant,source_discovery_required,,,,0
+place:osm:node:8401828719,Маджонг,restaurant,no_description_on_page,,https://mahjong.ob-ob.ru/,,0
+place:osm:node:9675786917,Кусто,restaurant,fetch_failed,,https://custo.rest/,ConnectTimeout,0
+place:osm:node:11649066423,Мазл Тов,restaurant,restored_from_site,https://mazltov.ru/,https://mazltov.ru/,,155
+place:osm:node:2451466120,Хинкали,restaurant,source_discovery_required,,,,0
+place:osm:node:11773551814,Brera,restaurant,source_discovery_required,,,,0
+place:osm:node:8839197233,Хинкали,restaurant,no_description_on_page,,https://hinkali-nn.ru/,,0
+place:osm:node:2451466151,Тарелкин,restaurant,source_discovery_required,,,,0
+place:osm:node:11727762139,Artcoffee,restaurant,source_discovery_required,,,,0
+place:osm:node:8761637611,Флорентина,restaurant,source_discovery_required,,,,0
+place:osm:node:5720245323,Шоколадница,restaurant,fetch_failed,,https://regions.shoko.ru/,ConnectTimeout,0
+place:osm:node:12706424094,Кофелайк,restaurant,source_discovery_required,,,,0
+place:osm:node:2926971975,Позавчера,restaurant,source_discovery_required,,,,0
+place:osm:node:4368365367,Трактиръ,restaurant,source_discovery_required,,,,0
+place:osm:node:11775183100,Aloha & poke vibe,restaurant,source_discovery_required,,,,0
+place:osm:node:8625677217,Паста&Пицца,restaurant,fetch_failed,,https://www.pastapizza-nn.com/,gaierror,0
+place:osm:node:2926971973,Casa Mia,restaurant,source_discovery_required,,,,0
+place:osm:node:11831001886,Chiho,restaurant,source_discovery_required,,,,0
+place:osm:node:11773580508,Баку,restaurant,source_discovery_required,,,,0
+place:osm:node:8748386619,"Остерия ""Брускетта""",restaurant,source_discovery_required,,,,0
+place:osm:node:11773582004,Lee's food,restaurant,source_discovery_required,,,,0
+place:osm:node:8712821217,ТЕМП,restaurant,no_description_on_page,,https://tempcoffee.ru/,,0
+place:osm:node:2926971976,Кофе чёрточка,restaurant,source_discovery_required,,,,0
+place:osm:node:11697182671,Сокровища дракона,restaurant,source_discovery_required,,,,0
+place:osm:node:10230924681,Coffee Like,restaurant,fetch_failed,,https://coffee-like.com/,ConnectTimeout,0
+place:osm:node:9244406469,Губернское кафе,restaurant,source_discovery_required,,,,0
+place:osm:node:5193254181,Smoke House,restaurant,source_discovery_required,,,,0
+place:osm:node:4368365360,Кофетайм,restaurant,source_discovery_required,,,,0
+place:osm:node:5393720044,Steak Me Truck,restaurant,fetch_failed,,https://steakmetruck.ru/,PermissionError,0
+place:osm:node:2926971974,Вспышка,restaurant,source_discovery_required,,,,0
+place:osm:node:13041462602,Волконский,restaurant,source_discovery_required,,,,0
+place:osm:node:11660269833,Mr. Choo,restaurant,source_discovery_required,,,,0
+place:osm:node:5841444906,Цейлон,restaurant,restored_from_site,https://ceylon.salutandco.ru/,https://ceylon.salutandco.ru/,,132
+place:osm:node:3453901704,Волконский,restaurant,source_discovery_required,,,,0
+place:osm:node:2451466126,Кино,restaurant,source_discovery_required,,,,0
+place:osm:node:6536736809,Coffee Like,restaurant,fetch_failed,,https://coffee-like.com/,ConnectTimeout,0
+place:osm:node:4379325589,Фалафельная Noot,restaurant,fetch_failed,,http://noottoot.ru/,HTTPStatusError,0
+place:osm:node:4379295691,Крендель,restaurant,source_discovery_required,,,,0
+place:osm:node:12134213802,Метеор,restaurant,fetch_failed,,https://meteorbistro.ru/,gaierror,0
+place:osm:node:2917705888,Горячо,restaurant,source_discovery_required,,,,0
+place:osm:node:12860119086,Met Tea,restaurant,source_discovery_required,,,,0
+place:osm:node:5224362564,МясоRoob,restaurant,fetch_failed,,https://myasoroob.ru/nizhniy-novgorod/menu/,ConnectTimeout,0
+place:osm:node:11941102734,Skuratov Coffee,restaurant,source_discovery_required,,,,0
+place:osm:node:1947322248,Moloko,restaurant,identity_review,,http://molokocafe.ru/,PermissionError,0
+place:osm:node:7856241990,Red Wall,restaurant,source_discovery_required,,,,0
+place:osm:node:8557351917,Винедо,restaurant,fetch_failed,,https://vinedo.ru/,ValueError,0
+place:osm:node:12841118383,Stars Coffee,restaurant,source_discovery_required,,,,0
+place:osm:node:4462102010,Экспедиция,restaurant,restored_from_site,https://nn-grad.ru/kuda-poyti/Ekspediciya/,,,246
+place:osm:node:13001047838,19,restaurant,restored_from_site,https://19rest.ru/,https://19rest.ru/,,112
+place:osm:node:11696793595,ЧебурекМи,restaurant,fetch_failed,,https://cheburek.me/,ValueError,0
+place:osm:node:12084658043,Сыроварня,restaurant,no_description_on_page,,https://www.syrovarnya.com/,,0
+place:osm:node:2334443679,Фидель,restaurant,source_discovery_required,,,,0
+place:osm:node:5216549629,Bocconcino,restaurant,restored_from_site,https://nn.bocconcino.ru/,https://nn.bocconcino.ru/,,295
+place:osm:node:12084658042,Магадан,restaurant,fetch_failed,,https://www.novikovgroup.ru/,ConnectTimeout,0
+place:osm:node:11843816987,Mayar,restaurant,restored_from_site,https://mayar.cafe/,https://mayar.cafe/,,78
+place:osm:node:8465356113,Вот такие пироги,restaurant,restored_from_site,https://nov.vot-takie-pirogi.ru/,https://nov.vot-takie-pirogi.ru/,,330
+place:osm:node:11649066424,Lamvil,restaurant,restored_from_site,https://lamvil.ru/,https://lamvil.ru/,,52
+place:osm:node:2334441692,Хуторок,restaurant,no_description_on_page,,https://hutorokrest.ru/,,0
+place:osm:node:2926980101,Пабло Рестобар,restaurant,source_discovery_required,,,,0
+place:osm:node:4462102007,Хинкальная,restaurant,restored_from_site,https://nn-grad.ru/kuda-poyti/Hinkal_naya/,,,484
+place:osm:node:11219566793,Skuratov Coffee,restaurant,no_description_on_page,,https://skuratovcoffee.ru/,,0
+place:osm:node:1650950804,Monet,restaurant,fetch_failed,,https://www.premiocentre.ru/monet,PermissionError,0
+place:osm:node:2926971977,Dodici Grill,restaurant,source_discovery_required,,,,0
+place:osm:node:12187976351,Onne,restaurant,source_discovery_required,,,,0
+place:osm:node:12258168816,Чизкеечная,restaurant,source_discovery_required,,,,0
+place:osm:node:5155782830,Мануфактура,restaurant,source_discovery_required,,,,0
+place:osm:node:11521391269,Ма-Тина,restaurant,source_discovery_required,,,,0
+place:osm:node:4288872156,Mitch,restaurant,source_discovery_required,,,,0
+place:osm:node:11049516305,Бистро 9/18,restaurant,source_discovery_required,,,,0
+place:osm:node:4231275565,Митрич,restaurant,source_discovery_required,,,,0
+place:osm:node:2273751903,Brown Hall,restaurant,source_discovery_required,,,,0
+place:osm:node:12222010767,Краса,restaurant,restored_from_site,https://krasarest.ru/,https://krasarest.ru/,,144
+place:osm:node:11992480439,Сайгон,restaurant,source_discovery_required,,,,0
+place:osm:node:5600178022,Юла Пицца,restaurant,fetch_failed,,https://salutandco.ru/,HTTPStatusError,0
+place:osm:node:4159865725,Salut! Burgers,restaurant,fetch_failed,,https://salutandco.ru/,HTTPStatusError,0
+place:osm:node:9678549017,Фукурамен,restaurant,source_discovery_required,,,,0
+place:osm:node:6536736824,Coffee Like,restaurant,fetch_failed,,https://coffee-like.com/,ConnectTimeout,0
+place:osm:node:6996169778,Coffee Like,restaurant,fetch_failed,,https://coffee-like.com/,ConnectTimeout,0
+place:osm:node:5389528125,Молодость,restaurant,source_discovery_required,,,,0
+place:osm:node:4371665093,Дель Пара,restaurant,source_discovery_required,,,,0
+place:osm:node:5726533567,Нэко,restaurant,source_discovery_required,,,,0
+place:osm:node:5126122158,Смысл,restaurant,source_discovery_required,,,,0
+place:osm:node:1061841261,Улей,restaurant,source_discovery_required,,,,0
+place:osm:node:11037167564,Salut! Coffee,restaurant,fetch_failed,,https://salutandco.ru/,HTTPStatusError,0
+place:osm:node:11725354708,Министерство завтраков,restaurant,fetch_failed,,https://salutandco.ru/,HTTPStatusError,0
+place:osm:node:4398304989,"Лепи тесто, пельменная",restaurant,source_discovery_required,,,,0
+place:osm:node:4462102006,Топ Ган,restaurant,source_discovery_required,,,,0
+place:osm:node:13986019401,Счастливые люди,restaurant,fetch_failed,,http://www.schastievnn.ru/,PermissionError,0
+place:osm:node:11681997928,Pasters,restaurant,fetch_failed,,https://salutandco.ru/,HTTPStatusError,0
+place:osm:node:5133430321,Cake&Pie,restaurant,fetch_failed,,https://www.cakeandpie.ru/,PermissionError,0
+place:osm:node:6765906237,Скоба,restaurant,identity_review,,https://skobar.ob-ob.ru/,,0
+place:osm:node:12023025704,Хартут,restaurant,source_discovery_required,,,,0
+place:osm:node:11594968440,Гусь в яблоках,restaurant,restored_from_site,https://gooserest.ru/,https://gooserest.ru/,,149
+place:osm:node:4880459921,Ё-маё,restaurant,source_discovery_required,,,,0
+place:osm:node:1654916319,Додо пицца,restaurant,source_discovery_required,,,,0
+place:osm:node:12135287501,Волконский,restaurant,fetch_failed,,https://wolkonsky.com/russia/nizhniynovgorod/,ConnectTimeout,0
+place:osm:node:2325934112,Безухов,restaurant,osm_description,,http://bezuhov.ru/,PermissionError,17
+place:osm:node:13065151072,Столовая,restaurant,source_discovery_required,,,,0
+place:osm:node:2251131383,Ёж,restaurant,source_discovery_required,,,,0
+place:osm:node:2552275221,Negroni,restaurant,restored_from_site,https://negronibar.ru/,https://negronibar.ru/,,226
+place:osm:node:11961297807,Кунг-фу Панда,restaurant,source_discovery_required,,,,0
+place:osm:node:10576703508,Dark Side,restaurant,fetch_failed,,https://darkshaurma.com/,ConnectTimeout,0
+place:osm:node:12803630701,Столовая № 1,restaurant,source_discovery_required,,,,0
+place:osm:node:11783919583,Самарканд,restaurant,source_discovery_required,,,,0
+place:osm:node:5789360745,БаклаДжан,restaurant,restored_from_site,https://nn-grad.ru/kuda-poyti/BaklaDzhan/,https://bakladzhanrest.ru/,ReadTimeout,539
+place:osm:node:2251131245,Золотой восток,restaurant,source_discovery_required,,,,0
+place:osm:node:2649773415,Fellini,restaurant,fetch_failed,,http://fellininn.com/,gaierror,0
+place:osm:node:13909088655,Iva,restaurant,restored_from_site,https://ivarestnn.ru/,https://ivarestnn.ru/,,121
+place:osm:node:11961846179,ПанДок,restaurant,no_description_on_page,,https://pandoknn.ru/,,0
+place:osm:node:11594992678,Кефтэме,restaurant,restored_from_site,https://kefteme-nn.ru/,https://kefteme-nn.ru/,,269
+place:osm:node:4240951912,Селедка и кофе,restaurant,restored_from_site,https://nn-grad.ru/kuda-poyti/Seledka_i_kofe/,https://seledkagazeta.ru/,,381
+place:osm:node:8839197229,Печёрка,restaurant,source_discovery_required,,,,0
+place:osm:node:2789966186,Балканский дворик,restaurant,source_discovery_required,,,,0
+place:osm:node:2649773394,pitniča,restaurant,source_discovery_required,,,,0
+place:osm:node:10926401816,Виа,restaurant,source_discovery_required,,,,0
+place:osm:node:4462102005,Семь:сорок,restaurant,source_discovery_required,,,,0
+place:osm:node:2649773419,Hesburger,restaurant,source_discovery_required,,,,0
+place:osm:node:9165218151,Амо,restaurant,source_discovery_required,,,,0
+place:osm:node:4731184870,Буфетъ,restaurant,source_discovery_required,,,,0
+place:osm:node:13017723365,Стейк & Эггс,restaurant,source_discovery_required,,,,0
+place:osm:node:2552275195,Coffee Like,restaurant,source_discovery_required,,,,0
+place:osm:node:10576732439,Spicy band,restaurant,source_discovery_required,,,,0
+place:osm:node:1782759891,Буфет,restaurant,restored_from_site,https://nn-grad.ru/kuda-poyti/Bufet/,,,372
+place:osm:node:11572353661,Кофехюгге,restaurant,restored_from_site,http://coffeehyggenn.tilda.ws/page40060374.html,http://coffeehyggenn.tilda.ws/page40060374.html,,133
+place:osm:node:2325934125,Нептун,restaurant,source_discovery_required,,,,0
+place:osm:node:2649773452,Звоно пицца,restaurant,source_discovery_required,,,,0
+place:osm:node:7856241989,7 гость,restaurant,source_discovery_required,,,,0
+place:osm:node:12022634989,Кефтэме,restaurant,source_discovery_required,,,,0
+place:osm:node:12023041349,Coffee cups,restaurant,source_discovery_required,,,,0
+place:osm:node:11696800229,Terrapia,restaurant,source_discovery_required,,,,0
+place:osm:node:2277432518,Пяткин,restaurant,fetch_failed,,https://pyatkin.pirnnov.ru/,ConnectTimeout,0
+place:osm:node:9672084117,Синдбад,restaurant,restored_from_site,https://sindbad.ob-ob.ru/,https://sindbad.ob-ob.ru/,,107
+place:osm:node:4462100931,Aura-кальянная,restaurant,source_discovery_required,,,,0
+place:osm:node:8597165617,Три Апельсина,restaurant,restored_from_site,https://restoran3apelcina.ru/,https://restoran3apelcina.ru/,,198
+place:osm:node:11809490062,Берл бар,restaurant,source_discovery_required,,,,0
+place:osm:node:11958251111,Noire,restaurant,fetch_failed,,https://www.nuare.ru/,ConnectError,0
+place:osm:node:3029660378,Мирайя,restaurant,source_discovery_required,,,,0
+place:osm:node:12035847036,Escape,restaurant,restored_from_site,https://escape.rest/,https://escape.rest/,,568
+place:osm:node:9919203198,Coffee Like,restaurant,fetch_failed,,https://coffee-like.com/,ConnectTimeout,0
+place:osm:node:6416454934,Гастропаб Горьковская пивоварня,restaurant,fetch_failed,,https://gorkybeer.ru/,ValueError,0
+place:osm:node:7208220592,Квеври,restaurant,fetch_failed,,https://qvevrirest.ru/,gaierror,0
+place:osm:node:2338101600,Централ Перк,restaurant,source_discovery_required,,,,0
+place:osm:node:2709159572,Виталич,restaurant,restored_from_site,https://nn-grad.ru/kuda-poyti/Vitalich/,,,363
+place:osm:node:4353128568,Mukka,restaurant,restored_from_site,https://nn-grad.ru/kuda-poyti/Mukka/,,,704
+place:osm:node:11304388881,Кофехюгге,restaurant,restored_from_site,http://coffeehyggenn.tilda.ws/page40060374.html,http://coffeehyggenn.tilda.ws/page40060374.html,,133
+place:osm:node:12976162699,Вагончик,restaurant,source_discovery_required,,,,0
+place:osm:node:10576711333,G.Group,restaurant,fetch_failed,,https://g-grouprestoran.ru/,ConnectError,0
+place:osm:node:2351941450,Ложки,restaurant,source_discovery_required,,,,0
+place:osm:node:12124974701,Caprese,restaurant,source_discovery_required,,,,0
+place:osm:node:1825761821,Тако,restaurant,fetch_failed,,http://sushi-bar.ru/,ReadTimeout,0
+place:osm:node:5144962888,Кофе – это Фрукт,restaurant,source_discovery_required,,,,0
+place:osm:node:1792397090,Папаша Билли,restaurant,restored_from_site,https://nn-grad.ru/kuda-poyti/Papasha_Billi/,https://dadbilly.pirnnov.ru/,ConnectTimeout,222
+place:osm:node:2572596394,Cinnabon,restaurant,fetch_failed,,https://cinnabonrussia.com/,ConnectTimeout,0
+place:osm:node:5574534526,One Price Coffee,restaurant,fetch_failed,,https://onepricecoffee.com/,PermissionError,0
+place:osm:node:2879687096,Alt lib,restaurant,source_discovery_required,,,,0
+place:osm:node:3522157673,Beerлога,restaurant,source_discovery_required,,,,0
+place:osm:node:2338101592,Оливо,restaurant,source_discovery_required,,,,0
+place:osm:node:12135291301,Артишок,restaurant,source_discovery_required,,,,0
+place:osm:node:11968170464,Парк Bistro,restaurant,no_description_on_page,,https://pk-bistro.ru/,,0
+place:osm:node:9995656057,Trattoria Fettuccine,restaurant,source_discovery_required,,,,0
+place:osm:node:9678505117,Трактир Патрон. Дикая кухня,restaurant,restored_from_site,https://traktir-patron.ru/,https://traktir-patron.ru/,ValueError,447
+place:osm:node:11304388882,Кофехюгге,restaurant,restored_from_site,http://coffeehyggenn.tilda.ws/page40060374.html,http://coffeehyggenn.tilda.ws/page40060374.html,,133
+place:osm:node:2601815896,Солодовъ,restaurant,fetch_failed,,http://xn--b1adulbbq2f.xn--p1ai/,PermissionError,0
+place:osm:node:11962964652,Сладкий горький,restaurant,source_discovery_required,,,,0
+place:osm:node:2338101588,Бельканто,restaurant,source_discovery_required,,,,0
+place:osm:node:4231274022,Волконский,restaurant,source_discovery_required,,,,0
+place:osm:node:12027923852,Парк Культуры,restaurant,fetch_failed,,https://www.park-k.ru/,PermissionError,0
+place:osm:node:4517361590,Бермудский треугольник,restaurant,fetch_failed,,https://bermudskiy.ru/,ConnectTimeout,0
+place:osm:node:12600018284,August,restaurant,fetch_failed,,https://augustrest.ru/,gaierror,0
+place:osm:node:2360739589,Сандаловый дом,restaurant,source_discovery_required,,,,0
+place:osm:node:13540869207,"Si, mamma",restaurant,restored_from_site,https://simamma.ru/,https://simamma.ru/,,143
+place:osm:node:4462100934,Vaffel,restaurant,fetch_failed,,https://vaffel.ru/,ConnectTimeout,0
+place:osm:node:12452550123,Мускат,restaurant,source_discovery_required,,,,0
+place:osm:node:4240959140,Coffee cake,restaurant,fetch_failed,,https://www.coffee-cake.net/,gaierror,0
+place:osm:node:2321039355,Fratelli,restaurant,source_discovery_required,,,,0
+place:osm:node:1643637493,Килиманджаро,restaurant,source_discovery_required,,,,0
+place:osm:node:7638085583,Dodici Wine & Kitchen,restaurant,restored_from_site,https://nn-grad.ru/kuda-poyti/DODICI_WINE_&_KITCHEN/,https://wkitchen.ru/,PermissionError,50
+place:osm:node:611853110,Чико,restaurant,source_discovery_required,,,,0
+place:osm:node:12804183401,Краснодарский парень,restaurant,source_discovery_required,,,,0
+place:osm:node:10576728511,Каратэ,restaurant,fetch_failed,,https://sushi-karate.ru/nn,ConnectTimeout,0
+place:osm:node:1056634097,Мир Пиццы,restaurant,osm_description,,https://www.mirpizzy.com/,PermissionError,40
+place:osm:node:4386808374,Вокруг Света,restaurant,source_discovery_required,,,,0
+place:osm:node:7044286364,Papi,restaurant,source_discovery_required,,,,0
+place:osm:node:2343624131,Строганов Стейк Хаус,restaurant,fetch_failed,,https://pir.nnov.ru/stroganov,ConnectError,0
+place:osm:node:1056903074,Мама дома,restaurant,restored_from_site,https://mamadomann.ru/,https://mamadomann.ru/,,239
+place:osm:node:10576728482,Мох,restaurant,fetch_failed,,https://moxcafe.ru/,HTTPStatusError,0
+place:osm:node:9919203183,Coffee Like,restaurant,fetch_failed,,https://coffee-like.com/,ConnectTimeout,0
+place:osm:node:2321347178,Рыба & крабы,restaurant,identity_review,,,,0
+place:osm:node:10024409926,Чебурешная на звезде,restaurant,source_discovery_required,,,,0
+place:osm:node:13038960176,Москва-Стамбул,restaurant,restored_from_site,https://mskstambul.ru/,https://mskstambul.ru/,,150
+place:osm:node:4386808371,Black Shisha,restaurant,source_discovery_required,,,,0
+place:osm:node:13994973901,Yale ресторан Русской кухни,restaurant,source_discovery_required,,,,0
+place:osm:node:5216500888,Додо Пицца,restaurant,fetch_failed,,https://dodopizza.ru/,PermissionError,0
+place:osm:node:6536736820,Coffee Like,restaurant,fetch_failed,,https://coffee-like.com/,ConnectTimeout,0
+place:osm:node:2626186939,Султан,restaurant,source_discovery_required,,,,0
+place:osm:node:2321347182,Сиба ину,restaurant,source_discovery_required,,,,0
+place:osm:node:2326170869,ФудПазик,restaurant,source_discovery_required,,,,0
+place:osm:node:4982328021,Лепи Тесто,restaurant,source_discovery_required,,,,0
+place:osm:node:3312102333,по щучьему велению,restaurant,source_discovery_required,,,,0
+place:osm:node:5826755086,Пекарня-мельница,restaurant,source_discovery_required,,,,0
+place:osm:node:12084658022,Навигация,restaurant,fetch_failed,,https://navigatcia.pirnnov.ru/,ConnectTimeout,0
+place:osm:node:4368367001,Bubble Cafe,restaurant,source_discovery_required,,,,0
+place:osm:node:8780754159,Настроечная,restaurant,fetch_failed,,https://nastroy.cafe/,gaierror,0
+place:osm:node:3029653510,KFC,restaurant,source_discovery_required,,,,0
+place:osm:node:12518367333,Pinci,restaurant,restored_from_site,https://pinci.ru/,https://pinci.ru/,,396
+place:osm:node:6048785985,Додо Пицца,restaurant,fetch_failed,,https://dodopizza.ru/,PermissionError,0
+place:osm:node:2343624139,Хачапури тётушки Марико,restaurant,restored_from_site,https://nn-grad.ru/kuda-poyti/Hachapuri/,https://vhachapuri.ru/,,615
+place:osm:node:610285182,Додо пицца,restaurant,source_discovery_required,,,,0
+place:osm:node:2879689207,Очаг,restaurant,osm_description,,,,11
+place:osm:node:4159863915,Пиццерия,restaurant,source_discovery_required,,,,0
+place:osm:node:4873415821,Хачапурия,restaurant,restored_from_site,https://nn-grad.ru/kuda-poyti/Hachapuriya/,https://hachapuriya.ru/,,17
+place:osm:node:9919203181,Coffee Like,restaurant,fetch_failed,,https://coffee-like.com/,ConnectTimeout,0
+place:osm:node:2879689208,Фонотека,restaurant,restored_from_site,https://fonoteca-nn.ru/,https://fonoteca-nn.ru/,,97
+place:osm:node:610285265,Biblioteca,restaurant,fetch_failed,,https://www.biblioteca-nn.ru/,PermissionError,0
+place:osm:node:2626186934,Пекарня Мадлен,restaurant,fetch_failed,,http://www.madlen-nn.ru/,gaierror,0
+place:osm:node:12022622773,Coffee Like,restaurant,source_discovery_required,,,,0
+place:osm:node:14196352201,Сгущёнка,restaurant,source_discovery_required,,,,0
+place:osm:node:6698544512,Surf Coffee,restaurant,restored_from_site,https://www.surfcoffee.ru/,https://www.surfcoffee.ru/,,100
+place:osm:node:6589106685,Уголёк,restaurant,fetch_failed,,https://ugolek.rest/,ConnectTimeout,0
+place:osm:node:12238329627,Frank by Баста,restaurant,no_description_on_page,,https://frankmeat.ru/nn,,0
+place:osm:node:9919203192,Coffee Like,restaurant,fetch_failed,,https://coffee-like.com/,ConnectTimeout,0
+place:osm:node:611852983,"Чайхана ""Тюбетейка""",restaurant,fetch_failed,,https://tubeteyka.pirnnov.ru/,ConnectTimeout,0
+place:osm:node:995770570,toilet OSM 995770570,toilet,name_missing,,,,0
+place:osm:node:9051120625,toilet OSM 9051120625,toilet,name_missing,,,,0
+place:osm:node:12176605865,toilet OSM 12176605865,toilet,name_missing,,,,0
+place:osm:node:9350432428,toilet OSM 9350432428,toilet,name_missing,,,,0
+place:osm:node:12176628302,toilet OSM 12176628302,toilet,name_missing,,,,0
+place:osm:node:9241245706,toilet OSM 9241245706,toilet,name_missing,,,,0
+place:osm:node:2337738100,toilet OSM 2337738100,toilet,name_missing,,,,0
+place:osm:node:2460096028,toilet OSM 2460096028,toilet,name_missing,,,,0
+place:osm:node:12989800001,toilet OSM 12989800001,toilet,name_missing,,,,0
+place:osm:node:11972358187,toilet OSM 11972358187,toilet,name_missing,,,,0
+place:osm:node:12956619031,toilet OSM 12956619031,toilet,name_missing,,,,0
+place:osm:node:11298582400,toilet OSM 11298582400,toilet,name_missing,,,,0
+place:osm:node:11277213269,toilet OSM 11277213269,toilet,name_missing,,,,0
+place:osm:node:2520227393,toilet OSM 2520227393,toilet,name_missing,,,,0
+place:osm:node:12438616302,toilet OSM 12438616302,toilet,name_missing,,,,0
+place:osm:node:12134104201,toilet OSM 12134104201,toilet,name_missing,,,,0
+place:osm:node:8960934846,toilet OSM 8960934846,toilet,name_missing,,,,0
+place:osm:node:13013478901,toilet OSM 13013478901,toilet,name_missing,,,,0
+place:osm:node:9029309180,toilet OSM 9029309180,toilet,name_missing,,,,0
+place:osm:node:13078232901,toilet OSM 13078232901,toilet,name_missing,,,,0
+place:osm:node:1711797296,toilet OSM 1711797296,toilet,name_missing,,,,0
+place:osm:node:13935101994,toilet OSM 13935101994,toilet,name_missing,,,,0
+place:osm:node:13935101997,toilet OSM 13935101997,toilet,name_missing,,,,0
+place:osm:node:3881870297,toilet OSM 3881870297,toilet,name_missing,,,,0
+place:osm:node:2228019747,toilet OSM 2228019747,toilet,name_missing,,,,0
+place:osm:node:2228019553,toilet OSM 2228019553,toilet,name_missing,,,,0
+place:osm:node:2193187307,toilet OSM 2193187307,toilet,name_missing,,,,0
+place:osm:node:12157271891,toilet OSM 12157271891,toilet,name_missing,,,,0
+place:osm:node:2185169784,toilet OSM 2185169784,toilet,name_missing,,,,0
+place:osm:node:5957898489,toilet OSM 5957898489,toilet,name_missing,,,,0
+place:osm:node:3801200185,toilet OSM 3801200185,toilet,name_missing,,,,0
+place:osm:node:4146701295,toilet OSM 4146701295,toilet,name_missing,,,,0
+place:osm:node:12157458301,toilet OSM 12157458301,toilet,name_missing,,,,0
+place:osm:node:11330620326,toilet OSM 11330620326,toilet,name_missing,,,,0
+place:osm:node:12157455102,toilet OSM 12157455102,toilet,name_missing,,,,0
+place:osm:node:941957263,toilet OSM 941957263,toilet,name_missing,,,,0
+place:osm:node:12157458302,toilet OSM 12157458302,toilet,name_missing,,,,0
+place:osm:node:9148174866,toilet OSM 9148174866,toilet,name_missing,,,,0
+place:osm:node:2200264051,toilet OSM 2200264051,toilet,name_missing,,,,0
+place:osm:node:12157463801,toilet OSM 12157463801,toilet,name_missing,,,,0
+place:osm:node:9139675811,toilet OSM 9139675811,toilet,name_missing,,,,0
+place:osm:node:11279107672,toilet OSM 11279107672,toilet,name_missing,,,,0
+place:osm:node:10013510117,toilet OSM 10013510117,toilet,name_missing,,,,0
+place:osm:node:12131491701,toilet OSM 12131491701,toilet,name_missing,,,,0
+place:osm:node:1775980685,toilet OSM 1775980685,toilet,name_missing,,,,0
+place:osm:node:11118503805,toilet OSM 11118503805,toilet,name_missing,,,,0
+place:osm:node:11118491806,toilet OSM 11118491806,toilet,name_missing,,,,0
+place:osm:node:12131321901,toilet OSM 12131321901,toilet,name_missing,,,,0
+place:osm:node:12741941722,toilet OSM 12741941722,toilet,name_missing,,,,0
+place:osm:node:4610234888,toilet OSM 4610234888,toilet,osm_description,,,,24
+place:osm:node:4610236945,toilet OSM 4610236945,toilet,osm_description,,,,24
+place:osm:node:12131290601,toilet OSM 12131290601,toilet,name_missing,,,,0
+place:osm:node:12065889438,toilet OSM 12065889438,toilet,name_missing,,,,0
+place:osm:node:5628572496,toilet OSM 5628572496,toilet,name_missing,,,,0
+place:osm:node:5181854233,toilet OSM 5181854233,toilet,name_missing,,,,0
+place:osm:node:13903222376,toilet OSM 13903222376,toilet,name_missing,,,,0
+place:osm:node:3854018881,toilet OSM 3854018881,toilet,name_missing,,,,0
+place:osm:node:2314010512,toilet OSM 2314010512,toilet,name_missing,,,,0
+place:osm:node:4362433860,toilet OSM 4362433860,toilet,name_missing,,,,0
+place:osm:node:7950445926,toilet OSM 7950445926,toilet,name_missing,,,,0
+place:osm:node:4463941949,toilet OSM 4463941949,toilet,name_missing,,,,0
+place:osm:node:9230029820,toilet OSM 9230029820,toilet,name_missing,,,,0
+place:osm:node:12409126750,toilet OSM 12409126750,toilet,name_missing,,,,0
+place:osm:node:11279352969,toilet OSM 11279352969,toilet,name_missing,,,,0
+place:osm:node:2360892585,toilet OSM 2360892585,toilet,name_missing,,,,0
+place:osm:node:7052993838,Гигантская скамейка,bench,source_discovery_required,,,,0
+place:osm:node:3495088548,Народный мемориал Ирины Славиной,bench,source_discovery_required,,,,0
+place:osm:node:2296264540,bench OSM 2296264540,bench,name_missing,,,,0
+place:osm:node:2295063531,bench OSM 2295063531,bench,name_missing,,,,0
+place:osm:node:2296264539,bench OSM 2296264539,bench,name_missing,,,,0
+place:osm:node:2296264536,bench OSM 2296264536,bench,name_missing,,,,0
+place:osm:node:2295063512,bench OSM 2295063512,bench,name_missing,,,,0
+place:osm:node:2295063602,bench OSM 2295063602,bench,name_missing,,,,0
+place:osm:node:2296264534,bench OSM 2296264534,bench,name_missing,,,,0
+place:osm:node:2295063641,bench OSM 2295063641,bench,name_missing,,,,0
+place:osm:node:2296264533,bench OSM 2296264533,bench,name_missing,,,,0
+place:osm:node:2296264531,bench OSM 2296264531,bench,name_missing,,,,0
+place:osm:node:4349521227,bench OSM 4349521227,bench,name_missing,,,,0
+place:osm:node:2295063442,bench OSM 2295063442,bench,name_missing,,,,0
+place:osm:node:4349521222,bench OSM 4349521222,bench,name_missing,,,,0
+place:osm:node:4349521228,bench OSM 4349521228,bench,name_missing,,,,0
+place:osm:node:2295063433,bench OSM 2295063433,bench,name_missing,,,,0
+place:osm:node:4349521224,bench OSM 4349521224,bench,name_missing,,,,0
+place:osm:node:4349521223,bench OSM 4349521223,bench,name_missing,,,,0
+place:osm:node:4349521225,bench OSM 4349521225,bench,name_missing,,,,0
+place:osm:node:11725096896,bench OSM 11725096896,bench,name_missing,,,,0
+place:osm:node:4349521221,bench OSM 4349521221,bench,name_missing,,,,0
+place:osm:node:2297015552,bench OSM 2297015552,bench,name_missing,,,,0
+place:osm:node:2297015543,bench OSM 2297015543,bench,name_missing,,,,0
+place:osm:node:4349521229,bench OSM 4349521229,bench,name_missing,,,,0
+place:osm:node:2297015589,bench OSM 2297015589,bench,name_missing,,,,0
+place:osm:node:2296264488,bench OSM 2296264488,bench,name_missing,,,,0
+place:osm:node:2297015592,bench OSM 2297015592,bench,name_missing,,,,0
+place:osm:node:4349513485,bench OSM 4349513485,bench,name_missing,,,,0
+place:osm:node:2297015606,bench OSM 2297015606,bench,name_missing,,,,0
+place:osm:node:2296264484,bench OSM 2296264484,bench,name_missing,,,,0
+place:osm:node:4349521243,bench OSM 4349521243,bench,name_missing,,,,0
+place:osm:node:4349521244,bench OSM 4349521244,bench,name_missing,,,,0
+place:osm:node:2296264476,bench OSM 2296264476,bench,name_missing,,,,0
+place:osm:node:9051108792,bench OSM 9051108792,bench,name_missing,,,,0
+place:osm:node:11949890667,bench OSM 11949890667,bench,name_missing,,,,0
+place:osm:node:9051110790,bench OSM 9051110790,bench,name_missing,,,,0
+place:osm:node:11949890668,bench OSM 11949890668,bench,name_missing,,,,0
+place:osm:node:2296264472,bench OSM 2296264472,bench,name_missing,,,,0
+place:osm:node:2289057590,bench OSM 2289057590,bench,name_missing,,,,0
+place:osm:node:2296264471,bench OSM 2296264471,bench,name_missing,,,,0
+place:osm:node:2297015734,bench OSM 2297015734,bench,name_missing,,,,0
+place:osm:node:2297015752,bench OSM 2297015752,bench,name_missing,,,,0
+place:osm:node:11949922559,bench OSM 11949922559,bench,name_missing,,,,0
+place:osm:node:9051117361,bench OSM 9051117361,bench,name_missing,,,,0
+place:osm:node:8776635628,bench OSM 8776635628,bench,name_missing,,,,0
+place:osm:node:11949917471,bench OSM 11949917471,bench,name_missing,,,,0
+place:osm:node:2297015941,bench OSM 2297015941,bench,name_missing,,,,0
+place:osm:node:2297015933,bench OSM 2297015933,bench,name_missing,,,,0
+place:osm:node:2296264458,bench OSM 2296264458,bench,name_missing,,,,0
+place:osm:node:8776635627,bench OSM 8776635627,bench,name_missing,,,,0
+place:osm:node:9051101151,bench OSM 9051101151,bench,name_missing,,,,0
+place:osm:node:9051071812,bench OSM 9051071812,bench,name_missing,,,,0
+place:osm:node:8776635626,bench OSM 8776635626,bench,name_missing,,,,0
+place:osm:node:9051112252,bench OSM 9051112252,bench,name_missing,,,,0
+place:osm:node:9007101238,bench OSM 9007101238,bench,name_missing,,,,0
+place:osm:node:8776635624,bench OSM 8776635624,bench,name_missing,,,,0
+place:osm:node:8776635625,bench OSM 8776635625,bench,name_missing,,,,0
+place:osm:node:2295063702,bench OSM 2295063702,bench,name_missing,,,,0
+place:osm:node:2296264460,bench OSM 2296264460,bench,name_missing,,,,0
+place:osm:node:11783301505,bench OSM 11783301505,bench,name_missing,,,,0
+place:osm:node:2289419833,bench OSM 2289419833,bench,name_missing,,,,0
+place:osm:node:2289419804,bench OSM 2289419804,bench,name_missing,,,,0
+place:osm:node:11783299322,bench OSM 11783299322,bench,name_missing,,,,0
+place:osm:node:2289419728,bench OSM 2289419728,bench,name_missing,,,,0
+place:osm:node:2296264462,bench OSM 2296264462,bench,name_missing,,,,0
+place:osm:node:2289419546,bench OSM 2289419546,bench,name_missing,,,,0
+place:osm:node:8689925282,bench OSM 8689925282,bench,name_missing,,,,0
+place:osm:node:8689925281,bench OSM 8689925281,bench,name_missing,,,,0
+place:osm:node:8689925280,bench OSM 8689925280,bench,name_missing,,,,0
+place:osm:node:2289419477,bench OSM 2289419477,bench,name_missing,,,,0
+place:osm:node:2296264465,bench OSM 2296264465,bench,name_missing,,,,0
+place:osm:node:3212469997,bench OSM 3212469997,bench,name_missing,,,,0
+place:osm:node:3212470026,bench OSM 3212470026,bench,name_missing,,,,0
+place:osm:node:3212469806,bench OSM 3212469806,bench,name_missing,,,,0
+place:osm:node:3212469816,bench OSM 3212469816,bench,name_missing,,,,0
+place:osm:node:2917706292,bench OSM 2917706292,bench,name_missing,,,,0
+place:osm:node:2296264467,bench OSM 2296264467,bench,name_missing,,,,0
+place:osm:node:2917706280,bench OSM 2917706280,bench,name_missing,,,,0
+place:osm:node:9007101244,bench OSM 9007101244,bench,name_missing,,,,0
+place:osm:node:4344946404,bench OSM 4344946404,bench,name_missing,,,,0
+place:osm:node:2917706249,bench OSM 2917706249,bench,name_missing,,,,0
+place:osm:node:9007101248,bench OSM 9007101248,bench,name_missing,,,,0
+place:osm:node:2917706256,bench OSM 2917706256,bench,name_missing,,,,0
+place:osm:node:9007101247,bench OSM 9007101247,bench,name_missing,,,,0
+place:osm:node:3212469572,bench OSM 3212469572,bench,name_missing,,,,0
+place:osm:node:3212469586,bench OSM 3212469586,bench,name_missing,,,,0
+place:osm:node:3212469632,bench OSM 3212469632,bench,name_missing,,,,0
+place:osm:node:3212469769,bench OSM 3212469769,bench,name_missing,,,,0
+place:osm:node:2296264481,bench OSM 2296264481,bench,name_missing,,,,0
+place:osm:node:2296264493,bench OSM 2296264493,bench,name_missing,,,,0
+place:osm:node:2296264511,bench OSM 2296264511,bench,name_missing,,,,0
+place:osm:node:9051143776,bench OSM 9051143776,bench,name_missing,,,,0
+place:osm:node:3212467447,bench OSM 3212467447,bench,name_missing,,,,0
+place:osm:node:2917706009,bench OSM 2917706009,bench,name_missing,,,,0
+place:osm:node:3212467457,bench OSM 3212467457,bench,name_missing,,,,0
+place:osm:node:2917706015,bench OSM 2917706015,bench,name_missing,,,,0
+place:osm:node:2296264532,bench OSM 2296264532,bench,name_missing,,,,0
+place:osm:node:13165994419,bench OSM 13165994419,bench,name_missing,,,,0
+place:osm:node:9051143775,bench OSM 9051143775,bench,name_missing,,,,0
+place:osm:node:12925496900,Ротонда,shelter,source_discovery_required,,,,0
+place:osm:node:796746720,Заводская,shelter,source_discovery_required,,,,0
+place:osm:node:11775167797,shelter OSM 11775167797,shelter,name_missing,,,,0
+place:osm:node:2779836928,shelter OSM 2779836928,shelter,name_missing,,,,0
+place:osm:node:2363658645,shelter OSM 2363658645,shelter,name_missing,,,,0
+place:osm:node:13034044672,shelter OSM 13034044672,shelter,name_missing,,,,0
+place:osm:node:13034044676,shelter OSM 13034044676,shelter,name_missing,,,,0
+place:osm:node:13034044671,shelter OSM 13034044671,shelter,name_missing,,,,0
+place:osm:node:13034044670,shelter OSM 13034044670,shelter,name_missing,,,,0
+place:osm:node:13034044669,shelter OSM 13034044669,shelter,name_missing,,,,0
+place:osm:node:13034044668,shelter OSM 13034044668,shelter,name_missing,,,,0
+place:osm:node:14225783661,shelter OSM 14225783661,shelter,name_missing,,,,0
+place:osm:node:13130563982,shelter OSM 13130563982,shelter,name_missing,,,,0
+place:osm:node:13169105106,shelter OSM 13169105106,shelter,name_missing,,,,0
+place:osm:node:4594202990,shelter OSM 4594202990,shelter,name_missing,,,,0
+place:osm:node:2363106073,shelter OSM 2363106073,shelter,name_missing,,,,0
+place:osm:node:5154729133,shelter OSM 5154729133,shelter,name_missing,,,,0
+place:osm:node:2201761921,shelter OSM 2201761921,shelter,name_missing,,,,0
+place:osm:node:2508674932,shelter OSM 2508674932,shelter,name_missing,,,,0
+place:osm:node:2361443178,shelter OSM 2361443178,shelter,name_missing,,,,0
+place:osm:node:9759086278,shelter OSM 9759086278,shelter,name_missing,,,,0
+place:osm:node:9759086266,shelter OSM 9759086266,shelter,name_missing,,,,0
+place:osm:node:9759086265,shelter OSM 9759086265,shelter,name_missing,,,,0
+place:osm:node:9759086261,shelter OSM 9759086261,shelter,name_missing,,,,0
+place:osm:node:9759086285,shelter OSM 9759086285,shelter,name_missing,,,,0
+place:osm:node:9759086279,shelter OSM 9759086279,shelter,name_missing,,,,0
+place:osm:node:9759086264,shelter OSM 9759086264,shelter,name_missing,,,,0
+place:osm:node:9759086262,shelter OSM 9759086262,shelter,name_missing,,,,0
+place:osm:node:9759086284,shelter OSM 9759086284,shelter,name_missing,,,,0
+place:osm:node:9759086280,shelter OSM 9759086280,shelter,name_missing,,,,0
+place:osm:node:9759086242,shelter OSM 9759086242,shelter,name_missing,,,,0
+place:osm:node:9759086283,shelter OSM 9759086283,shelter,name_missing,,,,0
+place:osm:node:9759086281,shelter OSM 9759086281,shelter,name_missing,,,,0
+place:osm:node:9759086263,shelter OSM 9759086263,shelter,name_missing,,,,0
+place:osm:node:9759086282,shelter OSM 9759086282,shelter,name_missing,,,,0
+place:osm:node:9759086243,shelter OSM 9759086243,shelter,name_missing,,,,0
+place:osm:node:2843964400,shelter OSM 2843964400,shelter,name_missing,,,,0
+place:osm:node:4370903645,shelter OSM 4370903645,shelter,name_missing,,,,0
+place:osm:node:2295063712,76-мм пушка ЗиС-3,landmark,osm_description,,,,154
+place:osm:node:2295063711,57-мм пушка ЗиС-3,landmark,osm_description,,,,151
+place:osm:node:2295063251,Танк Т-34,landmark,osm_description,,,,77
+place:osm:node:2295063229,Зенитная пушка 52-К,landmark,osm_description,,,,141
+place:osm:node:2295063219,Горьковчане фронту,landmark,source_discovery_required,,,,0
+place:osm:node:2295063213,ГАЗ-АА «Полуторка»,landmark,osm_description,,,,73
+place:osm:node:994364733,Истребитель ЛА-7,landmark,source_discovery_required,,,,0
+place:osm:node:2295063201,Автомобиль ГАЗ-67Б,landmark,osm_description,,,,104
+place:osm:node:2295063710,120-мм полковой миномёт,landmark,osm_description,,,,60
+place:osm:node:9051745332,Труженикам тыла,landmark,source_discovery_required,,,,0
+place:osm:node:2295063202,Артиллерия СУ-76,landmark,osm_description,,,,113
+place:osm:node:2295063205,Бронеавтомобиль БА-64,landmark,osm_description,,,,70
+place:osm:node:994449607,Рубка подводной лодки С-13,landmark,source_discovery_required,,,,0
+place:osm:node:2295063200,«Катюша» БМ-13,landmark,osm_description,,,,126
+place:osm:node:5141071785,Гарнизонная казарма,landmark,source_discovery_required,,,,0
+place:osm:node:5658006521,Из рук в руки,landmark,source_discovery_required,,,,0
+place:osm:node:262652496,Козьме Минину,landmark,identity_review,,,,0
+place:osm:node:5141071786,Дворец вице-губернатора,landmark,source_discovery_required,,,,0
+place:osm:node:5658006421,Из рук в руки 20 лет,landmark,source_discovery_required,,,,0
+place:osm:node:1715072900,Поклонный Крест,landmark,source_discovery_required,,,,0
+place:osm:node:11428239369,"Знак в честь соединений, сформированных в ВОВ",landmark,source_discovery_required,,,,0
+place:osm:node:5141054175,М. Горькому,landmark,source_discovery_required,,,,0
+place:osm:node:5141054174,Дом Советов,landmark,source_discovery_required,,,,0
+place:osm:node:994449615,Основателям города,landmark,osm_description,,,,113
+place:osm:node:12464941384,Козьма Минин,landmark,source_discovery_required,,,,0
+place:osm:node:11428239371,Усадьба Н.Х.Курепина,landmark,source_discovery_required,,,,0
+place:osm:node:9966335771,Н.А.Добролюбов,landmark,source_discovery_required,,,,0
+place:osm:node:11825622678,Нестеров А. А.,landmark,source_discovery_required,,,,0
+place:osm:node:9966335772,А.В.Потанина,landmark,source_discovery_required,,,,0
+place:osm:node:11428246669,Усадьба купца Г.Ф. Сверчкова. Торговая лавка,landmark,source_discovery_required,,,,0
+place:osm:node:925666793,Скоропечатная мастерская М.И. Свердлова,landmark,source_discovery_required,,,,0
+place:osm:node:11428240470,Усадьба купца И. К. Лопашева - купца И.М. Мокеева Флигель,landmark,source_discovery_required,,,,0
+place:osm:node:995772435,К. Минин,landmark,source_discovery_required,,,,0
+place:osm:node:1993500122,Н. А. Добролюбову,landmark,source_discovery_required,,,,0
+place:osm:node:11428156669,С.И.Ерёмин,landmark,source_discovery_required,,,,0
+place:osm:node:11428238169,И.И.Чугунов,landmark,source_discovery_required,,,,0
+place:osm:node:11799419125,Андрей Осипович Карелин,landmark,source_discovery_required,,,,0
+place:osm:node:994364730,Танк Т-34,landmark,osm_description,,,,218
+place:osm:node:11799419126,Доходный дом купцов Щелоковых,landmark,source_discovery_required,,,,0
+place:osm:node:11428156369,А.А.Соколов,landmark,source_discovery_required,,,,0
+place:osm:node:2088352858,Е.А.Евстигнеев на скамейке,landmark,source_discovery_required,,,,0
+place:osm:node:11428155171,Козьма Минин,landmark,source_discovery_required,,,,0
+place:osm:node:11428155070,В.М.Денисов,landmark,source_discovery_required,,,,0
+place:osm:node:11428155170,В.С.Максимов,landmark,source_discovery_required,,,,0
+place:osm:node:9090786917,Дмитрий Иоанович,landmark,source_discovery_required,,,,0
+place:osm:node:2295063237,Караульное помещение поста №1,landmark,source_discovery_required,,,,0
+place:osm:node:11978532305,Дом А.К. Фомина,landmark,source_discovery_required,,,,0
+place:osm:node:7007869195,Памятный знак «Первые нижегородцы» 1221 г.,landmark,source_discovery_required,,,,0
+place:osm:node:262652551,В. П. Чкалову,landmark,source_discovery_required,,,,0
+place:osm:node:2904638542,Н. И. Кочину,landmark,source_discovery_required,,,,0
+place:osm:node:2904638543,Объявлению,landmark,source_discovery_required,,,,0
+place:osm:node:4929597723,Чкаловская лестница,landmark,restored_from_site,https://nn-grad.ru/kuda-poyti/CHkalovskaya_lestnica/,,,1130
+place:osm:node:695152386,Набатный колокол,landmark,source_discovery_required,,,,0
+place:osm:node:11978529890,Дом купца Д.В. Сироткина,landmark,source_discovery_required,,,,0
+place:osm:node:6423511997,И. Ф. Якушенко,landmark,source_discovery_required,,,,0
+place:osm:node:11994894970,Б. И. Мокроусов,landmark,source_discovery_required,,,,0
+place:osm:node:9798946818,Петру I,landmark,source_discovery_required,,,,0
+place:osm:node:11428155169,А.Н.Самарина,landmark,source_discovery_required,,,,0
+place:osm:node:11428155069,Н.И.Собольщиков-Самарин,landmark,source_discovery_required,,,,0
+place:osm:node:3897687986,Остатки крепостного вала,landmark,source_discovery_required,,,,0
+place:osm:node:4184112587,Д.В.Сироткин,landmark,source_discovery_required,,,,0
+place:osm:node:4159863919,М.А.Бонч-Бруевич,landmark,source_discovery_required,,,,0
+place:osm:node:496202582,Высота,landmark,source_discovery_required,,,,0
+place:osm:node:11428154169,Усадьба А.Н.Нестеровой-А.М.Губина,landmark,source_discovery_required,,,,0
+place:osm:node:611572059,Минину и Пожарскому,landmark,source_discovery_required,,,,0
+place:osm:node:12113813507,Патриарх Гермоген,landmark,source_discovery_required,,,,0
+place:osm:node:11428152469,З.И.Клочихин,landmark,source_discovery_required,,,,0
+place:osm:node:1636763604,Н. В. Затееву,landmark,source_discovery_required,,,,0
+place:osm:node:6970622585,Земляной вал,landmark,source_discovery_required,,,,0
+place:osm:node:5193254176,А.С. Попов,landmark,source_discovery_required,,,,0
+place:osm:node:13011467301,Балкон,landmark,source_discovery_required,,,,0
+place:osm:node:11428151870,Выдающимся учёным,landmark,source_discovery_required,,,,0
+place:osm:node:925666794,Я. М. Свердлову,landmark,source_discovery_required,,,,0
+place:osm:node:12120803101,Якорь,landmark,source_discovery_required,,,,0
+place:osm:node:3884779472,Евфимию Суздальскому и Макарию Желтоводскому,landmark,source_discovery_required,,,,0
+place:osm:node:11428124169,Якорь,landmark,source_discovery_required,,,,0
+place:osm:node:2649774157,Усадьба П.Б.Григорьева,landmark,osm_description,,,,230
+place:osm:node:5193254175,В.Д. Максименко,landmark,source_discovery_required,,,,0
+place:osm:node:2915810969,А. П. Бринскому,landmark,source_discovery_required,,,,0
+place:osm:node:2572596376,Г. А. Грузинскому,landmark,source_discovery_required,,,,0
+place:osm:node:2552275387,Эвакогоспиталь,landmark,source_discovery_required,,,,0
+place:osm:node:11428122070,Якорь,landmark,source_discovery_required,,,,0
+place:osm:node:11428120571,Якорь,landmark,source_discovery_required,,,,0
+place:osm:node:12925547247,А,landmark,source_discovery_required,,,,0
+place:osm:node:5287329872,Г. Г. Масляков,landmark,source_discovery_required,,,,0
+place:osm:node:7221192326,Кванториум,other,fetch_failed,,http://kvantorium52.ru/,ReadTimeout,0
+place:osm:node:4344944087,Нижегородская центральная специальная библиотека для слепых,other,source_discovery_required,,,,0
+place:osm:node:2917705806,Детская библиотека-филиал имени В.А.Жуковского,other,source_discovery_required,,,,0
+place:osm:node:11089062040,Библиотека ПМ,other,source_discovery_required,,,,0
+place:osm:node:2552275208,Арни,other,source_discovery_required,,,,0
+place:osm:node:12198993245,Спортивная звезда,other,fetch_failed,,http://www.sportsstar-nn.ru/,PermissionError,0
+place:osm:node:7223089288,Дронт,other,fetch_failed,,https://dront.ru/,ConnectTimeout,0
+place:osm:node:2326170866,Манго,other,fetch_failed,,http://mango.nnov.ru/,PermissionError,0
+place:osm:node:5891889686,Красный тигр,other,fetch_failed,,http://redtiger52.ru/,PermissionError,0
+place:osm:node:6503581585,Нижегородская государственная областная детская библиотека,other,source_discovery_required,,,,0
+place:osm:node:1206993172,Библиотека ННГАСУ,other,fetch_failed,,http://www.bibl.nngasu.ru/,ReadTimeout,0
+place:osm:node:1637440947,Детско-юношеская спортивная школа №9,other,source_discovery_required,,,,0
+place:osm:node:1627190976,Православная библиотека,other,source_discovery_required,,,,0
+place:osm:node:7120005095,Go Fit,other,source_discovery_required,,,,0
+place:osm:node:3770874257,Центральная районная детская библиотека им. А. М. Горького,other,source_discovery_required,,,,0
+place:osm:node:10185187829,ГБУ Нижегородская областная спортивная школа олимпийского резерва по гребному спорту,other,fetch_failed,,https://rowingnn.ru/,ConnectTimeout,0
+place:osm:node:10576728494,Звездочка,other,no_description_on_page,,https://club-zvezdochka.ru/,,0
+place:osm:node:6192081725,Творческое пространство CADR,other,osm_description,,https://cadrspace.ru/,ConnectError,140
+place:osm:node:1817712837,Библиотека имени Ленина,other,source_discovery_required,,,,0
+place:osm:node:6434652546,Филиал № 3 библиотеки имени И. В. Мичурина,other,source_discovery_required,,,,0
+place:osm:node:1207019630,Фундаментальная библиотека ННГУ,other,source_discovery_required,,,,0
+place:osm:node:12519035154,Дельфин,other,fetch_failed,,https://sportdelfin.ru/,ConnectTimeout,0
+place:osm:node:2083028779,Библиотека им. М.А.Светлова.,other,osm_description,,,,44
+place:osm:node:3913970926,СДЮШОР №12,other,osm_description,,https://school-12.ru/,ConnectTimeout,98
+place:osm:node:975872169,Fitness Life,other,restored_from_site,https://fitnesslifenn.ru/,https://fitnesslifenn.ru/,,81
+place:osm:node:1207026758,Библиотека ВВАГС,other,source_discovery_required,,,,0
+place:osm:node:3244403389,Единоборства и фитнес,other,fetch_failed,,http://xn--e1apwg.xn--p1ai/,ReadTimeout,0
+place:osm:node:5411957043,Библиотека,other,source_discovery_required,,,,0
+place:osm:node:6357052648,Библиотека семейного чтения им. И. В. Зуева,other,source_discovery_required,,,,0
+place:osm:node:3910226842,Драйв,other,source_discovery_required,,,,0
+place:osm:node:5411961024,Библиотека,other,source_discovery_required,,,,0
+place:osm:node:5411961025,Библиотека,other,source_discovery_required,,,,0
+place:osm:node:1839887666,Центральная районная библиотека имени В.Г. Короленко,other,source_discovery_required,,,,0
+place:osm:node:6448654861,Союз,other,source_discovery_required,,,,0
+place:osm:node:2700947873,Библиотека,other,source_discovery_required,,,,0
+place:osm:node:6242383685,Библиотека,other,source_discovery_required,,,,0
+place:osm:node:3460337794,Библиотека им. Твардовского,other,source_discovery_required,,,,0
+place:osm:node:3460337795,Детская Библиотека им. Гагарина,other,source_discovery_required,,,,0
+place:osm:node:4376883246,Русский союз скаутов,other,source_discovery_required,,,,0
+place:osm:node:2001545400,Детская библиотека №6 им. Е. Никонова,other,source_discovery_required,,,,0
+place:osm:node:1847282743,Щёлоковский,other,source_discovery_required,,,,0
+place:osm:node:930348305,Спарта,other,source_discovery_required,,,,0
+place:osm:node:4938092121,ТалияФитнес,other,source_discovery_required,,,,0
+place:osm:node:10008746523,Лыжная база НГТУ,other,source_discovery_required,,,,0
+place:osm:node:4920385232,Библиотека,other,source_discovery_required,,,,0
+place:osm:node:3869107257,Арина,other,identity_review,,https://arina-orient.ru/,,0
+place:osm:node:1370908391,Центральная районная библиотека им. Т. Г. Шевченко,other,fetch_failed,,http://prioklib.ru/page/lib1.html,PermissionError,0
+place:osm:node:1370908397,Детская библиотека им. Саши Чекалина,other,source_discovery_required,,,,0
+place:osm:node:9893484619,Территория эмоций,other,identity_review,,https://biblionn.ru/,,0
+place:osm:node:13026977633,Kiber Zone,other,fetch_failed,,https://kiber-one.com/,PermissionError,0
+place:osm:node:12960471203,В.С.Беляков,landmark,source_discovery_required,,,,0
+place:osm:node:2649773439,Л. К. Сивухину,landmark,source_discovery_required,,,,0
+place:osm:node:2649773434,В. П. Малышеву,landmark,source_discovery_required,,,,0
+place:osm:node:979462188,Николай I,landmark,source_discovery_required,,,,0
+place:osm:node:11954894386,Нестеров – Таран Нестерова,landmark,source_discovery_required,,,,0
+place:osm:node:11954894383,Нестеров – Петля Нестерова,landmark,source_discovery_required,,,,0
+place:osm:node:11954894384,Нестеров – Групповой полёт,landmark,source_discovery_required,,,,0
+place:osm:node:611577989,Нестеров П.Н.,landmark,source_discovery_required,,,,0
+place:osm:node:11954894385,Нестеров – Информация,landmark,source_discovery_required,,,,0
+place:osm:node:11428122569,Б.С.Духан,landmark,source_discovery_required,,,,0
+place:osm:node:12948680963,В. В. Воронков,landmark,source_discovery_required,,,,0
+place:osm:node:11428119970,А.И.Кожевников,landmark,source_discovery_required,,,,0
+place:osm:node:5604442329,И. П. Склярову,landmark,source_discovery_required,,,,0
+place:osm:node:1248877770,"Макет самолёта ""Ньюпор""",landmark,osm_description,,,,16
+place:osm:node:2338101591,Дунаеву Е.А.,landmark,source_discovery_required,,,,0
+place:osm:node:3884779471,Памятная плита на месте нахождения усадьбы И.П.Кулибина,landmark,source_discovery_required,,,,0
+place:osm:node:2649773429,А. Е. Харитонову,landmark,source_discovery_required,,,,0
+place:osm:node:11428122369,А.А.Касьянов,landmark,source_discovery_required,,,,0
+place:osm:node:2572596397,На этом месте стояла церковь Покрова Пресвятой Богородицы,landmark,osm_description,,,,237
+place:osm:node:12138961308,Максиму Горькому,landmark,source_discovery_required,,,,0
+place:osm:node:1449034817,Н.Н. Боголюбов,landmark,source_discovery_required,,,,0
+place:osm:node:2709159582,Эвакогоспиталь во время ВОВ,landmark,osm_description,,,,93
+place:osm:node:2879689204,Д. И. Батищеву,landmark,source_discovery_required,,,,0
+place:osm:node:2572596418,Штаб 17-й Нижегородской стрелковой дивизии,landmark,osm_description,,,,180
+place:osm:node:2709159574,И. Г. Бубнову,landmark,source_discovery_required,,,,0
+place:osm:node:11428119969,М.Т.Грехова,landmark,source_discovery_required,,,,0
+place:osm:node:2572596391,Курсы красных командиров,landmark,osm_description,,,,97
+place:osm:node:2709159575,Ю. А. Адрианову,landmark,source_discovery_required,,,,0
+place:osm:node:11428120569,В.И.Даль,landmark,source_discovery_required,,,,0
+place:osm:node:11428122069,А.Н.Свободов,landmark,source_discovery_required,,,,0
+place:osm:node:11428121469,В.А.Евстифеев,landmark,source_discovery_required,,,,0
+place:osm:node:5536532655,Площадь Свободы,landmark,source_discovery_required,,,,0
+place:osm:node:6570392318,Л. Н. Тютикову,landmark,source_discovery_required,,,,0
+place:osm:node:3891854956,Сергию Радонежскому,landmark,source_discovery_required,,,,0
+place:osm:node:1636762467,Ю. А. Иванову,landmark,source_discovery_required,,,,0
+place:osm:node:6570147757,В. В. Половинкину,landmark,source_discovery_required,,,,0
+place:osm:node:9093165318,Нижегородская Биржа,landmark,restored_from_site,https://nn-grad.ru/kuda-poyti/Nizhegorodskaya_Birzha/,,,425
+place:osm:node:5517397341,Ю. В. Садовскому,landmark,source_discovery_required,,,,0
+place:osm:node:5517397340,В. П. Кузнецову,landmark,source_discovery_required,,,,0
+place:osm:node:12022627940,Торговый корпус О. К. Каменевой,landmark,source_discovery_required,,,,0
+place:osm:node:1290609526,И. П. Кулибину,landmark,source_discovery_required,,,,0
+place:osm:node:6570392317,В. П. Кузнецову,landmark,source_discovery_required,,,,0
+place:osm:node:4731184869,Экраноплан,landmark,source_discovery_required,,,,0
+place:osm:node:1814750892,М.А.Балакирев,landmark,source_discovery_required,,,,0
+place:osm:node:11428115969,С.В.Рукавишников,landmark,source_discovery_required,,,,0
+place:osm:node:6566445182,А. П. Благову,landmark,source_discovery_required,,,,0
+place:osm:node:11428118069,Политехникам Героям Советского Союза,landmark,source_discovery_required,,,,0
+place:osm:node:7126626685,Плита Бабушка Горького,landmark,source_discovery_required,,,,0
+place:osm:node:11942633059,Агеев Дмитрий Васильевич,landmark,source_discovery_required,,,,0
+place:osm:node:1056966401,Жертвам и мученикам революции 1905 года,landmark,source_discovery_required,,,,0
+place:osm:node:12480917004,Coffee like,restaurant,source_discovery_required,,,,0
+place:osm:node:11059190172,DeKas,restaurant,identity_review,,https://de-kas.ru/,,0
+place:osm:node:11098164206,Х.о Бар Ресторан,restaurant,source_discovery_required,,,,0
+place:osm:node:610280711,Столовая НГТУ,restaurant,source_discovery_required,,,,0
+place:osm:node:1061662241,И. П. Кулибину,landmark,source_discovery_required,,,,0
+place:osm:node:14317960901,Хангук,restaurant,restored_from_site,http://hanguknn.ru/,http://hanguknn.ru/,,245
+place:osm:node:10895480302,Могила Степана Семеновича Бубнова,landmark,source_discovery_required,,,,0
+place:osm:node:6557934693,Н. С. Старикову,landmark,source_discovery_required,,,,0
+place:osm:node:11428579769,Доходный дом купца Д.Н. Колчина,landmark,source_discovery_required,,,,0
+place:osm:node:2352478777,La Cantinetta da Roberto,restaurant,restored_from_site,https://nn-grad.ru/kuda-poyti/La_Cantinetta_da_Roberto/,https://roberto.pirnnov.ru/,ConnectTimeout,328
+place:osm:node:11304388878,Вкусно — и точка,restaurant,source_discovery_required,,,,0
+place:osm:node:12023079026,Gussi,restaurant,source_discovery_required,,,,0
+place:osm:node:5515261575,А. М. Пешкову,landmark,source_discovery_required,,,,0
+place:osm:node:10017965217,Владимир Иванович Даль,landmark,source_discovery_required,,,,0
+place:osm:node:12023084336,Sushi master,restaurant,source_discovery_required,,,,0
+place:osm:node:4745514179,Pronto PIZZA e PASTA,restaurant,fetch_failed,,http://prontopizza.ru/,ReadTimeout,0
+place:osm:node:6620298236,Ibis Kitchen,restaurant,source_discovery_required,,,,0
+place:osm:node:1997830993,В.И.Ленину и нижегородским марксистам,landmark,source_discovery_required,,,,0
+place:osm:node:479501527,Максиму Горькому,landmark,source_discovery_required,,,,0
+place:osm:node:9837748721,Кафе 38,restaurant,source_discovery_required,,,,0
+place:osm:node:11428118369,М.И.Быков,landmark,source_discovery_required,,,,0
+place:osm:node:12066491503,Фукурамен,restaurant,source_discovery_required,,,,0
+place:osm:node:7977389172,САМУРАЙ,restaurant,source_discovery_required,,,,0
+place:osm:node:597408727,Павшим студентам и преподавателям ГИСИ,landmark,source_discovery_required,,,,0
+place:osm:node:9919203193,Coffee Like,restaurant,fetch_failed,,https://coffee-like.com/,ConnectTimeout,0
+place:osm:node:4693769601,Coffee Like,restaurant,source_discovery_required,,,,0
+place:osm:node:2376776059,Матэ,restaurant,fetch_failed,,http://club-mate.nn.ru/,gaierror,0
+place:osm:node:1808422817,А. С. Пушкину,landmark,osm_description,,,,34
+place:osm:node:12084658026,Penthouse,restaurant,restored_from_site,https://nn-grad.ru/kuda-poyti/Penthouse/,,,142
+place:osm:node:5216536422,Папа Джонс,restaurant,fetch_failed,,http://nn.papajohns.ru/,HTTPStatusError,0
+place:osm:node:11978835518,Выдающиеся ученые,landmark,source_discovery_required,,,,0
+place:osm:node:4409564513,Самурай,restaurant,restored_from_site,https://samurai.ru/,https://samurai.ru/,,104
+place:osm:node:12262859328,О!Шаурма,restaurant,source_discovery_required,,,,0
+place:osm:node:8474861092,Ribs,restaurant,identity_review,,https://ribs-nn.ru/,ValueError,0
+place:osm:node:597408721,Лопасть рабочего колеса гидравлической турбины Горьковской ГЭС,landmark,source_discovery_required,,,,0
+place:osm:node:12039524273,"Нижегородцам, участникам Первой Мировой Войны",landmark,source_discovery_required,,,,0
+place:osm:node:2352478781,Мамаша Чанг,restaurant,source_discovery_required,,,,0
+place:osm:node:11727741229,Евгений Иванович Чазов,landmark,source_discovery_required,,,,0
+place:osm:node:7056113229,Самурай,restaurant,restored_from_site,https://samurai.ru/,https://samurai.ru/,,104
+place:osm:node:2352478780,Кафетерий,restaurant,source_discovery_required,,,,0
+place:osm:node:6557934696,В. А. Москвичёву,landmark,source_discovery_required,,,,0
+place:osm:node:6601199873,Я. З. Воробьёву,landmark,source_discovery_required,,,,0
+place:osm:node:9919203197,Coffee Like,restaurant,fetch_failed,,https://coffee-like.com/,ConnectTimeout,0
+place:osm:node:1056933605,Мир Пиццы,restaurant,osm_description,,https://www.mirpizzy.com/,PermissionError,40
+place:osm:node:13986099801,Лелькоv,restaurant,source_discovery_required,,,,0
+place:osm:node:12475498601,Рога и копыта,restaurant,source_discovery_required,,,,0
+place:osm:node:6504114314,А. В. Кикину,landmark,source_discovery_required,,,,0
+place:osm:node:3246716306,Н. В. Ряхину,landmark,source_discovery_required,,,,0
+place:osm:node:5324560321,Митрополиту Николаю,landmark,source_discovery_required,,,,0
+place:osm:node:7490583364,Бургер Кинг,restaurant,fetch_failed,,https://burgerkingrus.ru/,PermissionError,0
+place:osm:node:11913245156,ChokoLatte,restaurant,source_discovery_required,,,,0
+place:osm:node:10003885906,Строгов,restaurant,restored_from_site,https://strogov-restoran.ru/,https://strogov-restoran.ru/,,157
+place:osm:node:3396748672,Профессор и студент,landmark,source_discovery_required,,,,0
+place:osm:node:9234835848,Руины Похвалинского элеватора,landmark,osm_description,,,,16
+place:osm:node:6352917445,Капсула времени,landmark,source_discovery_required,,,,0
+place:osm:node:6352917444,"Стена ""Аллея славы НГТУ им. Р.Е. Алексеева""",landmark,source_discovery_required,,,,0
+place:osm:node:601268264,Вкусно — и точка,restaurant,fetch_failed,,https://vkusnoitochka.ru/,PermissionError,0
+place:osm:node:2317008395,В. И. Ленин,landmark,source_discovery_required,,,,0
+place:osm:node:4462100933,Восточная шаурма,restaurant,source_discovery_required,,,,0
+place:osm:node:1707323463,Сёстрам Невзоровым,landmark,source_discovery_required,,,,0
+place:osm:node:611853003,Столовая бизнес-центра,restaurant,source_discovery_required,,,,0
+place:osm:node:6557934774,Л. И. Миненко,landmark,source_discovery_required,,,,0
+place:osm:node:6557934744,Coffee Like,restaurant,fetch_failed,,https://coffee-like.com/,ConnectTimeout,0
+place:osm:node:11670032608,Dark side,restaurant,source_discovery_required,,,,0
+place:osm:node:4838277722,Onne,restaurant,source_discovery_required,,,,0
+place:osm:node:8402221917,Папа Джонс,restaurant,source_discovery_required,,,,0
+place:osm:node:11083618611,Палитра Суши,restaurant,restored_from_site,https://palitra-sushi.ru/,https://palitra-sushi.ru/,,89
+place:osm:node:5157485547,Луиджи,restaurant,source_discovery_required,,,,0
+place:osm:node:9804155109,Vasilchuki Chaihona №1,restaurant,fetch_failed,,https://chaihona.ru/niznij-novgorod/,HTTPStatusError,0
+place:osm:node:11428249569,Ю.А.Усачёв,landmark,source_discovery_required,,,,0
+place:osm:node:12718549576,Горячий пельмень,restaurant,source_discovery_required,,,,0
+place:osm:node:2376776058,Аллея дружбы,landmark,osm_description,,,,148
+place:osm:node:11981270546,Дальгона,restaurant,source_discovery_required,,,,0
+place:osm:node:6536736823,Coffee Like,restaurant,fetch_failed,,https://coffee-like.com/,ConnectTimeout,0
+place:osm:node:3585597801,Кико и Маргарита,restaurant,source_discovery_required,,,,0
+place:osm:node:7853201886,Skuratov Coffee,restaurant,no_description_on_page,,https://skuratovcoffee.ru/,,0
+place:osm:node:13034186761,Mola Mola Капри,restaurant,source_discovery_required,,,,0
+place:osm:node:12090410353,Буфетъ,restaurant,source_discovery_required,,,,0
+place:osm:node:7052526078,Мистер Бублик,restaurant,no_description_on_page,,https://xn--90aakldmfd2bilp.xn--p1ai/,,0
+place:osm:node:5141595594,Бакинская уица,restaurant,fetch_failed,,https://bakustreet.ru/,gaierror,0
+place:osm:node:262652256,М. Горькому,landmark,source_discovery_required,,,,0
+place:osm:node:6540955937,ЗИЛ-157,landmark,osm_description,,,,51
+place:osm:node:2356441074,КП-130,landmark,source_discovery_required,,,,0
+place:osm:node:6540955936,КП-125,landmark,source_discovery_required,,,,0
+place:osm:node:6540955935,ЗИС-3,landmark,osm_description,,,,31
+place:osm:node:6480751685,Р. М. Стрельскому,landmark,source_discovery_required,,,,0
+place:osm:node:11671732343,Местечко моей мечты,restaurant,source_discovery_required,,,,0
+place:osm:node:6483757773,Е. Э. Рубинчику,landmark,source_discovery_required,,,,0
+place:osm:node:2600911911,Тануки,restaurant,fetch_failed,,https://tanukifamily.ru/tanuki/,HTTPStatusError,0
+place:osm:node:11668925788,Блинбери,restaurant,source_discovery_required,,,,0
+place:osm:node:13009535078,Грузинские истории,restaurant,source_discovery_required,,,,0
+place:osm:node:1964968442,БМ-13Н,landmark,osm_description,,,,59
+place:osm:node:6441334181,ГАЗ-51,landmark,osm_description,,,,26
+place:osm:node:11521384469,Куулпицца,restaurant,source_discovery_required,,,,0
+place:osm:node:6483757774,Церковь Иоанна Богослова,landmark,source_discovery_required,,,,0
+place:osm:node:6441334182,ЗИЛ-157,landmark,osm_description,,,,51
+place:osm:node:6536736817,Coffee Like,restaurant,fetch_failed,,https://coffee-like.com/,ConnectTimeout,0
+place:osm:node:5757263633,М. П. Еськину,landmark,source_discovery_required,,,,0
+place:osm:node:2894873428,Пекарь,landmark,source_discovery_required,,,,0
+place:osm:node:6441334488,М-30,landmark,osm_description,,,,31
+place:osm:node:1964968446,ЗИС-2,landmark,osm_description,,,,33
+place:osm:node:1964968445,БТР-70,landmark,osm_description,,,,23
+place:osm:node:11277642170,CuPPcake,restaurant,source_discovery_required,,,,0
+place:osm:node:1613728935,А. Пешкову,landmark,source_discovery_required,,,,0
+place:osm:node:1964968444,БРДМ-2,landmark,osm_description,,,,52
+place:osm:node:6441334489,ЗИС-3,landmark,osm_description,,,,31
+place:osm:node:1922176201,БМП-1,landmark,osm_description,,,,26
+place:osm:node:1922176200,БТР-80,landmark,osm_description,,,,23
+place:osm:node:1902940702,БТР-70,landmark,osm_description,,,,23
+place:osm:node:1902940756,С-60,landmark,osm_description,,,,40
+place:osm:node:2054436066,Le grill,restaurant,source_discovery_required,,,,0

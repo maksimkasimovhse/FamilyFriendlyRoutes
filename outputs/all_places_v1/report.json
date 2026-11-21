@@ -1,0 +1,70 @@
+{
+  "schema_version": "all-places-report-v1",
+  "records": 1258,
+  "mvp_records": 281,
+  "source_records": 1259,
+  "known_merged_aliases": 1,
+  "supplemental_imports": [
+    {
+      "file": "_select_cs_id_cs_address_cs_coordinate_cs_description_cs_title_c.csv",
+      "sha256": "60d4b50215dc72e037772e2404b831b2be928e65e9f427e1cf8a5ef1a837c55c",
+      "rows": 259,
+      "identical_existing_records": 259
+    }
+  ],
+  "categories": {
+    "bench": 100,
+    "event": 39,
+    "landmark": 356,
+    "museum": 74,
+    "other": 89,
+    "park": 23,
+    "playground": 165,
+    "restaurant": 309,
+    "shelter": 38,
+    "toilet": 65
+  },
+  "source_counts": {
+    "osm": 1000,
+    "main": 173,
+    "addition": 85
+  },
+  "osm_description_status": {
+    "name_missing": 360,
+    "source_discovery_required": 394,
+    "no_description_on_page": 15,
+    "identity_review": 18,
+    "osm_description": 49,
+    "restored_from_site": 60,
+    "fetch_failed": 104
+  },
+  "coverage": {
+    "address": 348,
+    "description": 367,
+    "website_candidate": 194,
+    "opening_hours_raw": 272,
+    "duration_minutes": 0,
+    "hard_age_min": 0
+  },
+  "input_sha256": {
+    "main": "45771f7bd1d022f54cc9a32c63254214421530e0052e30388250e40724760a68",
+    "addition": "8c6fa53400087da5359d844db1dc772c4caa5f21329a5e3cd365f1432648c757",
+    "osm": "11dcde12037743e8272481a2ed0c60eacd5bf9d059a53b06aec6540309327de0",
+    "mvp": "f80508fe1c3133303ddb4a2e58cd93bfe23afd84d46fba56c0cc3fdd10b105cc",
+    "seed_decisions": "bd78d372ad71c348d9bf69b9f0295b5311a6d136168bf9b453dcb41f6ad76af5",
+    "restored_descriptions": "c326cbcbf841357e27fed28536ec8656803db83c18ec7a650b181eb028c7cded"
+  },
+  "output_sha256": {
+    "places.jsonl": "ca1db551c9ffbc1ea130f2acc9d2744e00cfbf251d1596f10555acf872b5a52b",
+    "places.csv": "b564f70499ee94e80875ea8019f1c43cfdb6a50cbdd845a638720c257a52f0e0",
+    "source_mapping.csv": "a04d02e9f548f050d716f8ad4ae259ab1dcd67941a2b5d3111461ae881060742",
+    "description_queue.csv": "4eee37f5c1d796ba1bac4865b840d0cad929c6802a7b43b6a44229e728e25d85",
+    "description_report.json": "002c97dc0d9f08a8dc7f9ada495f7281e19f988c6c626853ca2f63f52cbcd5ca"
+  },
+  "limitations": [
+    "Potential CSV/OSM overlaps remain separate pending review.",
+    "Site descriptions are attributed source excerpts, not confirmation of current visiting conditions.",
+    "Brand text is distinguished from individual branch conditions.",
+    "Unnamed OSM objects cannot be searched by name."
+  ]
+}

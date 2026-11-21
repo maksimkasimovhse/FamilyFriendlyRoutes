@@ -1,0 +1,13 @@
+{
+  "sources": [
+    {
+      "url": "https://terminal-nn.site/",
+      "place_ids": ["place:osm:node:11042381496"],
+      "activities": [
+        {"subject": "Групповая экскурсия по графику", "quote_start": "600 рублей\n60 минут", "quote_end": "Групповая экскурсия\nпо графику", "duration_minutes": 60, "price": 600, "price_unit": "RUB; charging basis not explicitly stated"},
+        {"subject": "Персональная групповая экскурсия по выставкам и мастерских художников", "quote_start": "7 000 рублей за группу", "quote_end": "Персональная групповая экскурсия по выставкам и мастерских художников", "duration_minutes": 90, "price": 7000, "price_unit": "RUB/group"},
+        {"subject": "Персональная групповая экскурсия по выставкам", "quote_start": "4 000 рублей группу", "quote_end": "Персональная групповая экскурсия по выставкам\n", "duration_minutes": 60, "price": 4000, "price_unit": "RUB/group"}
+      ]
+    }
+  ]
+}

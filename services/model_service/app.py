@@ -16,7 +16,8 @@ from place_ranker import RankCandidate, rank_places
 from query_match import query_match_score
 from request_schema import ParsedRequest, validate_evidence
 from shared.contracts import RankRequest, RankResponse
-from recommendation_engine import CATALOG_RELATIVE_PATH, CATALOG_VERSION, MODEL_VERSION, RecommendationEngine, RecommendationError
+from recommendation_engine import (CATALOG_RELATIVE_PATH, CATALOG_VERSION, ENRICHED_CATALOG_PATH,
+    ENRICHED_CATALOG_VERSION, MODEL_VERSION, SUPPORTED_PURPOSES, RecommendationEngine, RecommendationError)
 
 
 app = FastAPI(title="Family Routes Model Service", version="1.0.0")
@@ -37,12 +38,18 @@ async def invalid_recommendation_body(request: Request, error: RequestValidation
     return await request_validation_exception_handler(request, error)
 
 
-@lru_cache(maxsize=1)
-def recommendation_engine() -> RecommendationEngine:
+@lru_cache(maxsize=4)
+def recommendation_engine(version: str | None = None) -> RecommendationEngine:
+    default = os.environ.get("MODEL_CATALOG_VERSION", ENRICHED_CATALOG_VERSION)
+    version = version or default
+    catalogs = {CATALOG_VERSION: ROOT / CATALOG_RELATIVE_PATH, ENRICHED_CATALOG_VERSION: ROOT / ENRICHED_CATALOG_PATH}
+    path = os.environ.get("MODEL_CATALOG_PATH") if version == default else None
+    if version not in catalogs and not path:
+        raise RecommendationError("CATALOG_VERSION_MISMATCH", "Версия каталога не поддерживается.", 409)
     return RecommendationEngine(
-        Path(os.environ.get("MODEL_CATALOG_PATH", ROOT / CATALOG_RELATIVE_PATH)),
+        Path(path) if path else catalogs[version],
         ROOT / "docs/contracts/openapi.json", ROOT / "models/recommendation_policy.json",
-        os.environ.get("MODEL_CATALOG_VERSION", CATALOG_VERSION),
+        version,
     )
 
 
@@ -64,15 +71,20 @@ def health() -> dict:
         engine = recommendation_engine()
     except Exception:
         raise HTTPException(status_code=503, detail="Catalog is unavailable or invalid") from None
-    return {"status": "ok", "service": "model-service", "model_version": MODEL_VERSION,
+    return {"status": "ok", "service": "model-service", "model_version": engine.model_version,
             "catalog_version": engine.catalog_version, "catalog_sha256": engine.content_sha256,
-            "catalog_records": len(engine.records)}
+            "catalog_records": len(engine.records), "catalog_places": len({r["place"]["place_id"] for r in engine.records}),
+            "supported_catalog_versions": [CATALOG_VERSION, ENRICHED_CATALOG_VERSION],
+            "purposes": list(SUPPORTED_PURPOSES), "spatial_filters": True, "fixed_sessions": True}
 
 
 @app.post("/internal/v1/recommendations")
 def recommendations(request: dict) -> dict:
     try:
-        engine = recommendation_engine()
+        version = request.get("catalog_version")
+        engine = recommendation_engine(version if isinstance(version, str) else None)
+    except RecommendationError as error:
+        return api_error(error.status, error.code, str(error))
     except Exception:
         return api_error(503, "CATALOG_UNAVAILABLE", "Каталог недоступен или некорректен.")
     try:

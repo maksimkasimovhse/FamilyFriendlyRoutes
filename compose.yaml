@@ -32,7 +32,7 @@ services:
       context: .
       dockerfile: services/model_service/Dockerfile
     environment:
-      MODEL_CATALOG_VERSION: ${MODEL_CATALOG_VERSION:-city-osm-v2}
+      MODEL_CATALOG_VERSION: ${MODEL_CATALOG_VERSION:-city-enriched-v3}
       ML_API_TOKEN: ${ML_API_TOKEN:-}
       ML_REQUIRE_LEGACY_AUTH: ${ML_REQUIRE_LEGACY_AUTH:-false}
       REQUEST_PARSER_URL: ${REQUEST_PARSER_URL:-}
@@ -120,9 +120,9 @@ services:
       INITIAL_LLM_ENABLED: ${INITIAL_LLM_ENABLED:-false}
       LEGACY_ML_URL: http://mock-api:8090/internal/v1/recommendations
       CITY_ML_URL: http://model-service:8080/internal/v1/recommendations
-      CITY_CATALOG_VERSION: ${MODEL_CATALOG_VERSION:-city-osm-v2}
-    # Существующий backend сохраняет прежний источник. Новый каталог включается явно.
-    command: ["-listen", "0.0.0.0:8080", "-allow-network-listen", "-routing-url", "http://valhalla:8002", "-ml-url", "${BACKEND_ML_URL:-http://mock-api:8090/internal/v1/recommendations}", "-catalog-version", "${BACKEND_CATALOG_VERSION:-mock-ml-v1}"]
+      CITY_CATALOG_VERSION: city-osm-v2
+    # New drafts use RecSys; saved mock/city-osm-v2 trips keep their own provider.
+    command: ["-listen", "0.0.0.0:8080", "-allow-network-listen", "-routing-url", "http://valhalla:8002", "-ml-url", "${BACKEND_ML_URL:-http://model-service:8080/internal/v1/recommendations}", "-catalog-version", "${BACKEND_CATALOG_VERSION:-city-enriched-v3}"]
     ports:
       - "127.0.0.1:8083:8080"
     volumes:
@@ -134,6 +134,8 @@ services:
         condition: service_healthy
       mock-api:
         condition: service_started
+      model-service:
+        condition: service_healthy
       postgres:
         condition: service_healthy
     restart: unless-stopped

@@ -1,0 +1,15 @@
+{
+  "programmes": 30,
+  "upcoming_occurrences": 414,
+  "mapped_programmes": 29,
+  "timing_complete": 342,
+  "planner_ready_candidates": 264,
+  "duration_conflicts": 72,
+  "source_sold_out": 8,
+  "unmatched_venues": 1,
+  "horizon_days": 90,
+  "generated_at": "2026-11-20T23:43:48.913196+00:00",
+  "source_page_counts": {
+    "fetched": 29
+  }
+}

@@ -85,7 +85,7 @@ func tripHandlerWithAssistant(store *tripstore.Store, p planner.Planner, now fun
 	mux.HandleFunc("GET /api/v1/trips", api.listTrips)
 	mux.HandleFunc("POST /api/v1/trips/from-profile", api.post)
 	mux.HandleFunc("GET /api/v1/reference-data", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, 200, map[string]any{"interest_options": []map[string]string{{"id": "history", "label": "История"}, {"id": "science", "label": "Наука"}, {"id": "play", "label": "Игры"}}, "categories": []map[string]string{{"id": "landmark", "label": "Тестовые остановки"}}, "supported_city_ids": []string{"nizhny_novgorod"}, "supported_child_age": map[string]int{"min": 3, "max": 11}, "capabilities": map[string]bool{"taxi_suggestions": false, "weather_automation": false, "free_text": p.Source != nil, "assistant": interpreter != nil, "llm_understanding": p.Interpreter != nil}, "default_family_policy": planner.NewDraft("", c.TripInput{}, api.now()).Policy, "demo_activities": p.Activities, "implementation_stage": "multi_day_pool"})
+		writeJSON(w, 200, referenceData(p, interpreter != nil))
 	})
 	mux.HandleFunc("POST /api/v1/trips", api.post)
 	mux.HandleFunc("GET /api/v1/trips/{trip_id}", api.getTrip)
@@ -94,6 +94,8 @@ func tripHandlerWithAssistant(store *tripstore.Store, p planner.Planner, now fun
 	mux.HandleFunc("GET /api/v1/trips/{trip_id}/previews/{preview_id}", api.getPreview)
 	mux.HandleFunc("POST /api/v1/trips/{trip_id}/previews/{preview_id}/apply", api.post)
 	mux.HandleFunc("POST /api/v1/trips/{trip_id}/assistant/messages", api.assistantMessage)
+	mux.HandleFunc("POST /api/v1/trips/{trip_id}/recommendations", api.recommend)
+	mux.HandleFunc("POST /api/v1/trips/{trip_id}/needs", api.need)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Request-ID", newID())
 		w.Header().Set("Cache-Control", "no-store")

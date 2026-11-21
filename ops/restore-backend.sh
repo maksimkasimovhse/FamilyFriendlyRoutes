@@ -27,8 +27,8 @@ print(paths[0])
 fi
 
 docker compose --project-directory "${repo_dir}" config --quiet
-docker compose --project-directory "${repo_dir}" build backend mock-api
-docker compose --project-directory "${repo_dir}" up -d backend mock-api web
+docker compose --project-directory "${repo_dir}" build backend model-service mock-api
+docker compose --project-directory "${repo_dir}" up -d backend model-service mock-api web
 
 # A 200 from an unrelated Python /health is not evidence that the Go API works.
 api_ready=false
@@ -49,7 +49,7 @@ PY
   sleep 2
 done
 if [[ "${api_ready}" != true ]]; then
-  docker compose --project-directory "${repo_dir}" ps backend web mock-api
+  docker compose --project-directory "${repo_dir}" ps backend model-service web mock-api
   printf 'Go backend/web API verification failed; nginx was not changed.\n' >&2
   exit 1
 fi

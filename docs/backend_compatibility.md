@@ -33,16 +33,19 @@ Web ожидает готовности Go. Проверка обычного `/
 
 ## Совместимые настройки
 
-По умолчанию новые поездки получают прежний `mock-ml-v1` и прежний mock-api.
+После подключения RecSys по явному запросу пользователя новые поездки по умолчанию
+получают `city-enriched-v3` и model-service. Прежний mock-api сохранён для старых поездок.
 Сохранённая поездка выбирает provider по своей версии каталога: `mock-ml-v1`
-обслуживается mock-api, `city-osm-v2` — model-service. ID и версии не меняются молча.
+обслуживается mock-api, `city-osm-v2` и `city-enriched-v3` — model-service.
+ID и версии сохранённых поездок не меняются молча.
 Недоступность дополнительной модели не мешает чтению поездок, сессиям и входу.
 
-Для явного перехода новых поездок на городской каталог:
+Текущая конфигурация новых поездок:
 
 ```dotenv
 BACKEND_ML_URL=http://model-service:8080/internal/v1/recommendations
-BACKEND_CATALOG_VERSION=city-osm-v2
+BACKEND_CATALOG_VERSION=city-enriched-v3
+MODEL_CATALOG_VERSION=city-enriched-v3
 ```
 
 `ASSISTANT_URL` включает чат, но сам по себе не включает LLM в обычную генерацию.
@@ -67,8 +70,8 @@ parser из model-service в Compose можно указать его внутр
 bash ops/restore-backend.sh --nginx-config auto
 ```
 
-Скрипт собирает и поднимает Go backend, прежний mock-api и web без зависимости от
-сборки/ключей LLM. Сначала проверяет настоящий Go и `/api/v1/reference-data` через
+Скрипт собирает и поднимает Go backend, RecSys, прежний mock-api и web без зависимости
+от ключей LLM. Сначала проверяет настоящий Go и `/api/v1/reference-data` через
 web, затем делает резервную копию обнаруженного HTTP virtual host и проверяет
 `nginx -t` перед reload. Если конфиг не найден однозначно, нужно передать путь
 существующего активного HTTP-конфига вместо `auto`. TLS-конфигурация автоматически

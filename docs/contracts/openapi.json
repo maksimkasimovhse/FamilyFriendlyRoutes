@@ -2548,6 +2548,33 @@
                 "type": "null"
               }
             ]
+          },
+          "quote": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_sha256": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "verification_status": {
+            "type": "string",
+            "enum": [
+              "source_claim",
+              "reviewed"
+            ]
           }
         },
         "required": [
@@ -3560,6 +3587,34 @@
                         ]
                       }
                     ]
+                  },
+                  "cuisine": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "menu_urls": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "play_area_staff_hours_raw": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
                   }
                 },
                 "required": [
@@ -3629,6 +3684,36 @@
             "type": "number",
             "minimum": 0,
             "description": "Shortest geodesic distance to the saved route line in metres, not walking distance. Route-corridor search only."
+          },
+          "description": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "website": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "phone": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -4065,6 +4150,32 @@
             "items": {
               "$ref": "#/components/schemas/ID"
             }
+          },
+          "description": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_label_min": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "participation_rules_raw": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -4442,73 +4553,7 @@
           "spatial_scope": {
             "oneOf": [
               {
-                "type": "object",
-                "properties": {
-                  "center": {
-                    "oneOf": [
-                      {
-                        "$ref": "#/components/schemas/Point"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "radius_m": {
-                    "oneOf": [
-                      {
-                        "type": "number",
-                        "minimum": 0
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "route": {
-                    "oneOf": [
-                      {
-                        "type": "object",
-                        "properties": {
-                          "type": {
-                            "type": "string",
-                            "const": "LineString"
-                          },
-                          "coordinates": {
-                            "type": "array",
-                            "items": {
-                              "$ref": "#/components/schemas/Position"
-                            }
-                          }
-                        },
-                        "required": [
-                          "type",
-                          "coordinates"
-                        ]
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "corridor_width_m": {
-                    "oneOf": [
-                      {
-                        "type": "number",
-                        "minimum": 0
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                "required": [
-                  "center",
-                  "radius_m",
-                  "route",
-                  "corridor_width_m"
-                ]
+                "$ref": "#/components/schemas/SpatialScope"
               },
               {
                 "type": "null"
@@ -4525,6 +4570,16 @@
             "oneOf": [
               {
                 "$ref": "#/components/schemas/ParsedRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "restaurant_filters": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RestaurantFilters"
               },
               {
                 "type": "null"
@@ -5773,6 +5828,17 @@
                 "type": "null"
               }
             ]
+          },
+          "hotel_point": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Point"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Explicit hotel location. Never inferred from the day end point."
           }
         },
         "required": [
@@ -6009,6 +6075,15 @@
               },
               "llm_understanding": {
                 "type": "boolean"
+              },
+              "recommendations": {
+                "type": "boolean"
+              },
+              "needs": {
+                "type": "boolean"
+              },
+              "fixed_sessions": {
+                "type": "boolean"
               }
             },
             "required": [
@@ -6075,6 +6150,16 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 50
+          },
+          "restaurant_filters": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RestaurantFilters"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -6982,6 +7067,16 @@
                 "type": "null"
               }
             ]
+          },
+          "hotel_point": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Point"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         }
       },
@@ -7112,6 +7207,135 @@
             ]
           }
         }
+      },
+      "SpatialScope": {
+        "type": "object",
+        "properties": {
+          "center": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Point"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "radius_m": {
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "route": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RouteLine"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "corridor_width_m": {
+            "oneOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "routes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RouteLine"
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "description": "A union of actual disconnected route legs. No straight connectors are invented."
+          }
+        },
+        "required": [
+          "center",
+          "radius_m",
+          "route",
+          "corridor_width_m"
+        ]
+      },
+      "RestaurantFilters": {
+        "type": "object",
+        "properties": {
+          "children_menu": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "small_portions": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "play_area": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "play_area_supervision": {
+            "oneOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "description": "Explicit source-backed requirements. Unknown/brand-only properties never satisfy a boolean filter."
+      },
+      "RouteLine": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "LineString"
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Position"
+            },
+            "minItems": 2
+          }
+        },
+        "required": [
+          "type",
+          "coordinates"
+        ]
       }
     },
     "securitySchemes": {

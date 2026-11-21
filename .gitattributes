@@ -1,0 +1,3 @@
+# CSV exports retain their original CRLF and multiline source excerpts.
+# Normalizing them would invalidate source-file hashes and alter quoted data.
+*.csv -text -whitespace

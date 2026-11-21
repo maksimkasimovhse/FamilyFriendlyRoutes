@@ -1,0 +1,1903 @@
+{
+  "source_cards": 205,
+  "added_candidates": 98,
+  "held": 107,
+  "categories": {
+    "other": 12,
+    "landmark": 53,
+    "restaurant": 15,
+    "museum": 10,
+    "park": 7,
+    "event": 1
+  },
+  "decisions": [
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/1_Pamyatnik_Kuz_me_Mininu/",
+      "name": "Памятник Кузьме Минину",
+      "place_id": "place:tourism:2ddd700b7feb408f",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:262652496",
+        "place:main:126"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Akvapark_Oceanis/",
+      "name": "Аквапарк Oceanis",
+      "place_id": "place:tourism:d87bac3e57c2546f",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Akvapark__Atoll_/",
+      "name": "Аквапарк «Атолл»",
+      "place_id": "place:tourism:4005ed7d0ab06756",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Ali-Baba/",
+      "name": "Али-Баба",
+      "place_id": "place:tourism:25910865a86d5e25",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:8474861092",
+        "place:osm:node:4409564513"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Armyanskaya_cerkov__Surb_Amenaprkich/",
+      "name": "Армянская церковь Сурб Аменапркич",
+      "place_id": "place:tourism:f1317cddb3622e78",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:104"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Art-galereya__Kladovka_/",
+      "name": "Арт-галерея «Кладовка»",
+      "place_id": "place:tourism:69adbf4e38c6650f",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:1768844072",
+        "place:osm:node:12104682901"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Aviabaza__Sokol_/",
+      "name": "Авиабаза \"Сокол\"",
+      "place_id": "place:tourism:33170712cdd447ff",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/BAZAR/",
+      "name": "BAZAR",
+      "place_id": "place:tourism:4611227c54463555",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/BaklaDzhan/",
+      "name": "БаклаДжан",
+      "place_id": "place:tourism:b2343e0e76830333",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:5789360745",
+        "place:osm:node:2789966186",
+        "place:osm:node:4240951912"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Bar_gril___Goryacho___/",
+      "name": "Бар гриль \"Горячо\"",
+      "place_id": "place:tourism:9e3c920fe52c8c4c",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:5393720044",
+        "place:osm:node:2917705888"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Barenc/",
+      "name": "Баренц",
+      "place_id": "place:tourism:2602d0ea3cabc29c",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/BeZuhov/",
+      "name": "БеZухов",
+      "place_id": "place:tourism:5188f360beda858c",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:5789360745",
+        "place:osm:node:2325934112",
+        "place:osm:node:4240951912",
+        "place:osm:node:4462102005"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Ben_e/",
+      "name": "Бенье",
+      "place_id": "place:tourism:8568b5ae1938df7e",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:11681997928",
+        "place:osm:node:11037167564",
+        "place:osm:node:13986019401",
+        "place:osm:node:4880459921"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Blinovskii_passazh/",
+      "name": "Блиновский пассаж",
+      "place_id": "place:tourism:6d802d6b7845f32c",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Bosyackaya_chainaya__Stolbi_/",
+      "name": "Босяцкая чайная \"Столбы\"",
+      "place_id": "place:tourism:21c84377dd8c3192",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Britanskii_Pab_Union_Jack/",
+      "name": "Британский Паб Union Jack",
+      "place_id": "place:tourism:db7eea7abf5a7547",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Bufet/",
+      "name": "Буфет",
+      "place_id": "place:tourism:fea1e47d06c1481b",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:1782759891"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Burrito_Family/",
+      "name": "Burrito Family",
+      "place_id": "place:tourism:51fcf40ac976b4d7",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Butch&Dutch/",
+      "name": "Панорамный ресторан Butch&Dutch",
+      "place_id": "place:tourism:d641790cac99d5c8",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/CHaihana_na_rozhdestvenskoi/",
+      "name": "Чайхана Жамэль",
+      "place_id": "place:tourism:a3e01a3c389780fc",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/CHkalovskaya_lestnica/",
+      "name": "Чкаловская лестница",
+      "place_id": "place:tourism:eaa7ea9a414dfa32",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:5",
+        "place:osm:node:4929597723"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Capital_Club/",
+      "name": "Capital Club",
+      "place_id": "place:tourism:008bca3a1dcf186d",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Centr_avtomotosporta___Akademiya_/",
+      "name": "Центр автомотоспорта «Академия»",
+      "place_id": "place:tourism:13ce4b62264f12ce",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Centr_parashutnogo_sporta/",
+      "name": "Центр парашютного спорта",
+      "place_id": "place:tourism:122078cc5ad1bd0c",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Centr_sovremennogo_iskusstva_Arsenal/",
+      "name": "Центр современного искусства «Арсенал»",
+      "place_id": "place:tourism:47819c4282769589",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:47",
+        "place:osm:node:11966302769"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Centr_teatral_nogo_masterstva/",
+      "name": "Центр театрального мастерства",
+      "place_id": "place:tourism:1d4fe27b95889a90",
+      "status": "held",
+      "reason": "coordinates_missing",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Cerkov__Hristian_Adventistov_Sed_mogo_Dnya/",
+      "name": "Церковь Христиан Адвентистов Седьмого Дня",
+      "place_id": "place:tourism:e4b120eb8dee458e",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Cerkov__Sergiya_Radonezhskogo/",
+      "name": "Церковь Сергия Радонежского",
+      "place_id": "place:tourism:0e48d94846a99572",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Cerkov__Troici_ZHivonachal_noi/",
+      "name": "Церковь Троицы Живоначальной",
+      "place_id": "place:tourism:83b326b0904f7906",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/DODICI_WINE_&_KITCHEN/",
+      "name": "DODICI WINE & KITCHEN",
+      "place_id": "place:tourism:b9b5930839c5c2b9",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:12600018284",
+        "place:osm:node:4240959140",
+        "place:osm:node:7638085583",
+        "place:osm:node:13540869207",
+        "place:osm:node:2360739589"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Dadi/",
+      "name": "Дади",
+      "place_id": "place:tourism:3c3fc30c76cfaad5",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Detskii_teatr__Vera_/",
+      "name": "Детский театр «Вера»",
+      "place_id": "place:tourism:fa8b259e70e89daf",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:74"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Dom-kommuna__Kul_turnaya_revoluciya_/",
+      "name": "Дом-коммуна \"Культурная революция\"",
+      "place_id": "place:tourism:2e7c6b3f30d437cb",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Domashnyaya_Italiya/",
+      "name": "Домашняя Италия",
+      "place_id": "place:tourism:6665e9785f6558eb",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Domik_Petra/",
+      "name": "Домик Петра",
+      "place_id": "place:tourism:85f995598ad08d44",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:28"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Druzhkova_kruzhka/",
+      "name": "Дружкова кружка",
+      "place_id": "place:tourism:44495aa0ab283344",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Dvorec_Truda/",
+      "name": "Дворец Труда",
+      "place_id": "place:tourism:f1085f6ef87440d2",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Dvorec_sporta/",
+      "name": "Дворец спорта",
+      "place_id": "place:tourism:df9d7b3865934556",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Dvorec_sporta_Severnaya_Zvezdav_Avtozavodskom_raione/",
+      "name": "Дворец спорта Северная Звезда в Автозаводском районе",
+      "place_id": "place:tourism:2d949ac5b3e20e18",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Dzhani/",
+      "name": "Джани",
+      "place_id": "place:tourism:281403a0bb0e06c6",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Ekspediciya/",
+      "name": "Экспедиция",
+      "place_id": "place:tourism:b48dce0781eab7ae",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:4462102010"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Eleven/",
+      "name": "Eleven",
+      "place_id": "place:tourism:b4964d8cba7d4275",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Filarmoniya_im._M._Rostropovicha/",
+      "name": "Филармония им. М. Ростроповича",
+      "place_id": "place:tourism:933afaad526d1431",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:78",
+        "place:osm:node:2289219095"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Fizkul_turno-ozdorovitel_nii_centr_Mescherskii_v_Kanavinskom_rione/",
+      "name": "Физкультурно-оздоровительный центр Мещерский в Канавинском рйоне",
+      "place_id": "place:tourism:3567769dc04b4ec1",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Fizkul_turno-ozdorovitel_nii_kompleks_Priokskii/",
+      "name": "Физкультурно-оздоровительный комплекс Приокский",
+      "place_id": "place:tourism:8473fee56a71666d",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Franky_bar/",
+      "name": "Franky bar",
+      "place_id": "place:tourism:5bc05f73dfc096b9",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:12238329627",
+        "place:osm:node:11098164206"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Freakadely/",
+      "name": "Freakadely",
+      "place_id": "place:tourism:52fa942b64b42ce6",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:5389528125"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Galereya_Futuro/",
+      "name": "Галерея Futuro",
+      "place_id": "place:tourism:fa3c32634408a49f",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:4462100932"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Galereya__Urkovka_/",
+      "name": "Галерея «Юрковка»",
+      "place_id": "place:tourism:0babbcdffb3094d0",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:12104690801",
+        "place:osm:node:3302933087"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Galereya_vkusa__Park_Kul_turi_/",
+      "name": "Галерея вкуса \"Парк Культуры\"",
+      "place_id": "place:tourism:941b25826aac5144",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:12027923852"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Gosudarstvennii_bank/",
+      "name": "Государственный банк",
+      "place_id": "place:tourism:cc147037932b81b0",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:9"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Gril_-bar_Butch&Dutch/",
+      "name": "Гриль-бар Butch&Dutch",
+      "place_id": "place:tourism:65d2cc80f4078f1e",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Hachapuri/",
+      "name": "Хачапури тётушки Марико",
+      "place_id": "place:tourism:10353794f3cf70af",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:12518367333",
+        "place:osm:node:2343624139"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Hachapuriya/",
+      "name": "Хачапурия",
+      "place_id": "place:tourism:cdbbb6e172aefbcd",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:3029653510",
+        "place:osm:node:4982328021",
+        "place:osm:node:5826755086",
+        "place:osm:node:4159863915",
+        "place:osm:node:3312102333",
+        "place:osm:node:4873415821"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Hinkal_naya/",
+      "name": "Хинкальная",
+      "place_id": "place:tourism:b8b06146b7efcc62",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:11219566793",
+        "place:osm:node:4462102007"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Hram_Preobrazheniya_Gospodnya/",
+      "name": "Храм Преображения Господня",
+      "place_id": "place:tourism:b2bf6c94c1d41566",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Hram_Rozhdestva_Ioanna_Predtechi/",
+      "name": "Храм Рождества Иоанна Предтечи",
+      "place_id": "place:tourism:510283f14e0955c0",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Hram_Voskreseniya_Hristova/",
+      "name": "Храм Воскресения Христова",
+      "place_id": "place:tourism:14e3589789cfbfff",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Hram_Vseh_Svyatih/",
+      "name": "Храм Всех Святых",
+      "place_id": "place:tourism:82fa563a01fabaf2",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:1061662241",
+        "place:osm:node:10895480302"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Hram_ikoni_Bozhiei_Materi_Znamenie_i_svyatih_ZHen-Mironosic/",
+      "name": "Храм иконы Божией Матери Знамение и святых Жен-Мироносиц",
+      "place_id": "place:tourism:7bd678fce57a03f0",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:3884779472"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Hudozhestvennaya_galereya__Russkii_vek_/",
+      "name": "Художественная галерея «Русский век»",
+      "place_id": "place:tourism:2bc70c2f4b293393",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Hurma/",
+      "name": "Хурма",
+      "place_id": "place:tourism:38c5af8aa1b9325d",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/IL_TEMPO/",
+      "name": "IL TEMPO",
+      "place_id": "place:tourism:df10032ae53ed832",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Imperiya_boulinga/",
+      "name": "Империя боулинга",
+      "place_id": "place:tourism:484428d7c6d296eb",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Indigo/",
+      "name": "Индиго",
+      "place_id": "place:tourism:e0fdc7c65941d49e",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Informacionnii_centr_po_atomnoi_energii/",
+      "name": "Информационный центр по атомной энергии",
+      "place_id": "place:tourism:876baa658174511b",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Kafe_Biblioteca/",
+      "name": "Biblioteca",
+      "place_id": "place:tourism:b5b49144589b9804",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Karting-klub_Sormovo/",
+      "name": "Картинг-клуб Сормово",
+      "place_id": "place:tourism:d7d459f080fcc0b5",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Katok_Dinamo/",
+      "name": "Каток Динамо",
+      "place_id": "place:tourism:86857b2ac63020a8",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Katok_Dvorec_sporta_im._V.S._Konovalenkona_ulice_Loskutova/",
+      "name": "Каток Дворец спорта им. В.С. Коноваленкона улице Лоскутова",
+      "place_id": "place:tourism:b901afd4ae945151",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Katok_Russkii_Led_v_Sormovskom_parke/",
+      "name": "Каток Русский Лёд в Сормовском парке",
+      "place_id": "place:tourism:fee5563e25b14dbd",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Katok_v_FOK_Zarech_e/",
+      "name": "Каток в ФОК Заречье",
+      "place_id": "place:tourism:7adc8066bfea48b0",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Katok_v_parke_1_Maya_/",
+      "name": "Каток в парке 1 Мая",
+      "place_id": "place:tourism:e368da27b068445d",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:80"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Kinoklub__Sputnik__/",
+      "name": "Киноклуб «Спутник»",
+      "place_id": "place:tourism:f5db4f87f7960052",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:2527584549"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Kofeinya_TEMP/",
+      "name": "Кофейня ТЕМП",
+      "place_id": "place:tourism:d708d108cda8d439",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:8712821217"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Konservatoriya_im._M.I._Glinki/",
+      "name": "Консерватория им. М.И. Глинки",
+      "place_id": "place:tourism:fe2dea09ee348b49",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Kraken_bar/",
+      "name": "Кракен бар",
+      "place_id": "place:tourism:aa4adc3181dcfc53",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:2352478777",
+        "place:osm:node:611852983"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Krestovozdvizhenskii_zhenskii_monastir_/",
+      "name": "Крестовоздвиженский женский монастырь",
+      "place_id": "place:tourism:a29d85f20a7a0f2b",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Kulibin/",
+      "name": "Кулибин",
+      "place_id": "place:tourism:2b182b2a32716450",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/La_Cantinetta_da_Roberto/",
+      "name": "La Cantinetta da Roberto",
+      "place_id": "place:tourism:f2741f8224a08d1b",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:2352478777",
+        "place:osm:node:611852983"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Lapshichnaya_Sovok/",
+      "name": "Лапшичная Совок",
+      "place_id": "place:tourism:2768e3245ff5f000",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Lesopark__SCHelokovskii_hutor_/",
+      "name": "Лесопарк «Щелоковский хутор»",
+      "place_id": "place:tourism:4119ec3434c86ba0",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Literaturnii_muzei/",
+      "name": "Литературный музей",
+      "place_id": "place:tourism:d8d03aa6475f78ea",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:6412596831"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Lizhnaya_baza_Sormovich/",
+      "name": "Лыжная база Сормович",
+      "place_id": "place:tourism:883a5be966d140b8",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Lizhnaya_baza_Strigino_/",
+      "name": "Лыжная база\"Стригино\"",
+      "place_id": "place:tourism:706e5a46f8ab3895",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/MITRICH/",
+      "name": "MITRICH Steakhouse",
+      "place_id": "place:tourism:cfbb687b20966ec9",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:4288872156",
+        "place:osm:node:5155782830",
+        "place:osm:node:4231275565"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Mega/",
+      "name": "Мега",
+      "place_id": "place:tourism:93c9e746d0cb393f",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Mikroraion_Socgorod/",
+      "name": "Микрорайон Соцгород",
+      "place_id": "place:tourism:ddce90f74ba8c35d",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Milo_Club/",
+      "name": "Milo Club",
+      "place_id": "place:tourism:5da31bc07a2cd57e",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Milo_Concert_Hall/",
+      "name": "Milo Concert Hall",
+      "place_id": "place:tourism:98861a1be895a11b",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Mixtura_Bar/",
+      "name": "Mixtura Bar",
+      "place_id": "place:tourism:5e8f9fc552d78d94",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:9093165318"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Moloko/",
+      "name": "Moloko Cafe",
+      "place_id": "place:tourism:e17d8217942ab355",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:1947322248"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Mukka/",
+      "name": "Mukka",
+      "place_id": "place:tourism:a3efb2f177e38df8",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:4353128568"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Muzei-kvartira_A._D._Saharova/",
+      "name": "Музей-квартира А. Д. Сахарова",
+      "place_id": "place:tourism:48d7fda568dac826",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:217",
+        "place:osm:node:1808680332"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Muzei_SCHelkovskii_Hutor/",
+      "name": "Музей Щелковский Хутор",
+      "place_id": "place:tourism:40328379edca3ba7",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Muzei__Istorii_Nizhegorodskoi_Eparhii_/",
+      "name": "Музей «Истории Нижегородской Епархии»",
+      "place_id": "place:tourism:edd639116e3ecb8d",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Muzei_istorii_OAO__GAZ_/",
+      "name": "Музей истории ОАО «ГАЗ»",
+      "place_id": "place:tourism:2843b31259e57e11",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:33",
+        "place:osm:node:1808680326"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Muzei_istorii_hudozhestvennih_promislov_Nizhegorodskoi_oblasti/",
+      "name": "Музей истории художественных промыслов Нижегородской области",
+      "place_id": "place:tourism:e789589fea999fec",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:1808680323",
+        "place:osm:node:5103927383"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Muzei_istorii_tramvaya_i_trolleibusa/",
+      "name": "Музей истории трамвая и троллейбуса",
+      "place_id": "place:tourism:d362d5663b725843",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Muzei_knigi/",
+      "name": "Музей книги",
+      "place_id": "place:tourism:8ac65547835d92f3",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Muzei_nauki_NNGU__Nizhegorodskaya_radiolaboratoriya__/",
+      "name": "Музей науки ННГУ «Нижегородская радиолаборатория»",
+      "place_id": "place:tourism:724e29bb737df645",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:1808680328"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Muzeino-vistavochnii_centr__Mikula_/",
+      "name": "Музейно-выставочный центр \"Микула\"",
+      "place_id": "place:tourism:93a170818882a5aa",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:1993500121",
+        "place:main:220"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Naberezhnaya_Fedorovskogo_/",
+      "name": "Парк 800-летия Нижнего Новгорода",
+      "place_id": "place:tourism:eef479cb3084dd79",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:85"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Narsharab/",
+      "name": "Наршараб",
+      "place_id": "place:tourism:37f8ae9dff3a9328",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:13994973901",
+        "place:osm:node:10576728482",
+        "place:osm:node:12084658022",
+        "place:osm:node:2626186939"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Nebar/",
+      "name": "Nebar",
+      "place_id": "place:tourism:7c11a6e5261ea466",
+      "status": "held",
+      "reason": "coordinates_missing",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Negroni_bar_enoteca/",
+      "name": "Negroni bar enoteca",
+      "place_id": "place:tourism:7dee64206f742365",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:2552275221"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Nizhegorodskaya_Birzha/",
+      "name": "Нижегородская Биржа",
+      "place_id": "place:tourism:9107f13fb25e3b1d",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:9093165318"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Nizhegorodskaya_kanatnaya_doroga/",
+      "name": "Нижегородская канатная дорога",
+      "place_id": "place:tourism:3cd9869773f5a602",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:38"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Nizhegorodskaya_yarmarka/",
+      "name": "Нижегородская ярмарка",
+      "place_id": "place:tourism:bbf13522d1fd4aed",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:17"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Nizhegorodskii_cirk/",
+      "name": "Нижегородский цирк",
+      "place_id": "place:tourism:8b42f1d430aaf5ab",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:230"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Nizhegorodskii_gosudarstvennii_akademicheskii_teatr_kukol/",
+      "name": "Нижегородский государственный академический театр кукол",
+      "place_id": "place:tourism:393f6d08731645d7",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:64"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Nizhegorodskii_gosudarstvennii_hudozhestvennii_muzei/",
+      "name": "Нижегородский государственный художественный музей",
+      "place_id": "place:tourism:252cfff9cf41fe5c",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:112"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Nizhegorodskii_planetarii/",
+      "name": "Нижегородский планетарий",
+      "place_id": "place:tourism:8c0ff705d78c78b8",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:230"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Nizhnevolzhskaya_naberezhnaya/",
+      "name": "Нижне-Волжская набережная",
+      "place_id": "place:tourism:f54b11692d0eac98",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Obnyal/",
+      "name": "Сеть дымных кальяных \"Обнял\"",
+      "place_id": "place:tourism:5563d075402c7b43",
+      "status": "held",
+      "reason": "coordinates_missing",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Obzornaya_ploschadka/",
+      "name": "Обзорная площадка наб. Федоровского",
+      "place_id": "place:tourism:151a144ccc658b7d",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:52"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Oka/",
+      "name": "Ока",
+      "place_id": "place:tourism:4d339a13e6cba58b",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:tourism:b4964d8cba7d4275"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Orlenok/",
+      "name": "Орлёнок",
+      "place_id": "place:tourism:c58b7888aebf0b45",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:224"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Otkritaya_ploschadka__Parovozi_Rossii_/",
+      "name": "Открытая площадка «Паровозы России»",
+      "place_id": "place:tourism:10aabcdbeb564f2a",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Palata_Pushnikova_/",
+      "name": "Палаты Пушникова",
+      "place_id": "place:tourism:2cfdc83d9c14ad9b",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:92"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Pamyatnik_Ob_yavleniu/",
+      "name": "Памятник частному объявлению",
+      "place_id": "place:tourism:442c3f5044c6e846",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:2904638543"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Pamyatnik_V.I._Leninu/",
+      "name": "Памятник В.И. Ленину",
+      "place_id": "place:tourism:bad20d7c8320532f",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:128"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Pamyatnik_Veseloi_Koze_/",
+      "name": "Памятник Веселой Козе",
+      "place_id": "place:tourism:8785c28d4d821155",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:1993500122",
+        "place:main:125",
+        "place:main:123"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Papasha_Billi/",
+      "name": "Папаша Билли",
+      "place_id": "place:tourism:a209d3a3dcfc484d",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:1792397090"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Park_Dubki/",
+      "name": "Парк Дубки",
+      "place_id": "place:tourism:a19d511a9288aa70",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:70"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Park_im._Kulibina/",
+      "name": "Парк им. Кулибина",
+      "place_id": "place:tourism:7a4198d590b86b21",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:82"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Parusa_NN/",
+      "name": "Паруса НН",
+      "place_id": "place:tourism:9b717c898d1fafb3",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Penthouse/",
+      "name": "Penthouse",
+      "place_id": "place:tourism:56293546896d90a8",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:12084658026",
+        "place:osm:node:7977389172"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Pirushka_u_Gansa/",
+      "name": "Пирушка у Ганса",
+      "place_id": "place:tourism:c22cbbd5e7553826",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Plakuchaya_Iva/",
+      "name": "Плакучая Ива",
+      "place_id": "place:tourism:dbb4f21c6aec49bf",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Prihod_cerkvei_v_chest__Smolenskoi_i_Vladimirskoi_ikon_Bozhiei_Materi/",
+      "name": "Приход церквей в честь Смоленской и Владимирской икон Божией Матери",
+      "place_id": "place:tourism:db464fd43117367c",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Razvlekatel_nii_kompleks_Sinema_v_TC_RIO/",
+      "name": "Развлекательный комплекс Синема в ТЦ РИО",
+      "place_id": "place:tourism:fb4a2cdca78042b2",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Restoran__Nikitin_/",
+      "name": "Ресторан \"Никитин\"",
+      "place_id": "place:tourism:b3f0c3441843bc0e",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Restoran_narodnoi_kuhni__Matreshka_/",
+      "name": "Ресторан народной кухни «Матрешка»",
+      "place_id": "place:tourism:d9f301865ec56023",
+      "status": "held",
+      "reason": "coordinates_missing",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Riba_i_Krabi/",
+      "name": "Рыба и Крабы",
+      "place_id": "place:tourism:f50088688331cbc5",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:2321347178",
+        "place:tourism:38c5af8aa1b9325d"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Riv_era/",
+      "name": "Ривьера",
+      "place_id": "place:tourism:02a3a411aeb04994",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Rozas/",
+      "name": "Rozas",
+      "place_id": "place:tourism:b46c4c0a7e503e82",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Russkii_muzei_fotografii/",
+      "name": "Русский музей фотографии",
+      "place_id": "place:tourism:72b756fe1c0658c4",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:1768844092"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/SCHelokovskii_hutor/",
+      "name": "Щелоковский хутор",
+      "place_id": "place:tourism:795166c8705d07a9",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:tourism:40328379edca3ba7"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/SHokoladnica/",
+      "name": "Шоколадница",
+      "place_id": "place:tourism:9a9d404c74312eda",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Seledka_i_kofe/",
+      "name": "Селёдка и кофе",
+      "place_id": "place:tourism:a76ffff449410962",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:4240951912"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Sinema/",
+      "name": "Синема",
+      "place_id": "place:tourism:04f8ad29012c709c",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:tourism:fb4a2cdca78042b2"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Sinema_park_Fantastika/",
+      "name": "Синема парк Фантастика",
+      "place_id": "place:tourism:af6c2d8e1be12637",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:1253194943"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Sobor_svyatogo_blagovernogo_knyazya_Aleksandra_Nevskogo_/",
+      "name": "Собор святого благоверного князя Александра Невского",
+      "place_id": "place:tourism:7abb7e8707f8cefa",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:68"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Soffee_Cake/",
+      "name": "Сoffee Cake",
+      "place_id": "place:tourism:df7d4a002affc2c1",
+      "status": "held",
+      "reason": "coordinates_missing",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Sormovskii/",
+      "name": "Сормовский",
+      "place_id": "place:tourism:0f5ff8ee000c64ac",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:4234435144"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Sormovskii_park/",
+      "name": "Сормовский парк",
+      "place_id": "place:tourism:cd7d00b8171ed6e4",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:69"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Spaso-Preobrazhenskii_sobor/",
+      "name": "Спасо-Преображенский собор",
+      "place_id": "place:tourism:cbed506f7a110f81",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Spasskii_Staroyarmarochnii_sobor/",
+      "name": "Спасский Староярмарочный собор",
+      "place_id": "place:tourism:c263bbd6aa837194",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:62"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Stadion_Lokomotiv_/",
+      "name": "Стадион Локомотив",
+      "place_id": "place:tourism:b2831db85f4a49aa",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Stadion_Nizhnii_Novgorod/",
+      "name": "Стадион Нижний Новгород",
+      "place_id": "place:tourism:8c9ef126c0257295",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:8"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Stadion_Polet/",
+      "name": "Стадион Полет",
+      "place_id": "place:tourism:e7d99d4d4423d73a",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Stadion_Start/",
+      "name": "Стадион Старт",
+      "place_id": "place:tourism:00722b5a3ea4298b",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Stadion_Trud_v_Sormovskom_raione./",
+      "name": "Стадион Труд в Сормовском районе",
+      "place_id": "place:tourism:0e2edbb6e93f8a22",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Steik_Haus/",
+      "name": "Steak House",
+      "place_id": "place:tourism:d4f9e51c186dc4d9",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Strelka/",
+      "name": "Стрелка",
+      "place_id": "place:tourism:0158feb17130e2ed",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:11"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Strike/",
+      "name": "Strike",
+      "place_id": "place:tourism:5becbbc1cc1480cb",
+      "status": "held",
+      "reason": "coordinates_missing",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Stroganovskaya_cerkov_/",
+      "name": "Строгановская церковь",
+      "place_id": "place:tourism:3cdd4617b8466966",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:58"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Teatr__Komediya_/",
+      "name": "Театр «Комедiя»",
+      "place_id": "place:tourism:b716c678cd9cadb2",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:73"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Teatr__Preobrazhenie_/",
+      "name": "Театр «Преображение»",
+      "place_id": "place:tourism:9c7f62efa8fcac82",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:221",
+        "place:osm:node:3908569601"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Teatr_operi_i_baleta_im._A.S._Pushkina/",
+      "name": "Театр оперы и балета им. А.С. Пушкина",
+      "place_id": "place:tourism:7d3e7089e9088e08",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:76"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Teatral_naya_lestnica/",
+      "name": "Театральная лестница",
+      "place_id": "place:tourism:49e74b3b3d37f4c6",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:102"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Tehnicheskii_muzei/",
+      "name": "Технический музей",
+      "place_id": "place:tourism:2999080ef5a8c745",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:1808680323",
+        "place:osm:node:5103927383"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/The_Top_club/",
+      "name": "The Top club",
+      "place_id": "place:tourism:bdebd0e7f97bb5ea",
+      "status": "held",
+      "reason": "coordinates_missing",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Traktir_Patron/",
+      "name": "Трактир Патрон",
+      "place_id": "place:tourism:dc60dab3882b3a3d",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:9678505117"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Turistsko-informacionnii_centr/",
+      "name": "Туристско-информационный центр",
+      "place_id": "place:tourism:b90e6f08e9ffbc66",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/ULA_PIZZA/",
+      "name": "ЮЛА PIZZA",
+      "place_id": "place:tourism:6759eca95c6b3989",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Ulica_Rozhdestvenskaya_/",
+      "name": "Улица Рождественская",
+      "place_id": "place:tourism:89bde2e56bc4bc07",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:19",
+        "place:tourism:6d802d6b7845f32c"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Unost__/",
+      "name": "Юность",
+      "place_id": "place:tourism:12403d994d3f828a",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Verhne-Volzhskaya_naberezhnaya/",
+      "name": "Верхне-Волжская набережная",
+      "place_id": "place:tourism:b941a1a6960b965e",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Vistavochnii_zal__Pokrovka__8__/",
+      "name": "Выставочный зал «Покровка, 8»",
+      "place_id": "place:tourism:2484588f0cf8aed1",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:1768844072",
+        "place:osm:node:12104682901"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Vitalich/",
+      "name": "Виталич",
+      "place_id": "place:tourism:bd477d3441f64f27",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:2709159572"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/YAht-klub_Leto/",
+      "name": "Яхт-клуб Лето",
+      "place_id": "place:tourism:581c45513cf9c3f6",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Zdanie_Bugrovskoi_nochlezhki_/",
+      "name": "Здание Бугровской ночлежки",
+      "place_id": "place:tourism:77992901e412708e",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:103"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Zdanie_torgovogo_centra_CUM/",
+      "name": "Здание торгового центра ЦУМ",
+      "place_id": "place:tourism:c0ad839bb0febe05",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/Zoopark__Madagaskar_/",
+      "name": "Зоопарк «Мадагаскар»",
+      "place_id": "place:tourism:376047642b35ccdb",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/_Arlekino_/",
+      "name": "Арлекино",
+      "place_id": "place:tourism:2eb1afaba0a264ef",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:4423349298"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/_Romanov_Sinema_/",
+      "name": "Романов Синема",
+      "place_id": "place:tourism:bb2b2a288ad4a0b9",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/blagoveschenskii-monastir/",
+      "name": "Благовещенский монастырь",
+      "place_id": "place:tourism:5894694d418a44a5",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/bolshaya-pokrovskaya-ulica/",
+      "name": "Большая Покровская улица",
+      "place_id": "place:tourism:8a546a5ec0e63209",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:66",
+        "place:main:65"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/botanicheskii-sad-nizhegorodskogo-gosudarstvennogo-universiteta-im-ni-lobachevskogo/",
+      "name": "Ботанический сад Нижегородского государственного университета им. Н.И. Лобачевского.",
+      "place_id": "place:tourism:feb5c266520831f3",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/ezh/",
+      "name": "Ресторация \"Ёж\"",
+      "place_id": "place:tourism:e9187c45150da250",
+      "status": "held",
+      "reason": "coordinates_missing",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/gosudarstvennii-literaturno-memorialnii-muzei/",
+      "name": "Государственный литературно-мемориальный музей",
+      "place_id": "place:tourism:986000f2364fc58a",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/gosudarstvennii-ordena-pocheta-muzei-am-gorkogo/",
+      "name": "Государственный ордена Почета музей А.М. Горького",
+      "place_id": "place:tourism:b4bcaa77de4b35b7",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:6412596831"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/literaturno-memorialnii-muzei-im-na-dobrolubova/",
+      "name": "Литературно-мемориальный музей им. Н.А. Добролюбова",
+      "place_id": "place:tourism:2df75559cadc4a67",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:120"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/muzei-arhitekturi-i-bita-narodov-nizhegorodskogo-povolzhya/",
+      "name": "Музей архитектуры и быта народов Нижегородского Поволжья",
+      "place_id": "place:tourism:7f30c18df2edfd19",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:218",
+        "place:osm:node:4994480121"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/muzei-detstva-a-m-gorkogo--domik-kashirina-/",
+      "name": "музей детства А. М. Горького «Домик Каширина»",
+      "place_id": "place:tourism:dcbfd218443eb864",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:111"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/muzei-elochnoi-igrushki-fabriki--ariel-/",
+      "name": "Музей елочной игрушки фабрики «Ариель»",
+      "place_id": "place:tourism:16dcd96100ebe560",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/muzei-kvartira-am-gorkogo/",
+      "name": "музей-квартира А.М. Горького",
+      "place_id": "place:tourism:2ce628b390137aae",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:121"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/muzei-zanimatelnih-nauk--kvarki-/",
+      "name": "Музей занимательных наук «Кварки»",
+      "place_id": "place:tourism:89d543f39ceafcce",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/nizhegorodskii-delfinari/",
+      "name": "Нижегородский дельфинарий",
+      "place_id": "place:tourism:077decede9d18c57",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/nizhegorodskii-kreml--vistavochnii-zal--dmitrievskaya-bashnya-/",
+      "name": "Нижегородский Кремль, выставочный зал «Дмитриевская башня»",
+      "place_id": "place:tourism:dc356ccfe72d300c",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/nizhegorodskii-voznesenskii-pecherskii-muzhskoi-monastir/",
+      "name": "Нижегородский Вознесенский Печерский мужской монастырь",
+      "place_id": "place:tourism:b00c9fabbb17d44b",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:40"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/nizhegorodskiy-kreml/",
+      "name": "Нижегородский кремль",
+      "place_id": "place:tourism:593330878f7d101b",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:42"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/palati_kupca_Afanasiya_Olisova/",
+      "name": "Палаты купца Афанасия Олисова",
+      "place_id": "place:tourism:881f76c385dd4c58",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:27"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/park-kulturi-i-otdiha-im-1-maya/",
+      "name": "Парк культуры и отдыха им. 1 Мая",
+      "place_id": "place:tourism:b64a40a8c20288c6",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/park-priokskii-shveicariya/",
+      "name": "Парк Швейцария",
+      "place_id": "place:tourism:aeceaccd327b02c2",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/poznavatelno-razvlekatelnii-centr--park-chudes-galileo-/",
+      "name": "Познавательно-развлекательный центр «Парк чудес Галилео»",
+      "place_id": "place:tourism:9cda28868a8664ec",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/pyatkin/",
+      "name": "Пяткинъ",
+      "place_id": "place:tourism:52191f7d553e6758",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/sinema-park-sedmoe-nebo/",
+      "name": "Синема парк Седьмое небо",
+      "place_id": "place:tourism:65fdaccf4dd2e9d8",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/teatr-drami-im-am-gorkogo/",
+      "name": "Театр драмы им. А.М. Горького",
+      "place_id": "place:tourism:5a73f6f672c5d45b",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:main:75"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/uchebnii-teatr-teatralnogo-uchilischa-imeni-e-a-evstigneeva/",
+      "name": "Учебный театр театрального училища имени Е. А. Евстигнеева",
+      "place_id": "place:tourism:e42b7742f33992b5",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:osm:node:2527580477"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/ul._Kozhevennaya/",
+      "name": "ул. Кожевенная",
+      "place_id": "place:tourism:fba4afe450a23951",
+      "status": "held",
+      "reason": "existing_or_overlapping_record_requires_review",
+      "possible_existing_ids": [
+        "place:tourism:21c84377dd8c3192"
+      ]
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/usadba-rukavishnikovih/",
+      "name": "Усадьба Рукавишниковых",
+      "place_id": "place:tourism:0bebc7e8bbe1ebcf",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    },
+    {
+      "source_url": "https://nn-grad.ru/kuda-poyti/uspenskaya-cerkovna-ilinskoi-gore/",
+      "name": "Успенская церковь на Ильинской горе",
+      "place_id": "place:tourism:05d4075b0a479442",
+      "status": "added_candidate",
+      "reason": "No likely overlap under conservative name/coordinate rules",
+      "possible_existing_ids": []
+    }
+  ]
+}

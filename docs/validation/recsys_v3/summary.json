@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-21",
+  "stage": "validated_before_remote_branch_integration",
+  "base_commit": "c59818a",
+  "python_models": 79,
+  "python_scripts": 16,
+  "go": "go test ./... passed",
+  "compose": "docker compose config --quiet passed",
+  "recsys_e2e": "passed",
+  "legacy_e2e": "passed",
+  "caveats": [
+    "Docker daemon is off; container build/full stack not checked",
+    "Routing fixture, no real Valhalla/PostgreSQL acceptance",
+    "E2E interpreter is a structured test double",
+    "Historical live LLM smoke predates current branch integration"
+  ]
+}

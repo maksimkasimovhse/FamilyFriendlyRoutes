@@ -1,0 +1,25 @@
+{
+  "records": 1000,
+  "status_counts": {
+    "source_discovery_required": 394,
+    "restored_from_site": 60,
+    "fetch_failed": 104,
+    "identity_review": 18,
+    "osm_description": 49,
+    "no_description_on_page": 15,
+    "name_missing": 360
+  },
+  "description_count": 109,
+  "restored_previously_missing": 59,
+  "site_page_counts": {
+    "error": 105,
+    "extracted": 57
+  },
+  "downloaded_pages": 63,
+  "source_claims_not_field_verification": true,
+  "notes": [
+    "Source excerpts only; generated model claims are not promoted.",
+    "Brand descriptions do not confirm a branch's visit conditions.",
+    "No review-derived descriptions."
+  ]
+}

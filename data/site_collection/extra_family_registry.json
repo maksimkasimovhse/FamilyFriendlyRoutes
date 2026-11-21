@@ -1,0 +1,1 @@
+{"sources":[{"source_id":"mitrich","allowed_hosts":["mitrichsteakhouse.ru","www.mitrichsteakhouse.ru"],"enabled":true,"respect_robots":true,"max_response_bytes":2000000,"note":"Official source explicitly referenced in enrichment task; OSM name matched, geometry retained."}]}

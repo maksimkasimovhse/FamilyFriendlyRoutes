@@ -27,6 +27,7 @@ type assistantMessageRequest struct {
 	Date            *c.ISODate     `json:"date,omitempty"`
 	CurrentPosition *routing.Point `json:"current_position"`
 	ObservedAt      *c.Instant     `json:"observed_at"`
+	HotelPoint      *routing.Point `json:"hotel_point,omitempty"`
 }
 type placeOption struct {
 	PlaceID           c.ID    `json:"place_id"`
@@ -238,7 +239,11 @@ func (a *tripAPI) assistantMessage(w http.ResponseWriter, r *http.Request) {
 		}
 		days = append(days, map[string]any{"date": d.Date, "stops": stops, "end_point": d.EndPoint, "execution": d.Execution, "totals": d.Totals})
 	}
-	contextValue := map[string]any{"selected_date": date, "observed_at": a.now(), "family": view.Input.Family, "days": days, "history": memory.History, "choices": choices, "pending_stop_id": memory.PendingStopID}
+	if request.HotelPoint != nil && (routing.Request{From: *request.HotelPoint, To: *request.HotelPoint, Mode: "walk"}).Validate() != nil {
+		a.respondError(w, r, failure(422, "VALIDATION_ERROR", "Точка отеля вне области маршрутизации."))
+		return
+	}
+	contextValue := map[string]any{"selected_date": date, "observed_at": a.now(), "family": view.Input.Family, "days": days, "history": memory.History, "choices": choices, "pending_stop_id": memory.PendingStopID, "hotel_point": request.HotelPoint}
 	ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
 	defer cancel()
 	intent, err := a.assistant.Interpret(ctx, newID(), request.Message, contextValue)
@@ -268,6 +273,11 @@ func (a *tripAPI) assistantMessage(w http.ResponseWriter, r *http.Request) {
 	}
 	p := a.planner
 	command := planner.ChangeCommand{Kind: intent.Action, Date: &date, StopID: intent.StopID}
+	if intent.Action == "return_to_hotel" && request.HotelPoint == nil {
+		question := "Укажите точку отеля. Конечная точка дня может быть другим местом."
+		intent.Action = "clarify"
+		intent.Question = &question
+	}
 	switch intent.Action {
 	case "clarify":
 		reply.Reply = *intent.Question
@@ -311,12 +321,12 @@ func (a *tripAPI) assistantMessage(w http.ResponseWriter, r *http.Request) {
 			command.TargetRemainingWalkDistanceM = intent.MaxWalkDistanceM
 			command.StopID = nil
 		case "return_to_hotel":
-			reply.Reply = "Предлагаю вернуться к сохранённой точке завершения дня"
-			if day.EndPoint.Label != nil {
-				reply.Reply += " — «" + *day.EndPoint.Label + "»"
+			reply.Reply = "Предлагаю вернуться в указанный отель"
+			if request.HotelPoint.Label != nil {
+				reply.Reply += " — «" + *request.HotelPoint.Label + "»"
 			}
 			reply.Reply += ". Обязательные остановки сохраняются. "
-			command.HotelPoint = &day.EndPoint
+			command.HotelPoint = request.HotelPoint
 			command.TargetRemainingDurationSec = intent.DurationSec
 			command.TargetRemainingWalkDistanceM = intent.MaxWalkDistanceM
 			command.StopID = nil
@@ -452,6 +462,11 @@ func previewExplanation(p *c.PlanPreview) string {
 func (a *tripAPI) findAssistantPlaces(ctx context.Context, view c.TripView, day c.DayPlan, intent assistant.Intent) ([]c.Candidate, []c.Evidence, []placeOption, error) {
 	if len(intent.Needs) == 0 {
 		return a.findAssistantActivities(ctx, view, day, intent)
+	}
+	if p, err := a.planner.ForCatalog(view.CatalogVersion); err == nil {
+		if _, ok := p.Source.(planner.HTTPSource); ok {
+			return a.findAssistantModelNeeds(ctx, view, day, intent)
+		}
 	}
 	if a.places == nil {
 		return nil, nil, nil, failure(503, "CATALOG_UNAVAILABLE", "Каталог мест рядом не подключён.")

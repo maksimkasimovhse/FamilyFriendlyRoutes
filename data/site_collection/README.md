@@ -1,5 +1,14 @@
 # Первая партия данных сайтов
 
+Для восстановления описаний OSM добавлен пакетный запуск
+`scripts/restore_osm_descriptions.py` и разбор открытого туристического справочника
+`scripts/discover_tourism_descriptions.py`. `scripts/recover_osm_descriptions.py`
+сохраняет исходные фрагменты с evidence, а `scripts/export_all_places.py` собирает
+полный датасет мест в `outputs/all_places_v1/`. Состав и ограничения описаны в
+[`README полного датасета`](../../outputs/all_places_v1/README.md).
+Ключи берутся из локального `.env` только новым пакетным runner; ниже оставлена
+документация прежнего CLI первого сбора.
+
 Восстановлено 20 ноября 2026 года из корневых `continuation_handover.md`,
 `data_enrichment_ml_task.md` и архива продолжения.
 

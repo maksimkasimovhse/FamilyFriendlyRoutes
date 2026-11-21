@@ -1,0 +1,6 @@
+{
+  "policy_version": "dataset-estimates-v1",
+  "meal_duration_estimate_minutes": 45,
+  "meal_duration_origin": "editorial_starting_estimate",
+  "note": "Approximate planning placeholder for a meal, not restaurant service time or a source fact. Other independent visits use models/recommendation_policy.json. Estimates must never replace published session durations or be treated as measured timings."
+}

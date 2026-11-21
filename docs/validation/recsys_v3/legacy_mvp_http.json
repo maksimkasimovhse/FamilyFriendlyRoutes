@@ -1,0 +1,42 @@
+{
+  "checked_at": "2026-11-21T00:47:46.727299+00:00",
+  "passed": true,
+  "model": {
+    "status": "ok",
+    "service": "model-service",
+    "model_version": "city-content-baseline-v1",
+    "catalog_version": "city-osm-v2",
+    "catalog_sha256": "f80508fe1c3133303ddb4a2e58cd93bfe23afd84d46fba56c0cc3fdd10b105cc",
+    "catalog_records": 281,
+    "catalog_places": 281,
+    "supported_catalog_versions": [
+      "city-osm-v2",
+      "city-enriched-v3"
+    ],
+    "purposes": [
+      "initial",
+      "restaurant",
+      "along_route",
+      "toilet",
+      "rain",
+      "playground",
+      "rest"
+    ],
+    "spatial_filters": true,
+    "fixed_sessions": true
+  },
+  "routing": "test_fixture_not_real_osm",
+  "checks": [
+    "recommendation HTTP contract",
+    "mandatory selection",
+    "preview does not mutate",
+    "unknown data acknowledgement",
+    "apply",
+    "idempotent apply",
+    "stale apply rejected",
+    "ML outage preserves saved plan",
+    "initial LLM understanding reaches model",
+    "explicit time budget",
+    "assistant catalog suggestions and contextual selection"
+  ]
+}
