@@ -112,6 +112,8 @@ export const previewDraftChange = (draft, command, basePreviewId) => call('POST'
   expected_version: draft.version, command: { ...command, base_preview_id: basePreviewId }, current_position: null, observed_at: null,
 });
 export const listTrips = () => call('GET', '/api/v1/trips');
+// Прочитать поездку, не делая её текущей (альбом прошлых поездок)
+export const fetchTrip = id => call('GET', '/api/v1/trips/' + id);
 
 // Открыть сохранённую поездку как текущую
 export async function openTrip(id) {

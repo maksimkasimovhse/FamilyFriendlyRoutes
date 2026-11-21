@@ -397,7 +397,7 @@ async function savePreview() {
     clearResume();
     hooks.onDone(trip, st.picked);
   } catch (e) {
-    if (e.code === 'PREVIEW_EXPIRED' || e.code === 'PREVIEW_STALE') {
+    if (e.code === 'PREVIEW_EXPIRED' || e.code === 'PREVIEW_STALE' || e.code === 'PREVIEW_NOT_FOUND') {
       // Вариант устарел (на сервере он живёт 10 минут): строим план заново и накладываем ваши правки
       try {
         const fresh = await planDraft(draftTrip);

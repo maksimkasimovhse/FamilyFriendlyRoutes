@@ -369,7 +369,20 @@
         </div>
       </section>
 
-      <section class="pf-memory" id="pf-memory" aria-labelledby="pf-mem-h">
+      <section class="pf-card" aria-labelledby="pf-trips-h">
+        <div class="pf-head"><h2 id="pf-trips-h">Мои поездки</h2><button class="pf-link" id="prof-newtrip" type="button">Новая</button></div>
+        <div class="trip-rail" id="prof-trips" role="list" aria-label="Мои поездки"></div>
+      </section>
+    </div>
+
+    <!-- Альбом поездки: открывается нажатием на поездку в «Моих поездках» -->
+    <div class="pf-album" id="pf-album" hidden>
+      <header class="pf-album-top">
+        <button type="button" class="pf-album-back" id="pf-album-back" aria-label="Назад к поездкам">‹</button>
+        <b id="pf-album-title">Альбом поездки</b>
+      </header>
+      <div class="pf-album-scroll">
+        <section class="pf-memory" id="pf-memory" aria-labelledby="pf-mem-h">
         <div class="pf-mem-top">
           <div><span class="pf-kicker" id="pf-kicker">Альбом прогулки</span><h2 id="pf-mem-h"></h2></div>
           <div class="pf-ring" id="pf-ring"></div>
@@ -384,10 +397,8 @@
         <button class="pf-share" id="pf-share" type="button">✦ Выложить в сторис</button>
       </section>
 
-      <section class="pf-card" aria-labelledby="pf-trips-h">
-        <div class="pf-head"><h2 id="pf-trips-h">Мои поездки</h2><button class="pf-link" id="prof-newtrip" type="button">Новая</button></div>
-        <ul class="trip-list" id="prof-trips"></ul>
-      </section>
+        <button class="btn alt pf-album-open" id="pf-album-open" type="button" hidden>Открыть маршрут</button>
+      </div>
     </div>
   </section>
 

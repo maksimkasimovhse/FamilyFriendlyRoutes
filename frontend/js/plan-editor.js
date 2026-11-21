@@ -13,7 +13,7 @@ const fmtTime = iso => iso ? new Date(iso).toLocaleTimeString('ru-RU', { hour: '
 const fmtDay = iso => { const t = new Date(iso + 'T12:00:00Z').toLocaleDateString('ru-RU', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'long' }); return t.charAt(0).toUpperCase() + t.slice(1); };
 const fmtDayShort = iso => { const t = new Date(iso + 'T12:00:00Z').toLocaleDateString('ru-RU', { timeZone: 'UTC', weekday: 'short', day: 'numeric' }); return t.charAt(0).toUpperCase() + t.slice(1); };
 
-const isExpired = e => e && (e.code === 'PREVIEW_EXPIRED' || e.code === 'PREVIEW_STALE');
+const isExpired = e => e && (e.code === 'PREVIEW_EXPIRED' || e.code === 'PREVIEW_STALE' || e.code === 'PREVIEW_NOT_FOUND');
 function humanError(e) {
   if (isExpired(e)) return 'Вариант устарел. Нажмите «Применить» ещё раз: мы пересоберём план с вашими правками.';
   if (e.code === 'NETWORK') return 'Нет связи с сервером. Правки сохранены в окне — попробуйте ещё раз.';
