@@ -198,7 +198,7 @@ export interface RecommendationResponse {
 }
 
 export type StopRef = { kind: 'day_start' } | { kind: 'day_end' } |
-  { kind: 'stop'; stop_id: ID };
+  { kind: 'stop'; stop_id: ID } | { kind: 'current_position'; point: Point };
 export interface Stop {
   stop_id: ID; place_id: ID; activity_id: ID; occurrence_id: ID | null;
   title: string; category: Category; location: Point;
@@ -271,6 +271,8 @@ export interface TripView {
   warnings: Warning[];
 }
 export type PlanCommand =
+  | { kind: 'insert_infrastructure_stop'; date: ISODate; place_id: ID }
+  | { kind: 'edit_route'; date: ISODate; text: string }
   | { kind: 'append_manual_choices'; date: ISODate; choices: Selection[]; base_preview_id?: ID }
   | { kind: 'generate_plan' }
   | { kind: 'update_trip_input'; input: TripInput }

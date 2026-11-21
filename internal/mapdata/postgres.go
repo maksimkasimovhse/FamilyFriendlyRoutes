@@ -58,6 +58,11 @@ func (db Postgres) Search(ctx context.Context, q Query) (c.MapResponse, error) {
 		args = []any{string(raw), q.RadiusM, q.Categories, q.Limit + 1, q.Offset}
 		categoryParam, limitParam, offsetParam = 3, 4, 5
 	}
+	placeFilter := ""
+	if q.PlaceID != "" {
+		args = append(args, q.PlaceID)
+		placeFilter = fmt.Sprintf(" AND i.item_id::text=$%d", len(args))
+	}
 	rows, err := tx.Query(ctx, `WITH mapped AS (
  SELECT i.*, CASE c.slug WHEN 'playgrounds' THEN 'playground' WHEN 'parks' THEN 'park'
  WHEN 'benches' THEN 'bench' WHEN 'toilets' THEN 'toilet' WHEN 'pharmacies' THEN 'pharmacy'
@@ -70,7 +75,7 @@ func (db Postgres) Search(ctx context.Context, q Query) (c.MapResponse, error) {
    AND f.source=src.source_kind AND f.updated_at=src.checked_at AND f.fact_key IN ('indoor','toilet','shelter','seating','children_menu','small_portions','play_area')), '{}'::jsonb),
  `+distance+` AS distance_m
  FROM mapped i JOIN item_location l USING(item_id) LEFT JOIN item_map_sources src USING(item_id)
- WHERE i.api_category=ANY(`+fmt.Sprintf("$%d", categoryParam)+`::text[]) AND `+filter+`
+ WHERE i.api_category=ANY(`+fmt.Sprintf("$%d", categoryParam)+`::text[]) AND `+filter+placeFilter+`
  ORDER BY distance_m ASC NULLS LAST,i.item_id ASC LIMIT `+fmt.Sprintf("$%d OFFSET $%d", limitParam, offsetParam), args...)
 	if err != nil {
 		return result, err

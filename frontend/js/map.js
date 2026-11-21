@@ -520,3 +520,11 @@ export function resizeMap() {
   // Пока вкладка была скрыта, карта не знала свой размер и кадр мог «съехать» — переснимаем маршрут целиком
   if (mapReady && day && selected === null && !picked) showArea(allRouteCoords());
 }
+
+export function showRoutePreview(preview) {
+ if(!mapReady)return;const plan=preview.proposed_trip.days.find(d=>d.date===today().date);if(!plan)return;
+ const features=plan.legs.filter(l=>l.geometry).map(l=>({type:'Feature',properties:{leg_id:l.leg_id},geometry:l.geometry}));
+ map.getSource('route').setData({type:'FeatureCollection',features});
+ const coords=features.flatMap(f=>f.geometry.coordinates);if(coords.length)showArea(coords);
+}
+export function clearRoutePreview(){if(mapReady)render({fit:false});}

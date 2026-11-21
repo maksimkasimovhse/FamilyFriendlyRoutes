@@ -129,6 +129,10 @@ func TestPostGISRadiusBBoxImportAndHTTP(t *testing.T) {
 	if len(nearest.Items) != 1 || nearest.Items[0].Name != "Far pharmacy" || nearest.Items[0].DistanceM == nil || *nearest.Items[0].DistanceM <= 1000 {
 		t.Fatal("nearest search incorrectly cut off far results")
 	}
+	lookup, lookupErr := (mapdata.Postgres{Pool: pool}).Search(ctx, mapdata.Query{PlaceID: string(nearest.Items[0].PlaceID), Nearest: true, Categories: mapdata.Categories, Limit: 1})
+	if lookupErr != nil || len(lookup.Items) != 1 || lookup.Items[0].Name != "Far pharmacy" {
+		t.Fatal("catalog identity lookup failed", lookupErr)
+	}
 	empty := get("lon=40&lat=50&radius_km=1", 200)
 	if len(empty.Items) != 0 || empty.Items == nil || empty.Evidence == nil {
 		t.Fatal("empty arrays not preserved")

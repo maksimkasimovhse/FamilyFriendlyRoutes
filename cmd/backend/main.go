@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	c "github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/contracts"
 
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/httpapi"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/mapdata"
@@ -86,6 +88,18 @@ func main() {
 	root.Handle("/api/v1/map/places", httpapi.MapHandler(mapRepository))
 	root.Handle("GET /api/v1/trips/{trip_id}/map/places", httpapi.RouteMapHandler(store, mapRepository))
 	root.Handle("/media/", httpapi.MediaHandler(*imagesDir))
+	if mapRepository != nil {
+		p.Infrastructure = func(ctx context.Context, id c.ID) (c.Place, error) {
+			result, err := mapRepository.Search(ctx, mapdata.Query{PlaceID: string(id), Nearest: true, Categories: mapdata.Categories, Limit: 1})
+			if err != nil {
+				return c.Place{}, err
+			}
+			if len(result.Items) != 1 {
+				return c.Place{}, fmt.Errorf("%w: объект инфраструктуры не найден", planner.ErrValidation)
+			}
+			return result.Items[0], nil
+		}
+	}
 	root.Handle("/", httpapi.TripHandler(store, p))
 	var handler http.Handler = root
 	if *trustProxy {

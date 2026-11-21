@@ -35,10 +35,11 @@ type Router interface {
 	Route(context.Context, routing.Request) (routing.Result, error)
 }
 type Planner struct {
-	Router     Router
-	Activities []Activity
-	Source     CandidateSource
-	metadata   map[c.ID]c.Candidate
+	Infrastructure func(context.Context, c.ID) (c.Place, error)
+	Router         Router
+	Activities     []Activity
+	Source         CandidateSource
+	metadata       map[c.ID]c.Candidate
 }
 
 var ErrValidation = errors.New("trip validation failed")

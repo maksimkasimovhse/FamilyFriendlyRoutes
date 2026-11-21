@@ -466,7 +466,7 @@ func (a *tripAPI) prepare(r *http.Request, owner string, raw []byte) (*c.PlanPre
 		preview.CanApply = false
 	}
 	for _, warning := range proposed.Warnings {
-		critical := slices.Contains([]string{"DEMO_CATALOG", "SNAPPED_ENDPOINTS", "OPENING_HOURS_UNKNOWN", "ELIGIBILITY_UNKNOWN", "BOOKING_UNKNOWN", "START_TIME_UNKNOWN"}, warning.Code)
+		critical := slices.Contains([]string{"DEMO_CATALOG", "SNAPPED_ENDPOINTS", "OPENING_HOURS_UNKNOWN", "ELIGIBILITY_UNKNOWN", "BOOKING_UNKNOWN", "START_TIME_UNKNOWN", "INFRASTRUCTURE_HOURS_UNKNOWN", "GPS_MOVEMENT_ESTIMATED"}, warning.Code)
 		if critical && !slices.Contains(preview.RequiredAcknowledgementCodes, warning.Code) {
 			preview.RequiredAcknowledgementCodes = append(preview.RequiredAcknowledgementCodes, warning.Code)
 		}

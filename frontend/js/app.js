@@ -14,11 +14,11 @@ import { loadFamily, syncLocalProfile, seedDemoNames, clearDeviceData, openOnboa
 import { openTripSetup, markStep, clearResume, afterPick, backToWhen, backToWishes, backToPreview, closeTripSetup, prepareInitialChoices } from './trip-setup.js';
 import { manualSelection, pickConfiguration } from './recommendation-cards.js';
 import { loadRoutePlaces, clearRoutePlaces, onPlacesChange, loadPlaceTypes } from './places.js';
-import { initMap, resizeMap, focusPlace, showPicked, refreshMap } from './map.js';
+import { initMap, resizeMap, focusPlace, showRoutePreview, clearRoutePreview, showPicked, refreshMap } from './map.js';
 import { initPick, openPick } from './pick.js';
 import { initToday, refreshToday, toast } from './today.js';
 import { initWeatherSky } from './weather-sky.js';
-import { initAssistant, openAssistant } from './assistant.js';
+import { initMapActions, openUrgentWidget } from './map-actions.js';
 import { initKid, openKid, syncKidOrder, kidStopInfo, setKidPlaces, clearKidPlaces } from './kid.js';
 
 const $ = id => document.getElementById(id);
@@ -36,7 +36,6 @@ function openTab(name) {
   tabs.forEach(t => t.classList.toggle('on', t.dataset.tab === name));
   screens.forEach(s => { s.hidden = s.dataset.tab !== name; });
   if (name === 'map') resizeMap();
-  if (name === 'helper') openAssistant();
   if (name === 'album') renderProfile();
 }
 tabs.forEach(t => t.addEventListener('click', () => openTab(t.dataset.tab)));
@@ -71,8 +70,8 @@ function startMain() {
     console.error(err);
     $('sheet-body').innerHTML = `<p class="source warn">Не удалось загрузить карту: ${err.message}</p>`;
   });
-  initToday({ childName: name, childNameGenitive: genitive(name), kidStopInfo, onOpenKid: () => openKid(), onNeedNow: () => openTab('helper') });
-  initAssistant({ onShowOnMap: place => { openTab('map'); focusPlace(place); } });
+  initToday({ childName: name, childNameGenitive: genitive(name), kidStopInfo, onOpenKid: () => openKid(), onNeedNow: () => { openTab('map'); openUrgentWidget(); } });
+  initMapActions({onFocus:focusPlace,onPreview:showRoutePreview,onCancel:clearRoutePreview});
 
   // Тропа ребёнка — в порядке маршрута; «Сегодня» — когда подгрузились места рядом
   const syncKid = () => kidReady.then(() => { const day = today(); if (day) syncKidOrder(day.stops.map(s => s.activity_id)); });

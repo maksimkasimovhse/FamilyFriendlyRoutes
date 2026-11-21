@@ -49,10 +49,10 @@ test('rain ranks by distance and marks unknown cafes explicitly',()=>{
   assert.deepEqual(candidates.map(p=>p.place_id),['unknown','covered']);
   assert.match(candidates[0].urgent_note,/не подтверждена/);
 });
-test('skip previews the next planned stop using GPS only on an active day',async()=>{
+test('skip previews the next planned stop from the confirmed route position',async()=>{
   let saved=false;
   const preview={preview_id:'preview-only'};
-  const answer=await runUrgentAction('skip',{day:{execution:{},stops:[{stop_id:'done',progress:'visited'},{stop_id:'next',title:'Музей',progress:'planned'}]},getPosition:async()=>origin,remove:async(id,point)=>{assert.equal(id,'next');assert.deepEqual(point,origin);return preview;},apply:()=>{saved=true;}});
+  const answer=await runUrgentAction('skip',{day:{execution:{},stops:[{stop_id:'done',progress:'visited'},{stop_id:'next',title:'Музей',progress:'planned'}]},getPosition:async()=>origin,remove:async(id,point)=>{assert.equal(id,'next');assert.equal(point,null);return preview;},apply:()=>{saved=true;}});
   assert.equal(answer.preview,preview);assert.equal(saved,false);
 });
 test('mandatory next stop cannot be skipped',async()=>{

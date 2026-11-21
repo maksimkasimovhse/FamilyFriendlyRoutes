@@ -65,7 +65,7 @@
       <div class="ld-grid">
         <article><h3>Под возраст детей</h3><p>Анкета для одного или двух детей от 3 до 11 лет: интересы, темп прогулки, пожелания.</p></article>
         <article><h3>Всё нужное рядом</h3><p>На карте — туалеты, еда, детские площадки, парки, скамейки и аптеки вдоль маршрута.</p></article>
-        <article><h3>Помощник</h3><p>Ребёнок устал или пошёл дождь — помощник предложит, что убрать из маршрута, и найдёт место рядом.</p></article>
+        <article><h3>Срочные действия на карте</h3><p>Ребёнок устал или пошёл дождь — помощник предложит, что убрать из маршрута, и найдёт место рядом.</p></article>
         <article><h3>Настоящие фото</h3><p>Только снимки из архива PastVu, с автором и ссылкой. Ничего не нарисовано нейросетью.</p></article>
       </div>
     </section>
@@ -107,6 +107,7 @@
       <!-- Источники карты (обязательны по лицензиям) и оговорки — спрятаны под «i», как в Яндекс/Google -->
       <button id="btn-info" class="map-info" aria-label="О карте и маршруте" aria-expanded="false">i</button>
       <div class="map-info-pop" id="map-info-pop" hidden></div>
+      <button type="button" id="urgent-toggle" class="urgent-toggle" aria-haspopup="dialog" aria-controls="urgent-dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H9l-5 4zM8 8h8M8 12h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Нужно сейчас</span></button>
 
     </div>
 
@@ -123,6 +124,7 @@
         <button class="chip" data-layer="pharmacy" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/pharmacy.svg" alt="" aria-hidden="true">Аптеки</button>
       </div>
       <div id="sheet-body" aria-live="polite"><p class="muted">Строим маршрут…</p></div>
+      <div class="map-edit"><button type="button" id="map-edit-toggle" aria-expanded="false" aria-controls="map-edit-form"><span>✦</span> Изменить маршрут</button><form id="map-edit-form" hidden><label class="sr-only" for="map-edit-text">Как изменить маршрут</label><div class="map-edit-row"><input id="map-edit-text" maxlength="2000" autocomplete="off" placeholder="Например: убери последнюю точку" required><button type="submit" aria-label="Рассчитать изменение маршрута">↑</button></div><p>Убрать точку, сократить прогулку или пересчитать оставшийся путь.</p></form></div>
     </div>
   </section>
 
@@ -334,22 +336,7 @@
       </div>
     </div>
   </section>
-  <!-- ===== Помощник: ИИ-чат, перестраивает маршрут под семью ===== -->
-  <section class="screen helper" data-tab="helper" hidden>
-    <header class="today-top chat-top">
-      <p class="today-sub">Перестрою маршрут под вас</p>
-      <h1>Помощник</h1>
-      <span class="demo-flag" id="chat-mode" hidden>демо: ответы по правилам</span>
-    </header>
-    <div class="chat" id="chat" aria-live="polite"></div>
-    <div class="chat-suggest" id="chat-suggest"></div>
-    <form class="chat-input" id="chat-form">
-      <input id="chat-text" type="text" autocomplete="off" placeholder="Например: ребёнок устал" aria-label="Сообщение помощнику">
-      <button class="send" aria-label="Отправить">
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 12l16-8-6 16-2-6z" fill="currentColor"/></svg>
-      </button>
-    </form>
-  </section>
+  <dialog id="urgent-dialog" class="urgent-dialog" aria-labelledby="urgent-title"><header><div><small>ПОМОЖЕМ ПО ПУТИ</small><h2 id="urgent-title">Что нужно сейчас?</h2></div><button type="button" id="urgent-close" aria-label="Закрыть срочные действия">×</button></header><div id="urgent-kinds" class="urgent-kinds"></div><div id="urgent-content" class="urgent-content" aria-live="polite"></div></dialog>
   <!-- ===== Альбом и профиль: анкета, мои поездки, выход ===== -->
   <section class="screen profile" data-tab="album" hidden>
     <header class="today-top"><p class="today-sub" id="prof-who"></p><h1>Профиль</h1></header>
@@ -609,7 +596,6 @@
   <!-- ===== Нижнее меню ===== -->
   <nav class="tabbar" aria-label="Разделы">
     <button data-tab="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c3-1 4-5 7-7s5-1 7-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="5" cy="19" r="2" fill="currentColor"/><circle cx="19" cy="6" r="2" fill="currentColor"/></svg>Сегодня</button>
-    <button data-tab="helper"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 7.5l1 2.2 2.2 1-2.2 1-1 2.2-1-2.2-2.2-1 2.2-1z" fill="currentColor"/></svg>Помощник</button>
     <button data-tab="map" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Карта</button>
     <button data-tab="kid" class="kid"><span class="kid-badge">М</span>Маша</button>
     <button data-tab="album"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 16l5-5 4 4 3-3 4 4" fill="none" stroke="currentColor" stroke-width="2"/></svg>Альбом</button>

@@ -4682,6 +4682,23 @@
               "kind",
               "stop_id"
             ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "current_position"
+              },
+              "point": {
+                "$ref": "#/components/schemas/Point"
+              }
+            },
+            "required": [
+              "kind",
+              "point"
+            ]
           }
         ]
       },
@@ -5486,6 +5503,52 @@
               "date",
               "choices"
             ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "insert_infrastructure_stop"
+              },
+              "date": {
+                "$ref": "#/components/schemas/ISODate"
+              },
+              "place_id": {
+                "$ref": "#/components/schemas/ID"
+              }
+            },
+            "required": [
+              "kind",
+              "date",
+              "place_id"
+            ],
+            "description": "Insert a catalog infrastructure object as the next planned stop, preserving visited history and other days. Server resolves coordinates and estimates visit duration. With current_position on an active day, the OSM estimate from the last confirmed position is accounted separately. Returns a normal preview; user confirmation applies it."
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "edit_route"
+              },
+              "date": {
+                "$ref": "#/components/schemas/ISODate"
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "kind",
+              "date",
+              "text"
+            ],
+            "description": "Supported text commands: remove a named/next/last stop, shorten the route, replan. Unsupported or ambiguous requests are rejected; no LLM service is implied."
           }
         ]
       },

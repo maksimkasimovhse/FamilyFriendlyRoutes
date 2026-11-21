@@ -177,3 +177,10 @@ export const previewManualChoices = (t, date, choices, basePreviewId = null) => 
 export function previewRemove(stopId, position = null) {
   return preview({ kind: 'remove_stop', date: today().date, stop_id: stopId }, trip, position);
 }
+
+export function previewInfrastructure(placeId,position) {
+ return preview({kind:'insert_infrastructure_stop',date:today().date,place_id:placeId},trip,position);
+}
+export function previewRouteEdit(text) {
+ return preview({kind:'edit_route',date:today().date,text});
+}

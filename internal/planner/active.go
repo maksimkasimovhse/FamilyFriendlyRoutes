@@ -22,6 +22,8 @@ func stateError(code, message string) error { return &StateError{code, message} 
 
 // Only commands implemented in this stage. Unknown fields are rejected by HTTP.
 type ChangeCommand struct {
+	PlaceID       *c.ID          `json:"place_id,omitempty"`
+	Text          *string        `json:"text,omitempty"`
 	Choices       []c.Selection  `json:"choices,omitempty"`
 	BasePreviewID *c.ID          `json:"base_preview_id,omitempty"`
 	Kind          string         `json:"kind"`
@@ -32,11 +34,21 @@ type ChangeCommand struct {
 }
 
 func (cmd ChangeCommand) Validate() error {
+	if cmd.Kind != "edit_route" && cmd.Text != nil {
+		return stateError("INVALID_COMMAND", "text допустим только для запроса изменения маршрута.")
+	}
+	if cmd.Kind != "insert_infrastructure_stop" && cmd.PlaceID != nil {
+		return stateError("INVALID_COMMAND", "place_id допустим только для срочного захода.")
+	}
 	if cmd.Kind != "append_manual_choices" && (cmd.Choices != nil || cmd.BasePreviewID != nil) {
 		return stateError("INVALID_COMMAND", "Поля дополнения недопустимы для этой команды.")
 	}
 	valid := false
 	switch cmd.Kind {
+	case "edit_route":
+		valid = cmd.Date != nil && cmd.Text != nil && len(*cmd.Text) > 0 && len(*cmd.Text) <= 2000 && cmd.PlaceID == nil && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
+	case "insert_infrastructure_stop":
+		valid = cmd.Date != nil && cmd.PlaceID != nil && *cmd.PlaceID != "" && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
 	case "append_manual_choices":
 		valid = cmd.Date != nil && len(cmd.Choices) > 0 && len(cmd.Choices) <= budgetDefaults.CompletionPolicy.ManualLimitPerDay && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
 	case "generate_plan":
@@ -214,12 +226,22 @@ func (p Planner) Change(ctx context.Context, view c.TripView, cmd ChangeCommand,
 	if err := cmd.Validate(); err != nil {
 		return c.TripView{}, err
 	}
+	if cmd.Kind == "edit_route" {
+		resolved, err := resolveRouteEdit(view, cmd)
+		if err != nil {
+			return c.TripView{}, err
+		}
+		return p.Change(ctx, view, resolved, position, observed, now)
+	}
 	copied, err := cloneView(view)
 	if err != nil {
 		return c.TripView{}, err
 	}
 	view = copied
 	view.Input = resolveBudgetDefaults(view.Input)
+	if cmd.Kind == "insert_infrastructure_stop" {
+		return p.insertInfrastructure(ctx, view, cmd, position, observed, now)
+	}
 	if cmd.Date == nil {
 		return c.TripView{}, stateError("INVALID_COMMAND", "Нужна дата дня.")
 	}

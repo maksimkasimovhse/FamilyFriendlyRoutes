@@ -20,6 +20,8 @@ var ErrQuery = errors.New("invalid map query")
 var Categories = []string{"playground", "park", "bench", "toilet", "pharmacy", "restaurant"}
 
 type Query struct {
+	// PlaceID is internal-only: resolve a chosen catalog object before routing.
+	PlaceID           string
 	Nearest           bool
 	Lon, Lat, RadiusM float64
 	BBox              *[4]float64
