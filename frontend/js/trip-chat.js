@@ -58,7 +58,7 @@ async function send(text) {
   if (!text || busy) return;
   busy = true;
   $('chat-send').disabled = true;
-  $('chat-input').value = '';
+  $('chat-input').value = ''; $('chat-input').style.height = '48px';
   bubble('me', text);
   messages.push(text);
   const wait = bubble('bot typing', 'Подбираю места…');
@@ -88,6 +88,9 @@ async function send(text) {
 function bind() {
   bound = true;
   $('wish-chat-form').onsubmit = e => { e.preventDefault(); send($('chat-input').value); };
+  // Поле растёт по мере набора (до 4 строк), но пока текст короткий — той же высоты, что кнопка отправки
+  const fit = () => { const t = $('chat-input'); t.style.height = '48px'; t.style.height = Math.min(t.scrollHeight, 110) + 'px'; };
+  $('chat-input').addEventListener('input', fit);
   $('chat-input').addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send($('chat-input').value); }
   });

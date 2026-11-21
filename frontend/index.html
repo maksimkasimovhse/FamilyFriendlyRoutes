@@ -51,9 +51,10 @@
         <h1>Нижний, каким его видели сто лет назад</h1>
         <p class="ld-lead">Откройте для себя персонализированные семейные маршруты по Нижнему Новгороду, вовлекающие вашего ребенка в процесс изучения города!</p>
         <div class="ld-cta">
-          <button type="button" class="ld-btn primary" data-auth="register">Начать прогулку</button>
-          <a class="ld-btn ghost" href="#how">Как это работает</a>
+          <button type="button" class="ld-btn primary" data-auth="register">Создать аккаунт</button>
+          <button type="button" class="ld-btn ghost" data-guest>Попробовать без входа</button>
         </div>
+        <a class="ld-how" href="#how">Как это работает ↓</a>
       </div>
       <div class="ld-stack" aria-hidden="true">
         <figure class="ph a"><img src="media/windows/kremlin-old.jpg" alt=""><figcaption>1886–1916</figcaption></figure>
@@ -89,7 +90,7 @@
       <p>Регистрация занимает минуту. Можно и без неё — поездка сохранится на сутки на этом телефоне.</p>
       <div class="ld-cta center">
         <button type="button" class="ld-btn primary" data-auth="register">Создать аккаунт</button>
-        <button type="button" class="ld-btn ghost" id="ld-guest">Попробовать без входа</button>
+        <button type="button" class="ld-btn ghost" data-guest>Попробовать без входа</button>
       </div>
     </section>
   </main>
@@ -585,7 +586,7 @@
     <div class="chat-log" id="chat-log" aria-live="polite"></div>
     <div class="chat-chips" id="chat-chips"></div>
     <form class="chat-form" id="wish-chat-form" autocomplete="off">
-      <textarea id="chat-input" rows="1" maxlength="600" placeholder="Например: любим историю и театры, без музеев" aria-label="Ваши пожелания"></textarea>
+      <textarea id="chat-input" rows="1" maxlength="600" placeholder="Например: любим театры" aria-label="Ваши пожелания"></textarea>
       <button type="submit" class="chat-send" id="chat-send" aria-label="Отправить">➤</button>
     </form>
     <div class="flow-bottom">

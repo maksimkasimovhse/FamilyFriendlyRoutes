@@ -227,7 +227,7 @@ document.querySelectorAll('#landing [data-auth]').forEach(b => {
     openAuthFlow(afterAuth, b.dataset.auth);
   };
 });
-$('ld-guest').onclick = () => { $('landing').hidden = true; guestEnter(); };
+document.querySelectorAll('#landing [data-guest]').forEach(b => { b.onclick = () => { $('landing').hidden = true; guestEnter(); }; });
 $('auth-back').onclick = () => { $('onb-auth').hidden = true; if (mainStarted) { app.classList.remove('flow-mode'); } else showLanding(); };
 initAuthScreen({
   onDone: async () => { $('onb-auth').hidden = true; await authCallback?.(); },

@@ -37,6 +37,9 @@ main > section, .ld-foot { padding-left: max(20px, calc((100% - 1040px) / 2)); p
 }
 .ld-btn.primary { background: var(--now); color: #fff !important; box-shadow: 0 6px 18px rgba(36,99,214,.3); }
 .ld-btn.ghost { background: transparent; color: var(--ink) !important; border-color: var(--line); background: #fff; }
+.ld-how { display: inline-block; margin-top: 16px; color: var(--now); font-weight: 800; font-size: 15px; text-decoration: none; }
+/* На телефоне кнопки — одной ширины и во всю строку: сразу видно, что их две и выбирать между ними */
+@media (max-width: 600px) { .ld-cta .ld-btn { flex: 1 1 100%; } .ld-cta.center { flex-direction: column; } }
 .ld-fine { margin: 14px 0 0; color: var(--ink-2); font-size: 14px; font-weight: 600; }
 
 /* Стопка старых фото */
