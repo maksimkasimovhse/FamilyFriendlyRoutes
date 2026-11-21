@@ -14,6 +14,7 @@
 <link href="css/chat.css" rel="stylesheet">
 <link href="css/onboarding.css" rel="stylesheet">
 <link href="css/today.css" rel="stylesheet">
+<link href="css/profile.css" rel="stylesheet">
 <link href="css/landing.css" rel="stylesheet">
 <script src="vendor/maplibre-gl-4.7.1/maplibre-gl.js"></script>
 <script type="module" src="js/app.js"></script>
@@ -98,6 +99,11 @@
     <div class="map-wrap">
       <div id="map" aria-label="Карта маршрута"></div>
       <div id="map-sky" class="map-sky" hidden aria-hidden="true"><canvas></canvas></div>
+
+      <!-- Детский режим: быстрый вход прямо с карты (карту переделает Максим — кнопку просто перенести) -->
+      <button type="button" class="kid-fab" id="kid-fab" aria-label="Детский режим">
+        <span class="kid-fab-ava"><img src="media/fawn/fawn-base.svg" alt=""></span><b>Детский режим</b>
+      </button>
 
       <div class="map-buttons">
         <button id="btn-3d" class="round" aria-label="Переключить 3D" title="2D / 3D">3D</button>
@@ -339,24 +345,39 @@
     </div>
   </section>
   <dialog id="urgent-dialog" class="urgent-dialog" aria-labelledby="urgent-title"><header><div><small>ПОМОЖЕМ ПО ПУТИ</small><h2 id="urgent-title">Что нужно сейчас?</h2></div><button type="button" id="urgent-close" aria-label="Закрыть срочные действия">×</button></header><div id="urgent-kinds" class="urgent-kinds"></div><div id="urgent-content" class="urgent-content" aria-live="polite"></div></dialog>
-  <!-- ===== Альбом и профиль: анкета, мои поездки, выход ===== -->
-  <section class="screen profile" data-tab="album" hidden>
-    <header class="today-top"><p class="today-sub" id="prof-who"></p><h1>Профиль</h1></header>
-    <div class="today-scroll">
-      <div class="card-w">
-        <b>Семья</b>
-        <p class="muted" id="prof-family"></p>
-        <div class="row">
-          <button class="btn alt slim" id="prof-edit">Изменить анкету</button>
-          <button class="btn main slim" id="prof-newtrip">Новая поездка</button>
+  <!-- ===== Профиль: дети, память о поездке (статистика, фото, достижения), мои поездки ===== -->
+  <section class="screen profile" data-tab="profile" hidden>
+    <div class="pf-scroll">
+      <header class="pf-hero">
+        <span class="pf-ava" id="pf-ava">·</span>
+        <div class="pf-who"><b id="pf-name">Профиль</b><small id="pf-sub"></small></div>
+        <button class="pf-out" id="prof-auth" type="button">Выйти</button>
+      </header>
+
+      <section class="pf-card" aria-labelledby="pf-kids-h">
+        <div class="pf-head"><h2 id="pf-kids-h">Дети</h2><button class="pf-link" id="prof-edit" type="button">Изменить</button></div>
+        <div id="pf-kids"></div>
+        <p class="pf-adults" id="pf-adults"></p>
+      </section>
+
+      <!-- Память о поездке: можно показать на память и выложить в сторис -->
+      <section class="pf-memory" id="pf-memory" aria-labelledby="pf-mem-h">
+        <div class="pf-mem-top">
+          <span class="pf-kicker">Память о поездке</span>
+          <h2 id="pf-mem-h">Наша прогулка по&nbsp;Нижнему</h2>
         </div>
-      </div>
-      <div class="card-w">
-        <b>Мои поездки</b>
+        <div class="pf-stats" id="pf-stats"></div>
+        <div class="pf-seen" id="pf-seen"></div>
+        <div class="pf-photos" id="pf-photos"></div>
+        <input type="file" id="pf-file" accept="image/*" multiple hidden>
+        <div class="pf-ach" id="pf-ach"></div>
+        <button class="pf-share" id="pf-share" type="button"><span aria-hidden="true">✦</span> Выложить в сторис</button>
+      </section>
+
+      <section class="pf-card" aria-labelledby="pf-trips-h">
+        <div class="pf-head"><h2 id="pf-trips-h">Мои поездки</h2><button class="pf-link" id="prof-newtrip" type="button">Новая</button></div>
         <ul class="trip-list" id="prof-trips"><li class="muted">Загружаем…</li></ul>
-      </div>
-      <button class="btn alt" id="prof-auth">Выйти</button>
-      <p class="fine center">Альбом «тогда и сейчас» появится здесь.</p>
+      </section>
     </div>
   </section>
 
@@ -615,9 +636,10 @@
   <!-- ===== Нижнее меню ===== -->
   <nav class="tabbar" aria-label="Разделы">
     <button data-tab="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c3-1 4-5 7-7s5-1 7-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="5" cy="19" r="2" fill="currentColor"/><circle cx="19" cy="6" r="2" fill="currentColor"/></svg>Сегодня</button>
-    <button data-tab="map" class="on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Карта</button>
-    <button data-tab="kid" class="kid"><span class="kid-badge">М</span>Маша</button>
-    <button data-tab="album"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 16l5-5 4 4 3-3 4 4" fill="none" stroke="currentColor" stroke-width="2"/></svg>Альбом</button>
+    <button data-tab="map" class="map-tab on" aria-label="Карта">
+      <span class="map-disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Карта
+    </button>
+    <button data-tab="profile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Профиль</button>
   </nav>
 </div>
 </body>

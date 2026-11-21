@@ -19,6 +19,7 @@ import { initPick, openPick } from './pick.js';
 import { initToday, refreshToday, toast } from './today.js';
 import { initWeatherSky } from './weather-sky.js';
 import { initMapActions, openUrgentWidget } from './map-actions.js';
+import { initProfile, renderProfile } from './profile.js';
 import { initKid, openKid, syncKidOrder, kidStopInfo, setKidPlaces, clearKidPlaces } from './kid.js';
 
 const $ = id => document.getElementById(id);
@@ -36,7 +37,7 @@ function openTab(name) {
   tabs.forEach(t => t.classList.toggle('on', t.dataset.tab === name));
   screens.forEach(s => { s.hidden = s.dataset.tab !== name; });
   if (name === 'map') resizeMap();
-  if (name === 'album') renderProfile();
+  if (name === 'profile') renderProfile();
 }
 tabs.forEach(t => t.addEventListener('click', () => openTab(t.dataset.tab)));
 
@@ -57,8 +58,6 @@ function startMain() {
   // Имя ребёнка — из анкеты на этом устройстве; детский режим пока ведёт первого ребёнка
   const name = childName(0);
   const age = currentProfile()?.family.children[0]?.age_years || 7;
-  document.querySelectorAll('.tabbar .kid').forEach(b => { b.lastChild.textContent = name.startsWith('Ребёнок') ? 'Ребёнок' : name; });
-  document.querySelectorAll('.kid-badge').forEach(b => { b.textContent = name.charAt(0).toUpperCase(); });
 
   kidReady = initKid({
     childName: name, childNameGenitive: genitive(name), ageYears: age,
@@ -246,51 +245,25 @@ async function afterAuth() {
   } catch (err) { showFatal(err); }
 }
 
-// ---------- Профиль (вкладка «Альбом») ----------
-async function renderProfile() {
-  $('prof-who').textContent = isAuthenticated() ? userEmail() : 'Без входа · поездка хранится сутки на этом устройстве';
-  $('prof-family').textContent = familySummary() || 'Анкета не заполнена';
-  $('prof-auth').textContent = isAuthenticated() ? 'Выйти' : 'Войти или зарегистрироваться';
-  const list = $('prof-trips');
-  try {
-    const { items } = await listTrips();
-    const current = getTrip()?.trip_id;
-    list.innerHTML = items.length ? '' : '<li class="muted">Поездок пока нет</li>';
-    items.forEach(t => {
-      const li = document.createElement('li');
-      const date = new Date(t.updated_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
-      li.innerHTML = `<span><b>Поездка от ${date}</b><small>${t.status === 'draft' ? 'черновик' : 'маршрут сохранён'}</small></span>`;
-      if (t.trip_id === current) li.insertAdjacentHTML('beforeend', '<span class="cur">открыта</span>');
-      else if (t.status !== 'draft') {
-        const b = document.createElement('button');
-        b.className = 'btn alt slim';
-        b.textContent = 'Открыть';
-        b.onclick = async () => { await openTrip(t.trip_id); openTab('today'); };
-        li.append(b);
-      }
-      list.append(li);
-    });
-  } catch {
-    list.innerHTML = '<li class="muted">Список поездок сейчас недоступен</li>';
-  }
-}
-$('prof-edit').onclick = () => openOnboarding({
-  authenticated: isAuthenticated(),
-  onDone: () => location.reload(),          // имя и возраст ребёнка перечитаются везде
-  onBack: () => { closeOnboarding(); app.classList.remove('flow-mode'); },
-});
-$('prof-newtrip').onclick = () => { clearResume(); startTripSetup(); };
-$('prof-auth').onclick = async () => {
-  if (isAuthenticated()) {
+// ---------- Профиль ----------
+initProfile({
+  onEditProfile: () => openOnboarding({
+    authenticated: isAuthenticated(),
+    onDone: () => location.reload(),          // имя и возраст ребёнка перечитаются везде
+    onBack: () => { closeOnboarding(); app.classList.remove('flow-mode'); },
+  }),
+  onNewTrip: () => { clearResume(); startTripSetup(); },
+  onOpenTrip: () => openTab('today'),
+  onSignOut: async () => {
     await signOut();
     forget();
     // Анкету этого аккаунта с устройства убираем: телефоном может пользоваться кто-то ещё
     try { localStorage.removeItem('family-profile-v1'); localStorage.removeItem('child-names-v1'); } catch { /* ничего */ }
     location.reload();
-  } else {
-    openAuthFlow(async () => { await syncLocalProfile(); location.reload(); });
-  }
-};
+  },
+  onSignIn: () => openAuthFlow(async () => { await syncLocalProfile(); location.reload(); }),
+});
+$('kid-fab').onclick = () => openKid();     // детский режим — кнопка на карте
 
 // ---------- Запуск ----------
 function showFatal(err) {

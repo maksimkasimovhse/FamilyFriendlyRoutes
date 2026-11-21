@@ -139,6 +139,10 @@ export function seedDemoNames(email) {
   write(NAMES_KEY, names);
 }
 
+// Названия интересов для профиля
+export const interestLabel = id => (CHILD_INTERESTS.concat(ADULT_INTERESTS).find(o => o.id === id) || { label: id }).label;
+export const adultInterestLabels = ids => ids.map(interestLabel);
+
 // ---------- Экраны ----------
 let draft = null;      // редактируемая копия
 let unsure = {};       // «Пока не знаем» по child_id

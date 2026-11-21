@@ -249,6 +249,14 @@ export function clearKidPlaces() {
   if (!$('kid-mode').hidden) renderTrail();
 }
 
+// Прогресс ребёнка для профиля: штампы за пройденные задания и текущий наряд оленёнка
+export function kidProgress() {
+  let saved = state;
+  try { saved = { ...state, ...JSON.parse(localStorage.getItem('kid-state') || '{}') }; } catch { /* приватный режим */ }
+  const outfit = route && route.outfits[saved.outfit] ? route.outfits[saved.outfit].img : 'media/fawn/fawn-base.svg';
+  return { stamps: (saved.done || []).length, outfitImg: outfit };
+}
+
 // Сводка для экрана родителя «Сегодня»: сколько точек и окон осталось на тропе ребёнка
 export function kidSummary() {
   if (!route) return null;
