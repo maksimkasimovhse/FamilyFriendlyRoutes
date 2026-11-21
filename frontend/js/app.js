@@ -17,7 +17,6 @@ import { loadRoutePlaces, clearRoutePlaces, onPlacesChange, loadPlaceTypes } fro
 import { initMap, resizeMap, focusPlace, showRoutePreview, clearRoutePreview, showPicked, refreshMap, setAmenityFilter } from './map.js';
 import { initPick, openPick } from './pick.js';
 import { initToday, refreshToday, toast } from './today.js';
-import { initWeatherSky } from './weather-sky.js';
 import { initMapActions, openUrgentWidget } from './map-actions.js';
 import { initProfile, renderProfile } from './profile.js';
 import { initKid, openKid, syncKidOrder, kidStopInfo, setKidPlaces, clearKidPlaces } from './kid.js';
@@ -119,7 +118,6 @@ function leavePickStep() {
   document.querySelector('#screen-pick .pick-top h1').textContent = 'Подбор мест';
   $('screen-pick').hidden = true;
 }
-initWeatherSky($('map-sky'));
 initPick({
   onFinish: async places => {
     if (customPickFinish) {

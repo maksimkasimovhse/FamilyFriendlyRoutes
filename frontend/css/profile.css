@@ -13,8 +13,8 @@
 #screen-map .map-wrap { position: absolute; inset: 0; flex: none; }
 #screen-map .sheet { position: absolute; left: 0; right: 0; bottom: 0; margin-top: 0; }
 #screen-map .map-sheet-content { max-height: 46dvh; scroll-behavior: smooth; }
-.map-info { bottom: auto; top: 66px; }
-.map-info-pop { bottom: auto; top: 102px; }
+.map-info { bottom: auto; top: 14px; }
+.map-info-pop { bottom: auto; top: 50px; }
 
 /* ===== Профиль ===== */
 .profile { background: var(--bg); }
