@@ -5,13 +5,19 @@
 // поровну на все места) или вопросы (quiz, только у памятника Чкалову, текст в data/kid-quiz.json).
 // Решил задание — получил штамп. Озвучки нет. Прогресс — только в этом браузере (localStorage).
 //
-// ?reset=1 — начать тропу заново.
+// Плюс одно «Окно в прошлое» (PAST_ID, первая остановка): старое фото PastVu → встать на место фотографа →
+// камера с полупрозрачным старым кадром → «тогда / сейчас», новый наряд оленёнка, сторис.
+//
+// ?reset=1 — начать тропу заново. ?demo=0 — окно открывается только на месте (по GPS);
+// по умолчанию демо: «считаем, что вы на месте».
 
 import { startGame, GAME_LABELS, GAME_HINTS } from './games.js';
 import { loadCards, cardById, orderByNearest } from './catalog.js';
+import { watchPlace, enableCompass, openCamera, closeCamera } from './camera.js';
 
 const $ = id => document.getElementById(id);
 const ICONS = {
+  camera: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>',
   star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" fill="currentColor"/></svg>',
   check: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 };
@@ -19,10 +25,17 @@ const ICONS = {
 let route = null;
 let quiz = {};            // вопросы по id места (data/kid-quiz.json)
 let child = { name: 'Маша', ageGroup: '6-8' };
-let state = { done: [], outfit: 'base', demo: false, picks: [] };   // picks — id мест, выбранных для маршрута
+let state = { done: [], outfit: 'base', demo: true, picks: [] };   // picks — id мест, выбранных для маршрута
 let current = null;        // открытая остановка
 let game = null;           // запущенная игра (promise с { destroy })
 let onExit = () => {};
+let stopWatch = null;       // слежение за GPS на экране окна
+let lastPhoto = null;       // { stop, url } — для «Сохранить сторис»
+
+// Единственное окно в прошлое на тропе — пока одно, на нём доводим вид и сценарий
+const PAST_ID = 'win_minin';
+const isWindow = s => s.id === PAST_ID;
+const pastStop = () => route.demoStops.find(s => s.id === PAST_ID);
 
 // ---------- Прогресс ----------
 function load() { try { Object.assign(state, JSON.parse(localStorage.getItem('kid-state') || '{}')); } catch { /* приватный режим */ } }
@@ -36,8 +49,12 @@ function gameOf(s) {
 const placeStop = card => ({ id: 'place_' + card.id, type: 'task', title: card.title, point: card.location, place: card.id });
 function applyPicks() {
   const cards = state.picks.map(cardById).filter(Boolean);
-  route.stops = cards.length ? cards.map(placeStop) : [...route.demoStops];
+  const stops = cards.length ? cards.map(placeStop) : [...route.demoStops];
+  const w = pastStop();
+  // окно — первой остановкой; то же место без окна из тропы убираем
+  route.stops = w ? [w, ...stops.filter(s => s.id !== w.id && s.place !== w.place)] : stops;
 }
+const kindLabel = s => isWindow(s) ? `Окно в прошлое · ${s.years}` : GAME_LABELS[gameOf(s).type];
 const isDone = s => state.done.includes(s.id);
 const nextStop = () => route.stops.find(s => !isDone(s));
 const outfitImg = id => route.outfits[id].img;
@@ -59,6 +76,7 @@ function fawnSays(text) {
 function fawnLine() {
   const n = nextStop();
   if (!n) return `Мы прошли всю тропу! ${child.name}, ты настоящий путешественник!`;
+  if (isWindow(n)) return `Идём к остановке «${n.title}». Там откроем окно в прошлое — посмотрим, как здесь было в ${n.years.split('–')[0]} году!`;
   return `Идём к остановке «${n.title}». Нас ждёт задание: ${GAME_LABELS[gameOf(n).type].toLowerCase()}!`;
 }
 
@@ -101,8 +119,8 @@ function renderTrail() {
     // кружок (56px) центрируем на точке; справа от центра подпись уходит влево
     if (p.x > w / 2) b.style.right = (w - p.x - 28) + 'px'; else b.style.left = (p.x - 28) + 'px';
     b.style.top = p.y + 'px';
-    const icon = isDone(p.s) ? ICONS.check : ICONS.star;
-    const sub = GAME_LABELS[gameOf(p.s).type];
+    const icon = isDone(p.s) ? ICONS.check : isWindow(p.s) ? ICONS.camera : ICONS.star;
+    const sub = kindLabel(p.s);
     b.innerHTML = `<span class="pt">${icon}</span><span class="lbl"></span>`;
     b.querySelector('.lbl').textContent = p.s.title;
     b.querySelector('.lbl').insertAdjacentHTML('beforeend', `<small>${sub}</small>`);
@@ -121,17 +139,19 @@ function renderTrail() {
 
 // ---------- Переходы между страницами режима ----------
 function showPage(id) {
-  ['game-page', 'stamp-page'].forEach(p => { $(p).hidden = p !== id; });
+  ['game-page', 'stamp-page', 'window-page', 'result-page'].forEach(p => { $(p).hidden = p !== id; });
 }
 function backToTrail() {
   stopGame();
+  if (stopWatch) { stopWatch(); stopWatch = null; }
+  closeCamera();
   showPage(null);
   renderTrail();
 }
 
 function openStop(s) {
   current = s;
-  openGame(s);
+  if (isWindow(s)) openWindow(s); else openGame(s);
 }
 
 // ---------- Задание: игра с картинкой объекта ----------
@@ -186,11 +206,119 @@ function finishStop(s) {
 
 function showStamp(s) {
   const all = route.stops;
-  $('stamp-icon').innerHTML = ICONS.star;
+  $('stamp-icon').innerHTML = isWindow(s) ? ICONS.camera : ICONS.star;
   $('stamp-text').textContent = `Штамп «${s.title}» твой!`;
   $('stamp-row').innerHTML = all.map(x => `<span class="${isDone(x) ? 'on' : ''}"></span>`).join('');
   $('stamp-next').textContent = nextStop() ? 'Дальше по тропе' : 'Тропа пройдена!';
   showPage('stamp-page');
+}
+
+// ---------- Окно в прошлое, шаг 1: старое фото и место фотографа ----------
+function openWindow(s) {
+  stopGame();
+  $('win-title').textContent = s.title;
+  $('win-years').textContent = s.years;
+  $('win-old').src = s.photo.url;
+  $('win-old').alt = `Старое фото: ${s.title}, ${s.years}`;
+  $('win-attrib').textContent = s.photo.attribution;
+  $('win-say').textContent = 'Найдите место, где стоял фотограф, и сфотографируйтесь вместе — окно откроется!';
+  showPage('window-page');
+  const btn = $('win-camera');
+  stopWatch = watchPlace(s, state.demo, st => {
+    $('win-place').textContent = st.text;
+    $('win-place').classList.toggle('ready', st.ready);
+    btn.disabled = !st.ready;
+  });
+}
+
+// Шаг 2: камера с полупрозрачным старым кадром
+async function startCamera() {
+  if (stopWatch) { stopWatch(); stopWatch = null; }
+  await enableCompass();   // iPhone: разрешение — только по нажатию
+  openCamera(current, state.demo, (url, aspect) => showResult(current, url, aspect));
+}
+
+// Шаг 3: окно открыто — тогда / сейчас
+function showResult(s, url, aspect) {
+  lastPhoto = { stop: s, url };
+  $('res-title').textContent = s.title;
+  $('res-years').textContent = s.years;
+  const tn = $('res-tn');
+  tn.style.aspectRatio = String(aspect);
+  tn.style.width = `min(100%, calc(52dvh * ${aspect}))`;
+  tn.style.setProperty('--cut', '50%');
+  $('res-range').value = 50;
+  $('res-now').src = url;
+  $('res-old').src = s.photo.url;
+  $('res-old').alt = `Тогда: ${s.title}, ${s.years}`;
+  $('res-attrib').innerHTML = '';
+  const a = document.createElement('a');
+  a.href = s.photo.sourceUrl; a.target = '_blank'; a.rel = 'noopener'; a.textContent = s.photo.attribution;
+  $('res-attrib').append(a);
+  $('res-kid').textContent = s.kidText;
+  $('res-adult').textContent = s.adultText;
+  $('res-source').textContent = 'Источник: ' + s.textSource;
+  showPage('result-page');
+
+  const firstTime = !isDone(s);
+  finishStop(s);
+  if (firstTime && s.outfit) showReward(s.outfit);
+}
+
+function showReward(outfitId) {
+  const o = route.outfits[outfitId];
+  $('reward-img').src = o.img;
+  $('reward-text').textContent = `Оленёнок теперь — ${o.title.toLowerCase()}!`;
+  $('reward').hidden = false;
+  $('reward-ok').onclick = () => {
+    $('reward').hidden = true;
+    state.outfit = outfitId;
+    save();
+    $('fawn-img').src = o.img;
+    $('fawn-buddy').classList.remove('bounce');
+    void $('fawn-buddy').offsetWidth;   // перезапуск анимации
+    $('fawn-buddy').classList.add('bounce');
+  };
+}
+
+// «Сохранить сторис»: картинка 1080×1920 — сверху «тогда», снизу «сейчас»
+async function saveStory() {
+  if (!lastPhoto) return;
+  const { stop: s, url } = lastPhoto;
+  const loadImg = src => new Promise((ok, fail) => { const i = new Image(); i.onload = () => ok(i); i.onerror = fail; i.src = src; });
+  const [oldImg, nowImg, fawn] = await Promise.all([loadImg(s.photo.url), loadImg(url), loadImg(outfitImg(s.outfit || state.outfit))]);
+  const c = document.createElement('canvas');
+  c.width = 1080; c.height = 1920;
+  const g = c.getContext('2d');
+  g.fillStyle = '#13223A'; g.fillRect(0, 0, 1080, 1920);
+  const cover = (img, x, y, w, h) => {
+    const sc = Math.max(w / img.width, h / img.height), sw = w / sc, sh = h / sc;
+    g.save(); g.beginPath(); g.roundRect(x, y, w, h, 36); g.clip();
+    g.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, x, y, w, h);
+    g.restore();
+  };
+  cover(oldImg, 60, 250, 960, 760);
+  cover(nowImg, 60, 1050, 960, 760);
+  g.fillStyle = '#F1E7D6';
+  g.font = '800 66px Nunito, sans-serif';
+  g.fillText('Мы открыли окно в прошлое', 60, 130);
+  g.font = '700 40px Nunito, sans-serif';
+  g.fillText(`${s.title} · ${s.years}`, 60, 196);
+  const label = (t, y, color) => { g.fillStyle = color; g.beginPath(); g.roundRect(90, y, 210, 64, 32); g.fill(); g.fillStyle = '#fff'; g.font = '800 34px Nunito, sans-serif'; g.fillText(t, 118, y + 44); };
+  label('ТОГДА', 280, '#8A5A2B');
+  label('СЕЙЧАС', 1080, '#2463D6');
+  g.drawImage(fawn, 820, 1600, 220, 242);
+  g.fillStyle = '#8D97AB'; g.font = '400 26px Nunito, sans-serif';
+  g.fillText(s.photo.attribution, 60, 1870);
+
+  const blob = await new Promise(ok => c.toBlob(ok, 'image/jpeg', 0.9));
+  const file = new File([blob], `okno-${s.id}.jpg`, { type: 'image/jpeg' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'Окно в прошлое' }); return; } catch { /* отменили — скачаем */ }
+  }
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob); link.download = file.name; link.click();
+  setTimeout(() => URL.revokeObjectURL(link.href), 5000);
 }
 
 // ---------- Вход и выход из режима ----------
@@ -228,6 +356,10 @@ export async function initKid(options) {
   document.querySelectorAll('.kid-mode [data-back]').forEach(b => b.addEventListener('click', backToTrail));
   $('stamp-next').onclick = backToTrail;
   $('stamp-return').onclick = closeKid;
+  $('win-camera').onclick = startCamera;
+  $('res-range').oninput = e => $('res-tn').style.setProperty('--cut', e.target.value + '%');
+  $('res-next').onclick = () => showStamp(current);
+  $('res-save').onclick = () => saveStory().catch(err => alert('Не получилось сохранить: ' + err.message));
   addEventListener('resize', () => { if (!$('kid-mode').hidden) renderTrail(); });
 }
 
@@ -271,7 +403,7 @@ export function syncKidOrder(activityIds) {
   const pos = id => { const i = activityIds.indexOf(id); return i === -1 ? 999 : i; };
   route.demoStops.sort((a, b) => pos(a.id) - pos(b.id));
   if (state.picks.length) return;          // тропа из выбранных мест идёт в порядке выбора, а не демо-маршрута
-  route.stops = [...route.demoStops];
+  applyPicks();
   if (!$('kid-mode').hidden) renderTrail();
 }
 
@@ -279,5 +411,6 @@ export function syncKidOrder(activityIds) {
 export function kidStopInfo(activityId) {
   const s = route && route.demoStops.find(x => x.id === activityId);
   if (!s) return null;
+  if (isWindow(s)) return { type: 'window', label: 'Окно в прошлое', years: s.years, done: isDone(s), photo: s.photo.url };
   return { type: 'task', label: GAME_LABELS[gameOf(s).type], years: null, done: isDone(s), photo: null };
 }
