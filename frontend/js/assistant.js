@@ -1,3 +1,4 @@
+import { requestId } from './request-id.js';
 // «Помощник» — чат, который перестраивает маршрут на сегодня (ИИ — зона Вильдана).
 // Сначала спрашиваем настоящий сервис (контракт: docs/contracts/assistant_draft.md),
 // если его ещё нет — отвечает мок на правилах (assistant-mock.js) с пометкой «демо».
@@ -5,7 +6,7 @@
 
 import { today, tripId, tripVersion, csrf, applyPreview, onTripChange } from './api.js';
 import { walkMinutes, distanceM, cafeBadges, isDemo } from './places.js';
-import { mockAssistant, DEFAULT_SUGGESTIONS } from './assistant-mock.js';
+import { DEFAULT_SUGGESTIONS } from './assistant-mock.js';
 import { placeEmojiHtml } from './place-display.js';
 import { kindOf } from './places.js';
 import { urgentKind, runUrgentAction, walkingDirections } from './urgent-actions.js';
@@ -17,7 +18,6 @@ function fmtDuration(sec) {
   return min < 60 ? min + ' мин' : Math.floor(min / 60) + ' ч' + (min % 60 ? ' ' + (min % 60) + ' мин' : '');
 }
 
-let useMock = false;
 let onShowOnMap = () => {};
 let lastQuestion = '';
 let greeted = false;
@@ -25,24 +25,15 @@ let sending = false;
 
 // ---------- Запрос: настоящий сервис или мок ----------
 async function ask(message) {
-  const kind = urgentKind(message);
-  if (kind) return runUrgentAction(kind);
-  if (!useMock) {
-    try {
-      const res = await fetch(`/api/v1/trips/${tripId()}/assistant/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf() },
-        body: JSON.stringify({ expected_version: tripVersion(), message, current_position: null, observed_at: new Date().toISOString() }),
-      });
-      if (res.ok) return await res.json();
-      if (res.status !== 404) throw new Error('HTTP ' + res.status);
-    } catch (err) {
-      if (!(err instanceof TypeError) && !String(err.message).startsWith('HTTP 404')) console.warn('Помощник:', err);
-    }
-    useMock = true;
-    $('chat-mode').hidden = false;
-  }
-  return mockAssistant(message);
+  const res = await fetch(`/api/v1/trips/${tripId()}/assistant/messages`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf(), 'Idempotency-Key': requestId() },
+    body: JSON.stringify({ expected_version: tripVersion(), date: today().date, message, hotel_point: /точк.*(?:завершения|финиша)/i.test(message) ? today().end_point : null, current_position: null, observed_at: new Date().toISOString() }),
+  });
+  const answer = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(answer.error?.message || 'Помощник временно недоступен. Повторите запрос.');
+  $('chat-mode').hidden = answer.mode !== 'rules';
+  return answer;
 }
 
 // ---------- Сообщения ----------
@@ -99,14 +90,15 @@ function previewCard(preview) {
   };
 }
 
-function placesCard(places) {
+function placesCard(places, options = []) {
+  const metrics = new Map(options.map(o => [o.place_id, o]));
   const from = today().execution ? today().execution.current_point.coordinates
     : (today().stops.find(s => s.progress === 'planned') || { location: today().start_point }).location.coordinates;
   const el = add(places.map((p, i) => {
     const badges = cafeBadges(p).filter(b => b.state !== 'unknown')
       .map(b => `<span class="badge ${b.state}">${b.state === 'yes' ? '✓' : '✕'} ${b.text}</span>`);
     if (isDemo(p)) badges.push('<span class="badge demo">демо</span>');
-    return `<div class="place-row"><div><b>${placeEmojiHtml(kindOf(p))} ${esc(p.name)}</b><small>~${walkMinutes(p.urgent_distance_m ?? distanceM(from, p.location.coordinates))} мин пешком${p.urgent_origin ? ' от геопозиции · оценка' : ''}</small>
+    return `<div class="place-row"><div><b>${placeEmojiHtml(kindOf(p))} ${esc(p.name)}</b><small>~${metrics.has(p.place_id) ? Math.ceil(metrics.get(p.place_id).walk_duration_sec / 60) : '~' + walkMinutes(p.urgent_distance_m ?? distanceM(from, p.location.coordinates))} мин пешком от последней подтверждённой точки</small>
       ${p.urgent_note ? `<small>${esc(p.urgent_note)}</small>` : ''}
       ${p.urgent_origin ? `<a class="btn link slim" target="_blank" rel="noopener noreferrer" href="${esc(walkingDirections(p.urgent_origin,p.location.coordinates))}">Пешком в Яндекс Картах ↗</a>` : ''}
       ${badges.length ? `<div class="badges">${badges.join('')}</div>` : ''}</div><button class="btn alt slim" data-i="${i}">На карте</button></div>`;
@@ -127,7 +119,7 @@ async function send(text, { silent = false } = {}) {
     typing.remove();
     add(esc(answer.reply), 'bot');
     if (answer.preview) previewCard(answer.preview);
-    if (answer.places?.length) placesCard(answer.places);
+    if (answer.places?.length) placesCard(answer.places, answer.options);
     suggest(answer.suggestions);
   } catch (err) {
     typing.innerHTML = 'Не получилось: ' + esc(err.message);

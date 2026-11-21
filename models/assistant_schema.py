@@ -340,6 +340,23 @@ def validate_assistant_response(message, context, response):
         raise ValueError("move_stop requires a target_date from context.days")
     if intent.action == "find_places" and not intent.needs and not intent.preferences.claims:
         raise ValueError("find_places requires an extracted need or preference, otherwise clarify")
+    family_children = context.get("family", {}).get("children", [])
+    if len(family_children) > 1:
+        ages = [c.get("age_years") for c in family_children]
+        for need in intent.needs:
+            if need.child_id is None:
+                continue
+            child = next((c for c in family_children if c["child_id"] == need.child_id), None)
+            quote = need.evidence.casefold()
+            explicit = need.child_id.casefold() in quote
+            if child and child.get("age_years") is not None:
+                age = child["age_years"]
+                explicit |= bool(re.search(rf"\b{age}\s*(?:лет|год|года|летн)", quote))
+                if all(a is not None for a in ages) and ages.count(age) == 1:
+                    explicit |= bool(re.search(r"младш", quote)) and age == min(ages)
+                    explicit |= bool(re.search(r"старш", quote)) and age == max(ages)
+            if not explicit:
+                need.child_id = None
     children = {c["child_id"] for c in context.get("family", {}).get("children", [])}
     if any(n.child_id is not None and n.child_id not in children for n in intent.needs):
         raise ValueError("unknown child")

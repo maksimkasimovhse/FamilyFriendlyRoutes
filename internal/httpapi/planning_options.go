@@ -56,7 +56,15 @@ func (a *tripAPI) planningOptions(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
 	defer cancel()
-	_, hydrated, err := a.planner.Hydrate(ctx, view)
+	p := a.planner
+	if view.Status == "draft" && view.RecommendationSnapshot == nil {
+		p, view, err = p.PrepareInitial(ctx, view, a.now())
+		if err != nil {
+			a.respondError(w, r, err)
+			return
+		}
+	}
+	_, hydrated, err := p.Hydrate(ctx, view)
 	if err != nil {
 		a.respondError(w, r, err)
 		return
@@ -88,7 +96,7 @@ func (a *tripAPI) planningOptions(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	result, err := a.planner.PlanningOptions(ctx, hydrated, a.now())
+	result, err := p.PlanningOptions(ctx, hydrated, a.now())
 	if err != nil {
 		a.respondError(w, r, err)
 		return

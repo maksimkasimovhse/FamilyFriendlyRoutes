@@ -20,11 +20,15 @@ from query_match import query_match_score
 from request_schema import ParsedRequest, validate_evidence
 from model_contracts import recommendation_schemas
 from taxonomy import FORMATS, INTEREST_IDS
+from recommendation_context import calendar_for, matches_purpose, spatial_distance, distance_m, restaurant_filters, matches_restaurant
 
 
 MODEL_VERSION = "city-content-baseline-v1"
 CATALOG_VERSION = "city-osm-v2"
 CATALOG_RELATIVE_PATH = "data/catalog/city/catalog.jsonl"
+ENRICHED_CATALOG_VERSION = "city-enriched-v3"
+ENRICHED_CATALOG_PATH = "data/catalog/enriched/catalog.jsonl"
+SUPPORTED_PURPOSES = ("initial", "restaurant", "along_route", "toilet", "rain", "playground", "rest")
 UNKNOWN = {"state": "unknown", "value": None, "evidence_ids": []}
 ALIASES = {
     "tech": {"interest:technology"},
@@ -81,6 +85,7 @@ class RecommendationEngine:
         raw = catalog_path.read_bytes()
         self.content_sha256 = hashlib.sha256(raw).hexdigest()
         self.catalog_version = catalog_version
+        self.model_version = "family-content-recsys-v2" if catalog_version == ENRICHED_CATALOG_VERSION else MODEL_VERSION
         self.records = [json.loads(line) for line in raw.decode().splitlines() if line.strip()]
         json.dumps(self.records, allow_nan=False)
         self.policy = json.loads(policy_path.read_text())
@@ -91,6 +96,7 @@ class RecommendationEngine:
         ) for name in ("RecommendationRequest", "RecommendationResponse", "Place", "Activity", "Evidence", "ApiError")}
         self.by_id = {}
         places = set()
+        api_places = {}
         self.evidence = {}
         if not self.records or not self.catalog_version:
             raise ValueError("catalog and catalog_version must be nonempty")
@@ -102,8 +108,10 @@ class RecommendationEngine:
             ):
                 raise ValueError("invalid catalog topics or formats")
             aid, pid = activity["activity_id"], place["place_id"]
-            if not aid or aid in self.by_id or not pid or pid in places:
-                raise ValueError("catalog must contain unique activity and place IDs")
+            if not aid or aid in self.by_id or not pid:
+                raise ValueError("catalog must contain unique activity IDs and nonempty place IDs")
+            if pid in places and not row.get("api"):
+                raise ValueError("legacy catalog must contain unique place IDs")
             self.by_id[aid] = row
             places.add(pid)
             for span in row.get("evidence", []):
@@ -113,18 +121,49 @@ class RecommendationEngine:
                     raise ValueError("conflicting evidence ID")
                 self.evidence[key] = span
         # Build all candidates at startup so malformed data cannot pass readiness.
+        def referenced_evidence(value):
+            if isinstance(value,dict):
+                for eid in value.get("evidence_ids",[]):
+                    yield eid
+                for child in value.values():
+                    yield from referenced_evidence(child)
+            elif isinstance(value,list):
+                for child in value:
+                    yield from referenced_evidence(child)
         for row in self.records:
             p, a = self._entities(row)
             self.validators["Place"].validate(p)
             self.validators["Activity"].validate(a)
+            if not set(referenced_evidence([p,a])) <= self.evidence.keys():
+                raise ValueError("entity references missing evidence")
+            lon,lat=p["location"]["coordinates"]
+            if not (43.5 <= lon <= 44.4 and 56.05 <= lat <= 56.6):
+                raise ValueError("place outside backend routing area")
             if any(value["state"] == "known" and not set(value["evidence_ids"]) <= self.evidence.keys()
                    for container in (p, a) for value in container.values() if isinstance(value, dict) and "state" in value):
                 raise ValueError("known fact references missing evidence")
             lower, upper = a["age_min_years"]["value"], a["age_max_years"]["value"]
             if lower is not None and upper is not None and lower > upper:
                 raise ValueError("invalid hard age range")
+            pid = p["place_id"]
+            if pid in api_places and api_places[pid] != p:
+                raise ValueError("activities disagree about a shared place")
+            api_places[pid] = p
+            duration = a["duration"]["duration_sec"]
+            if not 0 < duration <= 86400:
+                raise ValueError("invalid duration")
+            occurrence_ids = set()
+            for occurrence in row.get("occurrences", []):
+                start, end = (datetime.fromisoformat(occurrence[k].replace("Z", "+00:00")) for k in ("start_at", "end_at"))
+                if start.utcoffset() is None or end.utcoffset() is None or (end-start).total_seconds() != duration or not set(occurrence["evidence_ids"]) <= self.evidence.keys() or occurrence["occurrence_id"] in occurrence_ids:
+                    raise ValueError("invalid occurrence timing, ID or evidence")
+                occurrence_ids.add(occurrence["occurrence_id"])
+            if a["kind"] == "session" and not occurrence_ids:
+                raise ValueError("session without occurrences")
 
     def _entities(self, row: dict) -> tuple[dict, dict]:
+        if "api" in row:
+            return deepcopy(row["api"]["place"]), deepcopy(row["api"]["activity"])
         place, activity = row["place"], row["activity"]
         location = place["location"]
         p = dict(place_id=place["place_id"], name=place["title"],
@@ -149,7 +188,6 @@ class RecommendationEngine:
         return p, a
 
     def validate_request(self, request: dict) -> None:
-        """Reject invalid requests before any optional remote parser call."""
         def finite_values(value):
             if isinstance(value, float) and not math.isfinite(value):
                 return False
@@ -166,8 +204,13 @@ class RecommendationEngine:
             raise RecommendationError("INVALID_REQUEST", "Неверный запрос: " + ".".join(str(v) for v in error.absolute_path))
         if request["catalog_version"] != self.catalog_version:
             raise RecommendationError("CATALOG_VERSION_MISMATCH", "Версия каталога не совпадает.", 409)
-        if request["purpose"] != "initial" or request["spatial_scope"] is not None:
-            raise RecommendationError("FEATURE_DISABLED", "MVP поддерживает начальный подбор без пространственных фильтров.", 501)
+        scope = request["spatial_scope"]
+        if scope is not None:
+            has_route = scope["route"] is not None or bool(scope.get("routes"))
+            if (scope["center"] is None) != (scope["radius_m"] is None) or has_route != (scope["corridor_width_m"] is not None):
+                raise RecommendationError("INVALID_REQUEST", "Для радиуса нужна точка, для коридора — линия маршрута.")
+            if scope["center"] is None and not has_route:
+                raise RecommendationError("INVALID_REQUEST", "Пустая область пространственного поиска.")
         children = request["profile"]["children"]
         child_ids = [c["child_id"] for c in children]
         dates = [d["date"] for d in request["days"]]
@@ -178,25 +221,31 @@ class RecommendationEngine:
             not math.isclose(w["weight"], 1 / len(children), abs_tol=1e-9) for w in weights
         ):
             raise RecommendationError("INVALID_POLICY", "Для интересов детей нужны равные веса.")
+        if request["current_day_date"] is not None and request["current_day_date"] not in dates:
+            raise RecommendationError("INVALID_REQUEST", "Текущая дата отсутствует среди дней поездки.")
+        for day in request["days"]:
+            window = day["available_window"]
+            if window and datetime.fromisoformat(window["start_at"].replace("Z", "+00:00")) >= datetime.fromisoformat(window["end_at"].replace("Z", "+00:00")):
+                raise RecommendationError("INVALID_REQUEST", "Начало окна дня должно предшествовать окончанию.")
         excluded = set(request["excluded_activity_ids"]) | set(request["visited_activity_ids"])
         selections = request["selections"]
         selected = {s["activity_id"] for s in selections}
-        if len(selected) != len(selections) or len(selected) > request["limit"]:
+        if len(selected) != len(selections) or len(selected) > request["limit"] or len({s["place_id"] for s in selections}) != len(selections):
             raise RecommendationError("SELECTION_CONFLICT", "Выборы повторяются или превышают лимит.")
         for selection in selections:
             row = self.by_id.get(selection["activity_id"])
             if not row or row["place"]["place_id"] != selection["place_id"]:
                 raise RecommendationError("UNKNOWN_ACTIVITY", "Выбранная активность отсутствует в каталоге.")
-            if selection["activity_id"] in excluded or selection["occurrence_id"] is not None or (
+            if selection["activity_id"] in excluded or (
                 selection["preferred_date"] is not None and selection["preferred_date"] not in dates
             ):
                 raise RecommendationError("SELECTION_CONFLICT", "Выбранная активность конфликтует с исключениями, сеансом или датой.")
-
-    def recommend(self, request: dict, parsed_request=None) -> dict:
+    def recommend(self, request: dict, parsed_request=None, *, now: datetime | None = None) -> dict:
         self.validate_request(request)
         children = request["profile"]["children"]
         child_ids = [c["child_id"] for c in children]
         dates = [d["date"] for d in request["days"]]
+        scope = request["spatial_scope"]
         excluded = set(request["excluded_activity_ids"]) | set(request["visited_activity_ids"])
         selections = request["selections"]
         selected = {s["activity_id"] for s in selections}
@@ -208,17 +257,56 @@ class RecommendationEngine:
                 raise RecommendationError("INVALID_REQUEST", "Некорректное понимание пожеланий.") from None
         parsed = parsed_request if parsed_request is not None else parse_baseline_text(request["request_text"] or "")
         global_warnings = [warning("BASELINE_MODEL", "Подбор по тематике; модель интереса на локальных откликах ещё не обучена.", severity="info")]
+        if scope is not None or request["current_point"] is not None:
+            global_warnings.append(warning("SPATIAL_APPROXIMATION", "Пространственный фильтр использует расстояние по прямой или до линии; реальный подход проверяет backend.", severity="info"))
         if parsed.unsupported_requests:
             global_warnings.append(warning("REQUEST_TEXT_PARTIALLY_UNDERSTOOD", "Часть пожелания не распознана; учитываются только явные темы и анкета."))
         if parsed.needs_clarification:
             raise RecommendationError("REQUEST_CLARIFICATION_REQUIRED", parsed.clarification_question)
         pool, candidates, rejected = [], {}, []
+        now = now or datetime.now(timezone.utc)
+        filters = restaurant_filters(request) if request["purpose"] == "restaurant" else request.get("restaurant_filters") or {}
+        selection_by_id = {s["activity_id"]: s for s in selections}
         rank_policy = replace(RankingPolicy(), adult_interest_weight=request["policy"]["adult_interest_weight"])
         for row in self.records:
             aid = row["activity"]["activity_id"]
             if aid in excluded:
                 continue
             place, activity = self._entities(row)
+            if not matches_purpose(row, place, request["purpose"]) and aid not in selected:
+                continue
+            if filters and not matches_restaurant(place, filters):
+                if aid in selected:
+                    raise RecommendationError("SELECTION_CONFLICT", "Свойства выбранного ресторана не подтверждают требуемые условия.")
+                continue
+            if row.get("access_raw") in {"no", "private"}:
+                if aid in selected:
+                    raise RecommendationError("HARD_CONSTRAINT_VIOLATION", "Доступ к выбранному месту ограничен.")
+                continue
+            in_scope, distance = spatial_distance(place["location"]["coordinates"], request)
+            if not in_scope:
+                if aid in selected:
+                    raise RecommendationError("SELECTION_CONFLICT", "Выбранное место вне области поиска.")
+                continue
+            if distance is not None:
+                if scope and (scope["route"] or scope.get("routes")):
+                    place["distance_to_route_m"] = distance
+                center = request["current_point"] or (scope["center"] if scope else None)
+                if center:
+                    place["distance_m"] = distance_m(place["location"]["coordinates"],center["coordinates"])
+                    distance = place["distance_m"]
+            availability = calendar_for(row, dates, now)
+            selection = selection_by_id.get(aid)
+            relevant_dates = [selection["preferred_date"]] if selection and selection["preferred_date"] else dates
+            if request["current_day_date"] is not None and not selection:
+                relevant_dates = [request["current_day_date"]]
+            if selection and selection["occurrence_id"] is not None:
+                if not any(o["occurrence_id"] == selection["occurrence_id"] for av in availability if av["date"] in relevant_dates for o in av["occurrences"]):
+                    raise RecommendationError("SELECTION_CONFLICT", "Выбранный сеанс отсутствует, недоступен или не соответствует дате.")
+            if activity["kind"] == "session" and not any(av["occurrences"] for av in availability if av["date"] in relevant_dates):
+                if aid in selected:
+                    raise RecommendationError("SELECTION_CONFLICT", "Нет пригодного сеанса на выбранные даты.")
+                continue
             tags = frozenset(["category:" + row["place"]["category"]]
                              + ["interest:" + t for t in row["activity"]["topics"]]
                              + ["format:" + f for f in row["activity"]["formats"]])
@@ -251,9 +339,18 @@ class RecommendationEngine:
                 continue
             adult, unknown = interest_score(request["profile"]["adult_interest_ids"], tags)
             unknown_interests.update(unknown)
-            pool.append(RankCandidate(aid, eligibility, interest, age_fit, adult, 0.5, query_match_score(parsed, tags), tags))
-            notices = [warning("OPENING_HOURS_UNKNOWN", "Часы работы не подтверждены.", aid),
-                       warning("DURATION_ESTIMATED", "Длительность — предварительная оценка посещения.", aid)]
+            query_score = query_match_score(parsed, tags)
+            if request["purpose"] != "initial":
+                proximity = 1 / (1 + distance / 300) if distance is not None else 0.5
+                query_score = 0.3 * query_score + 0.7 * proximity
+            pool.append(RankCandidate(aid, eligibility, interest, age_fit, adult, 0.5, query_score, tags))
+            notices = []
+            if any(av["state"] == "unknown" for av in availability):
+                notices.append(warning("OPENING_HOURS_UNKNOWN", "Часы работы не подтверждены.", aid))
+            if activity["duration"]["source"] == "estimated":
+                notices.append(warning("DURATION_ESTIMATED", "Длительность — предварительная оценка посещения.", aid))
+            if activity["kind"] == "session":
+                notices.append(warning("BOOKING_UNKNOWN", "Актуальное наличие билетов на сеанс не подтверждено.", aid))
             notices.extend(warning(note["code"], note["message"], aid) for note in row.get("data_quality_warnings", []))
             if avoided & tags:
                 notices.append(warning("SELECTION_OVERRIDES_SOFT_AVOID", "Явно выбранное место сохранено вопреки мягкому пожеланию в тексте.", aid))
@@ -264,20 +361,24 @@ class RecommendationEngine:
             if unknown_interests:
                 notices.append(warning("UNKNOWN_INTEREST_IDS", "Часть интересов не представлена в словаре и не учитывается.", aid))
             candidates[aid] = dict(place=place, activity=activity,
-                availability=[dict(date=date, state="unknown", visit_windows=[], last_entry_at=None, occurrences=[], evidence_ids=[]) for date in dates],
+                availability=availability,
                 eligibility=[dict(child_id=cid, status=eligibility[cid], reasons=[]) for cid in child_ids],
                 scores=dict(child_interest=[dict(child_id=cid, value=interest[cid] / (1 + interest[cid])) for cid in child_ids],
                             child_age_fit=[dict(child_id=cid, value=age_fit[cid]) for cid in child_ids],
                             adult_interest=adult / (1 + adult), popularity=0.5, final_relevance=0),
-                balance_credit=[dict(child_id=cid, value=1 / len(children)) for cid in child_ids],
+                balance_credit=[dict(child_id=cid, value=0 if activity["kind"] in {"meal", "rest", "utility"} else 1 / len(children)) for cid in child_ids],
                 is_top_place=False, reasons=[reason("CONTENT_BASELINE", "Совпадение интересов с темами описания; темы выделены эвристически.", child_ids)], warnings=notices)
         ranked = rank_places(pool, limit=len(pool), policy=rank_policy)
         ids = [item.activity_id for item in ranked]
         chosen = set(selected)
+        chosen_places = {self.by_id[aid]["place"]["place_id"] for aid in selected}
         for aid in ids:
             if len(chosen) >= request["limit"]:
                 break
-            chosen.add(aid)
+            pid = self.by_id[aid]["place"]["place_id"]
+            if pid not in chosen_places:
+                chosen.add(aid)
+                chosen_places.add(pid)
         result = []
         for item in ranked:
             if item.activity_id in chosen:
@@ -290,8 +391,11 @@ class RecommendationEngine:
         used_evidence = {eid for c in result for section in ("activity", "place") for f in c[section].values()
                          if isinstance(f, dict) for eid in f.get("evidence_ids", [])}
         used_evidence.update(eid for candidate in result for eid in candidate["activity"]["evidence_ids"])
+        used_evidence.update(eid for candidate in result for av in candidate["availability"] for eid in av["evidence_ids"])
+        used_evidence.update(eid for candidate in result for fact in (candidate["place"].get("restaurant") or {}).values()
+                             if isinstance(fact, dict) for eid in fact.get("evidence_ids", []))
         response = dict(contract_version="1.0", request_id=request["request_id"], trip_id=request["trip_id"],
-                        trip_version=request["trip_version"], catalog_version=self.catalog_version, model_version=MODEL_VERSION,
+                        trip_version=request["trip_version"], catalog_version=self.catalog_version, model_version=self.model_version,
                         generated_at=datetime.now(timezone.utc).isoformat(), status="partial" if result else "no_candidates",
                         candidates=result, rejected=rejected, evidence=[self.evidence[eid] for eid in sorted(used_evidence)], warnings=global_warnings)
         self.validators["RecommendationResponse"].validate(response)

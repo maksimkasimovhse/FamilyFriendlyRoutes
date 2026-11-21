@@ -89,7 +89,7 @@ class MLBoundariesTests(unittest.TestCase):
         original = path.read_bytes()
         spec = json.loads(original)
         extended = recommendation_schemas(spec)
-        self.assertNotIn("parsed_request", spec["components"]["schemas"]["RecommendationRequest"]["properties"])
+        self.assertEqual(spec, json.loads(original))
         self.assertIn("parsed_request", extended["RecommendationRequest"]["properties"])
         self.assertEqual(path.read_bytes(), original)
 
@@ -112,7 +112,7 @@ class MLBoundariesTests(unittest.TestCase):
             self.assertIs(response.json()["requires_backend_validation"], True)
 
     def test_missing_llm_configuration_is_unavailable_not_a_broken_legacy_api(self):
-        with patch.dict("os.environ", {"ML_API_TOKEN": ""}), TestClient(parser_app) as client, patch("services.parser_service.app.online_client", side_effect=ValueError("missing credentials")):
+        with patch.dict("os.environ", {"ML_API_TOKEN": "", "ASSISTANT_RULES_FALLBACK": "false"}), TestClient(parser_app) as client, patch("services.parser_service.app.online_client", side_effect=ValueError("missing credentials")):
             self.assertEqual(client.get("/health").status_code, 200)
             response = client.post("/internal/v1/assistant-intents", json={"contract_version": "1.0", "request_id": "intent", "message": "Ребёнок устал", "context": CONTEXT})
             self.assertEqual(response.status_code, 503)
@@ -129,7 +129,7 @@ class MLBoundariesTests(unittest.TestCase):
             remote.assert_not_called()
 
     def test_llm_timeout_returns_unavailable_and_health_remains_accessible(self):
-        with patch.dict("os.environ", {"ML_API_TOKEN": ""}), TestClient(parser_app) as client, patch("services.parser_service.app.online_client", return_value=object()), patch("services.parser_service.app.asyncio.to_thread", new=AsyncMock(side_effect=TimeoutError)):
+        with patch.dict("os.environ", {"ML_API_TOKEN": "", "ASSISTANT_RULES_FALLBACK": "false"}), TestClient(parser_app) as client, patch("services.parser_service.app.online_client", return_value=object()), patch("services.parser_service.app.asyncio.to_thread", new=AsyncMock(side_effect=TimeoutError)):
             for path, body in [
                 ("/internal/v1/request-parses", dict(contract_version="1.0", request_id="timeout", text="Хотим музей")),
                 ("/internal/v1/assistant-intents", dict(contract_version="1.0", request_id="timeout", message="Ребёнок устал", context=CONTEXT)),

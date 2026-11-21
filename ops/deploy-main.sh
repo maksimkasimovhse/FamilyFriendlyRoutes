@@ -33,6 +33,14 @@ if ! git -C "${repo_dir}" cat-file -e "${target_commit}:compose.yaml" 2>/dev/nul
   exit 0
 fi
 
+# Keep a private recovery copy of the running app's file store before switching code.
+if [[ -f "${repo_dir}/data/backend/state.json" ]]; then
+  mkdir -p "${state_dir}/backups"
+  chmod 700 "${state_dir}/backups"
+  cp -p "${repo_dir}/data/backend/state.json" "${state_dir}/backups/state-${target_commit}.json"
+  chmod 600 "${state_dir}/backups/state-${target_commit}.json"
+fi
+
 git -C "${repo_dir}" switch --force-create "${branch}" "origin/${branch}"
 git -C "${repo_dir}" reset --hard "${target_commit}"
 
@@ -94,6 +102,10 @@ if printf '%s\n' "${configured_services[@]}" | grep --quiet --line-regexp parser
   fi
 fi
 
+# An HTTP listener is not proof that the catalog schema is installed.
+docker compose --project-directory "${repo_dir}" up -d postgres
+docker compose --project-directory "${repo_dir}" --profile tools run --rm migrate
+docker compose --project-directory "${repo_dir}" --profile tools run --rm infra-import
 docker compose --project-directory "${repo_dir}" up -d --remove-orphans
 
 readarray -t expected_services < <(
@@ -125,9 +137,9 @@ for attempt in $(seq 1 "${health_attempts}"); do
 done
 
 if [[ "${deployment_ready}" == true ]]; then
-  if docker compose --project-directory "${repo_dir}" config --services | grep --quiet --line-regexp migrate; then
-    docker compose --project-directory "${repo_dir}" --profile tools run --rm migrate
-  fi
+  # Idempotent: existing accounts/profiles are preserved.
+  python3 "${repo_dir}/scripts/seed-demo-users.py" http://127.0.0.1:8000
+  python3 "${repo_dir}/scripts/check_deployment.py" http://127.0.0.1:8000
   printf '%s\n' "${target_commit}" > "${state_file}"
   printf 'Deployed origin/%s at %s\n' "${branch}" "${target_commit}"
   exit 0

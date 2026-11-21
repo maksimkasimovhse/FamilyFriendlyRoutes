@@ -14,6 +14,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/assistant"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/httpapi"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/mapdata"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/planner"
@@ -36,6 +37,8 @@ func main() {
 	modelURL := flag.String("model-url", "", "model-service base URL (ranking); empty = local ranking only")
 	cardTags := flag.String("card-tags", "data/card_tags.json", "Card tags for wish-based selection (scripts/build-card-tags.py)")
 	keywords := flag.String("wish-keywords", "data/wish_keywords.json", "Keyword stems for wish parsing")
+	assistantURL := flag.String("assistant-url", os.Getenv("ASSISTANT_URL"), "Contextual intent parser endpoint")
+	initialLLM := flag.Bool("initial-llm", os.Getenv("INITIAL_LLM_ENABLED") == "true", "Interpret initial route requests")
 	flag.Parse()
 	if *demo == (*mlURL != "") || (!*demo && *catalogVersion == "") {
 		log.Fatal("Choose -demo-catalog OR -ml-url <endpoint> -catalog-version <version>.")
@@ -62,6 +65,25 @@ func main() {
 		p.Activities = planner.DemoActivities()
 	} else {
 		p.Source = planner.HTTPSource{Endpoint: *mlURL, Version: *catalogVersion, Token: os.Getenv("ML_API_TOKEN")}
+	}
+	if p.Source != nil {
+		versions := map[string]planner.CandidateSource{}
+		for _, spec := range [][2]string{{"LEGACY_ML_URL", "mock-ml-v1"}, {"CITY_ML_URL", "city-osm-v2"}} {
+			if endpoint := os.Getenv(spec[0]); endpoint != "" {
+				versions[spec[1]] = planner.HTTPSource{Endpoint: endpoint, Version: spec[1], Token: os.Getenv("ML_API_TOKEN")}
+			}
+		}
+		p.Source = planner.CatalogSources{Default: p.Source, Versions: versions}
+	}
+	var interpreter assistant.Interpreter
+	if *assistantURL != "" {
+		interpreter = assistant.HTTPInterpreter{Endpoint: *assistantURL, Token: os.Getenv("ML_API_TOKEN")}
+	}
+	if *initialLLM {
+		if interpreter == nil {
+			log.Fatal("initial-llm requires assistant-url")
+		}
+		p.Interpreter = interpreter
 	}
 	if _, err := os.Stat(*imagesDir); err != nil {
 		log.Fatalf("images-dir: %v", err)
@@ -99,12 +121,12 @@ func main() {
 		rec := wishes.NewRecommender(kw, tags, wishes.Services{ParserURL: *parserURL, ModelURL: *modelURL})
 		root.Handle("/api/v1/wishes/recommendations", httpapi.WishesHandler(rec))
 	}
-	root.Handle("/", httpapi.TripHandler(store, p))
+	root.Handle("/", httpapi.TripHandlerWithAssistant(store, p, interpreter, mapRepository))
 	var handler http.Handler = root
 	if *trustProxy {
 		handler = httpapi.TrustedProxyHTTPS(handler)
 	}
-	server := &http.Server{Addr: *listen, Handler: handler, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 40 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
+	server := &http.Server{Addr: *listen, Handler: handler, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 70 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	go func() {

@@ -91,7 +91,7 @@ async function send(text) {
 
 function bind() {
   bound = true;
-  $('chat-form').onsubmit = e => { e.preventDefault(); send($('chat-input').value); };
+  $('wish-chat-form').onsubmit = e => { e.preventDefault(); send($('chat-input').value); };
   $('chat-input').addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send($('chat-input').value); }
   });

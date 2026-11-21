@@ -1,0 +1,99 @@
+{
+  "contract_version": "1.0",
+  "request_id": "example-request",
+  "trip_id": "example-trip",
+  "trip_version": 1,
+  "catalog_version": "city-enriched-v3",
+  "purpose": "restaurant",
+  "profile": {
+    "children": [
+      {
+        "child_id": "child-1",
+        "age_years": 4,
+        "height_cm": null,
+        "interest_ids": [
+          "play"
+        ]
+      },
+      {
+        "child_id": "child-2",
+        "age_years": 10,
+        "height_cm": null,
+        "interest_ids": [
+          "science"
+        ]
+      }
+    ],
+    "adult_count": 2,
+    "adult_interest_ids": [
+      "history"
+    ]
+  },
+  "policy": {
+    "child_interest_weights": [
+      {
+        "child_id": "child-1",
+        "weight": 0.5
+      },
+      {
+        "child_id": "child-2",
+        "weight": 0.5
+      }
+    ],
+    "activity_balance": {
+      "mode": "equal_count_target",
+      "scope": "trip",
+      "shared_activity_credit": "split_equally"
+    },
+    "adult_interest_weight": 0.1
+  },
+  "load_limits": {
+    "pace": "relaxed",
+    "max_walk_distance_m_per_day": null,
+    "max_continuous_walk_duration_sec": 3600,
+    "restaurant_walk_reserve_m_per_day": 0
+  },
+  "days": [
+    {
+      "date": "2030-06-15",
+      "start_point": {
+        "coordinates": [
+          44.0059,
+          56.3269
+        ],
+        "label": "Тестовый старт"
+      },
+      "end_point": {
+        "coordinates": [
+          44.0059,
+          56.3269
+        ],
+        "label": "Тестовый финиш"
+      },
+      "available_window": {
+        "start_at": "2030-06-15T10:00:00+03:00",
+        "end_at": "2030-06-15T17:00:00+03:00"
+      },
+      "duration_budget_sec": 21600,
+      "meal_window": null,
+      "rest_budget_sec": 0
+    }
+  ],
+  "selections": [],
+  "current_day_date": "2030-06-15",
+  "current_point": {
+    "coordinates": [
+      44.0059,
+      56.3269
+    ],
+    "label": "Тестовый старт"
+  },
+  "visited_activity_ids": [],
+  "excluded_activity_ids": [],
+  "request_text": null,
+  "spatial_scope": null,
+  "limit": 50,
+  "restaurant_filters": {
+    "children_menu": true
+  }
+}

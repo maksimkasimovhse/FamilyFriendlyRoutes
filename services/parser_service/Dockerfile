@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt \
 COPY models/gigachat_client.py models/gigachat_request_parser.py models/request_schema.py /app/models/
 COPY models/site_extractor.py models/site_ingestion.py /app/models/
 COPY models/site_schema.py models/taxonomy.py /app/models/
-COPY models/assistant_schema.py models/assistant_context.py /app/models/
+COPY models/assistant_schema.py models/assistant_context.py models/assistant_rules.py models/baseline_query.py /app/models/
 COPY shared /app/shared
 COPY services/__init__.py /app/services/__init__.py
 COPY services/parser_service /app/services/parser_service

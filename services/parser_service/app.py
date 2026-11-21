@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from assistant_schema import AssistantIntent, parse_assistant
 from assistant_context import AssistantContext
+from assistant_rules import parse_rules
 
 from gigachat_client import GigaChatStructuredClient
 from gigachat_request_parser import parse_request_text
@@ -67,12 +68,18 @@ class AssistantRequest(BaseModel):
         return value
 
 
+class AssistantParserMetadata(BaseModel):
+    provider: Literal["gigachat", "rules"]
+    model: str
+    usage: dict[str, object]
+
+
 class AssistantResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
     contract_version: Literal["1.0"]
     request_id: str
     intent: AssistantIntent
-    parser: ParserMetadata
+    parser: AssistantParserMetadata
     route_changed: Literal[False] = False
     requires_backend_validation: Literal[True] = True
 
@@ -86,17 +93,23 @@ def configured_client():
 
 @app.post("/internal/v1/assistant-intents", response_model=AssistantResponse)
 async def assistant_intent(request: AssistantRequest):
-    client = configured_client()
+    context = request.context.model_dump(mode="json", exclude_none=True)
+    provider = "gigachat"
     try:
-        intent, result = await asyncio.wait_for(asyncio.to_thread(parse_assistant, request.message, request.context.model_dump(mode="json", exclude_none=True), client), timeout=20)
-    except (httpx.HTTPError, OSError, TimeoutError):
-        raise HTTPException(503, "LLM is unavailable") from None
+        client = configured_client()
+        intent, result = await asyncio.wait_for(asyncio.to_thread(parse_assistant, request.message, context, client), timeout=20)
+    except (httpx.HTTPError, OSError, TimeoutError, HTTPException):
+        # The fallback is explicit in the response and only understands bounded commands.
+        if os.environ.get("ASSISTANT_RULES_FALLBACK", "true").lower() != "true":
+            raise HTTPException(503, "LLM is unavailable") from None
+        intent, result = parse_rules(request.message, context)
+        provider = "rules"
     except ValueError:
         raise HTTPException(502, "Invalid structured LLM response or configuration") from None
     return {"contract_version": "1.0", "request_id": request.request_id,
             "intent": intent.model_dump(mode="json"),
             "route_changed": False, "requires_backend_validation": True,
-            "parser": {"provider": "gigachat", "model": result.model, "usage": result.usage}}
+            "parser": {"provider": provider, "model": result.model, "usage": result.usage}}
 
 
 def load_policy(source_id: str) -> SourcePolicy:

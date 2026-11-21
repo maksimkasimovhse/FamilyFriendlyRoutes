@@ -25,6 +25,9 @@ type budgetParameters struct {
 
 var budgetDefaults = loadBudgetParameters()
 
+// WalkingSpeedKPH uses the same product policy in search previews and day plans.
+func WalkingSpeedKPH(pace string) float64 { return budgetDefaults.WalkingSpeedKPHByPace[pace] }
+
 func loadBudgetParameters() budgetParameters {
 	var parameters budgetParameters
 	if err := json.Unmarshal(defaultsJSON, &parameters); err != nil {
@@ -103,6 +106,14 @@ func dailyTimeBudget(day c.DayInput) float64 {
 		budget = math.Min(budget, end.Sub(start).Seconds())
 	}
 	return budget
+}
+
+func dailyWalkLimit(input c.TripInput, day c.DayInput) float64 {
+	limit := *input.LoadLimits.MaxWalkDistanceMPerDay
+	if day.MaxWalkDistanceM != nil {
+		limit = math.Min(limit, *day.MaxWalkDistanceM)
+	}
+	return limit
 }
 
 // Inputs/outputs use meters and seconds. P is deducted once, after the min.

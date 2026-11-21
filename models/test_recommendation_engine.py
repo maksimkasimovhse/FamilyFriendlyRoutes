@@ -155,7 +155,7 @@ class RecommendationAPITests(unittest.TestCase):
         self.assertEqual(self.post(request).status_code, 409)
         request["catalog_version"] = CATALOG_VERSION
         request["purpose"] = "restaurant"
-        self.assertEqual(self.post(request).status_code, 501)
+        self.assertEqual(self.post(request).json()["status"], "no_candidates")
         request["purpose"] = "initial"
         del request["profile"]
         response = self.post(request)

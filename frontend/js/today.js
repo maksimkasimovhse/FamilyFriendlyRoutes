@@ -1,3 +1,4 @@
+import { finishInstant } from './route-time.js';
 import { placeEmojiHtml } from './place-display.js';
 // Экран «Сегодня» — главный экран родителя (макет «Сегодня и Карта: что сейчас и что рядом»).
 // Карточка «Сейчас» + лента со временем. Под каждой точкой — одна «семейная» строка:
@@ -129,11 +130,7 @@ function render() {
     </li>`;
   });
   // Финиш: время из последнего перехода
-  const lastLeg = day.legs[day.legs.length - 1];
-  const lastStop = [...stops].reverse().find(s => s.timing.estimated_departure_at);
-  const finishAt = lastLeg && lastLeg.to.kind === 'day_end' && lastStop
-    ? fmtTime(new Date(new Date(lastStop.timing.estimated_departure_at).getTime() + lastLeg.travel_duration_sec * 1000).toISOString())
-    : '';
+  const finishAt = finishInstant(day) ? fmtTime(finishInstant(day)) : '';
   rows.push(`<li class="finish"><span class="node">${ICON.flag}</span><span class="t">${finishAt || ''}</span>
     <span class="what"><b>Финиш</b><small>${esc(day.end_point.label || 'конец прогулки')} · ${fmtDuration(day.totals.elapsed_duration_sec)} на весь день</small></span></li>`);
   $('today-list').innerHTML = rows.join('');
