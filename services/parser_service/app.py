@@ -91,6 +91,13 @@ def configured_client():
         raise HTTPException(503, "LLM is not configured") from None
 
 
+def rules_fallback(message: str, context: dict):
+    """Return the bounded parser when the provider cannot produce a valid intent."""
+    if os.environ.get("ASSISTANT_RULES_FALLBACK", "true").lower() != "true":
+        raise HTTPException(503, "LLM is unavailable") from None
+    return parse_rules(message, context)
+
+
 @app.post("/internal/v1/assistant-intents", response_model=AssistantResponse)
 async def assistant_intent(request: AssistantRequest):
     context = request.context.model_dump(mode="json", exclude_none=True)
@@ -98,14 +105,11 @@ async def assistant_intent(request: AssistantRequest):
     try:
         client = configured_client()
         intent, result = await asyncio.wait_for(asyncio.to_thread(parse_assistant, request.message, context, client), timeout=20)
-    except (httpx.HTTPError, OSError, TimeoutError, HTTPException):
-        # The fallback is explicit in the response and only understands bounded commands.
-        if os.environ.get("ASSISTANT_RULES_FALLBACK", "true").lower() != "true":
-            raise HTTPException(503, "LLM is unavailable") from None
-        intent, result = parse_rules(request.message, context)
+    except (httpx.HTTPError, OSError, TimeoutError, HTTPException, ValueError):
+        # A malformed structured response is no more actionable than a timeout.
+        # Keep the operation available through the bounded, validated rules parser.
+        intent, result = rules_fallback(request.message, context)
         provider = "rules"
-    except ValueError:
-        raise HTTPException(502, "Invalid structured LLM response or configuration") from None
     return {"contract_version": "1.0", "request_id": request.request_id,
             "intent": intent.model_dump(mode="json"),
             "route_changed": False, "requires_backend_validation": True,
