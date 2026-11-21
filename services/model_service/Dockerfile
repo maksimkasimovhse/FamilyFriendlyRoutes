@@ -9,8 +9,8 @@ COPY services/model_service/requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt \
     && useradd --create-home --uid 10001 appuser
 
-COPY models /app/models
-COPY docs/contracts /app/docs/contracts
+COPY models /app/models/
+COPY docs/contracts/openapi.json /app/docs/contracts/openapi.json
 COPY services/model_service/catalog_recommendations.py /app/services/model_service/catalog_recommendations.py
 COPY shared /app/shared
 COPY services/__init__.py /app/services/__init__.py
