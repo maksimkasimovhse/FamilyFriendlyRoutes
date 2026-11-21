@@ -17,6 +17,7 @@ COPY shared /app/shared
 COPY services/__init__.py /app/services/__init__.py
 COPY services/parser_service /app/services/parser_service
 COPY data/source_registry.example.json /app/config/source_registry.json
+COPY infra/docker/certs/russian_trusted_root_ca_pem.crt /app/certs/russian_trusted_root_ca_pem.crt
 
 USER appuser
 EXPOSE 8080
