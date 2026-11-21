@@ -1,3 +1,4 @@
+import { routeDurationHtml, routeDurationParts } from './route-duration.js';
 // Экран «Карта» для родителя: маршрут дня по улицам, остановки, удобства рядом.
 
 import { emojiAsset, placeEmojiHtml, createPlaceEmoji, thinBenches } from './place-display.js';
@@ -210,6 +211,7 @@ function showSummary({ fit = true } = {}) {
       </span>
       <span class="go" aria-hidden="true">›</span>
     </button>
+    ${routeDurationHtml(day,fmtDuration)}
     ${source === 'backend' ? '' : '<p class="source warn">Нет связи с сервером — показан сохранённый маршрут</p>'}`;
   // К следующей непройденной остановке
   sheetBody.querySelector('[data-act="first"]').onclick = () => showStop(Math.max(0, day.stops.findIndex(st => st.progress === 'planned')));
@@ -230,6 +232,7 @@ function showStop(i, { fly = true } = {}) {
       <h2>${escapeHtml(stop.title)}</h2>
       <p>${leg ? `${fmtDuration(leg.travel_duration_sec)} пешком · ${fmtDistance(leg.distance_m)} · ` : ''}на месте ~${fmtDuration(stop.duration.duration_sec)}</p>
     </div>
+    ${i===day.stops.length-1 && routeDurationParts(day).finishSeconds>0 ? `<p class="route-finish">После этой точки до финиша ещё ${fmtDuration(routeDurationParts(day).finishSeconds)} пешком. Это время входит в итог маршрута.</p>` : ''}
     <div class="row">
       <button class="btn icon alt" data-act="prev" aria-label="Предыдущая остановка" ${i === 0 ? 'disabled' : ''}>‹</button>
       <button class="btn main" data-act="all">Весь маршрут</button>

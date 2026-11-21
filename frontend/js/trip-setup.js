@@ -1,3 +1,4 @@
+import { routeDurationHtml } from './route-duration.js';
 import { selectionReview } from './selection-review.js';
 // Новая поездка: экраны 5, 7, 8 (+ шаг 2 — подбор мест из pick.js) — docs/tz-onboarding.md.
 // Гость: POST /trips с полным TripInput из локальной анкеты.
@@ -316,6 +317,9 @@ function renderPreview() {
   const day = days[previewDay];
   const t = day.totals;
   $('preview-line').textContent = `${cap(fmtDay(day.date, { weekday: 'long', day: 'numeric', month: 'long' }))} · около ${fmtDuration(t.elapsed_duration_sec || 0)} · ${fmtDistance(t.walk_distance_m || 0)} пешком`;
+  let durationPanel=$('preview-duration');
+  if(!durationPanel){durationPanel=document.createElement('div');durationPanel.id='preview-duration';$('preview-line').after(durationPanel);}
+  durationPanel.innerHTML=routeDurationHtml(day,fmtDuration);
   const stops = day.stops.map((s, i) => {
     const time = fmtTime(s.timing?.estimated_arrival_at);
     return `<li><span class="n">${i + 1}</span><span><b>${esc(s.title)}</b><small>${time ? time + ' · ' : ''}на месте ~${fmtDuration(s.duration.duration_sec)}</small></span></li>`;

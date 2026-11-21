@@ -3011,13 +3011,14 @@
           "rest_budget_sec": {
             "type": "number",
             "minimum": 0,
-            "description": "Daily rest time reserve. Existing rest stops cover the reserve; only the unallocated remainder is added."
+            "description": "Legacy compatibility field; no automatic rest time is reserved. Only selected stops consume time."
           },
           "meal_count": {
             "type": "integer",
             "minimum": 0,
             "maximum": 10,
-            "default": 1
+            "default": 0,
+            "description": "Legacy compatibility field; no automatic meal time is reserved."
           },
           "meal_format": {
             "type": "string",
@@ -3032,7 +3033,7 @@
             "type": "number",
             "minimum": 0,
             "maximum": 86400,
-            "description": "Total daily meal time, seconds. When omitted, meal_count times the configured duration for meal_format. Explicit zero disables the meal time reserve."
+            "description": "Legacy compatibility field; no unscheduled meal time is added. Selected meal stops use their activity duration."
           },
           "max_walk_distance_m": {
             "oneOf": [
@@ -5247,12 +5248,12 @@
               "rest_duration_sec": {
                 "type": "number",
                 "minimum": 0,
-                "description": "Maximum of rest_budget_sec and scheduled rest-stop duration, without double counting."
+                "description": "Duration of explicitly scheduled rest stops only. No automatic rest reserve."
               },
               "meal_duration_sec": {
                 "type": "number",
                 "minimum": 0,
-                "description": "Maximum of the daily meal time reserve and scheduled meal-stop duration, without double counting."
+                "description": "Duration of explicitly scheduled meal stops only. No automatic meal reserve."
               },
               "elapsed_duration_sec": {
                 "oneOf": [
