@@ -41,16 +41,23 @@ function setMapSheetExpanded(expanded) {
 function openTab(name) {
   // «Маша» — не вкладка, а детский режим на весь экран поверх приложения
   if (name === 'kid') { openKid(); return; }
-  if (name !== 'pick') currentTab = name;
   if (name === 'restaurants') {
-    tabs.forEach(t => t.classList.toggle('on', t.dataset.tab === name));
+    currentTab = 'map';
+    tabs.forEach(t => t.classList.toggle('on', t.dataset.tab === 'map'));
     screens.forEach(s => { s.hidden = s.dataset.tab !== 'map'; });
+    $('restaurant-map-widget').classList.add('on');
+    $('restaurant-map-widget').setAttribute('aria-pressed', 'true');
+    $('restaurant-map-widget').setAttribute('aria-label', 'Закрыть подбор ресторанов');
     setMapSheetExpanded(true);
     resizeMap();
     openRestaurants();
     return;
   }
+  if (name !== 'pick') currentTab = name;
   closeRestaurants();
+  $('restaurant-map-widget').classList.remove('on');
+  $('restaurant-map-widget').setAttribute('aria-pressed', 'false');
+  $('restaurant-map-widget').setAttribute('aria-label', 'Подобрать ресторан по маршруту');
   tabs.forEach(t => t.classList.toggle('on', t.dataset.tab === name));
   screens.forEach(s => { s.hidden = s.dataset.tab !== name; });
   if (name === 'map') resizeMap();
@@ -90,6 +97,7 @@ function startMain() {
   initToday({ childName: name, childNameGenitive: genitive(name), kidStopInfo, onOpenKid: () => openKid(), onNeedNow: () => { openTab('map'); openUrgentWidget(); } });
   initMapActions({onFilter:setAmenityFilter,onFocus:focusPlace,onPreview:showRoutePreview,onCancel:clearRoutePreview});
   initRestaurants({ onFocus:focusPlaceOnMap, onClear:clearFocusedPlaceOnMap, onResize:resizeMap });
+  $('restaurant-map-widget').onclick=()=>openTab($('restaurant-map-widget').getAttribute('aria-pressed') === 'true' ? 'map' : 'restaurants');
   $('map-kid-mode').onclick=()=>kidReady.then(()=>openKid());
   $('map-sheet-toggle').onclick=()=>setMapSheetExpanded($('map-sheet-content').hidden);
 

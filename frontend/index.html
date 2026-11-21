@@ -124,6 +124,9 @@
 
     <!-- Нижняя карточка: сводка дня или выбранная остановка -->
     <div class="sheet" id="map-sheet">
+      <button type="button" id="restaurant-map-widget" class="restaurant-map-widget" aria-label="Подобрать ресторан по маршруту" aria-pressed="false">
+        <img src="/assets/category-icons/food.svg" alt="" aria-hidden="true">
+      </button>
       <button type="button" class="map-sheet-toggle" id="map-sheet-toggle" aria-expanded="true" aria-controls="map-sheet-content" aria-label="Свернуть панель карты"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button>
       <div id="map-sheet-content" class="map-sheet-content">
       <!-- Конкретные срочные действия; выбор категории показывает ближайшие объекты. -->
@@ -366,16 +369,6 @@
   </section>
   <dialog id="nap-start-dialog" class="urgent-dialog"><header><h2>Начать день с дневным сном</h2></header><div class="urgent-content" id="nap-start-content"></div><div class="urgent-preview-actions"><button type="button" class="btn alt" id="nap-start-cancel">Отмена</button><button type="button" class="btn main" id="nap-start-apply">Начать с этим планом</button></div></dialog>
   <dialog id="urgent-dialog" class="urgent-dialog" aria-labelledby="urgent-title"><header><div><h2 id="urgent-title">Что нужно сейчас?</h2></div><button type="button" id="urgent-close" aria-label="Закрыть срочные действия">×</button></header><div id="urgent-kinds" class="urgent-kinds"></div><div id="urgent-content" class="urgent-content" aria-live="polite"></div></dialog>
-  <dialog id="restaurant-confirm-dialog" class="restaurant-confirm-dialog" aria-labelledby="restaurant-confirm-title">
-    <div class="restaurant-confirm-icon"><img src="/assets/category-icons/food.svg" alt="" aria-hidden="true"></div>
-    <p class="restaurant-confirm-kicker">ИЗМЕНЕНИЕ МАРШРУТА</p>
-    <h2 id="restaurant-confirm-title">Добавить ресторан?</h2>
-    <div id="restaurant-confirm-body"></div>
-    <div class="restaurant-confirm-actions">
-      <button type="button" id="restaurant-confirm-cancel">Не сейчас</button>
-      <button type="button" id="restaurant-confirm-apply">Добавить</button>
-    </div>
-  </dialog>
   <!-- ===== Профиль: дети, память о поездке (статистика, фото, достижения), мои поездки ===== -->
   <section class="screen profile" data-tab="profile" hidden>
     <div class="pf-scroll">
@@ -654,7 +647,6 @@
     <button data-tab="map" class="on">
       <span class="tab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Карта
     </button>
-    <button data-tab="restaurants"><span class="tab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v8M4 3v5c0 2 6 2 6 0V3M7 11v10M15 3v18M15 3c4 2 5 7 0 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Еда</button>
     <button data-tab="profile"><span class="tab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Профиль</button>
   </nav>
 </div>

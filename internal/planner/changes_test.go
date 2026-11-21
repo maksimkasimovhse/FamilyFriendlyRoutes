@@ -3,10 +3,21 @@ package planner
 import (
 	"context"
 	"encoding/json"
+	"math"
 	c "github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/contracts"
+	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/routing"
 	"testing"
 	"time"
 )
+
+type distanceRouter struct{}
+
+func (distanceRouter) Route(_ context.Context, request routing.Request) (routing.Result, error) {
+	dx := request.To.Coordinates[0] - request.From.Coordinates[0]
+	dy := request.To.Coordinates[1] - request.From.Coordinates[1]
+	distance := math.Hypot(dx, dy) * 100000
+	return routing.Result{Mode: "walk", Status: "calculated", DistanceM: distance, TravelDurationSec: distance / 1.2, Geometry: routing.LineString{Type: "LineString", Coordinates: []routing.Position{request.From.Coordinates, request.To.Coordinates}}, RoutingDataVersion: "distance-test"}, nil
+}
 
 func TestShortenAndReturnPreserveMandatoryAndSnapshot(t *testing.T) {
 	now := time.Date(2030, 6, 15, 10, 0, 0, 0, time.FixedZone("MSK", 10800))
@@ -118,6 +129,30 @@ func TestMoveReorderReplaceAndInsert(t *testing.T) {
 	}
 	if !found {
 		t.Fatal("lost moved stop")
+	}
+}
+
+func TestAddActivityUsesShortestFeasibleInsertion(t *testing.T) {
+	now := time.Date(2030, 6, 15, 10, 0, 0, 0, time.FixedZone("MSK", 10800))
+	input := sample(t)
+	p := Planner{Router: distanceRouter{}, Activities: DemoActivities()}
+	view, err := p.Build(context.Background(), NewDraft("shortest-insert", input, now), now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	removed := view.Days[0].Stops[1]
+	date := view.Days[0].Date
+	withoutMiddle, err := p.Change(context.Background(), view, ChangeCommand{Kind: "remove_stop", Date: &date, StopID: &removed.StopID}, nil, nil, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	selection := c.Selection{PlaceID: removed.PlaceID, ActivityID: removed.ActivityID}
+	added, err := p.Change(context.Background(), withoutMiddle, ChangeCommand{Kind: "add_activity", Date: &date, Selection: &selection}, nil, nil, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := added.Days[0].Stops[1].StopID; got != removed.StopID {
+		t.Fatalf("restaurant inserted at %s instead of shortest middle position", got)
 	}
 }
 

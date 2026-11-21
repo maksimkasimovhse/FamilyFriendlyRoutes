@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { restaurantBadges, restaurantCardModel, mapRestaurantWidgetModel, cardSwipeAction, candidateMatchesFilters } from './restaurants.js';
+import { restaurantBadges, restaurantCardModel, mapRestaurantWidgetModel, cardSwipeAction, restaurantCardAllowsSwipe, candidateMatchesFilters } from './restaurants.js';
 
 const fact = (state, value) => ({state, value, evidence_ids:[]});
 test('restaurant card keeps known family features and labels unknown facts', () => {
@@ -12,9 +12,6 @@ test('restaurant card keeps known family features and labels unknown facts', () 
   assert.deepEqual(model.badges.map(({key,state})=>({key,state})),[
     {key:'high_chairs',state:'unknown'},
     {key:'children_menu',state:'yes'},
-    {key:'small_portions',state:'unknown'},
-    {key:'play_area_supervision',state:'unknown'},
-    {key:'toilet',state:'unknown'},
   ]);
   assert.equal(restaurantBadges(candidate.place).find(x=>x.key==='play_area').state,'no');
 });
@@ -31,10 +28,16 @@ test('card swipes skip the restaurant in either direction', () => {
   assert.equal(cardSwipeAction(75), 'skip');
   assert.equal(cardSwipeAction(-75), 'skip');
   assert.equal(cardSwipeAction(30), null);
+  assert.equal(cardSwipeAction(20, .3), 'skip');
+});
+
+test('card controls do not start a swipe gesture', () => {
+  assert.equal(restaurantCardAllowsSwipe({closest: () => ({})}), false);
+  assert.equal(restaurantCardAllowsSwipe({closest: () => null}), true);
 });
 
 test('child infrastructure filters require confirmed facilities', () => {
-  const candidate = { place: { restaurant: { high_chairs: fact('known', true), children_menu: fact('unknown', null) }, toilet: fact('known', true) } };
-  assert.equal(candidateMatchesFilters(candidate, {high_chairs:true, toilet:true}), true);
+  const candidate = { place: { restaurant: { high_chairs: fact('known', true), children_menu: fact('unknown', null) } } };
+  assert.equal(candidateMatchesFilters(candidate, {high_chairs:true}), true);
   assert.equal(candidateMatchesFilters(candidate, {children_menu:true}), false);
 });

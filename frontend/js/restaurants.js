@@ -5,10 +5,11 @@ const FILTER_LABELS = {
   high_chairs: 'Детский стульчик',
   children_menu: 'Детское меню',
   play_area: 'Игровая зона',
-  small_portions: 'Маленькие порции',
-  play_area_supervision: 'Есть присмотр',
-  toilet: 'Туалет',
 };
+const SWIPE_PX = 45;
+const FLING_SPEED = 0.25;
+const COMMIT_PX = 110;
+const FLY_MS = 280;
 let initialized = false;
 let mapWidgetRequest = 0;
 let mapCandidates = [];
@@ -50,9 +51,12 @@ export function mapRestaurantWidgetModel(candidate) {
     detail: [card.distance, familyFeature?.label].filter(Boolean).join(' · ') || 'Подходит для семейного обеда',
   };
 }
-export function cardSwipeAction(offsetX, threshold = 72) {
-  if (Math.abs(offsetX) >= threshold) return 'skip';
+export function cardSwipeAction(offsetX, velocityX = 0) {
+  if (Math.abs(offsetX) > SWIPE_PX || (Math.abs(velocityX) > FLING_SPEED && Math.abs(offsetX) > 14)) return 'skip';
   return null;
+}
+export function restaurantCardAllowsSwipe(target) {
+  return !target?.closest?.('button, .restaurant-map-details');
 }
 async function loadMapCandidates() {
   const trip = getTrip();
@@ -90,23 +94,60 @@ function renderRestaurantSheet(message = '') {
   const fullDescription = [card.description, card.address && `Адрес: ${card.address}.`, card.openingHours && `Часы работы: ${card.openingHours}.`].filter(Boolean).join(' ');
   container.innerHTML = `<p class="restaurant-map-progress">${mapSelectedIndex + 1} из ${mapCandidates.length} вдоль маршрута · свайпните, чтобы пропустить</p><article class="restaurant-map-card" data-map-candidate="${mapSelectedIndex}"><div class="restaurant-map-card-head"><img class="restaurant-map-card-icon" src="/assets/category-icons/food.svg" alt=""><div><h3>${esc(card.title)}</h3><p>${esc(card.address || 'Рядом с маршрутом')}</p></div></div>${meta ? `<p>${esc(meta)}</p>` : ''}<p class="restaurant-summary">${esc(shortDescription)}</p><div class="restaurant-badges">${card.badges.map(badge => `<span class="restaurant-badge ${badge.state}">${esc(badge.label)}${badge.state === 'unknown' ? ': нет данных' : ''}</span>`).join('')}</div>${fullDescription ? `<details class="restaurant-map-details"><summary>Полное описание</summary><p>${esc(fullDescription)}</p></details>` : ''}<button type="button" class="restaurant-map-add" data-add-map-candidate="${mapSelectedIndex}">Добавить в маршрут</button></article>`;
   const element = container.querySelector('.restaurant-map-card');
-  const skip = () => { mapSelectedIndex = (mapSelectedIndex + 1) % mapCandidates.length; renderRestaurantSheet(); };
+  const skip = (offsetX, offsetY = 0) => {
+    const direction = offsetX >= 0 ? 1 : -1;
+    element.classList.remove('drag');
+    element.classList.add('fly');
+    element.style.transform = `translate(${direction * (window.innerWidth + 200)}px, ${offsetY}px) rotate(${direction * 24}deg)`;
+    const delay = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : FLY_MS;
+    window.setTimeout(() => {
+      mapSelectedIndex = (mapSelectedIndex + 1) % mapCandidates.length;
+      renderRestaurantSheet();
+    }, delay);
+  };
   element.querySelector('[data-add-map-candidate]').onclick = event => addRestaurant(event.currentTarget, candidate);
-  let startX = null;
-  element.onpointerdown = event => { startX = event.clientX; element.setPointerCapture(event.pointerId); };
+  let startX = 0, startY = 0, offsetX = 0, offsetY = 0, lastX = 0, lastTime = 0, velocityX = 0, dragging = false;
+  element.onpointerdown = event => {
+    if (event.button > 0 || !restaurantCardAllowsSwipe(event.target)) return;
+    dragging = true;
+    startX = lastX = event.clientX;
+    startY = event.clientY;
+    offsetX = offsetY = velocityX = 0;
+    lastTime = event.timeStamp;
+    try { element.setPointerCapture(event.pointerId); } catch { /* указатель уже не активен */ }
+    element.classList.add('drag');
+  };
   element.onpointermove = event => {
-    if (startX === null) return;
-    const offset = event.clientX - startX;
-    element.style.transform = `translateX(${offset}px) rotate(${offset / 24}deg)`;
-    element.style.opacity = String(1 - Math.min(Math.abs(offset) / 500, .35));
+    if (!dragging) return;
+    offsetX = event.clientX - startX;
+    offsetY = event.clientY - startY;
+    const elapsed = event.timeStamp - lastTime;
+    if (elapsed > 0) velocityX = (event.clientX - lastX) / elapsed;
+    lastX = event.clientX;
+    lastTime = event.timeStamp;
+    element.style.transform = `translate(${offsetX}px, ${offsetY}px) rotate(${offsetX / 18}deg)`;
+    if (Math.abs(offsetX) > COMMIT_PX && Math.abs(offsetX) > Math.abs(offsetY) * .7) {
+      dragging = false;
+      try { element.releasePointerCapture(event.pointerId); } catch { /* захвата не было */ }
+      skip(offsetX, offsetY);
+    }
   };
   element.onpointerup = event => {
-    if (startX === null) return;
-    const action = cardSwipeAction(event.clientX - startX); startX = null;
-    element.style.transform = ''; element.style.opacity = '';
-    if (action === 'skip') skip();
+    if (!dragging) return;
+    dragging = false;
+    element.classList.remove('drag');
+    try { element.releasePointerCapture(event.pointerId); } catch { /* захвата не было */ }
+    const horizontalGesture = Math.abs(offsetX) > Math.abs(offsetY) * .7;
+    if (horizontalGesture && cardSwipeAction(offsetX, velocityX) === 'skip') skip(offsetX, offsetY);
+    else element.style.transform = '';
   };
-  element.onpointercancel = () => { startX = null; element.style.transform = ''; element.style.opacity = ''; };
+  element.onpointercancel = event => {
+    if (!dragging) return;
+    dragging = false;
+    element.classList.remove('drag');
+    try { element.releasePointerCapture(event.pointerId); } catch { /* захвата не было */ }
+    element.style.transform = '';
+  };
   hooks.onFocus?.(candidate.place);
   hooks.onResize?.();
 }
@@ -115,8 +156,6 @@ async function addRestaurant(button, candidate) {
   try {
     const preview = await previewAddRestaurant(candidate, candidate.recommended_date || today()?.date);
     if (!preview.can_apply) throw new Error('Этот ресторан не помещается в маршрут выбранного дня.');
-    const warnings = (preview.warnings || []).filter(warning => preview.required_acknowledgement_codes.includes(warning.code)).map(warning => warning.message);
-    if (!await confirmRestaurant(candidate, warnings)) return;
     await applyPreview(preview, preview.required_acknowledgement_codes);
     closeRestaurants();
     await loadMapCandidates();
@@ -127,24 +166,6 @@ async function addRestaurant(button, candidate) {
   } finally {
     button.disabled = false; button.classList.remove('busy'); button.textContent = 'Добавить в маршрут';
   }
-}
-function confirmRestaurant(candidate, warnings) {
-  const dialog = $('restaurant-confirm-dialog');
-  $('restaurant-confirm-title').textContent = `Добавить «${candidate.place.name || candidate.activity.title}»?`;
-  $('restaurant-confirm-body').innerHTML = `<p>Проверка пройдена. Перестроим маршрут через это место.</p>${warnings.length ? `<ul>${warnings.map(warning => `<li>${esc(warning)}</li>`).join('')}</ul>` : ''}`;
-  if (!dialog.open) dialog.showModal();
-  return new Promise(resolve => {
-    let finished = false;
-    const finish = result => {
-      if (finished) return;
-      finished = true;
-      dialog.close();
-      resolve(result);
-    };
-    $('restaurant-confirm-cancel').onclick = () => finish(false);
-    $('restaurant-confirm-apply').onclick = () => finish(true);
-    dialog.oncancel = event => { event.preventDefault(); finish(false); };
-  });
 }
 export function initRestaurants(options = {}) {
   if (initialized) return;

@@ -108,6 +108,11 @@ func (p Planner) insert(ctx context.Context, view c.TripView, i, j int, cmd Chan
 		availability := candidate.Availability
 		stop.Availability = &availability
 	}
+	for _, span := range evidence {
+		if !slices.ContainsFunc(view.Evidence, func(old c.Evidence) bool { return old.EvidenceID == span.EvidenceID }) {
+			view.Evidence = append(view.Evidence, span)
+		}
+	}
 	stops := view.Days[i].Stops
 	at := 0
 	for at < len(stops) && stops[at].Progress != "planned" {
@@ -145,15 +150,41 @@ func (p Planner) insert(ctx context.Context, view c.TripView, i, j int, cmd Chan
 			return c.TripView{}, stateError("STOP_NOT_FOUND", "Следующая остановка не найдена.")
 		}
 	}
+	// Without an explicitly requested position, try every valid insertion point.
+	// This keeps confirmed history and the user's existing stop order intact while
+	// choosing the shortest feasible rebuilt walking route through the new place.
+	if cmd.Kind == "add_activity" && cmd.AfterStopID == nil {
+		var best c.TripView
+		bestSet, bestFeasible := false, false
+		bestDistance := math.Inf(1)
+		for candidateAt := at; candidateAt <= len(stops); candidateAt++ {
+			trial, err := cloneView(view)
+			if err != nil {
+				return c.TripView{}, err
+			}
+			trialStops := append([]c.Stop{}, stops[:candidateAt]...)
+			trialStops = append(trialStops, stop)
+			trialStops = append(trialStops, stops[candidateAt:]...)
+			trial.Days[i].Stops = trialStops
+			rebuilt, err := p.rebuildExistingDay(ctx, trial, i, j, position, observed, now)
+			if err != nil {
+				return c.TripView{}, err
+			}
+			feasible := rebuilt.Days[i].Feasibility != "infeasible"
+			distance := math.Inf(1)
+			if rebuilt.Days[i].Totals.WalkDistanceM != nil {
+				distance = *rebuilt.Days[i].Totals.WalkDistanceM
+			}
+			if !bestSet || feasible && !bestFeasible || feasible == bestFeasible && distance < bestDistance {
+				best, bestSet, bestFeasible, bestDistance = rebuilt, true, feasible, distance
+			}
+		}
+		return best, nil
+	}
 	next := append([]c.Stop{}, stops[:at]...)
 	next = append(next, stop)
 	next = append(next, stops[at:]...)
 	view.Days[i].Stops = next
-	for _, span := range evidence {
-		if !slices.ContainsFunc(view.Evidence, func(old c.Evidence) bool { return old.EvidenceID == span.EvidenceID }) {
-			view.Evidence = append(view.Evidence, span)
-		}
-	}
 	return p.rebuildExistingDay(ctx, view, i, j, position, observed, now)
 }
 
