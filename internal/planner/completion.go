@@ -193,8 +193,7 @@ func (p Planner) PlanningOptions(ctx context.Context, view c.TripView, now time.
 	}
 	for _, inputDay := range view.Input.Days {
 		row := c.DayPlanningOptions{Date: inputDay.Date, AvailableDurationSec: dailyTimeBudget(inputDay), Candidates: []c.Candidate{}, ManualCount: manualCount(view, inputDay.Date)}
-		row.RemainingManualChoices = max(0, result.Policy.ManualLimitPerDay-row.ManualCount)
-		row.RemainingManualChoices = min(row.RemainingManualChoices, max(0, len(view.Input.Days)*result.Policy.ManualLimitPerDay-len(view.Input.Selections)))
+		row.RemainingManualChoices = len(result.Candidates)
 		index := -1
 		for i, d := range view.Days {
 			if d.Date == inputDay.Date {
@@ -239,6 +238,7 @@ func (p Planner) PlanningOptions(ctx context.Context, view c.TripView, now time.
 				row.Candidates = append(row.Candidates, candidate)
 			}
 		}
+		row.RemainingManualChoices = len(row.Candidates)
 		result.Days = append(result.Days, row)
 	}
 	return result, nil
@@ -263,8 +263,8 @@ func (p Planner) AppendManualChoices(ctx context.Context, view c.TripView, date 
 			return view, stateError("ACTIVE_TRIP", "Дополнение карточками пока доступно до начала прогулки.")
 		}
 	}
-	if len(choices) < 1 || len(choices)+manualCount(view, date) > budgetDefaults.CompletionPolicy.ManualLimitPerDay || len(view.Input.Selections)+len(choices) > len(view.Input.Days)*budgetDefaults.CompletionPolicy.ManualLimitPerDay {
-		return view, stateError("MANUAL_LIMIT", "Можно выбрать вручную не больше двух мест на день.")
+	if len(choices) < 1 {
+		return view, stateError("INVALID_COMMAND", "Выберите хотя бы одно место.")
 	}
 	var input c.DayInput
 	for _, d := range view.Input.Days {

@@ -81,7 +81,7 @@ func (cmd ChangeCommand) Validate() error {
 		valid = cmd.Date != nil && cmd.PlaceID != nil && *cmd.PlaceID != "" && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
 
 	case "append_manual_choices":
-		valid = cmd.Date != nil && len(cmd.Choices) > 0 && len(cmd.Choices) <= budgetDefaults.CompletionPolicy.ManualLimitPerDay && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
+		valid = cmd.Date != nil && len(cmd.Choices) > 0 && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
 	case "generate_plan":
 		valid = cmd.Date == nil && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
 	case "start_day":

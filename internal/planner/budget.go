@@ -36,7 +36,7 @@ func loadBudgetParameters() budgetParameters {
 	if parameters.PolicyVersion == "" || parameters.DefaultMealCount < 0 || parameters.DefaultMealCount > 10 || !finite(parameters.RestaurantWalkReserveMPerDay) || parameters.RestaurantWalkReserveMPerDay < 0 {
 		panic("invalid planning defaults")
 	}
-	if parameters.CompletionPolicy.ManualLimitPerDay != 2 || parameters.CompletionPolicy.ShortDayRatio <= 0 || parameters.CompletionPolicy.ShortDayRatio > 1 || parameters.CompletionPolicy.SupplementRadiusM <= 0 {
+	if parameters.CompletionPolicy.ManualLimitPerDay != 0 || parameters.CompletionPolicy.ShortDayRatio <= 0 || parameters.CompletionPolicy.ShortDayRatio > 1 || parameters.CompletionPolicy.SupplementRadiusM <= 0 {
 		panic("invalid completion policy")
 	}
 	for age := 3; age <= 11; age++ {

@@ -112,19 +112,7 @@ func Validate(input c.TripInput) error {
 		if *input.PlanningPolicy != "ranked_prefix" && *input.PlanningPolicy != "manual_choices" {
 			return invalid("invalid planning_policy")
 		}
-		if len(input.Selections) > len(input.Days)*budgetDefaults.CompletionPolicy.ManualLimitPerDay {
-			return invalid("MANUAL_LIMIT: at most two manual choices per day")
-		}
-		counts := map[c.ISODate]int{}
-		for _, s := range input.Selections {
-			if s.PreferredDate == nil {
-				continue // Days are assigned by geographic clustering, not by the picker.
-			}
-			counts[*s.PreferredDate]++
-			if counts[*s.PreferredDate] > budgetDefaults.CompletionPolicy.ManualLimitPerDay {
-				return invalid("MANUAL_LIMIT: at most two manual choices per day")
-			}
-		}
+
 	}
 	if err := ValidateFamily(input.Family, input.LoadLimits); err != nil {
 		return err

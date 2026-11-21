@@ -18,14 +18,14 @@ export const planningPolicyForSelections = selections => selections.length ? 'ma
 export function pickConfiguration(options, { supplemental = false, selected = [] } = {}) {
   if (!supplemental) {
     const available=new Set(options.days.flatMap(d=>d.candidates.map(c=>c.activity.activity_id)));
-    return { days:[], tripLimit:options.policy.manual_limit_per_day*options.days.length,
+    return { days:[], tripLimit:Infinity,
       cards:options.candidates.filter(c=>available.has(c.activity.activity_id)).map(c=>candidateCard(c,null)),
       selected:selected.map(c=>({...c,preferred_date:null,occurrence_id:null})),
     };
   }
   const days = options.days.filter(d => !supplemental || d.is_short && d.remaining_manual_choices > 0 && d.candidates.length);
   return {
-    days: days.map(d => ({date:d.date,limit:d.remaining_manual_choices,anchorOnFirstPick:d.anchor===null,radiusM:options.policy.supplement_radius_m})),
+    days: days.map(d => ({date:d.date,limit:Infinity,anchorOnFirstPick:d.anchor===null,radiusM:options.policy.supplement_radius_m})),
     cardsByDay: Object.fromEntries(days.map(d => [d.date,d.candidates.map(c => candidateCard(c,d.date))])),
     selected,
   };

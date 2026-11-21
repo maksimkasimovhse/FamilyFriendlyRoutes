@@ -3,6 +3,7 @@ package planner
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 	"testing"
 	"time"
@@ -74,7 +75,7 @@ func completionFixture(t *testing.T) (Planner, c.TripView) {
 	response.Candidates[2].Activity.Duration.DurationSec = 300
 	return Planner{Router: &testRouter{}, Source: fixedSource{response: response}}, view
 }
-func TestRankedPrefixAndTwoManualChoices(t *testing.T) {
+func TestRankedPrefixAndUnlimitedManualChoices(t *testing.T) {
 	p, view := completionFixture(t)
 	result, err := p.Build(context.Background(), view, time.Now())
 	if err != nil {
@@ -85,8 +86,8 @@ func TestRankedPrefixAndTwoManualChoices(t *testing.T) {
 	}
 	date := view.Input.Days[0].Date
 	view.Input.Selections = append(view.Input.Selections, c.Selection{ActivityID: "activity-2", PlaceID: "place-2", PreferredDate: &date}, c.Selection{ActivityID: "activity-3", PlaceID: "place-3", PreferredDate: &date})
-	if !errors.Is(Validate(view.Input), ErrValidation) {
-		t.Fatal("accepted three manual choices in a day")
+	if err := Validate(view.Input); err != nil {
+		t.Fatalf("rejected three manual choices: %v", err)
 	}
 }
 func TestManualChoicesNeverSilentlyFillOtherStopsOrDays(t *testing.T) {
@@ -146,7 +147,7 @@ func TestShortDaySupplementRadiusQuotaAndPreservedChoices(t *testing.T) {
 		t.Fatal("append reordered or mutated the existing route")
 	}
 	if _, err := p.AppendManualChoices(ctx, updated, date, []c.Selection{{ActivityID: "activity-3", PlaceID: "place-3", PreferredDate: &date}}, now); err == nil {
-		t.Fatal("supplement bypassed two-choice limit")
+		t.Fatal("supplement bypassed 2km radius")
 	}
 	if _, err := p.AppendManualChoices(ctx, result, date, []c.Selection{{ActivityID: "activity-4", PlaceID: "place-4", PreferredDate: &date}}, now); err == nil {
 		t.Fatal("supplement bypassed 2km radius")
@@ -210,5 +211,41 @@ func TestDemoPlanningOptionsAndRouterOutage(t *testing.T) {
 	p.Router = &testRouter{err: routing.ErrUnavailable}
 	if _, err := p.PlanningOptions(ctx, result, now); !errors.Is(err, routing.ErrUnavailable) {
 		t.Fatal("routing outage presented as no suitable cards", err)
+	}
+}
+
+func TestManualChoicesBeyondTwoUseActualDayBudget(t *testing.T) {
+	input := sample(t)
+	policy := "manual_choices"
+	input.PlanningPolicy = &policy
+	input.Days[0].DurationBudgetSec = 14400
+	date := input.Days[0].Date
+	input.Selections = []c.Selection{}
+	for i := 0; i < 5; i++ {
+		input.Selections = append(input.Selections, c.Selection{ActivityID: c.ID(fmt.Sprintf("activity-%d", i)), PlaceID: c.ID(fmt.Sprintf("place-%d", i)), PreferredDate: &date})
+	}
+	view := NewDraft("unlimited-five", input, time.Now())
+	response := mlResponse(t, view, 5)
+	for i := range response.Candidates {
+		response.Candidates[i].Activity.Duration.DurationSec = 300
+	}
+	p := Planner{Router: &testRouter{}, Source: fixedSource{response: response}}
+	result, err := p.Build(context.Background(), view, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Days[0].Stops) != 5 {
+		t.Fatalf("expected all five fitting choices, got %d", len(result.Days[0].Stops))
+	}
+	view.Input.Days[0].DurationBudgetSec = 600
+	result, err = p.Build(context.Background(), view, time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Days[0].Stops) >= 5 {
+		t.Fatal("time budget did not exclude overflowing choices")
+	}
+	if len(result.Input.Selections) != 5 {
+		t.Fatal("overflow silently deleted user's choices")
 	}
 }

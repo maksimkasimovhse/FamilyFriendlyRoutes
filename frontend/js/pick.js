@@ -32,14 +32,13 @@ let busy = false;
 let configuration = null;
 let currentDate = null;
 const choicesToday = () => configuration?.tripLimit != null ? liked.length : liked.filter(c => c.preferred_date === currentDate).length;
-const dayLimit = () => configuration?.tripLimit ?? configuration?.days.find(d => d.date === currentDate)?.limit ?? Infinity;
 function renderDayTabs() {
   let tabs = $('pick-day-tabs');
   if (!tabs) { tabs = el('div', 'day-tabs'); tabs.id = 'pick-day-tabs'; $('deck').before(tabs); }
   tabs.replaceChildren(); tabs.hidden = !configuration || configuration.tripLimit != null || configuration.days.length<=1;
   if (tabs.hidden) return;
   configuration.days.forEach(d => {
-    const b = el('button', null, `${new Date(d.date+'T12:00:00Z').toLocaleDateString('ru-RU',{day:'numeric',month:'short',timeZone:'UTC'})} · ${liked.filter(c=>c.preferred_date===d.date).length}/${d.limit}`);
+    const b = el('button', null, `${new Date(d.date+'T12:00:00Z').toLocaleDateString('ru-RU',{day:'numeric',month:'short',timeZone:'UTC'})} · ${liked.filter(c=>c.preferred_date===d.date).length}`);
     b.type='button'; b.setAttribute('aria-pressed',String(d.date===currentDate));
     b.onclick=()=>{ if(busy)return;currentDate=d.date;startDeck(false); };
     tabs.append(b);
@@ -104,7 +103,7 @@ function layoutStack() {
 
 function updateHud() {
   const left = deck.length - pos;
-  $('pick-count').textContent = configuration?.tripLimit != null ? `Выбрано ${liked.length} из ${configuration.tripLimit} на поездку` : configuration ? `Можно добавить: ${choicesToday()} из ${dayLimit()}` : `Выбрано ${liked.length} · ещё ${left}`;
+  $('pick-count').textContent = configuration?.tripLimit != null ? `Выбрано ${liked.length} на поездку` : configuration ? `Выбрано ${choicesToday()}` : `Выбрано ${liked.length} · ещё ${left}`;
   const finish = $('pick-finish');
   finish.disabled = liked.length === 0;
   finish.textContent = liked.length ? `Завершить подбор мест (${liked.length})` : 'Завершить подбор мест';
@@ -171,7 +170,6 @@ function reset(card) {
 function decide(choice, dy = 0, fromCard = null) {
   const top = fromCard || $('deck').querySelector('.pcard:not(.gone)');
   if (!top || top.classList.contains('gone') || pos >= deck.length) return;
-  if (choice === 'yes' && choicesToday() >= dayLimit()) { reset(top); return; }
   closeDetails();
   const card = deck[pos];
   const dir = choice === 'yes' ? 1 : -1;

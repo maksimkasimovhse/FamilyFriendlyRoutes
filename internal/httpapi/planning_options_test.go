@@ -73,7 +73,7 @@ func TestPlanningOptionsPreviewSupplementApplyAndAccess(t *testing.T) {
 	}
 	var cards c.PlanningOptions
 	_ = json.Unmarshal(options.Body.Bytes(), &cards)
-	if len(cards.Candidates) != 3 || cards.Policy.ManualLimitPerDay != 2 || cards.Days[0].Anchor != nil || !cards.Days[0].IsShort {
+	if len(cards.Candidates) != 3 || cards.Policy.ManualLimitPerDay != 0 || cards.Days[0].Anchor != nil || !cards.Days[0].IsShort {
 		t.Fatal("wrong initial cards/policy")
 	}
 	outsider := bootstrap(t, h.handler)

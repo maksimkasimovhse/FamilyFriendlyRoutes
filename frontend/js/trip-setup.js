@@ -1,3 +1,4 @@
+import { selectionReview } from './selection-review.js';
 // Новая поездка: экраны 5, 7, 8 (+ шаг 2 — подбор мест из pick.js) — docs/tz-onboarding.md.
 // Гость: POST /trips с полным TripInput из локальной анкеты.
 // Аккаунт: POST /trips/from-profile с expected_profile_version.
@@ -222,7 +223,7 @@ function renderWishes() {
     ['Интересы', kids, 'profile'],
     ['Когда', `${$('cal-sum').textContent || plural(n, 'день', 'дня', 'дней')} · до ${st.hours} ч в день`, 'when'],
     ['Старт', st.start.label + (st.returnHome ? ' · возвращаемся сюда' : ` → ${st.end.label}`), 'when'],
-    ['Выбрано вручную', st.picked.length ? plural(st.picked.length, 'место', 'места', 'мест') + ' · до двух на день' : 'подберём сами', 'pick'],
+    ['Выбрано вручную', st.picked.length ? plural(st.picked.length, 'место', 'места', 'мест') : 'подберём сами', 'pick'],
   ];
   $('trip-summary').innerHTML = rows.map(([k, v, to]) => `<dt>${k}</dt><dd>${esc(v)}</dd><dd><button type="button" data-to="${to}">Изм.</button></dd>`).join('');
   persist();
@@ -291,12 +292,7 @@ function renderPreview() {
     <li><span class="n end">▶</span><span><b>Старт</b><small>${esc(day.start_point.label || 'точка старта')}</small></span></li>
     ${stops || '<li><span><small>На этот день мест не нашлось — попробуйте больше часов или другие даты</small></span></li>'}
     <li><span class="n end">■</span><span><b>Финиш</b><small>${esc(day.end_point.label || 'точка финиша')}</small></span></li>`;
-  let excluded = $('preview-excluded');
-  if (!excluded) { excluded = document.createElement('p'); excluded.id='preview-excluded'; excluded.className='small'; $('preview-list').after(excluded); }
-  const missing=trip.input.selections.filter(s=>(s.preferred_date===day.date || (s.preferred_date==null && day===days[0])) && !days.some(d=>d.stops.some(stop=>stop.activity_id===s.activity_id)));
-  const names=new Map((trip.recommendation_snapshot?.candidates || []).map(c=>[c.activity.activity_id,c.activity.title]));
-  excluded.hidden=!missing.length;
-  excluded.textContent=missing.length ? `Не удалось включить выбранные места: ${missing.map(s=>names.get(s.activity_id)||s.activity_id).join(', ')}. Проверьте доступное время, лимит ходьбы и даты.` : '';
+  renderSelectionReview();
 
   // Предупреждения, которые нужно подтвердить перед сохранением
   const codes = preview.required_acknowledgement_codes || [];
@@ -306,11 +302,46 @@ function renderPreview() {
     $('preview-ack-text').textContent = msgs.length ? 'Понимаю: ' + msgs.join(' ').replace(/\.\s*$/, '') + '. Уточню перед выходом.' : 'Часы работы проверены не у всех мест — уточню перед выходом';
   }
   $('preview-ack-box').checked = false;
-  $('preview-save').disabled = !preview.can_apply || codes.length > 0;
+  $('preview-save').disabled = !preview.can_apply || selectionReview(trip).excludedCount > 0 || codes.length > 0;
   $('preview-guest').hidden = hooks.authenticated;
   $('preview-error').hidden = true;
   renderCompletionOffer();
 }
+
+let selectionBusy=false;
+function renderSelectionReview() {
+ let panel=$('preview-selection-review');
+ if(!panel){panel=document.createElement('section');panel.id='preview-selection-review';panel.className='selection-review';$('preview-list').after(panel);}
+ const {cards,excludedCount}=selectionReview(preview.proposed_trip);
+ panel.hidden=!cards.length;
+ panel.innerHTML=(excludedCount ? '<p class="selection-overflow" role="alert"><b>Вы не успеете пройти маршрут со всеми выбранными местами.</b> Рекомендуем исключить '+plural(excludedCount,'карточку','карточки','карточек')+'.</p><p class="small">Отмечены места, которые не вошли в текущий расчёт. Можно убрать любые карточки — после удаления пересчитаем маршрут. Также можно увеличить время или изменить даты.</p>' : '')+
+ '<h3>Выбранные места ('+cards.length+')</h3><ul class="selection-review-list">'+cards.map(card=>'<li class="'+(card.missing?'is-excluded':'')+'"><span><b>'+esc(card.title)+'</b>'+(card.missing?'<small>Не помещается или недоступно в выбранные даты</small>':'')+'</span><button type="button" data-remove-choice="'+esc(card.activityId)+'" aria-label="Убрать '+esc(card.title)+'" title="Убрать место">×</button></li>').join('')+'</ul>';
+ panel.querySelectorAll('[data-remove-choice]').forEach(button=>button.onclick=()=>removePreviewChoice(button.dataset.removeChoice));
+}
+async function removePreviewChoice(activityId) {
+ if(selectionBusy)return;
+ selectionBusy=true;
+ $('trip-preview').querySelectorAll('button').forEach(button=>button.disabled=true);
+ $('preview-error').hidden=true;
+ try {
+  const input=structuredClone(preview.proposed_trip.input);
+  input.selections=input.selections.filter(choice=>choice.activity_id!==activityId);
+  const nextDraft=await createTrip(input);
+  const nextPreview=await planDraft(nextDraft);
+  draftTrip=nextDraft;preview=nextPreview;
+  st.picked=st.picked.filter(card=>card.activity_id!==activityId);persist();
+  completionOptions=null;
+  renderPreview();
+  await refreshCompletionOptions();
+ }catch(error){
+  renderPreview();$('preview-error').textContent=humanError(error);$('preview-error').hidden=false;
+ }finally{
+  selectionBusy=false;
+  $('trip-preview').querySelectorAll('button').forEach(button=>button.disabled=false);
+  $('preview-save').disabled=!preview.can_apply||selectionReview(preview.proposed_trip).excludedCount>0||!$('preview-ack').hidden&&!$('preview-ack-box').checked;
+ }
+}
+
 function renderCompletionOffer() {
   let panel = $('preview-completion');
   if (!panel) { panel = document.createElement('div'); panel.id = 'preview-completion'; $('preview-list').after(panel); }
@@ -319,7 +350,7 @@ function renderCompletionOffer() {
   if (!row?.is_short) return;
   const text = document.createElement('p');
   text.className='small';
-  text.textContent = `День заполнен на ${Math.round(row.fill_ratio*100)}%. ` + (row.remaining_manual_choices ? row.anchor ? `Можно предложить места в пределах ${completionOptions.policy.supplement_radius_m / 1000} км от последней активности.` : 'День пустой — предложим подходящие места без привязки к старту.' : 'Два ручных выбора на этот день уже использованы.');
+  text.textContent = `День заполнен на ${Math.round(row.fill_ratio*100)}%. ` + (row.remaining_manual_choices ? row.anchor ? `Можно предложить места в пределах ${completionOptions.policy.supplement_radius_m / 1000} км от последней активности.` : 'День пустой — предложим подходящие места без привязки к старту.' : 'Подходящих дополнительных мест не найдено.');
   panel.append(text);
   if (!row.remaining_manual_choices || !row.candidates.length) {
     if (row.remaining_manual_choices) text.textContent += ' В текущем пуле нет дополнительных мест, которые помещаются в этот день.';
@@ -343,6 +374,7 @@ async function refreshCompletionOptions() {
 }
 
 async function savePreview() {
+  if (selectionBusy || selectionReview(preview.proposed_trip).excludedCount) return;
   const btn = $('preview-save');
   btn.disabled = true;
   btn.textContent = 'Сохраняем…';
@@ -363,7 +395,7 @@ async function savePreview() {
     $('preview-error').hidden = false;
   } finally {
     btn.textContent = 'Сохранить маршрут';
-    if (!$('trip-preview').hidden) btn.disabled = !preview?.can_apply || !$('preview-ack').hidden && !$('preview-ack-box').checked;
+    if (!$('trip-preview').hidden) btn.disabled = selectionBusy || !preview?.can_apply || selectionReview(preview.proposed_trip).excludedCount > 0 || !$('preview-ack').hidden && !$('preview-ack-box').checked;
   }
 }
 
@@ -386,7 +418,7 @@ export async function openTripSetup(h, { keep = false, resume = false } = {}) {
     $('trip-build').onclick = build;
     $('trip-wishes').querySelector('[data-back]').onclick = () => { st.request = $('trip-request').value; $('trip-wishes').hidden = true; goPick(); };
     $('trip-preview').querySelector('[data-back]').onclick = () => { $('trip-preview').hidden = true; renderWishes(); $('trip-wishes').hidden = false; };
-    $('preview-ack-box').onchange = e => { $('preview-save').disabled = !preview?.can_apply || !e.target.checked; };
+    $('preview-ack-box').onchange = e => { $('preview-save').disabled = selectionBusy || !preview?.can_apply || selectionReview(preview.proposed_trip).excludedCount > 0 || !e.target.checked; };
     $('preview-save').onclick = savePreview;
     $('preview-login').onclick = () => hooks.onLogin();
   }

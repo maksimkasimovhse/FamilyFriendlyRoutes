@@ -203,7 +203,6 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 	assignments := make([][]c.Selection, len(days))
 	distances := make([]float64, len(days))
 	closedPrefix := make([]bool, len(days))
-	manualCounts := make([]int, len(days))
 	prefix := view.Input.PlanningPolicy != nil
 	speed := budgetDefaults.WalkingSpeedKPHByPace[view.Input.LoadLimits.Pace]
 	build := func(i int, choices []c.Selection) (c.DayPlan, error) {
@@ -253,7 +252,7 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 		}
 		options := []option{}
 		for i, day := range days {
-			if prefix && ((!selected[s.ActivityID] && closedPrefix[i]) || (selected[s.ActivityID] && manualCounts[i] >= budgetDefaults.CompletionPolicy.ManualLimitPerDay)) {
+			if prefix && !selected[s.ActivityID] && closedPrefix[i] {
 				continue
 			}
 			if s.PreferredDate != nil && day.Date != *s.PreferredDate {
@@ -319,9 +318,6 @@ func (p Planner) Build(ctx context.Context, view c.TripView, now time.Time) (c.T
 				assignments[o.day] = o.choices
 				distances[o.day] = o.totalDistance
 				accepted = true
-				if selected[s.ActivityID] {
-					manualCounts[o.day]++
-				}
 				break
 			}
 			if prefix && !selected[s.ActivityID] {

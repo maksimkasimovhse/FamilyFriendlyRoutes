@@ -22,16 +22,16 @@ test('after the first empty-day pick, subsequent choices stay within 2 km', () =
   assert.equal(withinCardRadius([44,56],[44.01,56],config.days[0].radiusM),true);
   assert.equal(withinCardRadius([44,56],[44.1,56],config.days[0].radiusM),false);
 });
-test('supplemental choices use remaining quota per short day', () => {
+test('short days offer all available candidates without a count quota', () => {
   const options={candidates:[candidate],policy:{manual_limit_per_day:2},days:[
     {date:'2030-06-15',is_short:true,remaining_manual_choices:1,candidates:[candidate]},
     {date:'2030-06-16',is_short:true,remaining_manual_choices:0,candidates:[candidate]},
     {date:'2030-06-17',is_short:false,remaining_manual_choices:2,candidates:[candidate]},
   ]};
-  assert.deepEqual(pickConfiguration(options,{supplemental:true}).days.map(({date,limit})=>({date,limit})),[{date:'2030-06-15',limit:1}]);
+  assert.deepEqual(pickConfiguration(options,{supplemental:true}).days.map(({date,limit})=>({date,limit})),[{date:'2030-06-15',limit:Infinity}]);
   const initial=pickConfiguration(options,{selected:[candidateCard(candidate,'2030-06-15')]});
   assert.deepEqual(initial.days,[]);
-  assert.equal(initial.tripLimit,6);
+  assert.equal(initial.tripLimit,Infinity);
   assert.equal(initial.cards.length,1);
   assert.equal(manualSelection(initial.selected[0]).preferred_date,null);
 });
