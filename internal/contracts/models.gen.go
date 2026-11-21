@@ -141,6 +141,7 @@ type Place struct {
 		PlayAreaMinAge        json.RawMessage  `json:"play_area_min_age"`
 		PlayAreaMaxAge        json.RawMessage  `json:"play_area_max_age"`
 		PlayAreaSupervision   json.RawMessage  `json:"play_area_supervision"`
+		HighChairs            *json.RawMessage `json:"high_chairs,omitempty"`
 		Cuisine               *[]string        `json:"cuisine,omitempty"`
 		MenuUrls              *[]string        `json:"menu_urls,omitempty"`
 		PlayAreaStaffHoursRaw *json.RawMessage `json:"play_area_staff_hours_raw,omitempty"`

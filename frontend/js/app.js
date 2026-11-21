@@ -20,6 +20,7 @@ import { initToday, refreshToday, toast } from './today.js';
 import { initMapActions, openUrgentWidget } from './map-actions.js';
 import { initProfile, renderProfile } from './profile.js';
 import { initKid, openKid, kidStopInfo, setKidRoute, clearKidPlaces } from './kid.js';
+import { initRestaurants, openRestaurants } from './restaurants.js';
 
 const $ = id => document.getElementById(id);
 const app = document.querySelector('.app');
@@ -36,6 +37,7 @@ function openTab(name) {
   tabs.forEach(t => t.classList.toggle('on', t.dataset.tab === name));
   screens.forEach(s => { s.hidden = s.dataset.tab !== name; });
   if (name === 'map') resizeMap();
+  if (name === 'restaurants') openRestaurants();
   if (name === 'profile') renderProfile();
 }
 tabs.forEach(t => t.addEventListener('click', () => openTab(t.dataset.tab)));
@@ -70,6 +72,7 @@ function startMain() {
   });
   initToday({ childName: name, childNameGenitive: genitive(name), kidStopInfo, onOpenKid: () => openKid(), onNeedNow: () => { openTab('map'); openUrgentWidget(); } });
   initMapActions({onFilter:setAmenityFilter,onFocus:focusPlace,onPreview:showRoutePreview,onCancel:clearRoutePreview});
+  initRestaurants();
   $('map-kid-mode').onclick=()=>kidReady.then(()=>openKid());
   $('map-sheet-toggle').onclick=()=>{
     const button=$('map-sheet-toggle'),panel=$('map-sheet-content');

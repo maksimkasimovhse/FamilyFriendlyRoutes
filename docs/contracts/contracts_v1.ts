@@ -121,6 +121,7 @@ export interface Place {
   fee_raw?: string | null;
   restaurant: {
     children_menu: Fact<boolean>; small_portions: Fact<boolean>;
+    high_chairs?: Fact<boolean>;
     play_area: Fact<boolean>; play_area_min_age: Fact<number>;
     play_area_max_age: Fact<number>; play_area_supervision: Fact<boolean>;
     cuisine?: string[]; menu_urls?: string[];
