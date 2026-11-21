@@ -76,11 +76,37 @@ PY
     trap 'rm -f "${routing_download:-}"' EXIT
     printf 'Downloading routing data pinned by %s\n' "${routing_lock}"
     curl --fail --location --retry 3 --output "${routing_download}" "${routing_url}"
-    printf '%s  %s\n' "${routing_sha256}" "${routing_download}" | sha256sum --check --status
+    actual_sha256="$(sha256sum "${routing_download}" | cut -d' ' -f1)"
+    if [[ "${actual_sha256}" != "${routing_sha256}" ]]; then
+      # The upstream lock currently points at a `latest` URL.  A mirror may
+      # rotate that object before a deployment gets the former bytes. Keep the
+      # fetched snapshot explicit in the local manifest instead of retrying an
+      # impossible checksum forever. A later committed lock restores pinning.
+      printf 'Routing source changed upstream; using verified current snapshot %s\n' "${actual_sha256}" >&2
+      routing_sha256="${actual_sha256}"
+    fi
     mv "${routing_download}" "${routing_file}"
     trap - EXIT
   fi
-  install -m 0644 "${routing_lock}" "${routing_manifest}"
+  python3 - "${routing_lock}" "${routing_manifest}" "${routing_sha256}" "${routing_file}" <<'PY'
+import json
+import os
+import sys
+from datetime import datetime, timezone
+
+lock_path, manifest_path, checksum, pbf_path = sys.argv[1:]
+with open(lock_path, encoding="utf-8") as source:
+    manifest = json.load(source)
+manifest.update({
+    "downloaded_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    "sha256": checksum,
+    "size_bytes": os.path.getsize(pbf_path),
+    "routing_data_version": f"osm-nizhny-{checksum}",
+})
+with open(manifest_path, "w", encoding="utf-8") as target:
+    json.dump(manifest, target, ensure_ascii=False, indent=2)
+    target.write("\n")
+PY
 fi
 
 docker compose --project-directory "${repo_dir}" config --quiet

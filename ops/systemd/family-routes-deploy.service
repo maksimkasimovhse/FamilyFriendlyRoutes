@@ -8,15 +8,16 @@ Type=oneshot
 User=votter
 Group=votter
 SupplementaryGroups=docker
-Environment=FAMILY_ROUTES_REPO=/home/votter/FamilyFriendlyRoutes
+Environment=FAMILY_ROUTES_REPO=/home/vmgabidullin/FamilyFriendlyRoutes
 Environment=FAMILY_ROUTES_BRANCH=main
+Environment=FAMILY_ROUTES_STATE_DIR=/home/vmgabidullin/.local/state/family-routes
 ExecStart=/usr/local/bin/family-routes-deploy-main
 
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/home/votter/FamilyFriendlyRoutes /home/votter/.local/state/family-routes
+ReadWritePaths=/home/vmgabidullin/FamilyFriendlyRoutes /home/vmgabidullin/.local/state/family-routes
 
 [Install]
 WantedBy=multi-user.target
