@@ -291,25 +291,40 @@ function tripCard(t, current) {
   return b;
 }
 
+// Две закреплённые ячейки слева направо:
+//  1) динамическая — самая свежая поездка (текущая, а новая сразу занимает это место); если поездок нет — «Создать поездку»;
+//  2) закреплённая оранжевая «Завершённая» (заглушка для показа), всегда на втором месте;
+//  дальше — остальные поездки от новых к старым.
+function newTripCard() {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'trip-card empty'; b.setAttribute('role', 'listitem');
+  b.innerHTML = '<span class="tc-plus" aria-hidden="true">+</span><b class="tc-range">Новая поездка</b><small>Подобрать места и маршрут</small>';
+  b.onclick = () => hooks.onNewTrip();
+  return b;
+}
+function composeTrips(realCards) {
+  const out = [realCards[0] || newTripCard()];
+  if (demoTrip) out.push(tripCard(demoTrip.summary, false));
+  out.push(...realCards.slice(1));
+  return out;
+}
+
 function drawTrips(items) {
   const rail = $('prof-trips');
   const current = getTrip()?.trip_id;
   const list = items.filter(t => t.status !== 'draft' && (t.days || []).length).slice(0, 12);
   // Текущая впереди, остальные от новых к старым по первому дню
   list.sort((a, b) => (b.trip_id === current) - (a.trip_id === current) || String(b.days[0].date).localeCompare(String(a.days[0].date)));
-  const cards = list.map(t => tripCard(t, t.trip_id === current));
-  if (demoTrip) cards.push(tripCard(demoTrip.summary, false));        // завершённая поездка-заглушка всегда в конце
-  rail.replaceChildren(...(cards.length ? cards : [Object.assign(document.createElement('p'), { className: 'muted', textContent: 'Сохранённых поездок пока нет' })]));
+  rail.replaceChildren(...composeTrips(list.map(t => tripCard(t, t.trip_id === current))));
 }
 
-// Пока список едет с сервера: текущая поездка уже в памяти (рисуем её сразу) и заготовки-«скелетоны»
+// Пока список едет с сервера: текущая поездка уже в памяти (рисуем её сразу), заглушка на своём месте и «скелетоны»
 function drawTripsPlaceholder() {
   const rail = $('prof-trips');
   const t = getTrip();
   const items = [];
   if (t) items.push({ trip_id: t.trip_id, status: t.status, days: t.days.map(d => ({ date: d.date, stops: d.stops.filter(s => s.progress !== 'removed').length, visited: d.stops.filter(s => s.progress === 'visited').length })) });
   drawTrips(items);
-  if (!items.length) rail.replaceChildren();
   rail.append(...[0, 1].map(() => Object.assign(document.createElement('div'), { className: 'trip-card skeleton', innerHTML: '<i></i><i></i><i></i>' })));
 }
 

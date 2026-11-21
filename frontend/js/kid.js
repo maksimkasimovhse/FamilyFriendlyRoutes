@@ -1,5 +1,5 @@
 // Детский режим «Тропа Маши».
-// Тропа строится из мест, которые туристы выбрали на экране «Подбор мест» (setKidPlaces); пока выбора нет,
+// Тропа строится из ВСЕХ мест итогового маршрута (setKidRoute: сохранённая поездка, по дням и в порядке маршрута); пока маршрута нет,
 // показывается демо-тропа из data/kid-route.json. На каждой остановке ровно одно задание: игра с картинкой
 // объекта (пазл, пиксель-пазл или раскраска по номерам; вид задан полем game у места в data/cards.json —
 // поровну на все места) или вопросы (quiz, только у памятника Чкалову, текст в data/kid-quiz.json).
@@ -12,7 +12,7 @@
 // по умолчанию демо: «считаем, что вы на месте».
 
 import { startGame, GAME_LABELS, GAME_HINTS } from './games.js';
-import { loadCards, cardById, orderByNearest } from './catalog.js';
+import { loadCards, cardById, allCards, orderByNearest } from './catalog.js';
 import { watchPlace, enableCompass, openCamera, closeCamera, prepareOld } from './camera.js';
 
 const $ = id => document.getElementById(id);
@@ -47,14 +47,36 @@ function gameOf(s) {
   return { type: card.game, dir: 'media/kid/' + card.id, image: card.image.full, questions: quiz[card.id]?.questions };
 }
 const placeStop = card => ({ id: 'place_' + card.id, type: 'task', title: card.title, point: card.location, place: card.id });
+
+// ---------- Тропа из итогового маршрута ----------
+// В тропе все места сохранённого маршрута, по дням и в порядке маршрута. У места из нашего каталога (174 карточки)
+// задание из его картинки; у места, которого в каталоге нет, — отметка «Мы здесь» и штамп.
+let routeStops = null;       // остановки итогового маршрута (null — маршрута ещё нет, показываем демо-тропу)
+const norm = t => String(t || '').trim().toLocaleLowerCase('ru-RU').replace(/ё/g, 'е');
+function cardForStop(stop) {
+  const m = /^activity:main:(\d+):/.exec(stop.activity_id || '');       // id места из нашего каталога зашит в activity_id
+  if (m && cardById(m[1])) return cardById(m[1]);
+  const key = norm(stop.title);
+  return allCards().find(c => norm(c.title) === key) || null;           // иначе — по точному названию
+}
+function stopFromRoute(stop, date) {
+  const card = cardForStop(stop);
+  const base = { activity: stop.activity_id, date, point: stop.location?.coordinates || card?.location };
+  return card
+    ? { ...placeStop(card), ...base, point: base.point || card.location }
+    : { id: 'stop_' + stop.activity_id, type: 'visit', title: stop.title, ...base };
+}
 function applyPicks() {
   const cards = state.picks.map(cardById).filter(Boolean);
-  const stops = cards.length ? cards.map(placeStop) : [...route.demoStops];
+  const stops = routeStops?.length ? routeStops : cards.length ? cards.map(placeStop) : [...route.demoStops];
   const w = pastStop();
   // окно — первой остановкой; то же место без окна из тропы убираем
   route.stops = w ? [w, ...stops.filter(s => s.id !== w.id && s.place !== w.place)] : stops;
 }
-const kindLabel = s => isWindow(s) ? `Окно в прошлое · ${s.years}` : GAME_LABELS[gameOf(s).type];
+const kindLabel = s => isWindow(s) ? `Окно в прошлое · ${s.years}` : s.type === 'visit' ? 'Отметиться на месте' : GAME_LABELS[gameOf(s).type];
+// В поездке на несколько дней у каждой точки подписан день
+const dayWord = iso => { const d = new Date(iso + 'T12:00:00'); return d.toLocaleDateString('ru-RU', { weekday: 'short', day: 'numeric' }).replace(/^./, c => c.toUpperCase()); };
+const stopSub = s => kindLabel(s) + (route.stops.some(x => x.date && x.date !== route.stops.find(y => y.date)?.date) && s.date ? ' · ' + dayWord(s.date) : '');
 const isDone = s => state.done.includes(s.id);
 const nextStop = () => route.stops.find(s => !isDone(s));
 const outfitImg = id => route.outfits[id].img;
@@ -81,7 +103,7 @@ function fawnLine() {
 }
 
 // ---------- Тропа дня ----------
-const ROW = 118, TOP = 86, BOTTOM = 70;
+const ROW = 118, TOP = 86, BOTTOM = 70;      // ROW — минимальный шаг между точками; при малом числе точек шаг растёт до края экрана
 
 function renderTrail() {
   const total = route.stops.length;
@@ -93,15 +115,19 @@ function renderTrail() {
   const map = $('trail-map');
   const w = map.clientWidth || 360;
   const n = route.stops.length;
-  const h = TOP + (n - 1) * ROW + BOTTOM;
+  // Шаг между точками подстраивается под экран: 2–3 точки растягиваются от низа до верха, много точек идут с минимальным
+  // шагом, и тропа растёт вверх сколько нужно (длинный маршрут на много дней просто пролистывается).
+  const view = $('trail-scroll').clientHeight;
+  const step = n > 1 ? Math.max(ROW, (view - TOP - BOTTOM) / (n - 1)) : ROW;
+  const h = Math.max(TOP + (n - 1) * step + BOTTOM, view);
   map.style.height = h + 'px';
   // Первая остановка внизу — тропа идёт вверх, к реке
-  const pts = route.stops.map((s, i) => ({ s, x: (i % 2 === 0 ? 0.22 : 0.78) * w, y: h - BOTTOM - i * ROW }));
+  const pts = route.stops.map((s, i) => ({ s, x: (i % 2 === 0 ? 0.22 : 0.78) * w, y: h - BOTTOM - i * step }));
 
   let path = `M${pts[0].x} ${pts[0].y + 60}`;
   pts.forEach((p, i) => {
     const prev = i === 0 ? { x: p.x, y: p.y + 60 } : pts[i - 1];
-    path += ` C${prev.x} ${prev.y - ROW * 0.55}, ${p.x} ${p.y + ROW * 0.55}, ${p.x} ${p.y}`;
+    path += ` C${prev.x} ${prev.y - step * 0.55}, ${p.x} ${p.y + step * 0.55}, ${p.x} ${p.y}`;
   });
   const trees = pts.map((p, i) => `<circle cx="${i % 2 ? 0.1 * w : 0.9 * w}" cy="${p.y + 30}" r="${11 + (i % 3) * 3}" fill="#7DBE6E"/>`).join('');
   const doneUpTo = route.stops.findIndex(s => !isDone(s));
@@ -120,7 +146,7 @@ function renderTrail() {
     if (p.x > w / 2) b.style.right = (w - p.x - 28) + 'px'; else b.style.left = (p.x - 28) + 'px';
     b.style.top = p.y + 'px';
     const icon = isDone(p.s) ? ICONS.check : isWindow(p.s) ? ICONS.camera : ICONS.star;
-    const sub = kindLabel(p.s);
+    const sub = stopSub(p.s);
     b.innerHTML = `<span class="pt">${icon}</span><span class="lbl"></span>`;
     b.querySelector('.lbl').textContent = p.s.title;
     b.querySelector('.lbl').insertAdjacentHTML('beforeend', `<small>${sub}</small>`);
@@ -151,7 +177,28 @@ function backToTrail() {
 
 function openStop(s) {
   current = s;
-  if (isWindow(s)) openWindow(s); else openGame(s);
+  if (isWindow(s)) openWindow(s); else if (s.type === 'visit') openVisit(s); else openGame(s);
+}
+
+// Место без нашей картинки: дойти и отметиться, за это штамп
+function openVisit(s) {
+  stopGame();
+  $('game-title').textContent = s.title;
+  $('game-kind').textContent = 'На месте';
+  $('game-fawn').src = outfitImg(state.outfit);
+  $('game-hint').textContent = 'Дойдите до места, оглядитесь и нажмите «Мы здесь!»';
+  $('game-progress').textContent = '';
+  const area = $('game-area');
+  area.replaceChildren();
+  const pic = document.createElement('img');
+  pic.src = outfitImg(state.outfit); pic.alt = ''; pic.className = 'visit-fawn';
+  area.append(pic);
+  const done = $('game-done');
+  done.disabled = false;
+  done.classList.add('win');
+  done.textContent = 'Мы здесь! Забрать штамп';
+  done.onclick = () => afterGame(s);
+  showPage('game-page');
 }
 
 // ---------- Задание: игра с картинкой объекта ----------
@@ -431,6 +478,27 @@ export function clearKidPlaces() {
   if (!$('kid-mode').hidden) renderTrail();
 }
 
+// Итоговый маршрут: остановки сохранённой поездки (trip.days[].stops) по дням и в порядке маршрута.
+// trip === null — маршрута нет, возвращаемся к демо-тропе. Прогресс (state.done) не сбрасывается: id места тот же.
+export function setKidRoute(trip) {
+  if (!route) return;
+  routeStops = null;
+  const seen = new Set();
+  const stops = [];
+  for (const day of [...(trip?.days || [])].sort((a, b) => String(a.date).localeCompare(String(b.date)))) {
+    for (const stop of day.stops || []) {
+      if (stop.progress === 'removed') continue;
+      const s = stopFromRoute(stop, day.date);
+      if (seen.has(s.id)) continue;
+      seen.add(s.id);
+      stops.push(s);
+    }
+  }
+  if (stops.length) routeStops = stops;
+  applyPicks();
+  if (!$('kid-mode').hidden) renderTrail();
+}
+
 // Прогресс ребёнка для профиля: штампы за пройденные задания и текущий наряд оленёнка
 export function kidProgress() {
   let saved = state;
@@ -459,7 +527,10 @@ export function syncKidOrder(activityIds) {
 
 // Что у ребёнка на этой остановке — для строки в ленте «Сегодня»
 export function kidStopInfo(activityId) {
-  const s = route && route.demoStops.find(x => x.id === activityId);
+  if (!route) return null;
+  const mine = route.stops.find(x => x.activity === activityId);
+  if (mine) return { type: 'task', label: kindLabel(mine), years: null, done: isDone(mine), photo: null };
+  const s = route.demoStops.find(x => x.id === activityId);
   if (!s) return null;
   if (isWindow(s)) return { type: 'window', label: 'Окно в прошлое', years: s.years, done: isDone(s), photo: s.photo.url };
   return { type: 'task', label: GAME_LABELS[gameOf(s).type], years: null, done: isDone(s), photo: null };
