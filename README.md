@@ -279,3 +279,7 @@ Compose использует `city-enriched-v3` для новых поездок
 `python scripts/audit_runtime_data.py` показывает счётчики хранилища и фактическое
 монтирование; секреты и содержимое профилей не выводятся. Повторный
 `python scripts/seed-demo-users.py` сохраняет существующие демо-анкеты.
+
+## Публичный HTTPS на сервере
+
+Готовая конфигурация Caddy + Docker: [инструкция](docs/server_https.md). Адрес задаётся через `PUBLIC_HOST` в серверном `.env`; поддерживается `IP.sslip.io`.

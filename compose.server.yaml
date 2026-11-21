@@ -1,0 +1,50 @@
+# Public HTTPS deployment. PUBLIC_HOST must resolve to this server (e.g. IP.sslip.io).
+services:
+  backend:
+    network_mode: !reset null
+    environment:
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgres://familyroutes:${POSTGRES_PASSWORD}@postgres:5432/familyroutes?sslmode=disable}
+      ML_API_TOKEN: ${ML_API_TOKEN:-}
+      LEGACY_ML_URL: http://mock-api:8090/internal/v1/recommendations
+      CITY_ML_URL: http://model-service:8080/internal/v1/recommendations
+    command: ["-listen", "0.0.0.0:8080", "-allow-network-listen", "-trust-proxy-headers", "-routing-url", "http://valhalla:8002", "-ml-url", "http://model-service:8080/internal/v1/recommendations", "-catalog-version", "city-enriched-v3", "-parser-url", "http://parser-service:8080", "-model-url", "http://model-service:8080", "-assistant-url", "http://parser-service:8080/internal/v1/assistant-intents", "-initial-llm"]
+  web:
+    volumes:
+      - ./infra/docker/nginx.bridge.conf:/etc/nginx/conf.d/default.conf:ro
+    network_mode: !reset null
+    ports: ["127.0.0.1:8000:8000"]
+  infra-import:
+    network_mode: !reset null
+    environment:
+      DATABASE_URL: ${DOCKER_DATABASE_URL:-postgres://familyroutes:${POSTGRES_PASSWORD}@postgres:5432/familyroutes?sslmode=disable}
+  mock-api:
+    network_mode: !reset null
+    environment:
+      MOCK_API_LISTEN: 0.0.0.0:8090
+  model-service:
+    environment:
+      ML_API_TOKEN: ${ML_API_TOKEN:-}
+      MODEL_CATALOG_VERSION: city-enriched-v3
+  parser-service:
+    environment:
+      ML_API_TOKEN: ${ML_API_TOKEN:-}
+      ASSISTANT_RULES_FALLBACK: ${ASSISTANT_RULES_FALLBACK:-true}
+  caddy:
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80", "443:443", "443:443/udp"]
+    environment:
+      PUBLIC_HOST: ${PUBLIC_HOST:?Set PUBLIC_HOST in .env to your public domain or IP.sslip.io}
+    volumes:
+      - ./infra/docker/Caddyfile.public:/etc/caddy/Caddyfile:ro
+      - caddy-public-data:/data
+      - caddy-public-config:/config
+    depends_on:
+      - web
+      - backend
+volumes:
+  caddy-public-data:
+  caddy-public-config:
