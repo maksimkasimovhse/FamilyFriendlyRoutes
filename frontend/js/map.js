@@ -85,6 +85,8 @@ function boundsOf(coords) {
 }
 // Запас под фото-метки (52 px) и кнопки справа, чтобы точки не уходили под край
 // Нижняя панель лежит поверх карты — оставляем под неё место, чтобы маршрут не оказался под ней
+// Видимая часть карты — над нижней панелью: объект ставим в её центр, а не в центр всего экрана
+const viewPadding = () => ({ top: 0, left: 0, right: 0, bottom: document.getElementById('map-sheet')?.offsetHeight || 0 });
 const padding = () => ({ top: 70, bottom: Math.max(document.getElementById('map-sheet')?.offsetHeight || 0, innerHeight * 0.42) + 16, left: 56, right: 80 });
 function showArea(coords) {
   map.resize();   // карточка снизу могла поменять высоту — карта должна это узнать
@@ -243,7 +245,7 @@ function showStop(i, { fly = true } = {}) {
   sheetBody.querySelector('[data-act="next"]').onclick = () => showStop(i + 1);
   sheetBody.querySelector('[data-act="all"]').onclick = () => showSummary();
   map.resize();
-  if (fly) map.flyTo({ center: stop.location.coordinates, zoom: Math.max(map.getZoom(), 15.5), duration: 600 });
+  if (fly) map.flyTo({ center: stop.location.coordinates, zoom: Math.max(map.getZoom(), 15.5), duration: 600 , padding: viewPadding() });
 }
 
 function showAmenity(f) {
@@ -271,7 +273,7 @@ function showPlace(place, nearM) {
     <button class="btn link" data-act="all">Назад к маршруту</button>`;
   sheetBody.querySelector('[data-act="all"]').onclick = () => showSummary();
   map.resize();
-  map.flyTo({ center: place.location.coordinates, zoom: Math.max(map.getZoom(), 16.2), duration: 500 });
+  map.flyTo({ center: place.location.coordinates, zoom: Math.max(map.getZoom(), 16.2), duration: 500 , padding: viewPadding() });
 }
 
 // Открыть место из «Помощника»: включить его слой и показать карточку
@@ -410,7 +412,7 @@ function showPickedPlace(i) {
   sheetBody.querySelector('[data-act="next"]').onclick = () => showPickedPlace(i + 1);
   sheetBody.querySelector('[data-act="all"]').onclick = showPickedSummary;
   map.resize();
-  map.flyTo({ center: p.location, zoom: Math.max(map.getZoom(), 15.5), duration: 600 });
+  map.flyTo({ center: p.location, zoom: Math.max(map.getZoom(), 15.5), duration: 600 , padding: viewPadding() });
 }
 
 export function setAmenityFilter(kind){
