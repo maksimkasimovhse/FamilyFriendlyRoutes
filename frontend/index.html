@@ -4,6 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Окно в прошлое</title>
+<!-- Установка на экран «Домой»: без адресной строки и панелей Safari, как банковское приложение -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Окно в прошлое">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" type="image/png" sizes="192x192" href="media/pwa/icon-192.png">
+<link rel="apple-touch-icon" href="media/pwa/apple-touch-icon.png">
 <!-- Всё своё, без внешних CDN: на защите интернет может быть нестабильным -->
 <link href="css/fonts.css" rel="stylesheet">
 <link href="vendor/maplibre-gl-4.7.1/maplibre-gl.css" rel="stylesheet">
@@ -627,5 +637,11 @@
     <button data-tab="profile"><span class="tab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Профиль</button>
   </nav>
 </div>
+<script>
+  // Service worker только по HTTPS (или localhost) — иначе браузер его не разрешит
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+</script>
 </body>
 </html>
