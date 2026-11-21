@@ -329,6 +329,10 @@ function renderPreview() {
     ${stops || '<li><span><small>На этот день мест не нашлось — попробуйте больше часов или другие даты</small></span></li>'}
     <li><span class="n end">■</span><span><b>Финиш</b><small>${esc(day.end_point.label || 'точка финиша')}</small></span></li>`;
   renderSelectionReview();
+  let minimumPanel=$('preview-auto-minimum');
+  if(!minimumPanel){minimumPanel=document.createElement('p');minimumPanel.id='preview-auto-minimum';minimumPanel.className='selection-overflow';minimumPanel.setAttribute('role','alert');$('preview-line').after(minimumPanel);}
+  const minimumWarnings=trip.warnings.filter(w=>w.code==='AUTO_DAY_BELOW_MINIMUM');
+  minimumPanel.hidden=!minimumWarnings.length;minimumPanel.textContent=minimumWarnings.map(w=>w.message).join(' ');
 
   // Предупреждения бекенда пользователю не показываем: подтверждаем их автоматически при сохранении
   $('preview-save').disabled = !preview.can_apply || selectionReview(trip).excludedCount > 0;

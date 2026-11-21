@@ -17,6 +17,7 @@
     "standard": 3.0,
     "intensive": 3.5
   },
+  "min_auto_stops_per_day": 2,
   "default_meal_count": 0,
   "default_meal_format": "table_service",
   "meal_duration_sec_by_format": {

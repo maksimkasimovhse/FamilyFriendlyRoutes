@@ -13,6 +13,7 @@ import (
 var defaultsJSON []byte
 
 type budgetParameters struct {
+	MinAutoStopsPerDay           int                `json:"min_auto_stops_per_day"`
 	CompletionPolicy             c.CompletionPolicy `json:"completion_policy"`
 	PolicyVersion                string             `json:"policy_version"`
 	DailyWalkLimitMByAge         map[int]float64    `json:"daily_walk_limit_m_by_age"`
@@ -33,7 +34,7 @@ func loadBudgetParameters() budgetParameters {
 	if err := json.Unmarshal(defaultsJSON, &parameters); err != nil {
 		panic(err)
 	}
-	if parameters.PolicyVersion == "" || parameters.DefaultMealCount < 0 || parameters.DefaultMealCount > 10 || !finite(parameters.RestaurantWalkReserveMPerDay) || parameters.RestaurantWalkReserveMPerDay < 0 {
+	if parameters.MinAutoStopsPerDay < 1 || parameters.MinAutoStopsPerDay > CandidateLimit || parameters.PolicyVersion == "" || parameters.DefaultMealCount < 0 || parameters.DefaultMealCount > 10 || !finite(parameters.RestaurantWalkReserveMPerDay) || parameters.RestaurantWalkReserveMPerDay < 0 {
 		panic("invalid planning defaults")
 	}
 	if parameters.CompletionPolicy.ManualLimitPerDay != 0 || parameters.CompletionPolicy.ShortDayRatio <= 0 || parameters.CompletionPolicy.ShortDayRatio > 1 || parameters.CompletionPolicy.SupplementRadiusM <= 0 {
