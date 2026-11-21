@@ -1,0 +1,4 @@
+{$PUBLIC_HOST} {
+    header Permissions-Policy "geolocation=(self)"
+    reverse_proxy web:8001
+}

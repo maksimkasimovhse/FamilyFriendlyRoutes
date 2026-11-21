@@ -109,11 +109,20 @@ with open(manifest_path, "w", encoding="utf-8") as target:
 PY
 fi
 
-docker compose --project-directory "${repo_dir}" config --quiet
-docker compose --project-directory "${repo_dir}" build
+# PUBLIC_HOST enables the public HTTPS stack; use the same files on every update.
+compose() {
+  if [[ -n "${PUBLIC_HOST:-}" ]] || grep -Eq '^PUBLIC_HOST=[^#[:space:]]+' "${repo_dir}/.env"; then
+    docker compose --project-directory "${repo_dir}" -f "${repo_dir}/compose.yaml" -f "${repo_dir}/compose.server.yaml" "$@"
+  else
+    docker compose --project-directory "${repo_dir}" "$@"
+  fi
+}
+
+compose config --quiet
+compose build
 
 mapfile -t configured_services < <(
-  docker compose --project-directory "${repo_dir}" config --services
+  compose config --services
 )
 if printf '%s\n' "${configured_services[@]}" | grep --quiet --line-regexp parser-service \
   && printf '%s\n' "${configured_services[@]}" | grep --quiet --line-regexp model-service; then
@@ -129,13 +138,13 @@ if printf '%s\n' "${configured_services[@]}" | grep --quiet --line-regexp parser
 fi
 
 # An HTTP listener is not proof that the catalog schema is installed.
-docker compose --project-directory "${repo_dir}" up -d postgres
-docker compose --project-directory "${repo_dir}" --profile tools run --rm migrate
-docker compose --project-directory "${repo_dir}" --profile tools run --rm infra-import
-docker compose --project-directory "${repo_dir}" up -d --remove-orphans
+compose up -d postgres
+compose --profile tools run --rm migrate
+compose --profile tools run --rm infra-import
+compose up -d --remove-orphans
 
 readarray -t expected_services < <(
-  docker compose --project-directory "${repo_dir}" config --format json \
+  compose config --format json \
     | python3 -c 'import json, sys; data=json.load(sys.stdin); print("\n".join(name for name, service in data["services"].items() if not service.get("profiles")))'
 )
 
@@ -143,7 +152,7 @@ deployment_ready=false
 for attempt in $(seq 1 "${health_attempts}"); do
   all_ready=true
   for service in "${expected_services[@]}"; do
-    container_id="$(docker compose --project-directory "${repo_dir}" ps -q "${service}")"
+    container_id="$(compose ps -q "${service}")"
     if [[ -z "${container_id}" ]]; then
       all_ready=false
       break
@@ -171,7 +180,7 @@ if [[ "${deployment_ready}" == true ]]; then
   exit 0
 fi
 
-docker compose --project-directory "${repo_dir}" ps
-docker compose --project-directory "${repo_dir}" logs --no-color --tail=100
+compose ps
+compose logs --no-color --tail=100
 printf 'Deployment health check failed for %s\n' "${target_commit}" >&2
 exit 1
