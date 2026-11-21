@@ -6,6 +6,7 @@ import { loadMapStyle } from './map-style.js';
 import { onTripChange, today, getSource } from './api.js';
 import { allPlaces, loadNearbyBenches, clearNearbyBenches, BENCH_RADIUS_M, onPlacesChange, kindOf, cafeBadges, isFamilyCafe, isDemo, walkMinutes, placeType } from './places.js';
 import { orderByNearest } from './catalog.js';
+import { napDayHtml } from './nap-display.js';
 import { currentPosition } from './geolocation.js';
 
 const CENTER = [44.0066, 56.3273];   // площадь Минина и Пожарского, [долгота, широта]
@@ -24,7 +25,7 @@ let pendingPicked;      // выбор, пришедший до загрузки 
 let pickedPins = [];
 let focusedPlacePin = null;
 let focusedPlace = null;
-let amenityFilter = null;
+let amenityFilters = new Set();
 
 // ---------- Форматирование ----------
 const fmtDistance = m => m < 1000 ? Math.round(m / 10) * 10 + ' м' : (m / 1000).toFixed(1).replace('.', ',') + ' км';
@@ -204,12 +205,12 @@ function showSummary({ fit = true } = {}) {
   selected = null;
   resetSelection();
   const t = day.totals;
-  sheetBody.innerHTML = `
+  sheetBody.innerHTML = `${napDayHtml(day)}
     <button class="card now card-btn" data-act="first">
       <span>
         <span class="kicker">${escapeHtml(fmtDate(day.date))}</span>
         <h2>Маршрут дня</h2>
-        <p>${plural(day.stops.length, 'остановка', 'остановки', 'остановок')} · ${fmtDistance(t.walk_distance_m)} · ${fmtDuration(t.elapsed_duration_sec)}</p>
+        <p>${plural(day.stops.length, 'остановка', 'остановки', 'остановок')} · ${fmtDistance(t.walk_distance_m)} · ${day.nap?fmtDuration(t.outing_duration_sec||0)+' прогулка + '+fmtDuration(t.nap_duration_sec||0)+' сон':fmtDuration(t.elapsed_duration_sec)}</p>
       </span>
       <span class="go" aria-hidden="true">›</span>
     </button>
@@ -413,10 +414,11 @@ function showPickedPlace(i) {
   map.flyTo({ center: p.location, zoom: Math.max(map.getZoom(), 15.5), duration: 600 });
 }
 
-export function setAmenityFilter(kind){
- amenityFilter=kind;
+export function setAmenityFilter(kinds){
+ const next=new Set(kinds||[]),needBenches=next.has('rest')&&!amenityFilters.has('rest');
+ amenityFilters=next;
  if(mapReady){showSummary({fit:false});applyChips();}
- if(kind==='rest')currentPosition().then(point=>loadNearbyBenches(point)).catch(err=>console.warn('Скамейки рядом недоступны:',err));
+ if(needBenches)currentPosition().then(point=>loadNearbyBenches(point)).catch(err=>console.warn('Скамейки рядом недоступны:',err));
 }
 
 // ---------- Кнопки ----------
@@ -424,9 +426,10 @@ function applyChips() {
   document.querySelectorAll('.chip[data-layer]').forEach(c => {
     if (c.dataset.layer === 'all') return;
     // Пока показан маршрут из выбранных мест, удобства вдоль маршрута дня не нужны
-    const wanted={rest:'bench',toilet:'toilets',pharmacy:'pharmacy',food:'cafe'}[amenityFilter];
-    const on = !picked && c.getAttribute('aria-pressed') === 'true' && (!wanted || wanted===c.dataset.layer);
-    map.setFilter('amenity-'+c.dataset.layer, amenityFilter==='rain' ? ['all',['==',['get','kind'],c.dataset.layer],['==',['get','sheltered'],true]] : ['==',['get','kind'],c.dataset.layer]);
+    const kinds={rest:'bench',toilet:'toilets',pharmacy:'pharmacy',food:'cafe',park:'park',playground:'playground'};
+    const wanted=new Set([...amenityFilters].map(kind=>kinds[kind]));
+    const on = !picked && c.getAttribute('aria-pressed') === 'true' && (!wanted.size || wanted.has(c.dataset.layer));
+    map.setFilter('amenity-'+c.dataset.layer,['==',['get','kind'],c.dataset.layer]);
     map.setLayoutProperty('amenity-' + c.dataset.layer, 'visibility', on ? 'visible' : 'none');
   });
 }

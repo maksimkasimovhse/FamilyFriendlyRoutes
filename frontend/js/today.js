@@ -4,9 +4,11 @@ import { placeEmojiHtml } from './place-display.js';
 // Карточка «Сейчас» + лента со временем. Под каждой точкой — одна «семейная» строка:
 // что там у ребёнка (задание / штамп) и что рядом (туалет, кафе для детей).
 
-import { onTripChange, today, getSource, startDay, markVisited, previewRemove, applyPreview, ApiError } from './api.js';
-import { renderWeather } from './weather.js';
+import { onTripChange, today, getSource, startDay, previewStartDay, markVisited, previewRemove, applyPreview, ApiError } from './api.js';
 import { nearest, walkMinutes, isFamilyCafe } from './places.js';
+
+import { currentPosition } from './geolocation.js';
+import { napDayHtml } from './nap-display.js';
 
 const $ = id => document.getElementById(id);
 let opt = { childName: 'Маша', childNameGenitive: 'Маши', kidStopInfo: () => null, onOpenKid: () => {}, onNeedNow: () => {} };
@@ -79,7 +81,7 @@ function render() {
   let card = '';
   if (next) {
     const leg = legTo(day, next);
-    const time = fmtTime(next.timing.estimated_arrival_at);
+    const time = next.activity_kind==='nap'?fmtTime(next.timing.fixed_event_interval?.start_at)+'–'+fmtTime(next.timing.fixed_event_interval?.end_at):fmtTime(next.timing.estimated_arrival_at);
     const kid = opt.kidStopInfo(next.activity_id);
     const line = kidLine(next);
     const chips = [...(line ? [{ cls: 'kid', text: line }] : []), ...nearbyChips(next.location.coordinates)];
@@ -89,7 +91,7 @@ function render() {
         <div class="now-body">
           <div class="now-head">
             <div class="kicker">${started ? 'Сейчас идём' : 'Первая точка'}</div>
-            ${started ? '<button class="more" data-act="skip" aria-label="Пропустить эту точку">⋯</button>' : ''}
+            ${started && !next.mandatory ? '<button class="more" data-act="skip" aria-label="Пропустить эту точку">⋯</button>' : ''}
           </div>
           <h2>${placeEmojiHtml(next.category)} ${esc(next.title)}</h2>
           <div class="now-meta">
@@ -98,7 +100,7 @@ function render() {
           </div>
           <div class="chips-s">${chips.map(chipHtml).join('')}</div>
           ${started
-            ? `<button class="btn main slim" data-act="visited" ${live ? '' : 'disabled'}>Мы на месте ✓</button>`
+            ? `<button class="btn main slim" data-act="visited" ${live ? '' : 'disabled'}>${next.activity_kind==='nap'?'Сон закончился':'Мы на месте ✓'}</button>`
             : day.date > new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' })
             ? '<button class="btn main slim" disabled>Начнём завтра</button>'   // вечером план на завтра — стартовать можно только в его день
             : `<button class="btn main slim" data-act="start" ${live ? '' : 'disabled'}>Начинаем прогулку</button>`}
@@ -114,7 +116,7 @@ function render() {
         </div>
       </article>`;
   }
-  $('today-now').innerHTML = card;
+  $('today-now').innerHTML = napDayHtml(day)+card;
 
   // ----- Лента: вертикальная линия с узлами -----
   const rows = stops.filter(s => s !== next).map(s => {
@@ -135,18 +137,28 @@ function render() {
     <span class="what"><b>Финиш</b><small>${esc(day.end_point.label || 'конец прогулки')} · ${fmtDuration(day.totals.elapsed_duration_sec)} на весь день</small></span></li>`);
   $('today-list').innerHTML = rows.join('');
 
-  renderWeather($('today-weather'), day);
   $('today-source').textContent = live ? '' : 'Нет связи с сервером — показан сохранённый план, отметки не работают.';
   bind(next);
 }
 
 function bind(next) {
   const act = name => $('today-now').querySelector(`[data-act="${name}"]`);
-  if (act('start')) act('start').onclick = () => run(startDay, 'Идём! Время прибытия пересчитано от сейчас.');
+  if (act('start')) act('start').onclick = () => today().nap ? startNapDay() : run(startDay, 'Идём! Время прибытия пересчитано от сейчас.');
   if (act('visited')) act('visited').onclick = () => run(() => markVisited(next.stop_id), `Отметили: ${next.title}`);
   if (act('skip')) act('skip').onclick = () => askSkip(next);
 }
 
+async function startNapDay(){
+ if(busy)return;busy=true;
+ try{
+ const coordinates=await currentPosition().catch(()=>null),point=coordinates?{coordinates,label:'Текущая геопозиция'}:today().start_point;
+ const preview=await previewStartDay(point),plan=preview.proposed_trip.days.find(d=>d.date===today().date);
+ const removed=preview.diff.removed_stop_ids.map(id=>today().stops.find(s=>s.stop_id===id)?.title).filter(Boolean);
+ const dialog=$('nap-start-dialog');$('nap-start-content').innerHTML='<p>Старт: '+esc(point.label||'выбранная точка')+(coordinates?'':' (геопозиция недоступна, используем указанную точку старта)')+'</p>'+napDayHtml(plan)+(removed.length?'<p>Чтобы вернуться вовремя, уберём: '+removed.map(esc).join(', ')+'.</p>':'<p>Места распределены до и после сна по фактическому времени старта.</p>')+(!preview.can_apply?'<p class="form-error">Этот план не помещается. Измените места или настройки сна.</p>':'');
+ $('nap-start-apply').disabled=!preview.can_apply;$('nap-start-cancel').onclick=()=>dialog.close();
+ $('nap-start-apply').onclick=async()=>{$('nap-start-apply').disabled=true;try{await applyPreview(preview);dialog.close();toast('День начат. Возвращение к дневному сну учтено.');}catch(error){dialog.close();toast(error.message,true)}};dialog.showModal();
+ }catch(error){toast(error.message,true)}finally{busy=false}
+}
 async function run(action, okText) {
   if (busy) return;
   busy = true;

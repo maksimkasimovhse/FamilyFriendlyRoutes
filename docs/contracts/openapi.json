@@ -2586,7 +2586,8 @@
           "shelter",
           "landmark",
           "other",
-          "pharmacy"
+          "pharmacy",
+          "lodging"
         ]
       },
       "Point": {
@@ -2858,6 +2859,17 @@
             "items": {
               "type": "string"
             }
+          },
+          "nap": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NapPreference"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional daily nap preference. Trip days carry explicit sleep windows and lodging coordinates."
           }
         },
         "required": [
@@ -3052,6 +3064,17 @@
             ],
             "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m.",
             "deprecated": true
+          },
+          "nap": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NapBreak"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mandatory lodging stop; omitted/null disables nap for this day. Nap and home waiting do not consume the outing duration budget."
           }
         },
         "required": [
@@ -5023,7 +5046,8 @@
               "session",
               "meal",
               "rest",
-              "utility"
+              "utility",
+              "nap"
             ]
           },
           "availability": {
@@ -5320,6 +5344,15 @@
                 "type": "number",
                 "minimum": 0,
                 "description": "Original available day time minus observed elapsed time, before planning remaining stops."
+              },
+              "nap_duration_sec": {
+                "type": "number",
+                "minimum": 0
+              },
+              "outing_duration_sec": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Travel + visits + event waiting; excludes fixed nap and waiting at home. Used for duration_budget_sec."
               }
             },
             "required": [
@@ -5341,6 +5374,16 @@
           "execution": {
             "$ref": "#/components/schemas/DayExecution",
             "description": "Present after start_day apply. The most recently started date is the active day; previous confirmed history is immutable."
+          },
+          "nap": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NapDayInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -7753,6 +7796,69 @@
         "required": [
           "type",
           "coordinates"
+        ]
+      },
+      "NapPreference": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "start_time": {
+            "type": "string",
+            "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+          },
+          "end_time": {
+            "type": "string",
+            "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+          }
+        },
+        "required": [
+          "start_time",
+          "end_time"
+        ]
+      },
+      "NapBreak": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/Interval"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Point"
+          }
+        },
+        "required": [
+          "window",
+          "location"
+        ]
+      },
+      "NapDayInfo": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "window": {
+            "$ref": "#/components/schemas/Interval"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "latest_start_at": {
+            "$ref": "#/components/schemas/Instant"
+          },
+          "early_arrival_wait_sec": {
+            "type": "number",
+            "minimum": 0
+          },
+          "start_time_is_estimated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "window",
+          "location",
+          "latest_start_at",
+          "early_arrival_wait_sec",
+          "start_time_is_estimated"
         ]
       }
     },

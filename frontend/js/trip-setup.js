@@ -1,3 +1,5 @@
+import { tripNapDefaults, validTripNapTimes, tripNapForDate } from './trip-nap.js';
+import { napDayHtml } from './nap-display.js';
 import { selectionReview } from './selection-review.js';
 // Новая поездка: экраны 5, 7, 8 (+ шаг 2 — подбор мест из pick.js) — docs/tz-onboarding.md.
 // Гость: POST /trips с полным TripInput из локальной анкеты.
@@ -96,7 +98,7 @@ function freshState() {
   const first = firstAllowed('in_city');
   return {
     context: 'in_city', from: first, to: first, month: first.slice(0, 7), hours: 5,
-    start: CENTER, returnHome: true, picked: [], request: null,
+    start: CENTER, returnHome: true, picked: [], request: null, ...tripNapDefaults({},currentProfile()?.family.nap), lodging:null, napDisabledDays:[],
   };
 }
 
@@ -115,7 +117,18 @@ function renderWhen() {
   $('return-home').setAttribute('aria-checked', st.returnHome !== false);
 }
 
+function renderNapSettings(){
+ Object.assign(st,tripNapDefaults(st,currentProfile()?.family.nap));$('trip-nap').hidden=false;
+ $('trip-nap-enabled').checked=st.napEnabled;$('trip-nap-settings').hidden=!st.napEnabled;
+ $('trip-nap-start').value=st.napStart;$('trip-nap-end').value=st.napEnd;
+ $('trip-nap-window').textContent=st.napStart+'–'+st.napEnd+' · сон отдельно от часов прогулки';
+ $('nap-address-selected').textContent=st.lodging?'Выбрано жильё: '+st.lodging.label:'Выберите адрес жилья, не просто введите текст.';
+ const dates=Array.from({length:Math.max(0,daysBetween(st.from,st.to)+1)},(_,i)=>addDays(st.from,i));
+ $('trip-nap-dates').innerHTML=dates.map(date=>'<label><input type="checkbox" data-nap-date="'+date+'" '+(!(st.napDisabledDays||[]).includes(date)?'checked':'')+'>'+cap(fmtDay(date,{day:'numeric',month:'long'}))+'</label>').join('');
+ $('trip-nap-dates').querySelectorAll('[data-nap-date]').forEach(box=>box.onchange=()=>{const off=new Set(st.napDisabledDays||[]);box.checked?off.delete(box.dataset.napDate):off.add(box.dataset.napDate);st.napDisabledDays=[...off];persist();});
+}
 function renderCalendar() {
+ renderNapSettings();
   const [y, m] = st.month.split('-').map(Number);
   const first = `${st.month}-01`;
   const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
@@ -148,6 +161,15 @@ function pickDate(iso) {
 }
 
 function bindWhen() {
+ $('trip-nap-enabled').onchange=()=>{st.napEnabled=$('trip-nap-enabled').checked;renderWhen();};
+ const syncTripNap=()=>{st.napStart=$('trip-nap-start').value;st.napEnd=$('trip-nap-end').value;$('trip-nap-window').textContent=st.napStart+'–'+st.napEnd+' · сон отдельно от часов прогулки';persist();};
+ $('trip-nap-start').oninput=syncTripNap;$('trip-nap-end').oninput=syncTripNap;
+ $('nap-use-start').onclick=()=>{st.lodging=structuredClone(st.start);renderWhen();};
+ $('nap-address-form').onsubmit=async event=>{event.preventDefault();const query=$('nap-address-input').value.trim();if(query.length<3){$('nap-address-selected').textContent='Введите улицу и номер дома.';return;}
+ $('nap-address-go').disabled=true;$('nap-address-results').replaceChildren();
+ try{const results=await searchAddress(query);if(!results.length)$('nap-address-selected').textContent='Адрес не найден. Уточните улицу и дом.';
+ results.forEach(point=>{const li=document.createElement('li'),button=document.createElement('button');button.type='button';button.textContent=point.label;button.onclick=()=>{st.lodging=point;$('nap-address-results').replaceChildren();renderWhen();};li.append(button);$('nap-address-results').append(li);});}
+ catch(error){$('nap-address-selected').textContent=error.message;}finally{$('nap-address-go').disabled=false;}};
   document.querySelectorAll('#trip-context button').forEach(b => {
     b.onclick = () => {
       st.context = b.dataset.ctx;
@@ -200,7 +222,14 @@ function bindWhen() {
       note('Не получилось определить местоположение: ' + e.message + (location.protocol !== 'https:' && location.hostname !== 'localhost' ? ' (на телефоне нужен HTTPS)' : ''));
     }, { enableHighAccuracy: true, timeout: 10000 });
   };
-  $('when-next').onclick = () => { $('trip-when').hidden = true; backToChat(); };
+  $('when-next').onclick = () => {
+   const fail=message=>{$('when-error').textContent=message;$('when-error').hidden=false;};
+   const hasSleep=st.napEnabled&&daysBetween(st.from,st.to)+1>(st.napDisabledDays||[]).filter(d=>d>=st.from&&d<=st.to).length;
+   if(hasSleep&&!validTripNapTimes(st)){fail('Укажите начало и окончание сна в пределах одного дня.');return;}
+   if(hasSleep&&st.context==='in_city'&&st.from===todayIso()&&!(st.napDisabledDays||[]).includes(st.from)&&mskTime()>=st.napStart){fail('Сегодня время начала сна уже прошло. Измените время на этом экране или снимите отметку у сегодняшнего дня.');return;}
+   if(hasSleep&&!st.lodging){fail('Выберите адрес жилья для дневного сна.');return;}
+   $('when-error').hidden=true;$('trip-when').hidden=true;backToChat();
+  };
   $('trip-when').querySelector('[data-back]').onclick = () => { $('trip-when').hidden = true; hooks.onBack(); };
 }
 
@@ -220,6 +249,7 @@ function dayInputs() {
       end_point: st.start,   // день заканчиваем там же, где начали
       available_window: { start_at: `${date}T${startAt}:00+03:00`, end_at: `${date}T${endAt}:00+03:00` },
       duration_budget_sec: Math.max(1800, Math.min(st.hours * 3600, windowSec)),
+      nap: tripNapForDate(date,st),
       meal_window: null,
       rest_budget_sec: 0,
     };
@@ -236,7 +266,10 @@ function requestText() {
 }
 
 function buildRequest() {
+  Object.assign(st,tripNapDefaults(st,currentProfile()?.family.nap));
+  if(st.napEnabled&&!validTripNapTimes(st))throw new Error('Укажите начало и окончание дневного сна.');
   const days = dayInputs();
+  if(days.some(d=>d.nap&&!d.nap.location))throw new Error('Укажите адрес жилья для дневного сна.');
   const selections = st.picked.filter(c=>c.preferred_date==null || days.some(d=>d.date===c.preferred_date)).map(manualSelection);
   const base = { city_id: 'nizhny_novgorod', timezone: 'Europe/Moscow', planning_context: st.context, days, planning_policy:planningPolicyForSelections(selections), selections, request_text: requestText() };
   if (hooks.authenticated) return { ...base, expected_profile_version: profileVersion() };
@@ -290,9 +323,10 @@ function renderPreview() {
 
   const day = days[previewDay];
   const t = day.totals;
-  $('preview-line').textContent = `${cap(fmtDay(day.date, { weekday: 'long', day: 'numeric', month: 'long' }))} · около ${fmtDuration(t.elapsed_duration_sec || 0)} · ${fmtDistance(t.walk_distance_m || 0)} пешком`;
+  let napNote=$('preview-nap-note');if(!napNote){napNote=document.createElement('div');napNote.id='preview-nap-note';$('preview-line').after(napNote);}napNote.innerHTML=napDayHtml(day);
+  $('preview-line').textContent = `${cap(fmtDay(day.date, { weekday: 'long', day: 'numeric', month: 'long' }))} · ${day.nap?'прогулка '+fmtDuration(t.outing_duration_sec||0)+' + сон '+fmtDuration(t.nap_duration_sec||0):'около '+fmtDuration(t.elapsed_duration_sec||0)} · ${fmtDistance(t.walk_distance_m || 0)} пешком`;
   const stops = day.stops.map((s, i) => {
-    const time = fmtTime(s.timing?.estimated_arrival_at);
+    const time = s.activity_kind==='nap'?fmtTime(s.timing?.fixed_event_interval?.start_at)+'–'+fmtTime(s.timing?.fixed_event_interval?.end_at):day.nap&&trip.input.planning_context==='before_arrival'?(Date.parse(s.timing?.estimated_arrival_at)<Date.parse(day.nap.window.start_at)?'До сна':'После сна'):fmtTime(s.timing?.estimated_arrival_at);
     return `<li><span class="n">${i + 1}</span><span><b>${esc(s.title)}</b><small>${time ? time + ' · ' : ''}на месте ~${fmtDuration(s.duration.duration_sec)}</small></span></li>`;
   }).join('');
   $('preview-list').innerHTML = `
@@ -308,7 +342,7 @@ function renderPreview() {
   // Предупреждения бекенда о данных пользователю не показываем (подтверждаем при сохранении). Перегрузку и пустые дни — показываем.
   const overloaded = days.filter(d => d.feasibility === 'infeasible');
   const total = days.reduce((n, d) => n + d.stops.length, 0);
-  const lowDays = days.filter(d => d.stops.length < 2);
+  const lowDays = days.filter(d => d.stops.filter(s=>s.activity_kind!=='nap').length < 2);
   const dayName = d => cap(fmtDay(d.date, { weekday: 'short', day: 'numeric' }));
   const overload = $('preview-overload');
   if (overloaded.length && preview.can_apply) {

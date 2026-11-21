@@ -63,8 +63,9 @@ type FamilyProfile struct {
 		HeightCm    *float64 `json:"height_cm"`
 		InterestIDS []string `json:"interest_ids"`
 	} `json:"children"`
-	AdultCount       int      `json:"adult_count"`
-	AdultInterestIDS []string `json:"adult_interest_ids"`
+	AdultCount       int            `json:"adult_count"`
+	AdultInterestIDS []string       `json:"adult_interest_ids"`
+	Nap              *NapPreference `json:"nap,omitempty"`
 }
 
 type FamilyPolicy struct {
@@ -99,6 +100,7 @@ type DayInput struct {
 	MealFormat        *string   `json:"meal_format,omitempty"`
 	MealDurationSec   *float64  `json:"meal_duration_sec,omitempty"`
 	MaxWalkDistanceM  *float64  `json:"max_walk_distance_m,omitempty"`
+	Nap               *NapBreak `json:"nap,omitempty"`
 }
 
 type Selection struct {
@@ -343,9 +345,12 @@ type DayPlan struct {
 		BudgetPolicyVersion    *string  `json:"budget_policy_version,omitempty"`
 		RemainingWalkDistanceM *float64 `json:"remaining_walk_distance_m,omitempty"`
 		RemainingDurationSec   *float64 `json:"remaining_duration_sec,omitempty"`
+		NapDurationSec         *float64 `json:"nap_duration_sec,omitempty"`
+		OutingDurationSec      *float64 `json:"outing_duration_sec,omitempty"`
 	} `json:"totals"`
 	Warnings  []Warning     `json:"warnings"`
 	Execution *DayExecution `json:"execution,omitempty"`
+	Nap       *NapDayInfo   `json:"nap,omitempty"`
 }
 
 type TripView struct {
@@ -733,4 +738,22 @@ type RestaurantFilters struct {
 type RouteLine struct {
 	Type        string     `json:"type"`
 	Coordinates []Position `json:"coordinates"`
+}
+
+type NapPreference struct {
+	StartTime string `json:"start_time"`
+	EndTime   string `json:"end_time"`
+}
+
+type NapBreak struct {
+	Window   Interval `json:"window"`
+	Location Point    `json:"location"`
+}
+
+type NapDayInfo struct {
+	Window               Interval `json:"window"`
+	Location             Point    `json:"location"`
+	LatestStartAt        Instant  `json:"latest_start_at"`
+	EarlyArrivalWaitSec  float64  `json:"early_arrival_wait_sec"`
+	StartTimeIsEstimated bool     `json:"start_time_is_estimated"`
 }

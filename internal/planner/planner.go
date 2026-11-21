@@ -49,6 +49,9 @@ var ErrValidation = errors.New("trip validation failed")
 func invalid(message string) error { return fmt.Errorf("%w: %s", ErrValidation, message) }
 func ValidateFamily(family c.FamilyProfile, limits c.LoadLimits) error {
 	input := c.TripInput{Family: family, LoadLimits: limits}
+	if err := validateNapPreference(family.Nap); err != nil {
+		return err
+	}
 	if input.Family.AdultInterestIDS == nil {
 		return invalid("adult_interest_ids must be an array")
 	}
@@ -126,6 +129,9 @@ func Validate(input c.TripInput) error {
 	input = resolveBudgetDefaults(input)
 	dates := map[c.ISODate]bool{}
 	for _, day := range input.Days {
+		if err := validateNap(day); err != nil {
+			return err
+		}
 		if day.MaxWalkDistanceM != nil && (!finite(*day.MaxWalkDistanceM) || *day.MaxWalkDistanceM < 0 || *day.MaxWalkDistanceM > 100000) {
 			return invalid("invalid day walking limit")
 		}
@@ -213,7 +219,7 @@ func nonNil[T any](values []T) []T {
 	}
 	return values
 }
-func (p Planner) buildDay(ctx context.Context, view c.TripView, now time.Time) (c.TripView, error) {
+func (p Planner) buildPlainDay(ctx context.Context, view c.TripView, now time.Time) (c.TripView, error) {
 	input := view.Input
 	day := input.Days[0]
 	available := map[c.ID]Activity{}

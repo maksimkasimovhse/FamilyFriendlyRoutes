@@ -119,3 +119,34 @@ func TestPlanningOptionsPreviewSupplementApplyAndAccess(t *testing.T) {
 		t.Fatal("HTTP accepted duplicate manual choices")
 	}
 }
+
+// Card count must not reject the trip before the planner checks actual duration.
+func TestCreateTripAcceptsManualChoicesWithoutDailyCountLimit(t *testing.T) {
+	for _, pinned := range []bool{false, true} {
+		t.Run(fmt.Sprintf("preferred_date=%t", pinned), func(t *testing.T) {
+			h := newActiveHarness(t)
+			input := h.read(t).Input
+			policy := "manual_choices"
+			input.PlanningPolicy = &policy
+			input.Selections = []c.Selection{}
+			for i := 0; i < 12; i++ {
+				choice := c.Selection{ActivityID: c.ID(fmt.Sprintf("chosen-%d", i)), PlaceID: c.ID(fmt.Sprintf("place-%d", i))}
+				if pinned {
+					choice.PreferredDate = &input.Days[0].Date
+				}
+				input.Selections = append(input.Selections, choice)
+			}
+			result := request(h.handler, h.browser, "POST", "/api/v1/trips", body(t, input), "unlimited-cards")
+			if result.Code != 201 {
+				t.Fatalf("12 cards rejected before route calculation: %s", result.Body.String())
+			}
+			var trip c.TripView
+			if err := json.Unmarshal(result.Body.Bytes(), &trip); err != nil {
+				t.Fatal(err)
+			}
+			if len(trip.Input.Selections) != 12 {
+				t.Fatal("selected cards were silently truncated")
+			}
+		})
+	}
+}

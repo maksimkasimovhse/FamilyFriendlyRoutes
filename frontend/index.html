@@ -65,7 +65,7 @@
       <div class="ld-grid">
         <article><h3>Под возраст детей</h3><p>Анкета для любого количества детей от 3 до 11 лет: возраст и интересы каждого.</p></article>
         <article><h3>Всё нужное рядом</h3><p>На карте — туалеты, еда, детские площадки, парки, скамейки и аптеки вдоль маршрута.</p></article>
-        <article><h3>Срочные действия на карте</h3><p>Ребёнок устал или пошёл дождь — помощник предложит, что убрать из маршрута, и найдёт место рядом.</p></article>
+        <article><h3>Срочные действия на карте</h3><p>Покажите на карте туалеты, кафе, аптеки и места для отдыха. При необходимости пропустите следующую остановку.</p></article>
         <article><h3>Настоящие фото</h3><p>Только снимки из архива PastVu, с автором и ссылкой. Ничего не нарисовано нейросетью.</p></article>
       </div>
     </section>
@@ -94,7 +94,6 @@
 
     <div class="map-wrap">
       <div id="map" aria-label="Карта маршрута"></div>
-      <div id="map-sky" class="map-sky" hidden role="img" aria-label="Погода"><span data-weather-icon aria-hidden="true"></span></div>
 
       <div class="map-buttons">
         <button id="btn-3d" class="round" aria-label="Переключить 3D" title="2D / 3D">3D</button>
@@ -186,7 +185,6 @@
       <div class="beads" id="today-stats"></div>
     </header>
     <div class="today-scroll">
-      <section id="today-weather" class="weather" hidden aria-live="polite"></section>
       <div id="today-now"></div>
       <ol class="timeline" id="today-list"></ol>
       <p class="source" id="today-source"></p>
@@ -339,6 +337,7 @@
       </div>
     </div>
   </section>
+  <dialog id="nap-start-dialog" class="urgent-dialog"><header><h2>Начать день с дневным сном</h2></header><div class="urgent-content" id="nap-start-content"></div><div class="urgent-preview-actions"><button type="button" class="btn alt" id="nap-start-cancel">Отмена</button><button type="button" class="btn main" id="nap-start-apply">Начать с этим планом</button></div></dialog>
   <dialog id="urgent-dialog" class="urgent-dialog" aria-labelledby="urgent-title"><header><div><h2 id="urgent-title">Что нужно сейчас?</h2></div><button type="button" id="urgent-close" aria-label="Закрыть срочные действия">×</button></header><div id="urgent-kinds" class="urgent-kinds"></div><div id="urgent-content" class="urgent-content" aria-live="polite"></div></dialog>
   <!-- ===== Альбом и профиль: анкета, мои поездки, выход ===== -->
   <section class="screen profile" data-tab="album" hidden>
@@ -469,7 +468,7 @@
         <b>Взрослым</b>
         <div class="chips-w" id="adult-interests"></div>
       </div>
-      <p class="form-error" id="adults-error" role="alert" hidden></p>
+ <p class="form-error" id="adults-error" role="alert" hidden></p>
     </div>
     <div class="flow-bottom">
       <button class="btn flow-main" id="profile-save">Сохранить анкету</button>
@@ -511,7 +510,16 @@
           <button type="button" role="radio" data-h="8">весь день</button>
         </div>
       </div>
-      <div class="card-w">
+      <div class="card-w" id="trip-nap">
+ <label><input type="checkbox" id="trip-nap-enabled"> <b>Нужен дневной сон?</b></label>
+ <div id="trip-nap-settings" hidden><div class="nap-time-fields"><label>Начало сна<input type="time" id="trip-nap-start" value="13:00"></label><label>Окончание сна<input type="time" id="trip-nap-end" value="15:00"></label></div><p id="trip-nap-window" class="hint"></p>
+ <label class="field" for="nap-address-input"><b>Адрес жилья для сна</b></label>
+ <form class="addr-form" id="nap-address-form"><input id="nap-address-input" type="text" autocomplete="street-address" placeholder="Улица и дом в Нижнем Новгороде" maxlength="120"><button type="submit" class="btn alt slim" id="nap-address-go">Найти</button></form>
+ <ul class="addr-results" id="nap-address-results"></ul><p id="nap-address-selected" class="hint"></p>
+ <button type="button" class="btn link" id="nap-use-start">Жильё совпадает с точкой старта</button>
+ <p class="hint">Сон повторяется каждый день. Снимите отметку у дней без сна.</p><div id="trip-nap-dates" class="nap-dates"></div></div>
+ </div>
+ <div class="card-w">
         <b>Откуда начинаете день</b>
         <div class="chips-w" id="start-points" role="radiogroup" aria-label="Точка старта">
           <button type="button" role="radio" data-start="center">Центр города</button>
