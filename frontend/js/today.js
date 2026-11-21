@@ -4,7 +4,7 @@ import { placeEmojiHtml } from './place-display.js';
 // Карточка «Сейчас» + лента со временем. Под каждой точкой — одна «семейная» строка:
 // что там у ребёнка (задание / штамп) и что рядом (туалет, кафе для детей).
 
-import { onTripChange, today, getSource, startDay, markVisited, previewRemove, applyPreview, ApiError } from './api.js';
+import { onTripChange, today, getTrip, getSource, startDay, markVisited, previewRemove, applyPreview, ApiError } from './api.js';
 import { renderWeather } from './weather.js';
 import { nearest, walkMinutes, isFamilyCafe } from './places.js';
 
@@ -54,9 +54,29 @@ const ICON = {
 };
 const iconFor = (stop, kid) => stop.progress === 'visited' ? ICON.done : kid ? ICON[kid.type] : ICON.place;
 
+// День, который смотрит родитель: по умолчанию сегодняшний, иначе первый. Переключается вкладками дней.
+let selDate = null;
+const mskToday = () => new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' });
+const tripDays = () => (getTrip()?.days || []);
+function currentDay() {
+  const days = tripDays();
+  if (!days.length) return null;
+  return days.find(d => d.date === selDate) || days.find(d => d.date === mskToday()) || days[0];
+}
+const dayWord = date => {
+  const t = mskToday();
+  const diff = Math.round((new Date(date + 'T12:00:00Z') - new Date(t + 'T12:00:00Z')) / 86400000);
+  return diff === 0 ? 'Сегодня' : diff === 1 ? 'Завтра' : cap(weekday(date));
+};
+const pluralPts = n => `${n} ${n % 10 === 1 && n % 100 !== 11 ? 'точка' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 'точки' : 'точек'}`;
+
 function render() {
-  const day = today();
+  const day = currentDay();
   if (!day) return;
+  const realToday = mskToday();
+  const isToday = day.date === realToday;
+  const activeDay = today();                       // день, с которым умеет работать бекенд (отметки, старт)
+  const canAct = isToday && activeDay && activeDay.date === day.date;
   const live = getSource() === 'backend';
   const started = !!day.execution;
   const stops = day.stops.filter(s => s.progress !== 'removed');
@@ -64,76 +84,87 @@ function render() {
   const doneCount = stops.filter(s => s.progress === 'visited').length;
   const walked = day.execution?.consumed_walk_distance_m || 0;
 
+  // ----- Шапка: дата, «Сегодня/Завтра/День недели», погода -----
   $('today-sub').textContent = cap(new Date(day.date + 'T12:00:00').toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' }));
+  $('today-h1').textContent = dayWord(day.date);
 
-  // ----- Шаги дня: кружок на каждую точку -----
+  // ----- Дни поездки (если их больше одного) -----
+  const days = tripDays();
+  $('today-days').hidden = days.length < 2;
+  $('today-days').innerHTML = days.length < 2 ? '' : days.map(d => {
+    const dt = new Date(d.date + 'T12:00:00');
+    return `<button type="button" role="tab" class="td-day${d.date === realToday ? ' now' : ''}" data-date="${d.date}" aria-selected="${d.date === day.date}">
+      <small>${esc(dt.toLocaleDateString('ru-RU', { weekday: 'short' }).toUpperCase())}</small><b>${dt.getDate()}</b></button>`;
+  }).join('');
+  $('today-days').querySelectorAll('[data-date]').forEach(b => { b.onclick = () => { selDate = b.dataset.date; render(); }; });
+
+  // ----- Сводка дня: одна строка и тонкий прогресс -----
+  const total = day.totals.walk_distance_m || 0;
   $('today-stats').innerHTML = `
-    <div class="bead-row">${stops.map(s => {
-      const kid = opt.kidStopInfo(s.activity_id);
-      const cls = s.progress === 'visited' ? 'done' : s === next ? 'now' : s.progress === 'skipped' ? 'skip' : '';
-      return `<span class="bead ${cls}" title="${esc(s.title)}">${iconFor(s, kid)}</span>`;
-    }).join('<i></i>')}</div>
-    <p class="bead-text">${doneCount} из ${stops.length} точек · ${fmtDistance(walked)} из ${fmtDistance(day.totals.walk_distance_m)}</p>`;
+    <div class="td-sum-row">
+      <b>${started ? `${doneCount} из ${stops.length} точек` : pluralPts(stops.length)}</b>
+      <span>${fmtDistance(started ? walked : total)}${started ? ' из ' + fmtDistance(total) : ''}</span>
+      <span>${fmtDuration(day.totals.elapsed_duration_sec)}</span>
+    </div>
+    ${started ? `<div class="td-prog" aria-hidden="true"><i style="width:${stops.length ? doneCount / stops.length * 100 : 0}%"></i></div>` : ''}`;
 
-  // ----- Карточка «Сейчас» -----
+  // ----- Карточка «Сейчас» — только для сегодняшнего дня -----
   let card = '';
-  if (next) {
+  if (isToday && next) {
     const leg = legTo(day, next);
     const time = fmtTime(next.timing.estimated_arrival_at);
     const kid = opt.kidStopInfo(next.activity_id);
     const line = kidLine(next);
     const chips = [...(line ? [{ cls: 'kid', text: line }] : []), ...nearbyChips(next.location.coordinates)];
+    const walk = leg && leg.distance_m >= 30;   // старт совпадает с первой точкой — «0 м пешком» не показываем
+    const meta = [time && `в ${time}`, walk && `${fmtDuration(leg.travel_duration_sec)} пешком`, walk && fmtDistance(leg.distance_m), `на месте ~${fmtDuration(next.duration.duration_sec)}`].filter(Boolean).join(' · ');
     card = `
-      <article class="now-card">
-        ${kid?.photo ? `<div class="now-photo"><img src="${kid.photo}" alt=""><span class="era">${esc(kid.years)}</span></div>` : ''}
-        <div class="now-body">
-          <div class="now-head">
-            <div class="kicker">${started ? 'Сейчас идём' : 'Первая точка'}</div>
-            ${started ? '<button class="more" data-act="skip" aria-label="Пропустить эту точку">⋯</button>' : ''}
+      <article class="td-now">
+        <div class="td-now-top">
+          ${kid?.photo ? `<img class="td-now-img" src="${kid.photo}" alt="">` : ''}
+          <div class="td-now-main">
+            <span class="td-kicker">${started ? 'Сейчас идём' : 'Первая точка'}</span>
+            <h2>${placeEmojiHtml(next.category)} ${esc(next.title)}</h2>
+            <p>${esc(meta)}</p>
           </div>
-          <h2>${placeEmojiHtml(next.category)} ${esc(next.title)}</h2>
-          <div class="now-meta">
-            ${time ? `<span class="big-time">${time}</span>` : ''}
-            <span>${leg ? `${fmtDuration(leg.travel_duration_sec)} пешком · ${fmtDistance(leg.distance_m)}<br>` : ''}на месте ~${fmtDuration(next.duration.duration_sec)}</span>
-          </div>
-          <div class="chips-s">${chips.map(chipHtml).join('')}</div>
-          ${started
-            ? `<button class="btn main slim" data-act="visited" ${live ? '' : 'disabled'}>Мы на месте ✓</button>`
-            : day.date > new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' })
-            ? '<button class="btn main slim" disabled>Начнём завтра</button>'   // вечером план на завтра — стартовать можно только в его день
-            : `<button class="btn main slim" data-act="start" ${live ? '' : 'disabled'}>Начинаем прогулку</button>`}
+          ${started && canAct ? '<button class="td-more" data-act="skip" aria-label="Пропустить эту точку">⋯</button>' : ''}
         </div>
+        ${chips.length ? `<div class="td-chips">${chips.map(chipHtml).join('')}</div>` : ''}
+        ${started
+          ? `<button class="btn main slim" data-act="visited" ${live && canAct ? '' : 'disabled'}>Мы на месте ✓</button>`
+          : canAct
+          ? `<button class="btn main slim" data-act="start" ${live ? '' : 'disabled'}>Начинаем прогулку</button>`
+          : ''}
       </article>`;
-  } else {
+  } else if (isToday && stops.length) {
     card = `
-      <article class="now-card done">
-        <div class="now-body">
-          <div class="kicker">Готово</div>
-          <h2>Все точки пройдены!</h2>
-          <p>${fmtDistance(walked)} пешком за день. Фото «тогда и сейчас» — в альбоме.</p>
-        </div>
+      <article class="td-now done">
+        <span class="td-kicker">Готово</span>
+        <h2>Все точки пройдены!</h2>
+        <p>${fmtDistance(walked)} пешком за день. Фото «тогда и сейчас» — в альбоме.</p>
       </article>`;
   }
   $('today-now').innerHTML = card;
 
-  // ----- Лента: вертикальная линия с узлами -----
-  const rows = stops.filter(s => s !== next).map(s => {
+  // ----- Лента дня -----
+  const showNextInLine = !(isToday && next);
+  const rows = stops.filter(s => showNextInLine || s !== next).map(s => {
     const kid = opt.kidStopInfo(s.activity_id);
     const state = s.progress === 'visited' ? 'done' : s.progress === 'skipped' ? 'skipped' : '';
     const line = kidLine(s) || (s.progress === 'visited' ? 'пройдено' : `на месте ~${fmtDuration(s.duration.duration_sec)}`);
     const time = fmtTime(s.progress === 'visited' ? s.timing.estimated_departure_at : s.timing.estimated_arrival_at);
     return `<li class="${state}">
-      <span class="node">${iconFor(s, kid)}</span>
-      <span class="t">${time || ''}</span>
-      <span class="what"><b>${placeEmojiHtml(s.category)} ${esc(s.title)}</b><small>${esc(line)}</small></span>
-      ${kid?.photo ? `<img class="thumb" src="${kid.photo}" alt="">` : ''}
+      <span class="td-node">${iconFor(s, kid)}</span>
+      <span class="td-t">${time || ''}</span>
+      <span class="td-what"><b>${placeEmojiHtml(s.category)} ${esc(s.title)}</b><small>${esc(line)}</small></span>
+      ${kid?.photo ? `<img class="td-thumb" src="${kid.photo}" alt="">` : ''}
     </li>`;
   });
-  // Финиш: время из последнего перехода
   const finishAt = finishInstant(day) ? fmtTime(finishInstant(day)) : '';
-  rows.push(`<li class="finish"><span class="node">${ICON.flag}</span><span class="t">${finishAt || ''}</span>
-    <span class="what"><b>Финиш</b><small>${esc(day.end_point.label || 'конец прогулки')} · ${fmtDuration(day.totals.elapsed_duration_sec)} на весь день</small></span></li>`);
+  rows.push(`<li class="finish"><span class="td-node">${ICON.flag}</span><span class="td-t">${finishAt || ''}</span>
+    <span class="td-what"><b>Финиш</b><small>${esc(day.end_point.label || 'конец прогулки')}</small></span></li>`);
   $('today-list').innerHTML = rows.join('');
+  $('today-list').classList.toggle('no-time', !stops.some(s => s.timing?.estimated_arrival_at));
 
   renderWeather($('today-weather'), day);
   $('today-source').textContent = live ? '' : 'Нет связи с сервером — показан сохранённый план, отметки не работают.';

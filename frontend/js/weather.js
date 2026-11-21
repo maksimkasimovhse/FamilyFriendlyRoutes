@@ -106,8 +106,11 @@ export async function forecastFor(day) {
 
 // ---------- Показ ----------
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const sign = n => (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(Math.round(n));
+const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+const sign = n => { const r = Math.round(n); return (r > 0 ? '+' : r < 0 ? '−' : '') + Math.abs(r); };   // «−0°» не показываем
 let shown = '';
+// Нажатие в любом другом месте закрывает подробности погоды
+document.addEventListener('click', e => { document.querySelectorAll('.wx-pop').forEach(p => { if (!p.hidden && !p.parentElement.contains(e.target)) { p.hidden = true; p.parentElement.querySelector('.wx-btn')?.setAttribute('aria-expanded', 'false'); } }); });
 
 // day — день плана (date, start_point, stops). Рисует блок в элементе el.
 export async function renderWeather(el, day) {
@@ -122,13 +125,20 @@ export async function renderWeather(el, day) {
     const sky = describe(h);
     const lo = min(h, x => x.temp), hi = max(h, x => x.temp);
     const tips = adviceFor(h);
-    el.className = 'weather' + (tips.some(t => t.level === 'warn') ? ' warn' : '');
+    const warn = tips.some(t => t.level === 'warn');
+    el.className = 'wx' + (warn ? ' warn' : '');
+    // Компактная плашка «☁️ +3…+5°»; по нажатию — подробности и советы
     el.innerHTML = `
-      <div class="weather-head"><span class="weather-ico" aria-hidden="true">${sky.icon}</span>
-        <div><b>${sign(lo)}${hi - lo >= 1.5 ? '…' + sign(hi) : ''}°C, ${esc(sky.text)}</b>
-        <small>погода на время прогулки, ${from}:00–${to}:00</small></div></div>
-      ${tips.length ? `<ul class="weather-tips">${tips.map(t => `<li class="${t.level}"><span aria-hidden="true">${t.icon}</span>${esc(t.text)}</li>`).join('')}</ul>`
-        : '<p class="weather-ok">Хорошая погода для прогулки, специальная одежда не нужна.</p>'}`;
+      <button type="button" class="wx-btn" aria-expanded="false" aria-label="Погода на прогулку: ${sign(lo)}${hi - lo >= 1.5 ? ' … ' + sign(hi) : ''} градусов, ${esc(sky.text)}. Подробнее">
+        <span class="wx-ico" aria-hidden="true">${sky.icon}</span><b>${sign(lo)}${hi - lo >= 1.5 ? '…' + sign(hi) : ''}°</b>${warn ? '<i class="wx-dot" aria-hidden="true"></i>' : ''}
+      </button>
+      <div class="wx-pop" hidden>
+        <div class="wx-sum"><span aria-hidden="true">${sky.icon}</span><div><b>${esc(cap(sky.text))}, ${sign(lo)}${hi - lo >= 1.5 ? '…' + sign(hi) : ''}°C</b><small>на время прогулки, ${from}:00–${to}:00</small></div></div>
+        ${tips.length ? `<ul class="wx-tips">${tips.map(t => `<li class="${t.level}"><span aria-hidden="true">${t.icon}</span>${esc(t.text)}</li>`).join('')}</ul>`
+          : '<p class="wx-ok">Хорошая погода для прогулки, специальная одежда не нужна.</p>'}
+      </div>`;
+    const btn = el.querySelector('.wx-btn'), pop = el.querySelector('.wx-pop');
+    btn.onclick = e => { e.stopPropagation(); const open = pop.hidden; pop.hidden = !open; btn.setAttribute('aria-expanded', open); };
     el.hidden = false;
   } catch (err) {
     console.warn('Погода недоступна:', err);

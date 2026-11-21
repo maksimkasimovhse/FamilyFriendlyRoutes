@@ -13,6 +13,7 @@
 <link href="css/games.css" rel="stylesheet">
 <link href="css/chat.css" rel="stylesheet">
 <link href="css/onboarding.css" rel="stylesheet">
+<link href="css/today.css" rel="stylesheet">
 <link href="css/landing.css" rel="stylesheet">
 <script src="vendor/maplibre-gl-4.7.1/maplibre-gl.js"></script>
 <script type="module" src="js/app.js"></script>
@@ -178,15 +179,15 @@
   <!-- ===== Остальные вкладки — пока заглушки ===== -->
   <!-- ===== Экран «Сегодня»: что сейчас, что дальше, что пройдено ===== -->
   <section class="screen today" data-tab="today" hidden>
-    <header class="today-top">
-      <p class="today-sub" id="today-sub"></p>
-      <h1>Сегодня</h1>
-      <div class="beads" id="today-stats"></div>
+    <header class="td-head">
+      <div class="td-title"><p id="today-sub"></p><h1 id="today-h1">Сегодня</h1></div>
+      <div class="wx" id="today-weather" hidden aria-live="polite"></div>
     </header>
-    <div class="today-scroll">
-      <section id="today-weather" class="weather" hidden aria-live="polite"></section>
+    <div class="td-days" id="today-days" role="tablist" aria-label="Дни поездки" hidden></div>
+    <div class="today-scroll td-scroll">
+      <div class="td-sum" id="today-stats"></div>
       <div id="today-now"></div>
-      <ol class="timeline" id="today-list"></ol>
+      <ol class="td-line" id="today-list"></ol>
       <p class="source" id="today-source"></p>
     </div>
     <div class="today-bottom">
