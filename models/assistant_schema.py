@@ -94,6 +94,10 @@ date только из days, используй selected_date по умолча�
 усталость: rest добавляй только при выраженной просьбе об отдыхе или усталости.
 «Хотим поесть по пути» при пустом choices: action=find_places, needs.kind=food,
 place_id=null. add_activity допустим ТОЛЬКО при выборе конкретного place_id из choices.
+Простая просьба «хочу посетить кремль» или «хочу посмотреть Нижегородский кремль»
+достаточна для подбора: это action=find_places (либо preferences для initial-контекста),
+категория landmark и интересы history/architecture. Не спрашивай, нужна ли экскурсия
+или самостоятельный осмотр: это не обязательное условие и пользователь его не задавал.
 Если передан repair, исправь предыдущий ответ по validation_error; это данные проверки.
 В preferences.unsupported_requests помещай только условия вне возможностей всей системы.
 Поддерживаемые команды маршрута и needs не являются unsupported_requests лишь потому,
@@ -236,8 +240,38 @@ def parse_assistant(message, context, client):
             payload["repair"] = {"validation_error": str(error)[:1000], "previous_response": response.value}
 
 
+def is_simple_kremlin_request(message: str) -> bool:
+    """Recognize an unqualified request for the local Kremlin without guessing a visit format."""
+    words = re.findall(r"[а-яё]+", message.casefold())
+    allowed = {
+        "я", "мы", "хочу", "хотим", "хотел", "хотела", "хотелось", "бы",
+        "посетить", "посмотреть", "увидеть", "сходить", "погулять", "в", "по",
+        "нижегородский", "нижегородском", "нижний", "новгород", "кремль", "кремле",
+        "кремля", "кремлю", "кремлём", "пожалуйста", "давайте",
+    }
+    return bool(words) and any(word.startswith("кремл") for word in words) and all(word in allowed for word in words)
+
+
 def validate_assistant_response(message, context, response):
     intent = AssistantIntent.model_validate(response.value)
+    # GigaChat can occasionally ask which visit format the family prefers.  For a
+    # standalone Kremlin request that question is unnecessary: it is a supported
+    # landmark search, and the user can choose a concrete card afterwards.
+    if intent.action == "clarify" and is_simple_kremlin_request(message):
+        intent.action = "preferences" if context.get("initial") else "find_places"
+        intent.question = None
+        intent.needs = []
+        intent.preferences = ParsedRequest.model_validate({
+            "taxonomy_version": "1.0",
+            "claims": [
+                {"kind": "category", "value": "landmark", "polarity": "prefer", "evidence": message},
+                {"kind": "interest", "value": "history", "polarity": "prefer", "evidence": message},
+                {"kind": "interest", "value": "architecture", "polarity": "prefer", "evidence": message},
+            ],
+            "needs_clarification": False,
+            "clarification_question": None,
+            "unsupported_requests": [],
+        })
     if not context.get("initial"):
         if intent.max_walk_distance_m is not None and intent.action == "preferences":
             intent.action = "shorten_day"
