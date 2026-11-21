@@ -41,7 +41,7 @@ func TestLiveActiveDayProgressAndRemoval(t *testing.T) {
 	if len(day.Stops) != 2 || !reflect.DeepEqual(day.Stops[0], historicalStop) || !reflect.DeepEqual(day.Legs[0], historicalLeg) {
 		t.Fatal("live history changed")
 	}
-	if day.Execution.ConsumedWalkDistanceM != *historicalLeg.DistanceM || day.Execution.ElapsedDurationSec != 5400 || *day.Totals.RemainingWalkDistanceM != 10000-*historicalLeg.DistanceM || *day.Totals.RemainingDurationSec != 16200 {
+	if day.Execution.ConsumedWalkDistanceM != *historicalLeg.DistanceM || day.Execution.ElapsedDurationSec != 5400 || day.Totals.RemainingWalkDistanceM != nil || *day.Totals.RemainingDurationSec != 16200 {
 		t.Fatal("live budget was reset")
 	}
 	for _, leg := range day.Legs {

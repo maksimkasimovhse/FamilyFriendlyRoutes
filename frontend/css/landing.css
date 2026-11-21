@@ -12,7 +12,7 @@
 .landing a { color: inherit; }
 
 .ld-bar {
-  position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between;
   padding: 10px max(16px, calc((100% - 1040px) / 2)); background: rgba(243,246,250,.9); backdrop-filter: blur(8px);
 }
 .ld-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-size: 17px; }
@@ -40,7 +40,7 @@ main > section, .ld-foot { padding-left: max(20px, calc((100% - 1040px) / 2)); p
 .ld-fine { margin: 14px 0 0; color: var(--ink-2); font-size: 14px; font-weight: 600; }
 
 /* Стопка старых фото */
-.ld-stack { position: relative; height: 300px; max-width: 460px; width: 100%; margin: 0 auto; }
+.ld-stack { position: relative; isolation: isolate; height: 300px; max-width: 460px; width: 100%; margin: 0 auto; }
 .ld-stack .ph { position: absolute; margin: 0; width: 64%; background: #fff; padding: 8px 8px 0; border-radius: 18px; box-shadow: 0 14px 30px rgba(15,22,40,.22); }
 .ld-stack .ph img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; filter: sepia(.25); }
 .ld-stack figcaption { padding: 7px 4px 8px; font-weight: 800; font-size: 13px; color: var(--sepia); }

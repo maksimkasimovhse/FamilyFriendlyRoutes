@@ -107,6 +107,10 @@ export const createTrip = tripInput => call('POST', '/api/v1/trips', tripInput, 
 export const createTripFromProfile = request => call('POST', '/api/v1/trips/from-profile', request, true);
 // Рассчитать маршрут для черновика (ещё не сохраняет)
 export const planDraft = draft => preview({ kind: 'generate_plan' }, draft);
+// Изменить рассчитанный, но ещё не сохранённый вариант (черновик): команда считается от base_preview_id
+export const previewDraftChange = (draft, command, basePreviewId) => call('POST', `/api/v1/trips/${draft.trip_id}/previews`, {
+  expected_version: draft.version, command: { ...command, base_preview_id: basePreviewId }, current_position: null, observed_at: null,
+});
 export const listTrips = () => call('GET', '/api/v1/trips');
 
 // Открыть сохранённую поездку как текущую
@@ -184,4 +188,8 @@ export function previewInfrastructure(placeId,position) {
 }
 export function previewRouteEdit(text) {
  return preview({kind:'edit_route',date:today().date,text});
+}
+
+export function previewActivity(selection) {
+ return preview({kind:'add_activity',date:today().date,selection});
 }

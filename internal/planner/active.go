@@ -47,13 +47,13 @@ func (cmd ChangeCommand) Validate() error {
 		"insert_infrastructure_stop": {"kind", "date", "place_id"},
 		"append_manual_choices":      {"kind", "date", "choices", "base_preview_id"},
 		"generate_plan":              {"kind"}, "start_day": {"kind", "date", "point", "start_at"},
-		"remove_stop": {"kind", "date", "stop_id"}, "replan_day": {"kind", "date"},
+		"remove_stop": {"kind", "date", "stop_id", "base_preview_id"}, "replan_day": {"kind", "date"},
 		"shorten_day":     {"kind", "date", "target_remaining_duration_sec", "target_remaining_walk_distance_m"},
 		"return_to_hotel": {"kind", "date", "hotel_point", "target_remaining_duration_sec", "target_remaining_walk_distance_m"},
-		"add_activity":    {"kind", "date", "selection", "after_stop_id"},
-		"replace_stop":    {"kind", "date", "stop_id", "selection"},
-		"move_stop":       {"kind", "date", "stop_id", "target_date"},
-		"reorder_stops":   {"kind", "date", "stop_ids"}, "update_trip_input": {"kind", "input"},
+		"add_activity":    {"kind", "date", "selection", "after_stop_id", "base_preview_id"},
+		"replace_stop":    {"kind", "date", "stop_id", "selection", "base_preview_id"},
+		"move_stop":       {"kind", "date", "stop_id", "target_date", "base_preview_id"},
+		"reorder_stops":   {"kind", "date", "stop_ids", "base_preview_id"}, "update_trip_input": {"kind", "input"},
 	}
 	fields, ok := allowed[cmd.Kind]
 	if !ok {
@@ -81,7 +81,7 @@ func (cmd ChangeCommand) Validate() error {
 		valid = cmd.Date != nil && cmd.PlaceID != nil && *cmd.PlaceID != "" && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
 
 	case "append_manual_choices":
-		valid = cmd.Date != nil && len(cmd.Choices) > 0 && len(cmd.Choices) <= budgetDefaults.CompletionPolicy.ManualLimitPerDay && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
+		valid = cmd.Date != nil && len(cmd.Choices) > 0 && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
 	case "generate_plan":
 		valid = cmd.Date == nil && cmd.StopID == nil && cmd.Point == nil && cmd.StartAt == nil
 	case "start_day":
@@ -256,9 +256,8 @@ func RecordProgress(view c.TripView, request c.ProgressRequest, now time.Time) (
 	if err != nil {
 		return c.TripView{}, err
 	}
-	distanceLeft := math.Max(0, dailyWalkLimit(view.Input, view.Input.Days[j])-execution.ConsumedWalkDistanceM)
 	timeLeft := math.Max(0, dailyTimeBudget(view.Input.Days[j])-execution.ElapsedDurationSec)
-	day.Totals.RemainingWalkDistanceM = &distanceLeft
+	day.Totals.RemainingWalkDistanceM = nil
 	day.Totals.RemainingDurationSec = &timeLeft
 	view.Status = "active"
 	view.Version++
@@ -462,6 +461,19 @@ func (p Planner) rebuildExistingDay(ctx context.Context, view c.TripView, index,
 		}
 	}
 	execution := original.Execution
+	// Replanning an unstarted walk today must not retain a start in the past.
+	if execution == nil && input.PlanningContext == "in_city" && day.AvailableWindow != nil {
+		start, _ := parseInstant(day.AvailableWindow.StartAt)
+		end, _ := parseInstant(day.AvailableWindow.EndAt)
+		if start.Before(now) {
+			if !end.After(now) {
+				return c.TripView{}, stateError("DAY_FINISHED", "Доступное время дня исчерпано.")
+			}
+			day.AvailableWindow = &c.Interval{StartAt: instant(now), EndAt: instant(end)}
+			day.DurationBudgetSec = math.Min(day.DurationBudgetSec, end.Sub(now).Seconds())
+			view.Input.Days[inputIndex] = day
+		}
+	}
 	spentTime, spentDistance := 0.0, 0.0
 	if execution != nil {
 		if position != nil && position.Coordinates != execution.CurrentPoint.Coordinates {
@@ -487,7 +499,6 @@ func (p Planner) rebuildExistingDay(ctx context.Context, view c.TripView, index,
 		spentDistance = execution.ConsumedWalkDistanceM
 		total := dailyTimeBudget(day)
 		timeLeft := math.Max(0, total-spentTime)
-		distanceLeft := math.Max(0, dailyWalkLimit(input, day)-spentDistance)
 		if timeLeft == 0 {
 			return c.TripView{}, stateError("DAY_FINISHED", "Доступное время дня исчерпано.")
 		}
@@ -498,7 +509,6 @@ func (p Planner) rebuildExistingDay(ctx context.Context, view c.TripView, index,
 		mealLeft := math.Max(0, *day.MealDurationSec-execution.ConsumedMealDurationSec)
 		day.MealDurationSec = &mealLeft
 		day.RestBudgetSec = math.Max(0, day.RestBudgetSec-execution.ConsumedRestDurationSec)
-		input.LoadLimits.MaxWalkDistanceMPerDay = &distanceLeft
 		input.PlanningContext = "in_city"
 		execution.ObservedAt = instant(at)
 		execution.ElapsedDurationSec = spentTime
@@ -559,11 +569,9 @@ func (p Planner) rebuildExistingDay(ctx context.Context, view c.TripView, index,
 		plan.Totals.RestDurationSec += execution.ConsumedRestDurationSec
 		plan.Totals.WaitDurationSec = add(plan.Totals.WaitDurationSec, execution.ConsumedWaitDurationSec)
 		plan.Totals.ElapsedDurationSec = add(plan.Totals.ElapsedDurationSec, spentTime)
-		dayLimit := dailyWalkLimit(view.Input, view.Input.Days[inputIndex])
-		plan.Totals.WalkBudgetM = &dayLimit
-		distanceLeft := math.Max(0, dayLimit-spentDistance)
+		plan.Totals.WalkBudgetM = nil
 		timeLeft := math.Max(0, dailyTimeBudget(view.Input.Days[inputIndex])-spentTime)
-		plan.Totals.RemainingWalkDistanceM = &distanceLeft
+		plan.Totals.RemainingWalkDistanceM = nil
 		plan.Totals.RemainingDurationSec = &timeLeft
 		plan.Assumptions = append(plan.Assumptions, "Пройденные сегменты сохранены; километры подтверждённых переходов оценены по OSM, время уже прошедшей части — по отметкам пользователя.")
 		if position == nil {

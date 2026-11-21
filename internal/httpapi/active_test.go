@@ -190,7 +190,7 @@ func TestActiveDayProgressRemovePreviewApplyAndRestart(t *testing.T) {
 	if final.Version != 5 || len(day.Stops) != 2 || len(day.Legs) != 3 || !reflect.DeepEqual(day.Stops[0], savedStop) || !reflect.DeepEqual(day.Legs[0], savedLeg) || !reflect.DeepEqual(final.Days[1], unrelated) {
 		t.Fatal("history or other day was modified")
 	}
-	if *day.Totals.RemainingWalkDistanceM != 2400 || *day.Totals.RemainingDurationSec != 20700 || *day.Totals.WalkDistanceM != 300 {
+	if day.Totals.RemainingWalkDistanceM != nil || *day.Totals.RemainingDurationSec != 20700 || *day.Totals.WalkDistanceM != 300 {
 		t.Fatalf("remaining budget restarted: %+v", day.Totals)
 	}
 	if *day.Totals.ElapsedDurationSec != 900+120+day.Stops[1].Duration.DurationSec {
@@ -216,7 +216,7 @@ func TestActiveDayProgressRemovePreviewApplyAndRestart(t *testing.T) {
 	// Another replan must debit the original budget once, not the previous remainder.
 	h.now = h.now.Add(5 * time.Minute)
 	next := h.preview(t, final, map[string]any{"kind": "replan_day", "date": day.Date}, 201)
-	if *next.ProposedTrip.Days[0].Totals.RemainingDurationSec != 20400 || *next.ProposedTrip.Days[0].Totals.RemainingWalkDistanceM != 2400 {
+	if *next.ProposedTrip.Days[0].Totals.RemainingDurationSec != 20400 || next.ProposedTrip.Days[0].Totals.RemainingWalkDistanceM != nil {
 		t.Fatal("repeated replan double-counted progress")
 	}
 }

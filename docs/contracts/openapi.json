@@ -2412,7 +2412,7 @@
             }
           }
         },
-        "description": "Loads a validated recommendation snapshot, shared by manual choices and route calculation. Preview options are scoped to its owner/version/expiry. Short day: <70% of effective time; suggestions within 2000 m of the last activity, or globally for an empty day. At most two manual choices per day, including supplements. Excludes all places already scheduled in the trip; checks real OSM paths, time and availability for supplemental candidates. Active trips cannot be supplemented yet."
+        "description": "Loads a validated recommendation snapshot, shared by manual choices and route calculation. Preview options are scoped to its owner/version/expiry. Short day: <70% of effective time; suggestions within 2000 m of the last activity, or globally for an empty day. No manual card count limit. Excludes all places already scheduled in the trip; checks real OSM paths, time and availability for supplemental candidates. Active trips cannot be supplemented yet."
       }
     },
     "/api/v1/trips/{trip_id}/assistant/messages": {
@@ -2847,7 +2847,7 @@
               ]
             },
             "minItems": 1,
-            "maxItems": 2
+            "maxItems": 10
           },
           "adult_count": {
             "type": "integer",
@@ -2945,7 +2945,8 @@
                 "type": "null"
               }
             ],
-            "description": "Daily family walking limit M, meters. Null selects the minimum configured age default among children; explicit value overrides the default."
+            "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m.",
+            "deprecated": true
           },
           "max_continuous_walk_duration_sec": {
             "oneOf": [
@@ -2956,13 +2957,16 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "deprecated": true,
+            "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m."
           },
           "restaurant_walk_reserve_m_per_day": {
             "type": "number",
             "minimum": 0,
             "default": 0,
-            "description": "Daily reserve p in meters for future restaurant detours. Must not exceed m. Primary route budget is m-p, including start and end legs. Omitted means zero. This is not meal duration or walked distance."
+            "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m.",
+            "deprecated": true
           }
         },
         "required": [
@@ -3011,13 +3015,14 @@
           "rest_budget_sec": {
             "type": "number",
             "minimum": 0,
-            "description": "Daily rest time reserve. Existing rest stops cover the reserve; only the unallocated remainder is added."
+            "description": "Legacy compatibility field; no automatic rest time is reserved. Only selected stops consume time."
           },
           "meal_count": {
             "type": "integer",
             "minimum": 0,
             "maximum": 10,
-            "default": 1
+            "default": 0,
+            "description": "Legacy compatibility field; no automatic meal time is reserved."
           },
           "meal_format": {
             "type": "string",
@@ -3032,7 +3037,7 @@
             "type": "number",
             "minimum": 0,
             "maximum": 86400,
-            "description": "Total daily meal time, seconds. When omitted, meal_count times the configured duration for meal_format. Explicit zero disables the meal time reserve."
+            "description": "Legacy compatibility field; no unscheduled meal time is added. Selected meal stops use their activity duration."
           },
           "max_walk_distance_m": {
             "oneOf": [
@@ -3045,7 +3050,8 @@
                 "type": "null"
               }
             ],
-            "description": "Optional cap for this day, additionally bounded by family load_limits."
+            "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m.",
+            "deprecated": true
           }
         },
         "required": [
@@ -3152,7 +3158,7 @@
               "ranked_prefix",
               "manual_choices"
             ],
-            "description": "manual_choices: route only explicitly selected places, with additional cards offered for short days. ranked_prefix: automatic ranked filling only when explicitly requested. Both enforce two manual choices per day. Omission preserves legacy behaviour."
+            "description": "manual_choices: route only explicitly selected places, with additional cards offered for short days. ranked_prefix: automatic ranked filling only when explicitly requested. No manual card count limit; feasibility uses time and walking budgets. Omission preserves legacy behaviour."
           }
         },
         "required": [
@@ -5247,12 +5253,12 @@
               "rest_duration_sec": {
                 "type": "number",
                 "minimum": 0,
-                "description": "Maximum of rest_budget_sec and scheduled rest-stop duration, without double counting."
+                "description": "Duration of explicitly scheduled rest stops only. No automatic rest reserve."
               },
               "meal_duration_sec": {
                 "type": "number",
                 "minimum": 0,
-                "description": "Maximum of the daily meal time reserve and scheduled meal-stop duration, without double counting."
+                "description": "Duration of explicitly scheduled meal stops only. No automatic meal reserve."
               },
               "elapsed_duration_sec": {
                 "oneOf": [
@@ -5269,25 +5275,32 @@
               "walk_budget_m": {
                 "type": "number",
                 "minimum": 0,
-                "description": "Total daily walking limit m."
+                "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m.",
+                "deprecated": true
               },
               "restaurant_walk_reserve_m": {
                 "type": "number",
                 "minimum": 0,
-                "description": "Reserved walking distance p, not part of actual walked distance."
+                "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m.",
+                "deprecated": true
               },
               "primary_walk_budget_m": {
                 "type": "number",
                 "minimum": 0,
-                "description": "max(0, min(M, V*T_walk) - P), meters. Recalculated for candidate visits and waits."
+                "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m.",
+                "deprecated": true
               },
               "walking_time_budget_sec": {
                 "type": "number",
-                "minimum": 0
+                "minimum": 0,
+                "deprecated": true,
+                "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m."
               },
               "time_limited_walk_budget_m": {
                 "type": "number",
-                "minimum": 0
+                "minimum": 0,
+                "deprecated": true,
+                "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m."
               },
               "walking_speed_kph": {
                 "type": "number",
@@ -5300,7 +5313,8 @@
               "remaining_walk_distance_m": {
                 "type": "number",
                 "minimum": 0,
-                "description": "Original daily M minus confirmed estimated walked distance, before planning the remaining stops."
+                "description": "Deprecated: daily capacity is controlled only by duration_budget_sec and available_window. This legacy distance/segment constraint is ignored; budget totals return null. Actual distance remains in walk_distance_m.",
+                "deprecated": true
               },
               "remaining_duration_sec": {
                 "type": "number",
@@ -5671,7 +5685,7 @@
               "choices": {
                 "type": "array",
                 "minItems": 1,
-                "maxItems": 2,
+                "maxItems": 50,
                 "items": {
                   "$ref": "#/components/schemas/Selection"
                 }
@@ -5703,7 +5717,9 @@
               "target_remaining_walk_distance_m": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100000
+                "maximum": 100000,
+                "deprecated": true,
+                "description": "No longer supported; use target_remaining_duration_sec. Returns TIME_LIMIT_REQUIRED."
               }
             },
             "required": [
@@ -5744,7 +5760,9 @@
               "target_remaining_walk_distance_m": {
                 "type": "number",
                 "minimum": 0,
-                "maximum": 100000
+                "maximum": 100000,
+                "deprecated": true,
+                "description": "No longer supported; use target_remaining_duration_sec. Returns TIME_LIMIT_REQUIRED."
               }
             },
             "required": [
@@ -7031,7 +7049,7 @@
               "ranked_prefix",
               "manual_choices"
             ],
-            "description": "manual_choices: route only explicitly selected places, with additional cards offered for short days. ranked_prefix: automatic ranked filling only when explicitly requested. Both enforce two manual choices per day. Omission preserves legacy behaviour."
+            "description": "manual_choices: route only explicitly selected places, with additional cards offered for short days. ranked_prefix: automatic ranked filling only when explicitly requested. No manual card count limit; feasibility uses time and walking budgets. Omission preserves legacy behaviour."
           }
         },
         "required": [
@@ -7092,7 +7110,8 @@
         "additionalProperties": false,
         "properties": {
           "manual_limit_per_day": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Deprecated compatibility field. 0 means no manual card count limit; feasibility is checked by walking/time budgets."
           },
           "short_day_ratio": {
             "type": "number"

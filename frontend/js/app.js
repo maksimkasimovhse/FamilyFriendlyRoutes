@@ -11,10 +11,10 @@
 import { onTripChange, loadSavedTrip, loadCachedTrip, listTrips, openTrip, forget, getTrip, getSource, today, planningOptions, previewManualChoices, applyPreview } from './api.js';
 import { startSession, isAuthenticated, isGuest, enterGuest, leaveGuest, userEmail, signOut, initAuthScreen, openAuth } from './session.js';
 import { loadFamily, syncLocalProfile, seedDemoNames, clearDeviceData, openOnboarding, closeOnboarding, currentProfile, childName, genitive, familySummary } from './onboarding.js';
-import { openTripSetup, markStep, clearResume, afterPick, backToWhen, backToChat, backToWishes, backToPreview, closeTripSetup, prepareInitialChoices } from './trip-setup.js';
+import { openTripSetup, markStep, clearResume, afterPick, backToWhen, backToChat, backToPreview, closeTripSetup, prepareInitialChoices } from './trip-setup.js';
 import { manualSelection, pickConfiguration } from './recommendation-cards.js';
 import { loadRoutePlaces, clearRoutePlaces, onPlacesChange, loadPlaceTypes } from './places.js';
-import { initMap, resizeMap, focusPlace, showRoutePreview, clearRoutePreview, showPicked, refreshMap } from './map.js';
+import { initMap, resizeMap, focusPlace, showRoutePreview, clearRoutePreview, showPicked, refreshMap, setAmenityFilter } from './map.js';
 import { initPick, openPick } from './pick.js';
 import { initToday, refreshToday, toast } from './today.js';
 import { initWeatherSky } from './weather-sky.js';
@@ -70,7 +70,16 @@ function startMain() {
     $('sheet-body').innerHTML = `<p class="source warn">Не удалось загрузить карту: ${err.message}</p>`;
   });
   initToday({ childName: name, childNameGenitive: genitive(name), kidStopInfo, onOpenKid: () => openKid(), onNeedNow: () => { openTab('map'); openUrgentWidget(); } });
-  initMapActions({onFocus:focusPlace,onPreview:showRoutePreview,onCancel:clearRoutePreview});
+  initMapActions({onFilter:setAmenityFilter,onFocus:focusPlace,onPreview:showRoutePreview,onCancel:clearRoutePreview});
+  $('map-kid-mode').onclick=()=>kidReady.then(()=>openKid());
+  $('map-sheet-toggle').onclick=()=>{
+    const button=$('map-sheet-toggle'),panel=$('map-sheet-content');
+    panel.hidden=!panel.hidden;
+    $('map-sheet').classList.toggle('is-collapsed',panel.hidden);
+    button.setAttribute('aria-expanded',String(!panel.hidden));
+    button.setAttribute('aria-label',panel.hidden?'Развернуть панель карты':'Свернуть панель карты');
+    requestAnimationFrame(()=>resizeMap());
+  };
 
   // Тропа ребёнка — в порядке маршрута; «Сегодня» — когда подгрузились места рядом
   const syncKid = () => kidReady.then(() => { const day = today(); if (day) syncKidOrder(day.stops.map(s => s.activity_id)); });
@@ -133,7 +142,7 @@ $('pick-skip').onclick = () => { if(customPickCancel){const cancel=customPickCan
 function supplementPicker(configuration,done,cancel) {
   customPickFinish=done;customPickCancel=cancel;pickInFlow=false;
   openTab('pick');openPick(configuration);
-  document.querySelector('#screen-pick .pick-top h1').textContent='Дополнить короткий день';
+  document.querySelector('#screen-pick .pick-top h1').textContent=configuration.title||'Дополнить короткий день';
 }
 document.addEventListener('pick:open', async () => {
   const trip=getTrip();if(!trip || getSource()!=='backend')return toast('Сначала сохраните маршрут.',true);
@@ -162,12 +171,8 @@ function startTripSetup({ keep = false, resume = false } = {}) {
     authenticated: isAuthenticated(),
     onBack: () => { closeTripSetup(); if (mainStarted) startMain(); else { app.classList.remove('flow-mode'); showLanding(); } },
     onPick: enterPickStep,
+    onBusy: text => loading(text),
     onSupplement: supplementPicker,
-    onEditProfile: () => openOnboarding({
-      authenticated: isAuthenticated(),
-      onDone: () => { closeOnboarding(); backToWishes(); },
-      onBack: () => backToWishes(),
-    }),
     onLogin: () => openAuthFlow(async () => { await syncLocalProfile(); backToPreview(); }),
     onDone: (trip, picked) => {
       closeTripSetup();

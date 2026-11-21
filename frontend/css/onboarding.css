@@ -169,7 +169,7 @@ textarea { resize: vertical; min-height: 84px; line-height: 1.4; }
 .app.flow-mode #screen-pick .pick-skip { background: none; color: var(--now); box-shadow: none; min-height: 44px; margin-top: 4px; font-weight: 800; }
 .app.flow-mode #screen-pick .pick-top h1 { font-size: 20px; line-height: 1.2; }
 .app.flow-mode #screen-pick .pick-top { flex-wrap: wrap; row-gap: 0; }
-.app.flow-mode #screen-pick .pick-count { flex-basis: 100%; padding-left: 56px; margin-top: -4px; }
+.app.flow-mode #screen-pick .pick-count { flex-basis: 100%; padding-left: 4px; margin-top: -2px; }
 
 .flow-bar.four { grid-template-columns: repeat(4, 1fr); }
 
@@ -216,3 +216,33 @@ textarea { resize: vertical; min-height: 84px; line-height: 1.4; }
 .addr-results { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
 .addr-results button { width: 100%; min-height: 48px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--surface); text-align: left; font: 700 15px var(--font-ui); color: var(--ink); cursor: pointer; }
 .addr-results button:hover { border-color: var(--now); }
+
+/* «Изменить план»: окно поверх предпросмотра маршрута */
+.plan-sheet { position: absolute; inset: 0; z-index: 30; display: flex; align-items: flex-end; background: rgba(15,22,40,.45); }
+.plan-sheet[hidden] { display: none; }
+.plan-panel { width: 100%; max-height: 90%; display: flex; flex-direction: column; background: var(--bg); border-radius: 24px 24px 0 0; padding: 16px 16px 12px; }
+.plan-head { display: flex; align-items: center; justify-content: space-between; }
+.plan-head h2 { margin: 0; font-size: 22px; font-weight: 800; }
+.plan-x { width: 40px; height: 40px; border: 0; border-radius: 50%; background: #fff; font-size: 16px; cursor: pointer; }
+.plan-body { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 0; display: grid; gap: 12px; align-content: start; }
+.plan-foot { display: grid; gap: 6px; padding-top: 8px; }
+.pe-day { border-radius: 16px; padding: 10px; background: #E8EDF5; transition: background .15s, box-shadow .15s; }
+.pe-day h3 { margin: 0 0 8px; font-size: 15px; display: flex; justify-content: space-between; }
+.pe-day h3 span { color: var(--ink-2); font-weight: 700; }
+.pe-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; min-height: 44px; }
+.pe-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: #fff; font-weight: 700; }
+.pe-title { flex: 1; min-width: 0; display: grid; }
+.pe-title small { color: var(--ink-2); font-weight: 600; font-size: 12px; }
+.pe-x { flex: none; width: 34px; height: 34px; border: 0; border-radius: 50%; background: #FDE3E0; color: #B3261E; font-size: 14px; cursor: pointer; }
+.pe-empty { padding: 12px; border: 2px dashed #BFC8D8; border-radius: 12px; text-align: center; color: var(--ink-2); font-size: 13px; font-weight: 700; }
+.pe-add { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 260px; overflow-y: auto; }
+.pe-add li { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; background: #fff; }
+.pe-days { display: flex; flex-wrap: wrap; gap: 6px; flex: none; }
+.pe-days button { border: 0; border-radius: 999px; padding: 7px 12px; background: var(--now-soft, #DDE9FF); color: var(--now); font: 800 13px inherit; cursor: pointer; }
+.pe-hint { margin: 6px 2px 0; font-size: 12px; font-weight: 700; color: #B36B00; }
+.pe-addcards { margin-top: 8px; width: 100%; border: 2px dashed var(--now); border-radius: 12px; background: transparent; color: var(--now); padding: 10px; font: 800 14px inherit; cursor: pointer; }
+.pe-addcards:disabled { opacity: .45; cursor: default; }
+.pv-overload { margin: 10px 0 0; padding: 12px 14px; border-radius: 14px; background: #FFF3D1; color: #7A3B00; font-size: 14px; font-weight: 700; line-height: 1.35; }
+.pv-overload[hidden], .pv-lowcount[hidden] { display: none; }
+.pv-lowcount { margin: 8px 0 0; padding: 10px 14px; border-radius: 14px; background: #E8EDF5; color: var(--ink-2); font-size: 13px; font-weight: 700; }
+.day-tabs [data-warn]::after { content: " ⚠"; }

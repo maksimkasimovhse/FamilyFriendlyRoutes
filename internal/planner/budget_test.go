@@ -8,27 +8,6 @@ import (
 	c "github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/contracts"
 )
 
-func TestCombinedWalkingBudgetFormula(t *testing.T) {
-	tests := []struct {
-		name                                                                 string
-		limit, speed, day, visits, meals, rest, wait, reserve, want, walkSec float64
-	}{
-		{"time bound", 6000, 2.5, 8 * 3600, 4 * 3600, 1.5 * 3600, 1800, 0, 1000, 4000, 7200},
-		{"distance bound", 6000, 2.5, 8 * 3600, 3 * 3600, 1.5 * 3600, 1800, 0, 1000, 5000, 10800},
-		{"no free time", 6000, 2.5, 3600, 3600, 4500, 0, 0, 1000, 0, 0},
-		{"waiting counted", 6000, 2.5, 7200, 0, 0, 0, 3600, 1000, 1500, 3600},
-		{"reserve exceeds time bound", 6000, 2.5, 3600, 0, 0, 0, 0, 3000, 0, 3600},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, seconds, _ := primaryWalkingBudget(tt.limit, tt.speed, tt.day, tt.visits, tt.meals, tt.rest, tt.wait, tt.reserve)
-			if got != tt.want || seconds != tt.walkSec {
-				t.Fatalf("got %.2fm/%.2fs, want %.2fm/%.2fs", got, seconds, tt.want, tt.walkSec)
-			}
-		})
-	}
-}
-
 func TestAutomaticAgeAndMealDefaultsDoNotMutateInput(t *testing.T) {
 	input := sample(t)
 	input.LoadLimits.MaxWalkDistanceMPerDay = nil
@@ -41,7 +20,7 @@ func TestAutomaticAgeAndMealDefaultsDoNotMutateInput(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if *view.Input.LoadLimits.MaxWalkDistanceMPerDay != 2500 || view.Days[0].Totals.MealDurationSec != 4500 || *view.Days[0].Totals.WalkingSpeedKPH != 2.5 || *view.Days[0].Totals.BudgetPolicyVersion != "family-budget-v1" {
+	if view.Input.LoadLimits.MaxWalkDistanceMPerDay != nil || view.Days[0].Totals.MealDurationSec != 0 || *view.Days[0].Totals.WalkingSpeedKPH != 2.5 || *view.Days[0].Totals.BudgetPolicyVersion != "family-time-v3" {
 		t.Fatal("incorrect resolved parameters")
 	}
 	if input.LoadLimits.MaxWalkDistanceMPerDay != nil || input.Days[0].MealDurationSec != nil || input.Days[0].MealCount != nil {
@@ -71,7 +50,7 @@ func TestMealCountFormatAndExplicitOverride(t *testing.T) {
 	}
 }
 
-func TestLongerMealBudgetReducesOptionalVisits(t *testing.T) {
+func TestLegacyMealAndRestReservesDoNotReduceVisits(t *testing.T) {
 	input := sample(t)
 	input.Days[0].DurationBudgetSec = 7200
 	input.Days[0].MealDurationSec = nil
@@ -82,12 +61,15 @@ func TestLongerMealBudgetReducesOptionalVisits(t *testing.T) {
 	}
 	format := "meal_with_play"
 	input.Days[0].MealFormat = &format
+	legacyMeal := 6300.0
+	input.Days[0].MealDurationSec = &legacyMeal
+	input.Days[0].RestBudgetSec = 1200
 	long, err := p.Build(context.Background(), NewDraft("trip", input, time.Now()), time.Now())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(short.Days[0].Stops) != 3 || len(long.Days[0].Stops) != 1 {
-		t.Fatalf("meal reservation did not affect plan: %d vs %d", len(short.Days[0].Stops), len(long.Days[0].Stops))
+	if len(short.Days[0].Stops) != 3 || len(long.Days[0].Stops) != 3 || *short.Days[0].Totals.ElapsedDurationSec != *long.Days[0].Totals.ElapsedDurationSec {
+		t.Fatalf("invisible reservation affected plan: %d vs %d", len(short.Days[0].Stops), len(long.Days[0].Stops))
 	}
 }
 
@@ -109,9 +91,9 @@ func TestKnownMealAndRestStopsAreNotReservedTwice(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Real meal=600, top up to 900; real rest=900 already exceeds requested 700.
+	// Explicit meal=600 and rest=900; legacy reserves add no time.
 	totals := view.Days[0].Totals
-	if totals.VisitDurationSec != 0 || totals.MealDurationSec != 900 || totals.RestDurationSec != 900 || *totals.ElapsedDurationSec != 1980 {
+	if totals.VisitDurationSec != 0 || totals.MealDurationSec != 600 || totals.RestDurationSec != 900 || *totals.ElapsedDurationSec != 1680 {
 		t.Fatalf("double-counted breaks: %+v", totals)
 	}
 }

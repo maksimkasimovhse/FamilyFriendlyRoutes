@@ -117,6 +117,14 @@ func lastActivity(plan c.DayPlan) *routing.Point {
 	}
 	return nil
 }
+
+// Pre-filter only visits that exceed the entire user time budget on their own.
+// OSM travel time and opening windows are checked by the actual planner; do not
+// convert time to a straight-line distance or resurrect legacy age/distance caps.
+func reachableAlone(day c.DayInput, stayDurationSec float64) bool {
+	return stayDurationSec <= dailyTimeBudget(day)
+}
+
 func withinSupplementRadius(anchor *routing.Point, point routing.Point) bool {
 	if anchor == nil {
 		return true
@@ -193,8 +201,7 @@ func (p Planner) PlanningOptions(ctx context.Context, view c.TripView, now time.
 	}
 	for _, inputDay := range view.Input.Days {
 		row := c.DayPlanningOptions{Date: inputDay.Date, AvailableDurationSec: dailyTimeBudget(inputDay), Candidates: []c.Candidate{}, ManualCount: manualCount(view, inputDay.Date)}
-		row.RemainingManualChoices = max(0, result.Policy.ManualLimitPerDay-row.ManualCount)
-		row.RemainingManualChoices = min(row.RemainingManualChoices, max(0, len(view.Input.Days)*result.Policy.ManualLimitPerDay-len(view.Input.Selections)))
+		row.RemainingManualChoices = len(result.Candidates)
 		index := -1
 		for i, d := range view.Days {
 			if d.Date == inputDay.Date {
@@ -220,6 +227,11 @@ func (p Planner) PlanningOptions(ctx context.Context, view c.TripView, now time.
 				if used[candidate.Place.PlaceID] || !p.candidateOpenOnDate(id, inputDay.Date, nil) || !withinSupplementRadius(row.Anchor, points[id]) {
 					continue
 				}
+				// Ещё нет плана: места, до которых заведомо не дойти за день, в подбор не предлагаем,
+				// иначе выбранное молча выпадет из маршрута и он окажется пустым.
+				if index < 0 && !reachableAlone(inputDay, candidate.Activity.Duration.DurationSec) {
+					continue
+				}
 				if index >= 0 {
 					selection := c.Selection{ActivityID: id, PlaceID: candidate.Place.PlaceID, PreferredDate: &row.Date}
 					plan, err := p.appendDay(ctx, view, index, []c.Selection{selection}, now)
@@ -239,6 +251,7 @@ func (p Planner) PlanningOptions(ctx context.Context, view c.TripView, now time.
 				row.Candidates = append(row.Candidates, candidate)
 			}
 		}
+		row.RemainingManualChoices = len(row.Candidates)
 		result.Days = append(result.Days, row)
 	}
 	return result, nil
@@ -263,8 +276,8 @@ func (p Planner) AppendManualChoices(ctx context.Context, view c.TripView, date 
 			return view, stateError("ACTIVE_TRIP", "Дополнение карточками пока доступно до начала прогулки.")
 		}
 	}
-	if len(choices) < 1 || len(choices)+manualCount(view, date) > budgetDefaults.CompletionPolicy.ManualLimitPerDay || len(view.Input.Selections)+len(choices) > len(view.Input.Days)*budgetDefaults.CompletionPolicy.ManualLimitPerDay {
-		return view, stateError("MANUAL_LIMIT", "Можно выбрать вручную не больше двух мест на день.")
+	if len(choices) < 1 {
+		return view, stateError("INVALID_COMMAND", "Выберите хотя бы одно место.")
 	}
 	var input c.DayInput
 	for _, d := range view.Input.Days {

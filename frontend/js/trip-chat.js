@@ -73,10 +73,6 @@ async function send(text) {
     wait.className = 'msg bot';
     wait.textContent = data.reply;
     if (data.claims.length) wait.append(claimsView(data.claims));
-    const meta = document.createElement('span');
-    meta.className = 'meta';
-    meta.textContent = data.parser === 'gigachat' ? 'Разбор: ИИ (GigaChat)' : 'Упрощённый режим: ИИ-разбор сейчас недоступен, ищу по ключевым словам';
-    wait.append(meta);
   } catch (err) {
     messages.pop();
     wait.className = 'msg bot';

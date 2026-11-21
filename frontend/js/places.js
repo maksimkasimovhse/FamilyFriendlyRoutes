@@ -104,12 +104,15 @@ export async function fetchNearestPlaces({lon,lat,categories,count=3,accept=()=>
   const query=new URLSearchParams({lon,lat,nearest:true,limit:count});
   categories.forEach(c=>query.append('categories',c));
   const result={items:[],evidence:[]};
+  const seen=new Set(),cursors=new Set();
   do {
     const response=await fetch('/api/v1/map/places?'+query,{signal});
     const data=await response.json();
     if(!response.ok)throw Error(data.error?.message || 'Инфраструктура: HTTP '+response.status);
-    result.items.push(...data.items.filter(accept));result.evidence.push(...data.evidence);
-    if(result.items.length>=count || !data.next_cursor)break;
+    for(const place of data.items){if(!seen.has(place.place_id)&&accept(place)){seen.add(place.place_id);result.items.push(place);}}
+    result.evidence.push(...data.evidence);
+    if(result.items.length>=count || !data.next_cursor || cursors.has(data.next_cursor))break;
+    cursors.add(data.next_cursor);
     query.set('cursor',data.next_cursor);
   } while(true);
   result.items=result.items.slice(0,count);return result;

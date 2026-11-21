@@ -121,7 +121,7 @@ func TestMoveReorderReplaceAndInsert(t *testing.T) {
 	}
 }
 
-func TestActiveWalkingCapKeepsHistoryAndChargesSpentDistanceOnce(t *testing.T) {
+func TestActiveTimeCapKeepsHistoryAndChargesSpentTimeOnce(t *testing.T) {
 	now := time.Date(2030, 6, 15, 10, 0, 0, 0, time.FixedZone("MSK", 10800))
 	input := sample(t)
 	p := Planner{Router: &testRouter{}, Activities: DemoActivities()}
@@ -141,18 +141,47 @@ func TestActiveWalkingCapKeepsHistoryAndChargesSpentDistanceOnce(t *testing.T) {
 		t.Fatal(err)
 	}
 	walked := progressed.Days[0].Execution.ConsumedWalkDistanceM
-	cap := 200.0
-	changed, err := p.Change(context.Background(), progressed, ChangeCommand{Kind: "shorten_day", Date: &date, TargetRemainingWalkDistanceM: &cap}, nil, nil, now)
+	cap := 1500.0
+	changed, err := p.Change(context.Background(), progressed, ChangeCommand{Kind: "shorten_day", Date: &date, TargetRemainingDurationSec: &cap}, nil, nil, now)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if changed.Days[0].Stops[0].Progress != "visited" || changed.Days[0].Execution.ConsumedWalkDistanceM != walked || *changed.Input.Days[0].MaxWalkDistanceM != walked+cap {
+	if changed.Days[0].Stops[0].Progress != "visited" || changed.Days[0].Execution.ConsumedWalkDistanceM != walked || changed.Days[0].Totals.RemainingWalkDistanceM != nil {
 		t.Fatal("history or walk accounting changed")
 	}
-	if *changed.Days[0].Totals.WalkDistanceM > walked+cap || changed.Days[0].Feasibility == "infeasible" {
+	if *changed.Days[0].Totals.RemainingDurationSec > cap || changed.Days[0].Feasibility == "infeasible" {
 		t.Fatal("remaining walk limit ignored")
 	}
-	if *changed.Input.LoadLimits.MaxWalkDistanceMPerDay != *view.Input.LoadLimits.MaxWalkDistanceMPerDay {
+	if changed.Input.LoadLimits.MaxWalkDistanceMPerDay != nil {
 		t.Fatal("temporary day cap changed family limits")
+	}
+}
+
+func TestUnstartedTodayReplanRefreshesPastStart(t *testing.T) {
+	zone := time.FixedZone("MSK", 10800)
+	start := time.Date(2030, 6, 15, 10, 0, 0, 0, zone)
+	input := sample(t)
+	input.PlanningContext = "in_city"
+	p := Planner{Router: &testRouter{}, Activities: DemoActivities()}
+	view, err := p.Build(context.Background(), NewDraft("today-refresh", input, start), start)
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := start.Add(time.Hour)
+	date := view.Days[0].Date
+	result, err := p.Change(context.Background(), view, ChangeCommand{Kind: "replan_day", Date: &date}, nil, nil, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	updated, _ := parseInstant(result.Input.Days[0].AvailableWindow.StartAt)
+	arrival, _ := parseInstant(*result.Days[0].Stops[0].Timing.EstimatedArrivalAt)
+	if updated.Before(now) || arrival.Before(now) {
+		t.Fatal("replan retained an arrival in the past")
+	}
+	if result.Input.Days[0].AvailableWindow.EndAt != view.Input.Days[0].AvailableWindow.EndAt {
+		t.Fatal("replan extended the end time")
+	}
+	if view.Input.Days[0].AvailableWindow.StartAt != input.Days[0].AvailableWindow.StartAt {
+		t.Fatal("original input was mutated")
 	}
 }

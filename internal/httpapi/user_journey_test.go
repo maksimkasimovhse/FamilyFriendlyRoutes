@@ -31,7 +31,7 @@ func TestUserJourneyExplicitWalkingLimit(t *testing.T) {
 	if err = json.Unmarshal(raw, &input); err != nil {
 		t.Fatal(err)
 	}
-	text := "Хотим пройти не больше 500 метров"
+	text := "На прогулку один час"
 	input.RequestText = &text
 	policy := "ranked_prefix"
 	input.PlanningPolicy = &policy
@@ -58,11 +58,11 @@ func TestUserJourneyExplicitWalkingLimit(t *testing.T) {
 	var result c.PlanPreview
 	_ = json.Unmarshal(preview.Body.Bytes(), &result)
 	day := result.ProposedTrip.Days[0]
-	if day.Totals.WalkDistanceM == nil || *day.Totals.WalkDistanceM > 500 {
+	if day.Totals.ElapsedDurationSec == nil || *day.Totals.ElapsedDurationSec > 3600 {
 		t.Fatalf("explicit limit ignored: %+v", day.Totals)
 	}
-	if result.ProposedTrip.Input.Days[0].MaxWalkDistanceM == nil || *result.ProposedTrip.Input.Days[0].MaxWalkDistanceM != 500 {
-		t.Fatal("limit did not reach trip input")
+	if result.ProposedTrip.Input.Days[0].DurationBudgetSec != 3600 {
+		t.Fatal("time limit did not reach trip input")
 	}
 	current := request(handler, browser, "GET", path, "", "")
 	var unchanged c.TripView

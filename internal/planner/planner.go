@@ -58,8 +58,8 @@ func ValidateFamily(family c.FamilyProfile, limits c.LoadLimits) error {
 	if err := validateInterests(family.AdultInterestIDS); err != nil {
 		return err
 	}
-	if len(input.Family.Children) < 1 || len(input.Family.Children) > 2 || input.Family.AdultCount < 1 || input.Family.AdultCount > 10 {
-		return invalid("supports 1..2 children and 1..10 adults")
+	if len(input.Family.Children) < 1 || len(input.Family.Children) > 10 || input.Family.AdultCount < 1 || input.Family.AdultCount > 10 {
+		return invalid("supports 1..10 children and 1..10 adults")
 	}
 	ids := map[c.ID]bool{}
 	for _, child := range input.Family.Children {
@@ -78,16 +78,10 @@ func ValidateFamily(family c.FamilyProfile, limits c.LoadLimits) error {
 		}
 	}
 	input = resolveBudgetDefaults(input)
-	if input.LoadLimits.MaxWalkDistanceMPerDay == nil {
-		return invalid("cannot resolve family walking limit")
-	}
-	if reserve := input.LoadLimits.RestaurantWalkReserveMPerDay; !finite(*reserve) || *reserve < 0 || *reserve > *input.LoadLimits.MaxWalkDistanceMPerDay {
-		return invalid("restaurant walking reserve must be finite and between 0 and the daily walking limit")
-	}
 	if limits.Pace != "relaxed" && limits.Pace != "standard" && limits.Pace != "intensive" {
 		return invalid("invalid pace")
 	}
-	for _, v := range []*float64{limits.MaxWalkDistanceMPerDay, limits.MaxContinuousWalkDurationSec} {
+	for _, v := range []*float64{limits.MaxWalkDistanceMPerDay, limits.MaxContinuousWalkDurationSec, limits.RestaurantWalkReserveMPerDay} {
 		if v != nil && (!finite(*v) || *v < 0) {
 			return invalid("invalid walking limit")
 		}
@@ -112,19 +106,7 @@ func Validate(input c.TripInput) error {
 		if *input.PlanningPolicy != "ranked_prefix" && *input.PlanningPolicy != "manual_choices" {
 			return invalid("invalid planning_policy")
 		}
-		if len(input.Selections) > len(input.Days)*budgetDefaults.CompletionPolicy.ManualLimitPerDay {
-			return invalid("MANUAL_LIMIT: at most two manual choices per day")
-		}
-		counts := map[c.ISODate]int{}
-		for _, s := range input.Selections {
-			if s.PreferredDate == nil {
-				continue // Days are assigned by geographic clustering, not by the picker.
-			}
-			counts[*s.PreferredDate]++
-			if counts[*s.PreferredDate] > budgetDefaults.CompletionPolicy.ManualLimitPerDay {
-				return invalid("MANUAL_LIMIT: at most two manual choices per day")
-			}
-		}
+
 	}
 	if err := ValidateFamily(input.Family, input.LoadLimits); err != nil {
 		return err
@@ -234,8 +216,6 @@ func nonNil[T any](values []T) []T {
 func (p Planner) buildDay(ctx context.Context, view c.TripView, now time.Time) (c.TripView, error) {
 	input := view.Input
 	day := input.Days[0]
-	limit := dailyWalkLimit(input, day)
-	input.LoadLimits.MaxWalkDistanceMPerDay = &limit
 	available := map[c.ID]Activity{}
 	for _, a := range p.Activities {
 		available[a.ID] = a
@@ -270,12 +250,6 @@ func (p Planner) buildDay(ctx context.Context, view c.TripView, now time.Time) (
 	speed := budgetDefaults.WalkingSpeedKPHByPace[input.LoadLimits.Pace]
 	plan.Assumptions = append(plan.Assumptions, fmt.Sprintf("Тестовая скорость %.1f км/ч по темпу; не возрастная норма.", speed))
 	plan.Warnings = append(plan.Warnings, Warning("SNAPPED_ENDPOINTS", "Подходы от исходных точек до сети не включены."), Warning("OPENING_HOURS_UNKNOWN", "В тестовом каталоге нет подтверждённых часов работы."))
-	exceeds := func(leg routing.Result) {
-		if max := input.LoadLimits.MaxContinuousWalkDurationSec; max != nil && leg.TravelDurationSec > *max {
-			plan.Feasibility = "infeasible"
-			plan.Warnings = append(plan.Warnings, Warning("WALK_SEGMENT_LIMIT", "Переход превышает лимит непрерывной ходьбы."))
-		}
-	}
 	appendLeg := func(target routing.Point, to c.StopRef) error {
 		result, err := p.Router.Route(ctx, routing.Request{From: current, To: target, Mode: "walk", WalkingSpeedKPH: &speed})
 		if err != nil {
@@ -292,7 +266,6 @@ func (p Planner) buildDay(ctx context.Context, view c.TripView, now time.Time) (
 		elapsed += t
 		walkTime += t
 		walkDistance += d
-		exceeds(result)
 		current = target
 		previous = to
 		return nil
@@ -387,31 +360,16 @@ func (p Planner) buildDay(ctx context.Context, view c.TripView, now time.Time) (
 		return c.TripView{}, err
 	}
 	plan.Totals.WalkDistanceM = &walkDistance
-	_, reserveM := walkingBudget(input.LoadLimits)
-	totalM := *input.LoadLimits.MaxWalkDistanceMPerDay
-	unscheduledMeals := math.Max(0, *day.MealDurationSec-plan.Totals.MealDurationSec)
-	unscheduledRest := math.Max(0, day.RestBudgetSec-plan.Totals.RestDurationSec)
-	plan.Totals.MealDurationSec += unscheduledMeals
-	plan.Totals.RestDurationSec += unscheduledRest
-	elapsed += unscheduledMeals + unscheduledRest
-	if unscheduledMeals+unscheduledRest > 0 {
-		plan.Warnings = append(plan.Warnings, Warning("UNSCHEDULED_BREAKS", "Время на еду/отдых учтено в бюджете; конкретные места и интервалы перерывов ещё не выбраны."))
-	}
-	waitSec := 0.0
-	if plan.Totals.WaitDurationSec != nil {
-		waitSec = *plan.Totals.WaitDurationSec
-	}
+	// Only the user's time budget constrains capacity. Distance is descriptive.
 	budget := dailyTimeBudget(day)
-	budgetM, walkingSec, timeLimitedM := primaryWalkingBudget(totalM, speed, budget, plan.Totals.VisitDurationSec, plan.Totals.MealDurationSec, plan.Totals.RestDurationSec, waitSec, reserveM)
-	plan.Totals.WalkBudgetM = &totalM
-	plan.Totals.RestaurantWalkReserveM = &reserveM
-	plan.Totals.PrimaryWalkBudgetM = &budgetM
-	plan.Totals.WalkingTimeBudgetSec = &walkingSec
-	plan.Totals.TimeLimitedWalkBudgetM = &timeLimitedM
+	plan.Totals.WalkBudgetM = nil
+	plan.Totals.RestaurantWalkReserveM = nil
+	plan.Totals.PrimaryWalkBudgetM = nil
+	plan.Totals.WalkingTimeBudgetSec = nil
+	plan.Totals.TimeLimitedWalkBudgetM = nil
 	plan.Totals.WalkingSpeedKPH = &speed
 	version := budgetDefaults.PolicyVersion
 	plan.Totals.BudgetPolicyVersion = &version
-	plan.Assumptions = append(plan.Assumptions, fmt.Sprintf("Бюджет max(0, min(M, V×T_ходьбы) − P) = %.0f м; M=%.0f м, P=%.0f м, V=%.1f км/ч. Параметры %s — продуктовые гипотезы, не возрастная медицинская норма.", budgetM, totalM, reserveM, speed, version))
 	plan.Totals.WalkDurationSec = &walkTime
 	zero := 0.0
 	if plan.Totals.WaitDurationSec == nil {
@@ -421,10 +379,6 @@ func (p Planner) buildDay(ctx context.Context, view c.TripView, now time.Time) (
 	if elapsed > budget {
 		plan.Feasibility = "infeasible"
 		plan.Warnings = append(plan.Warnings, Warning("DAY_BUDGET_EXCEEDED", "План не помещается в доступное время; обязательные точки не удалены."))
-	}
-	if walkDistance > budgetM {
-		plan.Feasibility = "infeasible"
-		plan.Warnings = append(plan.Warnings, Warning("WALK_DISTANCE_LIMIT", "Маршрут превышает бюджет max(0, min(M, V×T_ходьбы) − P)."))
 	}
 	// Recreate slices so preview does not mutate the original snapshot.
 	view.Days = []c.DayPlan{plan}

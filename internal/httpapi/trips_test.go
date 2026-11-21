@@ -162,7 +162,7 @@ func TestExpiredAndInfeasiblePreviewCannotApply(t *testing.T) {
 	}
 }
 
-func TestMultiDayPreviewCannotApplyWhenSecondDayIsInfeasible(t *testing.T) {
+func TestMultiDayPreviewOverloadedDayAppliesOnlyWithAcknowledgement(t *testing.T) {
 	store, _ := tripstore.Open(filepath.Join(t.TempDir(), "state.json"))
 	handler := TripHandler(store, planner.Planner{Router: dayRouter{}, Activities: planner.DemoActivities()})
 	browser := bootstrap(t, handler)
@@ -186,12 +186,17 @@ func TestMultiDayPreviewCannotApplyWhenSecondDayIsInfeasible(t *testing.T) {
 	response := request(handler, browser, "POST", path+"/previews", `{"expected_version":1,"command":{"kind":"generate_plan"},"current_position":null,"observed_at":null}`, "")
 	var preview c.PlanPreview
 	_ = json.Unmarshal(response.Body.Bytes(), &preview)
-	if response.Code != 201 || len(preview.ProposedTrip.Days) != 2 || preview.ProposedTrip.Days[0].Feasibility == "infeasible" || preview.ProposedTrip.Days[1].Feasibility != "infeasible" || preview.CanApply || len(preview.Diff.ChangedDates) != 2 {
+	if response.Code != 201 || len(preview.ProposedTrip.Days) != 2 || preview.ProposedTrip.Days[0].Feasibility == "infeasible" || preview.ProposedTrip.Days[1].Feasibility != "infeasible" || !preview.CanApply || len(preview.Diff.ChangedDates) != 2 {
 		t.Fatal(response.Body.String())
+	}
+	// Перегруженный день можно сохранить, но только с явным подтверждением: человек сам выбрал столько мест.
+	noAck, _ := json.Marshal(c.ApplyRequest{ExpectedVersion: 1, AcknowledgedWarningCodes: []string{}})
+	if refused := request(handler, browser, "POST", path+"/previews/"+string(preview.PreviewID)+"/apply", string(noAck), "apply-multi-noack"); refused.Code != 422 {
+		t.Fatal("overloaded plan saved without acknowledgement: " + refused.Body.String())
 	}
 	body, _ := json.Marshal(c.ApplyRequest{ExpectedVersion: 1, AcknowledgedWarningCodes: preview.RequiredAcknowledgementCodes})
 	applied := request(handler, browser, "POST", path+"/previews/"+string(preview.PreviewID)+"/apply", string(body), "apply-multi")
-	if applied.Code != 422 {
+	if applied.Code != 200 {
 		t.Fatal(applied.Body.String())
 	}
 }

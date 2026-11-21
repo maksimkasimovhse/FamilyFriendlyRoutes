@@ -39,12 +39,11 @@
       <div class="ld-hero-text">
         <p class="ld-eyebrow">Нижний Новгород · для семей с детьми</p>
         <h1>Нижний, каким его видели сто лет назад</h1>
-        <p class="ld-lead">Семейные маршруты по городу и «окна в прошлое»: встаньте там, где стоял фотограф, поднимите телефон — и старый снимок ляжет поверх живой камеры.</p>
+        <p class="ld-lead">Откройте для себя персонализированные семейные маршруты по Нижнему Новгороду, вовлекающие вашего ребенка в процесс изучения города!</p>
         <div class="ld-cta">
           <button type="button" class="ld-btn primary" data-auth="register">Начать прогулку</button>
           <a class="ld-btn ghost" href="#how">Как это работает</a>
         </div>
-        <p class="ld-fine">Открыть окно можно только на месте — из дома не получится.</p>
       </div>
       <div class="ld-stack" aria-hidden="true">
         <figure class="ph a"><img src="media/windows/kremlin-old.jpg" alt=""><figcaption>1886–1916</figcaption></figure>
@@ -67,7 +66,7 @@
     <section class="ld-section alt">
       <h2>Чем удобно семье</h2>
       <div class="ld-grid">
-        <article><h3>Под возраст детей</h3><p>Анкета для одного или двух детей от 3 до 11 лет: интересы, темп прогулки, пожелания.</p></article>
+        <article><h3>Под возраст детей</h3><p>Анкета для любого количества детей от 3 до 11 лет: возраст и интересы каждого.</p></article>
         <article><h3>Всё нужное рядом</h3><p>На карте — туалеты, еда, детские площадки, парки, скамейки и аптеки вдоль маршрута.</p></article>
         <article><h3>Срочные действия на карте</h3><p>Ребёнок устал или пошёл дождь — помощник предложит, что убрать из маршрута, и найдёт место рядом.</p></article>
         <article><h3>Настоящие фото</h3><p>Только снимки из архива PastVu, с автором и ссылкой. Ничего не нарисовано нейросетью.</p></article>
@@ -86,7 +85,6 @@
   </main>
 
   <footer class="ld-foot">
-    <p>Часы работы и детские удобства уточняйте на месте: часть данных предварительная.</p>
     <p>Старые фото — <a href="https://pastvu.com" target="_blank" rel="noopener">PastVu</a> (авторы указаны в приложении). Карта © участники <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>.</p>
     <p>GorkyCode 2026 · трек «Туризм»</p>
   </footer>
@@ -99,7 +97,7 @@
 
     <div class="map-wrap">
       <div id="map" aria-label="Карта маршрута"></div>
-      <div id="map-sky" class="map-sky" hidden aria-hidden="true"><canvas></canvas></div>
+      <div id="map-sky" class="map-sky" hidden role="img" aria-label="Погода"><span data-weather-icon aria-hidden="true"></span></div>
 
       <!-- Детский режим: быстрый вход прямо с карты (карту переделает Максим — кнопку просто перенести) -->
       <button type="button" class="kid-fab" id="kid-fab" aria-label="Детский режим">
@@ -116,15 +114,17 @@
       <!-- Источники карты (обязательны по лицензиям) и оговорки — спрятаны под «i», как в Яндекс/Google -->
       <button id="btn-info" class="map-info" aria-label="О карте и маршруте" aria-expanded="false">i</button>
       <div class="map-info-pop" id="map-info-pop" hidden></div>
-      <button type="button" id="urgent-toggle" class="urgent-toggle" aria-haspopup="dialog" aria-controls="urgent-dialog" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H9l-5 4zM8 8h8M8 12h6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Нужно сейчас</span></button>
 
     </div>
 
     <!-- Нижняя карточка: сводка дня или выбранная остановка -->
-    <div class="sheet">
-      <!-- Удобства: как на макете — под картой, «Всё семейное» включает всё -->
-      <div class="chips" aria-label="Показать на карте">
-        <button class="chip" data-layer="all" aria-pressed="true">Всё семейное</button>
+    <div class="sheet" id="map-sheet">
+      <button type="button" class="map-sheet-toggle" id="map-sheet-toggle" aria-expanded="true" aria-controls="map-sheet-content" aria-label="Свернуть панель карты"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg></button>
+      <div id="map-sheet-content" class="map-sheet-content">
+      <!-- Конкретные срочные действия; выбор категории показывает ближайшие объекты. -->
+      <div class="chips" aria-label="Действия и места на карте"><span id="map-action-chips" class="map-action-chips"></span></div>
+      <section id="map-action-panel" class="map-action-panel" hidden aria-labelledby="map-action-title"><header hidden><h2 id="map-action-title">По пути</h2><button type="button" id="map-action-close" aria-label="Закрыть предложения">×</button></header><div id="map-action-content" aria-live="polite"></div></section>
+      <div hidden class="map-layer-controls"><button class="chip" data-layer="all" aria-pressed="true">Все объекты</button>
         <button class="chip" data-layer="toilets" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/toilet.svg" alt="" aria-hidden="true">Туалеты</button>
         <button class="chip" data-layer="cafe" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/food.svg" alt="" aria-hidden="true">Еда</button>
         <button class="chip" data-layer="playground" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/playground.svg" alt="" aria-hidden="true">Площадки</button>
@@ -132,8 +132,10 @@
         <button class="chip" data-layer="bench" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/bench.svg" alt="" aria-hidden="true">Скамейки</button>
         <button class="chip" data-layer="pharmacy" aria-pressed="true"><img class="place-emoji" src="/assets/category-icons/pharmacy.svg" alt="" aria-hidden="true">Аптеки</button>
       </div>
+      <button type="button" id="map-kid-mode" class="map-kid-mode"><span class="map-kid-mark" aria-hidden="true">✦</span><span>Детский режим</span><span class="map-kid-arrow" aria-hidden="true">›</span></button>
       <div id="sheet-body" aria-live="polite"><p class="muted">Строим маршрут…</p></div>
       <div class="map-edit"><button type="button" id="map-edit-toggle" aria-expanded="false" aria-controls="map-edit-form"><span>✦</span> Изменить маршрут</button><form id="map-edit-form" hidden><label class="sr-only" for="map-edit-text">Как изменить маршрут</label><div class="map-edit-row"><input id="map-edit-text" maxlength="2000" autocomplete="off" placeholder="Например: убери последнюю точку" required><button type="submit" aria-label="Рассчитать изменение маршрута">↑</button></div><p>Убрать точку, сократить прогулку или пересчитать оставшийся путь.</p></form></div>
+      </div>
     </div>
   </section>
 
@@ -141,8 +143,7 @@
   <section class="screen pick" id="screen-pick" data-tab="pick" hidden>
     <!-- Только в «Новой поездке» (шаг 2 из 3): шапка шага и подзаголовок -->
     <div class="pick-flow">
-      <div class="flow-step"><div class="flow-bar four kid"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div></div>
-<p class="pick-flow-sub">Выберите места на всю поездку — распределим по дням с учётом близости и бюджета.</p>
+      <div class="flow-step"><div class="flow-bar kid"><i class="on"></i><i class="on"></i><i class="on"></i></div></div>
     </div>
     <header class="pick-top">
       <button class="pick-back" id="pick-back" aria-label="Назад к карте">‹</button>
@@ -150,6 +151,7 @@
       <span class="pick-count" id="pick-count" aria-live="polite"></span>
     </header>
 
+    <div class="swipe-hint" id="swipe-hint" aria-hidden="true"><span class="no"><i>←</i> Не нравится</span><span class="yes">В маршрут <i>→</i></span></div>
     <div class="deck" id="deck">
       <div class="deck-empty" id="deck-empty" hidden>
         <p>Карточки закончились</p>
@@ -361,7 +363,7 @@
       </div>
     </div>
   </section>
-  <dialog id="urgent-dialog" class="urgent-dialog" aria-labelledby="urgent-title"><header><div><small>ПОМОЖЕМ ПО ПУТИ</small><h2 id="urgent-title">Что нужно сейчас?</h2></div><button type="button" id="urgent-close" aria-label="Закрыть срочные действия">×</button></header><div id="urgent-kinds" class="urgent-kinds"></div><div id="urgent-content" class="urgent-content" aria-live="polite"></div></dialog>
+  <dialog id="urgent-dialog" class="urgent-dialog" aria-labelledby="urgent-title"><header><div><h2 id="urgent-title">Что нужно сейчас?</h2></div><button type="button" id="urgent-close" aria-label="Закрыть срочные действия">×</button></header><div id="urgent-kinds" class="urgent-kinds"></div><div id="urgent-content" class="urgent-content" aria-live="polite"></div></dialog>
   <!-- ===== Профиль: дети, память о поездке (статистика, фото, достижения), мои поездки ===== -->
   <section class="screen profile" data-tab="profile" hidden>
     <div class="pf-scroll">
@@ -465,10 +467,13 @@
       </div>
 
       <div class="card-w">
-        <b>Дети</b>
-        <div class="seg small" id="kids-count" role="radiogroup" aria-label="Сколько детей">
-          <button type="button" role="radio" aria-checked="true" data-n="1">1 ребёнок</button>
-          <button type="button" role="radio" aria-checked="false" data-n="2">2 ребёнка</button>
+        <div class="row-between">
+          <b>Дети</b>
+          <div class="stepper">
+            <button type="button" id="kids-minus" aria-label="Меньше детей">−</button>
+            <output id="kids-count" aria-live="polite">1</output>
+            <button type="button" id="kids-plus" aria-label="Больше детей">+</button>
+          </div>
         </div>
       </div>
       <div id="kids-cards"></div>
@@ -503,25 +508,6 @@
         <b>Взрослым</b>
         <div class="chips-w" id="adult-interests"></div>
       </div>
-      <div class="card-w">
-        <b>Темп прогулок</b>
-        <div class="pace" id="pace" role="radiogroup" aria-label="Темп прогулок">
-          <button type="button" role="radio" data-pace="relaxed"><b>Спокойный</b></button>
-          <button type="button" role="radio" data-pace="standard"><b>Обычный</b></button>
-          <button type="button" role="radio" data-pace="intensive"><b>Активный</b></button>
-        </div>
-      </div>
-      <div class="card-w">
-        <label class="field" for="wishes"><b>Пожелания и ограничения</b></label>
-        <textarea id="wishes" rows="3" maxlength="2000" placeholder="Например: ребёнок боится собак"></textarea>
-        <div class="chips-w quick" id="wish-chips">
-          <button type="button">Больше игровых площадок</button>
-          <button type="button">Ребёнок не любит шум</button>
-          <button type="button">Частые перерывы</button>
-          <button type="button">Нужны перекусы по пути</button>
-          <button type="button">Нужен тихий отдых</button>
-        </div>
-      </div>
       <p class="form-error" id="adults-error" role="alert" hidden></p>
     </div>
     <div class="flow-bottom">
@@ -533,7 +519,7 @@
   <section class="flow trip" id="trip-when" hidden>
     <header class="flow-top">
       <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
-      <div class="flow-step"><div class="flow-bar four kid"><i class="on"></i><i></i><i></i><i></i></div></div>
+      <div class="flow-step"><div class="flow-bar kid"><i class="on"></i><i></i><i></i></div></div>
     </header>
     <div class="flow-scroll">
       <h1 class="flow-title">Когда и откуда гуляем?</h1>
@@ -593,7 +579,7 @@
   <section class="flow trip" id="trip-chat" hidden>
     <header class="flow-top">
       <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
-      <div class="flow-step"><div class="flow-bar four kid"><i class="on"></i><i class="on"></i><i></i><i></i></div></div>
+      <div class="flow-step"><div class="flow-bar kid"><i class="on"></i><i class="on"></i><i></i></div></div>
     </header>
     <div class="chat-log" id="chat-log" aria-live="polite"></div>
     <div class="chat-chips" id="chat-chips"></div>
@@ -607,28 +593,6 @@
     </div>
   </section>
 
-  <!-- Экран 7. Новая поездка, шаг 4 — «Что-то особенное в этот раз?» -->
-  <section class="flow trip" id="trip-wishes" hidden>
-    <header class="flow-top">
-      <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
-      <div class="flow-step"><div class="flow-bar four kid"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div></div>
-    </header>
-    <div class="flow-scroll">
-      <h1 class="flow-title">Что-то особенное в этот раз?</h1>
-      <div class="card-w">
-        <label class="field" for="trip-request"><b>Пожелания на эту поездку</b></label>
-        <textarea id="trip-request" rows="3" maxlength="2000"></textarea>
-        <p class="hint" id="request-hint">Пожелания из анкеты уже здесь. Допишите, что нужно именно сейчас — анкета не изменится.</p>
-      </div>
-      <div class="card-w">
-        <b>Что мы учтём</b>
-        <dl class="summary" id="trip-summary"></dl>
-      </div>
-      <p class="form-error" id="wishes-error" role="alert" hidden></p>
-    </div>
-    <div class="flow-bottom"><button class="btn flow-main" id="trip-build">Построить маршрут</button></div>
-  </section>
-
   <!-- Экран 8. Предпросмотр и сохранение -->
   <section class="flow trip" id="trip-preview" hidden>
     <header class="flow-top">
@@ -639,6 +603,8 @@
       <h1 class="flow-title" id="preview-title">Маршрут</h1>
       <div class="day-tabs" id="preview-days" role="tablist" aria-label="Дни поездки"></div>
       <p class="flow-sub" id="preview-line"></p>
+      <p class="pv-overload" id="preview-overload" role="status" hidden></p>
+      <p class="pv-lowcount" id="preview-lowcount" hidden></p>
       <ol class="pv-list" id="preview-list"></ol>
       <p class="form-error" id="preview-error" role="alert" hidden></p>
     </div>
