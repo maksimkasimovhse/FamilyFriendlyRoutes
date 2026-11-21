@@ -1,0 +1,20 @@
+/* ИИ-чат пожеланий (шаг 2 «Новой поездки») */
+#trip-chat { display: flex; flex-direction: column; }
+#trip-chat[hidden] { display: none; }
+.chat-log { flex: 1; min-height: 0; overflow-y: auto; padding: 8px 16px; display: flex; flex-direction: column; gap: 10px; }
+.msg { max-width: 86%; padding: 10px 14px; border-radius: 18px; font-size: 16px; line-height: 1.35; white-space: pre-wrap; overflow-wrap: anywhere; }
+.msg.bot { align-self: flex-start; background: #fff; box-shadow: 0 1px 3px rgba(15,22,40,.12); border-bottom-left-radius: 6px; }
+.msg.me { align-self: flex-end; background: var(--now); color: #fff; border-bottom-right-radius: 6px; }
+.msg.typing { color: var(--ink-2); font-style: italic; }
+.msg .meta { display: block; margin-top: 6px; font-size: 12px; color: var(--ink-2); }
+.claims { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.claim { font-size: 13px; font-weight: 800; padding: 4px 10px; border-radius: 999px; }
+.claim.prefer { background: #DDF3E6; color: var(--ok); }
+.claim.avoid { background: #FDE3E0; color: #B3261E; text-decoration: line-through; }
+.chat-chips { flex: none; display: flex; gap: 8px; padding: 4px 16px 8px; overflow-x: auto; scrollbar-width: none; }
+.chat-chips::-webkit-scrollbar { display: none; }
+.chat-chips button { flex: none; border: 1.5px solid var(--line); background: #fff; color: var(--ink); border-radius: 999px; padding: 8px 14px; font: 700 14px inherit; cursor: pointer; }
+.chat-form { flex: none; display: flex; align-items: flex-end; gap: 8px; padding: 4px 16px 8px; }
+.chat-form textarea { flex: 1; resize: none; border: 1.5px solid var(--line); border-radius: 18px; padding: 11px 14px; font: 16px inherit; max-height: 110px; background: #fff; color: var(--ink); }
+.chat-send { flex: none; width: 46px; height: 46px; border: 0; border-radius: 50%; background: var(--now); color: #fff; font-size: 18px; cursor: pointer; }
+.chat-send:disabled { opacity: .45; }

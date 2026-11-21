@@ -19,6 +19,7 @@ import (
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/planner"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/routing"
 	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/tripstore"
+	"github.com/maksimkasimovhse/FamilyFriendlyRoutes/internal/wishes"
 )
 
 func main() {
@@ -30,6 +31,10 @@ func main() {
 	imagesDir := flag.String("images-dir", "assets/images", "Directory with card images served under /media/")
 	mlURL := flag.String("ml-url", "", "Full internal ML recommendations endpoint")
 	catalogVersion := flag.String("catalog-version", "", "Catalog version agreed with ML")
+	parserURL := flag.String("parser-url", "", "parser-service base URL (LLM request parsing); empty = keyword parser only")
+	modelURL := flag.String("model-url", "", "model-service base URL (ranking); empty = local ranking only")
+	cardTags := flag.String("card-tags", "data/card_tags.json", "Card tags for wish-based selection (scripts/build-card-tags.py)")
+	keywords := flag.String("wish-keywords", "data/wish_keywords.json", "Keyword stems for wish parsing")
 	flag.Parse()
 	if *demo == (*mlURL != "") || (!*demo && *catalogVersion == "") {
 		log.Fatal("Choose -demo-catalog OR -ml-url <endpoint> -catalog-version <version>.")
@@ -85,6 +90,14 @@ func main() {
 	root.Handle("/api/v1/map/places", httpapi.MapHandler(mapRepository))
 	root.Handle("GET /api/v1/trips/{trip_id}/map/places", httpapi.RouteMapHandler(store, mapRepository))
 	root.Handle("/media/", httpapi.MediaHandler(*imagesDir))
+	if kw, err := wishes.LoadKeywords(*keywords); err != nil {
+		log.Printf("wishes disabled: %v", err)
+	} else if tags, err := wishes.LoadCardTags(*cardTags); err != nil {
+		log.Printf("wishes disabled: %v", err)
+	} else {
+		rec := wishes.NewRecommender(kw, tags, wishes.Services{ParserURL: *parserURL, ModelURL: *modelURL})
+		root.Handle("/api/v1/wishes/recommendations", httpapi.WishesHandler(rec))
+	}
 	root.Handle("/", httpapi.TripHandler(store, p))
 	server := &http.Server{Addr: *listen, Handler: root, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 40 * time.Second, IdleTimeout: 60 * time.Second, MaxHeaderBytes: 16 * 1024}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

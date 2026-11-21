@@ -11,6 +11,7 @@
 <link href="css/kid.css" rel="stylesheet">
 <link href="css/pick.css" rel="stylesheet">
 <link href="css/games.css" rel="stylesheet">
+<link href="css/chat.css" rel="stylesheet">
 <link href="css/onboarding.css" rel="stylesheet">
 <script src="vendor/maplibre-gl-4.7.1/maplibre-gl.js"></script>
 <script type="module" src="js/app.js"></script>
@@ -58,7 +59,7 @@
   <section class="screen pick" id="screen-pick" data-tab="pick" hidden>
     <!-- Только в «Новой поездке» (шаг 2 из 3): шапка шага и подзаголовок -->
     <div class="pick-flow">
-      <div class="flow-step"><span>Новая поездка · шаг 2 из 3</span><div class="flow-bar kid"><i class="on"></i><i class="on"></i><i></i></div></div>
+      <div class="flow-step"><span>Новая поездка · шаг 3 из 4</span><div class="flow-bar four kid"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div></div>
     </div>
     <header class="pick-top">
       <button class="pick-back" id="pick-back" aria-label="Назад к карте">‹</button>
@@ -434,7 +435,7 @@
   <section class="flow trip" id="trip-when" hidden>
     <header class="flow-top">
       <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
-      <div class="flow-step"><span>Новая поездка · шаг 1 из 3</span><div class="flow-bar kid"><i class="on"></i><i></i><i></i></div></div>
+      <div class="flow-step"><span>Новая поездка · шаг 1 из 4</span><div class="flow-bar four kid"><i class="on"></i><i></i><i></i><i></i></div></div>
     </header>
     <div class="flow-scroll">
       <h1 class="flow-title">Когда и откуда гуляем?</h1>
@@ -484,11 +485,29 @@
     <div class="flow-bottom"><button class="btn flow-main" id="when-next">Дальше: выбрать места</button></div>
   </section>
 
-  <!-- Экран 7. Новая поездка, шаг 3 — «Что-то особенное в этот раз?» -->
+  <!-- Новая поездка, шаг 2 — ИИ-чат: пожелания словами, по ним отбираются карточки для подбора -->
+  <section class="flow trip" id="trip-chat" hidden>
+    <header class="flow-top">
+      <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
+      <div class="flow-step"><span>Новая поездка · шаг 2 из 4</span><div class="flow-bar four kid"><i class="on"></i><i class="on"></i><i></i><i></i></div></div>
+    </header>
+    <div class="chat-log" id="chat-log" aria-live="polite"></div>
+    <div class="chat-chips" id="chat-chips"></div>
+    <form class="chat-form" id="chat-form" autocomplete="off">
+      <textarea id="chat-input" rows="1" maxlength="600" placeholder="Например: любим историю и театры, без музеев" aria-label="Ваши пожелания"></textarea>
+      <button type="submit" class="chat-send" id="chat-send" aria-label="Отправить">➤</button>
+    </form>
+    <div class="flow-bottom">
+      <button class="btn flow-main" id="chat-next" disabled>Расскажите о пожеланиях</button>
+      <button class="btn link" id="chat-skip" type="button">Пропустить — покажите все места</button>
+    </div>
+  </section>
+
+  <!-- Экран 7. Новая поездка, шаг 4 — «Что-то особенное в этот раз?» -->
   <section class="flow trip" id="trip-wishes" hidden>
     <header class="flow-top">
       <button type="button" class="flow-back" data-back aria-label="Назад">‹</button>
-      <div class="flow-step"><span>Новая поездка · шаг 3 из 3</span><div class="flow-bar kid"><i class="on"></i><i class="on"></i><i class="on"></i></div></div>
+      <div class="flow-step"><span>Новая поездка · шаг 4 из 4</span><div class="flow-bar four kid"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div></div>
     </header>
     <div class="flow-scroll">
       <h1 class="flow-title">Что-то особенное в этот раз?</h1>

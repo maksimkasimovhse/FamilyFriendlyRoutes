@@ -11,7 +11,7 @@
 import { onTripChange, loadSavedTrip, loadCachedTrip, listTrips, openTrip, forget, getTrip, getSource, today } from './api.js';
 import { startSession, isAuthenticated, isGuest, userEmail, signOut, initAuthScreen, openAuth } from './session.js';
 import { loadFamily, syncLocalProfile, openOnboarding, closeOnboarding, currentProfile, childName, genitive, familySummary } from './onboarding.js';
-import { openTripSetup, afterPick, backToWhen, backToWishes, backToPreview, closeTripSetup } from './trip-setup.js';
+import { openTripSetup, afterPick, backToChat, backToWishes, backToPreview, closeTripSetup } from './trip-setup.js';
 import { loadRoutePlaces, clearRoutePlaces, onPlacesChange, loadPlaceTypes } from './places.js';
 import { initMap, resizeMap, focusPlace, showPicked, refreshMap } from './map.js';
 import { initPick, openPick } from './pick.js';
@@ -91,11 +91,11 @@ function startMain() {
 
 // ---------- Подбор мест: шаг 2 «Новой поездки» или отдельно с карты ----------
 let pickInFlow = false;
-function enterPickStep() {
+function enterPickStep(ids) {
   pickInFlow = true;
   app.classList.add('flow-mode');
   openTab('pick');
-  openPick();
+  openPick(ids);
   document.querySelector('#screen-pick .pick-top h1').textContent = 'Что точно хотите увидеть?';
 }
 function leavePickStep() {
@@ -111,7 +111,7 @@ initPick({
     openTab('map'); showPicked(places);      // отдельно с карты: выбранные места → карта
   },
   onClose: () => {
-    if (pickInFlow) { leavePickStep(); backToWhen(); return; }
+    if (pickInFlow) { leavePickStep(); backToChat(); return; }
     openTab('map');
   },
 });

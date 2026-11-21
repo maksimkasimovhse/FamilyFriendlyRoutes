@@ -110,7 +110,7 @@ services:
       DATABASE_URL: ${DOCKER_DATABASE_URL:-postgres://familyroutes:${POSTGRES_PASSWORD:-}@postgres:5432/familyroutes?sslmode=disable}
     # Места для маршрута берёт у ML по контракту /internal/v1/recommendations.
     # Пока у Вильдана нет сервиса — у мока (mock-api). Вернуть синтетику: command: ["-demo-catalog"]
-    command: ["-listen", "0.0.0.0:8080", "-allow-network-listen", "-routing-url", "http://valhalla:8002", "-ml-url", "http://mock-api:8090/internal/v1/recommendations", "-catalog-version", "mock-ml-v1"]
+    command: ["-listen", "0.0.0.0:8080", "-allow-network-listen", "-routing-url", "http://valhalla:8002", "-ml-url", "http://mock-api:8090/internal/v1/recommendations", "-catalog-version", "mock-ml-v1", "-parser-url", "http://parser-service:8080", "-model-url", "http://model-service:8080"]
     volumes:
       - ./data:/app/data
       # Картинки карточек: backend отдаёт их под /media/ и без папки не стартует (-images-dir)

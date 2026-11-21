@@ -180,8 +180,11 @@ function openDetails() {
 function closeDetails() { $('pick-sheet').hidden = true; }
 
 // ---------- Запуск ----------
+let order = null;       // порядок карточек от ИИ-чата (id); null — все места вперемешку
+let orderKey = '';
 function startDeck() {
-  deck = shuffled(all);
+  const byId = new Map(all.map(c => [String(c.id), c]));
+  deck = order?.length ? order.map(id => byId.get(String(id))).filter(Boolean) : shuffled(all);
   pos = 0; liked = []; disliked = 0;
   $('deck').querySelectorAll('.pcard').forEach(c => c.remove());
   layoutStack();
@@ -206,7 +209,8 @@ export function initPick(handlers) {
 }
 
 // Открыть экран. Колода собирается при первом открытии; потом продолжаем с того же места.
-export async function openPick() {
+// ids — порядок карточек из ИИ-чата; без аргумента колода остаётся как была.
+export async function openPick(ids) {
   try {
     await loadAll();
   } catch (err) {
@@ -215,7 +219,12 @@ export async function openPick() {
     $('deck-empty').querySelector('p').textContent = 'Не удалось загрузить карточки: ' + err.message;
     return;
   }
-  if (!deck.length) startDeck();
+  const key = ids === undefined ? orderKey : ids ? ids.join(',') : '';
+  if (!deck.length || key !== orderKey) {
+    orderKey = key;
+    order = ids === undefined ? order : ids;
+    startDeck();
+  }
 }
 
 export const pickedPlaces = () => [...liked];

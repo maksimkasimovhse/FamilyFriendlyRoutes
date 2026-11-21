@@ -162,3 +162,5 @@ textarea { resize: vertical; min-height: 84px; line-height: 1.4; }
 .app.flow-mode #screen-pick .pick-top h1 { font-size: 20px; line-height: 1.2; }
 .app.flow-mode #screen-pick .pick-top { flex-wrap: wrap; row-gap: 0; }
 .app.flow-mode #screen-pick .pick-count { flex-basis: 100%; padding-left: 56px; margin-top: -4px; }
+
+.flow-bar.four { grid-template-columns: repeat(4, 1fr); }
