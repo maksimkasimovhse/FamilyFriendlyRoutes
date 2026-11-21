@@ -12,7 +12,6 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.exception_handlers import request_validation_exception_handler
 
-from services.model_service.catalog_recommendations import recommend
 from place_ranker import RankCandidate, rank_places
 from query_match import query_match_score
 from request_schema import ParsedRequest, validate_evidence
@@ -163,12 +162,3 @@ def ranking(request: RankRequest) -> dict[str, object]:
     }
 
 
-@app.post("/internal/v1/recommendations")
-def recommendations(request: dict) -> dict[str, object]:
-    """Backend-facing adapter; the public HTTP API remains owned by Go."""
-    if request.get("contract_version") != "1.0":
-        raise HTTPException(status_code=422, detail="unsupported contract_version")
-    try:
-        return recommend(request)
-    except (KeyError, TypeError, ValueError) as error:
-        raise HTTPException(status_code=422, detail=str(error)) from error
