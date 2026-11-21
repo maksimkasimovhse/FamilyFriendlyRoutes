@@ -53,7 +53,7 @@ function selectCategory(kind){
  document.querySelectorAll('[data-urgent-kind]').forEach(button=>{const active=button.dataset.urgentKind===next;button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active));});
 }
 function showAssistantPlaces(answer){
- content(`<p class="urgent-results-hint">Выберите место — сначала покажем, как оно изменит маршрут.</p><div class="urgent-results">${answer.places.map((p,i)=>`<button type="button" class="urgent-place" data-choice="${i+1}"><span><b>${esc(p.name)}</b><small>${answer.options?.[i] ? `~${Math.ceil(answer.options[i].walk_duration_sec/60)} мин пешком · ` : ''}подтвердите добавление после расчёта</small></span><span class="urgent-place-action">Выбрать <span aria-hidden="true">→</span></span></button>`).join('')}</div><p class="urgent-footnote">Помощник предлагает только места из каталога. Маршрут изменится после проверки и подтверждения.</p>`);
+ content(`${answer.reply?`<p class="urgent-results-hint">${esc(answer.reply)}</p>`:''}<p class="urgent-results-hint">Выберите место — сначала покажем, как оно изменит маршрут.</p><div class="urgent-results">${answer.places.map((p,i)=>`<button type="button" class="urgent-place" data-choice="${i+1}"><span><b>${esc(p.name)}</b><small>${answer.options?.[i] ? `~${Math.ceil(answer.options[i].walk_duration_sec/60)} мин пешком · ` : ''}подтвердите добавление после расчёта</small></span><span class="urgent-place-action">Выбрать <span aria-hidden="true">→</span></span></button>`).join('')}</div><p class="urgent-footnote">Помощник предлагает только места из каталога. Маршрут изменится после проверки и подтверждения.</p>`);
  output().querySelectorAll('[data-choice]').forEach(button=>{button.onclick=()=>chooseAssistantPlace(Number(button.dataset.choice));});
 }
 async function showAssistantAnswer(answer,title='Изменить маршрут'){
@@ -74,6 +74,13 @@ async function askAssistant(text){
   if(getSource()!=='backend')throw Error('Для изменения нужен сохранённый маршрут и подключение к серверу.');
   const answer=await askRouteAssistant(text);if(ticket!==revision)return;
   await showAssistantAnswer(answer,'Изменение маршрута');
+ }catch(err){if(ticket===revision)error(err);}
+}
+async function submitAssistantRequest(text){
+ open('Помощник по маршруту');$('urgent-kinds').hidden=true;const ticket=revision;status('Разбираем просьбу и проверяем маршрут…');
+ try{
+  const kind=urgentKind(text);if(kind && actions.some(action=>action[0]===kind)){$('urgent-kinds').hidden=false;await search(kind);return;}
+  if(ticket===revision)await askAssistant(text);
  }catch(err){if(ticket===revision)error(err);}
 }
 async function search(kind){
@@ -102,13 +109,7 @@ export function initMapActions(options={}) {
  $('urgent-dialog').addEventListener('cancel',event=>{event.preventDefault();close();});
  $('urgent-dialog').addEventListener('click',event=>{if(event.target===$('urgent-dialog')){const rect=$('urgent-dialog').getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)close();}});
  $('map-edit-toggle').onclick=()=>{const form=$('map-edit-form');form.hidden=!form.hidden;$('map-edit-toggle').setAttribute('aria-expanded',String(!form.hidden));if(!form.hidden){form.scrollIntoView({block:'nearest'});$('map-edit-text').focus({preventScroll:true});}};
- $('map-edit-form').onsubmit=async event=>{
-  event.preventDefault();const text=$('map-edit-text').value.trim();if(!text)return;
-  open('Изменить маршрут');$('urgent-kinds').hidden=true;const ticket=revision;status('Рассчитываем изменение…');
-  try{
-   const kind=urgentKind(text);if(kind && actions.some(action=>action[0]===kind)){$('urgent-kinds').hidden=false;await search(kind);return;}
-   if(ticket===revision)await askAssistant(text);
-  }catch(err){if(ticket===revision)error(err);}
- };
+ $('map-edit-form').onsubmit=async event=>{event.preventDefault();const text=$('map-edit-text').value.trim();if(text)await submitAssistantRequest(text);};
+ document.querySelectorAll('[data-assistant-prompt]').forEach(button=>button.onclick=async()=>{const text=button.dataset.assistantPrompt;$('map-edit-text').value=text;await submitAssistantRequest(text);});
  onTripChange(()=>{if(!applying&&($('urgent-dialog').open||!$('map-action-panel').hidden)){revision++;hooks.onCancel?.();status('Маршрут обновился. Выберите действие ещё раз.');}});
 }
